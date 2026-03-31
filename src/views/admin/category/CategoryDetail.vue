@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { Button } from "@/components/ui/button";
@@ -77,11 +79,9 @@ onMounted(() => {
       </div>
       <div class="flex items-center gap-2">
         <Button variant="outline" @click="router.push(`/admin/categories/${categoryId}/edit`)" class="flex-1 md:flex-none">
-          <Pencil class="mr-2 h-4 w-4" /> Edit
-        </Button>
+          <Pencil class="mr-2 h-4 w-4" />{{ $t('crud.editBtn') }}</Button>
         <Button variant="destructive" @click="deleteCategory" class="flex-1 md:flex-none">
-          <Trash2 class="mr-2 h-4 w-4" /> Delete
-        </Button>
+          <Trash2 class="mr-2 h-4 w-4" />{{ $t('crud.delete') }}</Button>
       </div>
     </div>
 
@@ -93,7 +93,7 @@ onMounted(() => {
       <!-- Image Section -->
       <Card class="lg:col-span-1 overflow-hidden h-fit">
         <CardHeader class="pb-3">
-          <CardTitle class="text-lg">Category Image</CardTitle>
+          <CardTitle class="text-lg">{{ $t('modules.category') }} {{ $t('crud.image') }}</CardTitle>
         </CardHeader>
         <CardContent>
           <div class="aspect-square relative rounded-lg border bg-muted/50 flex items-center justify-center overflow-hidden">
@@ -110,50 +110,45 @@ onMounted(() => {
       <div class="lg:col-span-2 space-y-6">
         <Card>
           <CardHeader class="pb-3">
-            <CardTitle class="text-lg">General Information</CardTitle>
+            <CardTitle class="text-lg">{{ $t('crud.generalInfo') }}</CardTitle>
           </CardHeader>
           <CardContent>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Tag class="mr-2 h-4 w-4" /> Name
-                </div>
+                  <Tag class="mr-2 h-4 w-4" />{{ $t('fields.name') }}</div>
                 <p class="font-medium text-base">{{ category.name }}</p>
               </div>
               
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Barcode class="mr-2 h-4 w-4" /> Code
-                </div>
+                  <Barcode class="mr-2 h-4 w-4" />{{ $t('fields.code') }}</div>
                 <p class="font-medium text-base">{{ category.code || 'N/A' }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Globe class="mr-2 h-4 w-4" /> Slug
-                </div>
+                  <Globe class="mr-2 h-4 w-4" />{{ $t('fields.slug') }}</div>
                 <p class="font-medium text-base">{{ category.slug }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Folder class="mr-2 h-4 w-4" /> Parent Category
-                </div>
+                  <Folder class="mr-2 h-4 w-4" />{{ $t('fields.parent') }} {{ $t('modules.category') }}</div>
                 <p class="font-medium text-base">
                   <template v-if="parentCategory">
                     <router-link :to="`/admin/categories/${parentCategory.id}`" class="text-primary hover:underline inline-flex items-center">
                       {{ parentCategory.name }}
                     </router-link>
                   </template>
-                  <template v-else>None</template>
+                  <template v-else>{{ $t('crud.none') }}</template>
                 </p>
               </div>
             </div>
 
             <div class="mt-6 pt-6 border-t space-y-2">
               <div class="flex items-center text-sm text-muted-foreground">
-                <AlignLeft class="mr-2 h-4 w-4" /> Description
-              </div>
+                <AlignLeft class="mr-2 h-4 w-4" />{{ $t('fields.description') }}</div>
               <p class="text-sm leading-relaxed text-foreground/80 bg-muted/30 p-4 rounded-md">
                 {{ category.description || 'No description provided for this category.' }}
               </p>
@@ -163,21 +158,19 @@ onMounted(() => {
 
         <Card>
           <CardHeader class="pb-3">
-            <CardTitle class="text-lg">System Information</CardTitle>
+            <CardTitle class="text-lg">{{ $t('crud.systemInfo') }}</CardTitle>
           </CardHeader>
           <CardContent>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Calendar class="mr-2 h-4 w-4" /> Created Date
-                </div>
+                  <Calendar class="mr-2 h-4 w-4" />{{ $t('fields.createdAt') }}</div>
                 <p class="font-medium text-base">{{ new Date(category.createdAt).toLocaleString() }}</p>
               </div>
               
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Calendar class="mr-2 h-4 w-4" /> Last Modified
-                </div>
+                  <Calendar class="mr-2 h-4 w-4" />{{ $t('fields.updatedAt') }}</div>
                 <p class="font-medium text-base">{{ new Date(category.updatedAt).toLocaleString() }}</p>
               </div>
             </div>

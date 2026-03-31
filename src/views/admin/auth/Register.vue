@@ -23,9 +23,11 @@ import {
 import { RouterLink } from "vue-router";
 import { ref } from "vue";
 import { toast } from "vue-sonner";
+import { useI18n } from "vue-i18n";
 
 const router = useRouter();
 const authStore = useAuthStore();
+const { t } = useI18n();
 const isLoading = ref(false);
 
 const formSchema = toTypedSchema(
@@ -46,14 +48,14 @@ const onSubmit = form.handleSubmit(async (values) => {
     // Note: Backend might expect roleId, setting a default for now or adding to form
     const response = await authStore.register({ ...values, roleId: 3 });
     if (response.success) {
-      toast.success("Registration successful");
+      toast.success(t("auth.registerSuccess"));
       router.push("/dashboard");
     } else {
-      toast.error(response.message || "Registration failed");
+      toast.error(response.message || t("auth.registerFailed"));
     }
   } catch (error: any) {
     toast.error(
-      error.response?.data?.message || "An error occurred during registration"
+      error.response?.data?.message || t("auth.registerError")
     );
   } finally {
     isLoading.value = false;
@@ -66,16 +68,16 @@ const onSubmit = form.handleSubmit(async (values) => {
     <div class="w-full max-w-sm">
       <Card>
         <CardHeader class="text-center">
-          <CardTitle class="text-xl">Create an account</CardTitle>
+          <CardTitle class="text-xl">{{ $t('auth.createAccount') }}</CardTitle>
           <CardDescription>
-            Enter your details below to sign up
+            {{ $t('auth.registerDescription') }}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form @submit="onSubmit" class="grid gap-6">
             <FormField v-slot="{ componentField }" name="username">
               <FormItem>
-                <FormLabel>Username</FormLabel>
+                <FormLabel>{{ $t('auth.username') }}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="John Doe"
@@ -89,7 +91,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="email">
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>{{ $t('auth.email') }}</FormLabel>
                 <FormControl>
                   <Input
                     type="email"
@@ -104,7 +106,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="password">
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel>{{ $t('auth.password') }}</FormLabel>
                 <FormControl>
                   <Input
                     type="password"
@@ -117,13 +119,13 @@ const onSubmit = form.handleSubmit(async (values) => {
             </FormField>
 
             <Button type="submit" class="w-full" :disabled="isLoading">
-              {{ isLoading ? "Creating account..." : "Sign Up" }}
+              {{ isLoading ? $t('auth.creatingAccount') : $t('auth.signUpButton') }}
             </Button>
 
             <div class="text-center text-sm">
-              Already have an account?
+              {{ $t('auth.hasAccount') }}
               <RouterLink to="/login" class="underline underline-offset-4">
-                Login
+                {{ $t('auth.login') }}
               </RouterLink>
             </div>
           </form>

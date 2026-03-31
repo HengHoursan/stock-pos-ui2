@@ -24,11 +24,13 @@ import { RouterLink } from "vue-router";
 import { ref } from "vue";
 import { Eye, EyeOff } from "lucide-vue-next";
 import { toast } from "vue-sonner";
+import { useI18n } from "vue-i18n";
 
 type LoginForm = zod.infer<typeof loginSchema>;
 
 const router = useRouter();
 const authStore = useAuthStore();
+const { t } = useI18n();
 const isLoading = ref(false);
 const showPassword = ref(false);
 
@@ -52,14 +54,14 @@ const onSubmit = form.handleSubmit(async (values) => {
   try {
     const response = await authStore.login(values);
     if (response.success) {
-      toast.success("Login successful");
+      toast.success(t("auth.loginSuccess"));
       router.push("/dashboard");
     } else {
-      toast.error(response.message || "Login failed");
+      toast.error(response.message || t("auth.loginFailed"));
     }
   } catch (error: any) {
     toast.error(
-      error.response?.data?.message || "An error occurred during login",
+      error.response?.data?.message || t("auth.loginError"),
     );
   } finally {
     isLoading.value = false;
@@ -72,14 +74,14 @@ const onSubmit = form.handleSubmit(async (values) => {
     <div class="w-full max-w-sm">
       <Card>
         <CardHeader class="text-center">
-          <CardTitle class="text-xl">Welcome back</CardTitle>
-          <CardDescription>Login with your account</CardDescription>
+          <CardTitle class="text-xl">{{ $t('auth.welcomeBack') }}</CardTitle>
+          <CardDescription>{{ $t('auth.loginDescription') }}</CardDescription>
         </CardHeader>
         <CardContent>
           <form @submit="onSubmit" class="grid gap-6">
             <FormField v-slot="{ componentField }" name="email">
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>{{ $t('auth.email') }}</FormLabel>
                 <FormControl>
                   <Input
                     type="email"
@@ -94,7 +96,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="password">
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel>{{ $t('auth.password') }}</FormLabel>
                 <FormControl>
                   <div class="relative">
                     <Input
@@ -118,13 +120,13 @@ const onSubmit = form.handleSubmit(async (values) => {
             </FormField>
 
             <Button type="submit" class="w-full" :disabled="isLoading">
-              {{ isLoading ? "Logging in..." : "Login" }}
+              {{ isLoading ? $t('auth.loggingIn') : $t('auth.login') }}
             </Button>
 
             <div class="text-center text-sm">
-              Don't have an account?
+              {{ $t('auth.noAccount') }}
               <RouterLink to="/register" class="underline underline-offset-4"
-                >Sign up</RouterLink
+                >{{ $t('auth.signup') }}</RouterLink
               >
             </div>
           </form>

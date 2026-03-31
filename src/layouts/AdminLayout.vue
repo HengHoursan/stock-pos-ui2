@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
 import { RouterView, RouterLink, useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+import { setLanguage, availableLocales } from "@/i18n";
 import {
   Sidebar,
   SidebarContent,
@@ -36,6 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { toast } from "vue-sonner";
 import {
   LayoutDashboard,
@@ -58,40 +61,41 @@ import { useAuthStore } from "@/stores/auth";
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const { locale, t } = useI18n();
 
 const navItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { titleKey: "menu.dashboard", url: "/dashboard", icon: LayoutDashboard },
   {
-    title: "Categories",
+    titleKey: "menu.categories",
     icon: Tag,
     children: [
-      { title: "All Categories", url: "/admin/categories", icon: List },
+      { titleKey: "menu.allCategories", url: "/admin/categories", icon: List },
       {
-        title: "Add New Category",
+        titleKey: "menu.addCategory",
         url: "/admin/categories/create",
         icon: Plus,
       },
     ],
   },
   {
-    title: "Brands",
+    titleKey: "menu.brands",
     icon: Bookmark,
     children: [
-      { title: "All Brands", url: "/admin/brands", icon: List },
+      { titleKey: "menu.allBrands", url: "/admin/brands", icon: List },
       {
-        title: "Add New Brand",
+        titleKey: "menu.addBrand",
         url: "/admin/brands/create",
         icon: Plus,
       },
     ],
   },
   {
-    title: "Units",
+    titleKey: "menu.units",
     icon: Ruler,
     children: [
-      { title: "All Units", url: "/admin/units", icon: List },
+      { titleKey: "menu.allUnits", url: "/admin/units", icon: List },
       {
-        title: "Add New Unit",
+        titleKey: "menu.addUnit",
         url: "/admin/units/create",
         icon: Plus,
       },
@@ -99,7 +103,34 @@ const navItems = [
   },
 ];
 
-const currentPageTitle = computed(() => String(route.name ?? "Page"));
+const currentLocaleItem = computed(() => {
+  return availableLocales.find((l) => l.code === locale.value) || availableLocales[0];
+});
+
+function changeLanguage(code: "en" | "kh") {
+  setLanguage(code);
+}
+
+const currentPageTitle = computed(() => {
+  // Translate current page title conditionally or just return raw
+  // In a robust app, we'd map route names to i18n keys
+  const routeName = String(route.name ?? "Page");
+  
+  const routeKeyMap: Record<string, string> = {
+    Dashboard: "menu.dashboard",
+    Categories: "menu.allCategories",
+    CategoryCreate: "menu.addCategory",
+    Brands: "menu.allBrands",
+    BrandCreate: "menu.addBrand",
+    Units: "menu.allUnits",
+    UnitCreate: "menu.addUnit",
+  };
+
+  if (routeKeyMap[routeName]) {
+    return t(routeKeyMap[routeName]);
+  }
+  return routeName;
+});
 
 const userInitials = computed(() => {
   const username = authStore.user?.username || authStore.user?.email || "U";
@@ -135,9 +166,7 @@ onMounted(() => {
           </div>
           <div class="grid flex-1 text-left text-sm leading-tight">
             <span class="truncate font-semibold">Stock POS</span>
-            <span class="truncate text-xs text-muted-foreground"
-              >Admin Panel</span
-            >
+            <span class="truncate text-xs text-muted-foreground">{{ $t('layout.adminPanel') }}</span>
           </div>
         </div>
       </SidebarHeader>
@@ -145,10 +174,10 @@ onMounted(() => {
       <!-- Navigation -->
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Main Menu</SidebarGroupLabel>
+          <SidebarGroupLabel>{{ $t('layout.mainMenu') }}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem v-for="item in navItems" :key="item.title">
+              <SidebarMenuItem v-for="item in navItems" :key="item.titleKey">
                 <Collapsible
                   v-if="item.children"
                   as-child
@@ -156,9 +185,9 @@ onMounted(() => {
                 >
                   <div>
                     <CollapsibleTrigger as-child>
-                      <SidebarMenuButton :tooltip="item.title">
+                      <SidebarMenuButton :tooltip="$t(item.titleKey)">
                         <component :is="item.icon" />
-                        <span>{{ item.title }}</span>
+                        <span>{{ $t(item.titleKey) }}</span>
                         <ChevronRight
                           class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
                         />
@@ -168,7 +197,7 @@ onMounted(() => {
                       <SidebarMenuSub>
                         <SidebarMenuSubItem
                           v-for="subItem in item.children"
-                          :key="subItem.title"
+                          :key="subItem.titleKey"
                         >
                           <SidebarMenuSubButton as-child>
                             <RouterLink :to="subItem.url">
@@ -177,7 +206,7 @@ onMounted(() => {
                                 v-if="subItem.icon"
                                 class="size-4"
                               />
-                              <span>{{ subItem.title }}</span>
+                              <span>{{ $t(subItem.titleKey) }}</span>
                             </RouterLink>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
@@ -185,10 +214,10 @@ onMounted(() => {
                     </CollapsibleContent>
                   </div>
                 </Collapsible>
-                <SidebarMenuButton v-else as-child :tooltip="item.title">
+                <SidebarMenuButton v-else as-child :tooltip="$t(item.titleKey)">
                   <RouterLink :to="item.url">
                     <component :is="item.icon" />
-                    <span>{{ item.title }}</span>
+                    <span>{{ $t(item.titleKey) }}</span>
                   </RouterLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -239,7 +268,7 @@ onMounted(() => {
                   class="text-destructive focus:text-destructive cursor-pointer"
                 >
                   <LogOut class="mr-2 h-4 w-4" />
-                  Log out
+                  {{ $t('common.logout') }}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -250,25 +279,58 @@ onMounted(() => {
 
     <!-- Main content area -->
     <SidebarInset>
-      <!-- Header with breadcrumb -->
-      <header class="flex h-16 shrink-0 items-center gap-2 border-b px-4">
-        <SidebarTrigger class="-ml-1" />
-        <Separator orientation="vertical" class="mr-2 h-4" />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink as-child>
-                <RouterLink to="/">Home</RouterLink>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <template v-if="route.name !== 'Dashboard'">
-              <BreadcrumbSeparator />
+      <!-- Header with breadcrumb and Language Switcher -->
+      <header class="flex h-16 shrink-0 items-center border-b px-4 justify-between w-full bg-background/80 backdrop-blur-sm sticky top-0 z-10">
+        <div class="flex items-center gap-2">
+          <SidebarTrigger class="-ml-1" />
+          <Separator orientation="vertical" class="mr-2 h-4" />
+          <Breadcrumb>
+            <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbPage>{{ currentPageTitle }}</BreadcrumbPage>
+                <BreadcrumbLink as-child>
+                  <RouterLink to="/">{{ $t('common.home') }}</RouterLink>
+                </BreadcrumbLink>
               </BreadcrumbItem>
-            </template>
-          </BreadcrumbList>
-        </Breadcrumb>
+              <template v-if="route.name !== 'Dashboard'">
+                <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{{ currentPageTitle }}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </template>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+
+        <!-- Language Switcher: Dropdown -->
+        <DropdownMenu>
+          <DropdownMenuTrigger as-child>
+            <Button variant="outline" size="sm" class="h-8 gap-2 px-3 text-sm font-medium">
+              <img
+                :src="currentLocaleItem.flag"
+                :alt="currentLocaleItem.name"
+                class="h-3.5 w-5 rounded-sm object-cover shadow-[0_0_0_1px_rgba(0,0,0,0.10)]"
+              />
+              <span>{{ currentLocaleItem.nativeName }}</span>
+              <ChevronsUpDown class="h-3.5 w-3.5 opacity-50" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" class="w-44">
+            <DropdownMenuItem
+              v-for="lang in availableLocales"
+              :key="lang.code"
+              class="cursor-pointer gap-2"
+              @click="changeLanguage(lang.code as 'en' | 'kh')"
+            >
+              <img
+                :src="lang.flag"
+                :alt="lang.name"
+                class="h-3.5 w-5 rounded-sm object-cover shadow-[0_0_0_1px_rgba(0,0,0,0.10)]"
+              />
+              <span class="flex-1">{{ lang.name }}</span>
+              <span v-if="locale === lang.code" class="text-primary text-xs font-bold">✓</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </header>
 
       <main class="flex flex-1 flex-col gap-4 p-4 w-full">
@@ -277,3 +339,6 @@ onMounted(() => {
     </SidebarInset>
   </SidebarProvider>
 </template>
+
+<style scoped>
+</style>

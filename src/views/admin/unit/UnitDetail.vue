@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { Button } from "@/components/ui/button";
@@ -8,6 +10,7 @@ import { ChevronLeft, Pencil, Trash2, Loader2, Ruler, Calendar, Globe, AlignLeft
 import { UnitService } from "@/services/unit/unit.service";
 import type { Unit } from "@/types/unit";
 import { toast } from "vue-sonner";
+
 
 const router = useRouter();
 const route = useRoute();
@@ -77,11 +80,9 @@ onMounted(() => {
       </div>
       <div class="flex items-center gap-2">
         <Button variant="outline" @click="router.push(`/admin/units/${unitId}/edit`)" class="flex-1 md:flex-none">
-          <Pencil class="mr-2 h-4 w-4" /> Edit
-        </Button>
+          <Pencil class="mr-2 h-4 w-4" />{{ $t('crud.editBtn') }}</Button>
         <Button variant="destructive" @click="deleteUnit" class="flex-1 md:flex-none">
-          <Trash2 class="mr-2 h-4 w-4" /> Delete
-        </Button>
+          <Trash2 class="mr-2 h-4 w-4" />{{ $t('crud.delete') }}</Button>
       </div>
     </div>
 
@@ -94,56 +95,49 @@ onMounted(() => {
       <div class="space-y-6">
         <Card>
           <CardHeader class="pb-3">
-            <CardTitle class="text-lg">General Information</CardTitle>
+            <CardTitle class="text-lg">{{ $t('crud.generalInfo') }}</CardTitle>
           </CardHeader>
           <CardContent>
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Type class="mr-2 h-4 w-4" /> Name
-                </div>
+                  <Type class="mr-2 h-4 w-4" />{{ $t('fields.name') }}</div>
                 <p class="font-medium text-base">{{ unit.name }}</p>
               </div>
               
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Barcode class="mr-2 h-4 w-4" /> Code
-                </div>
+                  <Barcode class="mr-2 h-4 w-4" />{{ $t('fields.code') }}</div>
                 <p class="font-medium text-base">{{ unit.code || 'N/A' }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Globe class="mr-2 h-4 w-4" /> Slug
-                </div>
+                  <Globe class="mr-2 h-4 w-4" />{{ $t('fields.slug') }}</div>
                 <p class="font-medium text-base">{{ unit.slug }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Ruler class="mr-2 h-4 w-4" /> Symbol
-                </div>
+                  <Ruler class="mr-2 h-4 w-4" />{{ $t('fields.symbol') }}</div>
                 <p class="font-medium text-base">{{ unit.symbol || 'N/A' }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Calculator class="mr-2 h-4 w-4" /> Conversion Factor
-                </div>
+                  <Calculator class="mr-2 h-4 w-4" />{{ $t('fields.conversionFactor') }}</div>
                 <p class="font-medium text-base">{{ unit.conversionFactor || 1 }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Coins class="mr-2 h-4 w-4" /> Default Price
-                </div>
+                  <Coins class="mr-2 h-4 w-4" />{{ $t('fields.defaultPrice') }}</div>
                 <p class="font-medium text-base">{{ unit.defaultPrice || 0 }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Folder class="mr-2 h-4 w-4" /> Parent Unit
-                </div>
+                  <Folder class="mr-2 h-4 w-4" />{{ $t('fields.parent') }} {{ $t('modules.unit') }}</div>
                 <p class="font-medium text-base">
                   <template v-if="parentUnit">
                     <router-link :to="`/admin/units/${parentUnit.id}`" class="text-primary hover:underline inline-flex items-center">
@@ -156,8 +150,7 @@ onMounted(() => {
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <AlignLeft class="mr-2 h-4 w-4" /> Calculate Details
-                </div>
+                  <AlignLeft class="mr-2 h-4 w-4" />{{ $t('fields.isCalculateDetail') }}</div>
                 <div class="mt-1">
                   <Badge :variant="unit.isCalculateDetail ? 'success' : 'secondary'" class="text-[10px] h-5 px-2 uppercase font-bold shadow-sm">
                     {{ unit.isCalculateDetail ? "Yes" : "No" }}
@@ -171,21 +164,19 @@ onMounted(() => {
 
         <Card>
           <CardHeader class="pb-3">
-            <CardTitle class="text-lg">System Information</CardTitle>
+            <CardTitle class="text-lg">{{ $t('crud.systemInfo') }}</CardTitle>
           </CardHeader>
           <CardContent>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Calendar class="mr-2 h-4 w-4" /> Created Date
-                </div>
+                  <Calendar class="mr-2 h-4 w-4" />{{ $t('fields.createdAt') }}</div>
                 <p class="font-medium text-base">{{ new Date(unit.createdAt).toLocaleString() }}</p>
               </div>
               
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Calendar class="mr-2 h-4 w-4" /> Last Modified
-                </div>
+                  <Calendar class="mr-2 h-4 w-4" />{{ $t('fields.updatedAt') }}</div>
                 <p class="font-medium text-base">{{ new Date(unit.updatedAt).toLocaleString() }}</p>
               </div>
             </div>

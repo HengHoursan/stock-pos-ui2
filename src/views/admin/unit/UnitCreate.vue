@@ -5,6 +5,7 @@ import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
+
 import {
   FormControl,
   FormDescription,
@@ -14,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+
 import {
   Select,
   SelectContent,
@@ -22,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+
 import {
   Card,
   CardContent,
@@ -33,6 +36,7 @@ import { ChevronLeft, Loader2 } from "lucide-vue-next";
 import { UnitService } from "@/services/unit/unit.service";
 import type { Unit } from "@/types/unit";
 import { toast } from "vue-sonner";
+
 
 const router = useRouter();
 const unitService = new UnitService();
@@ -114,7 +118,7 @@ onMounted(() => {
       <Button variant="outline" size="icon" @click="router.back()">
         <ChevronLeft class="h-4 w-4" />
       </Button>
-      <h2 class="text-3xl font-bold tracking-tight">Create Unit</h2>
+      <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.create', { module: $t('modules.unit') }) }}</h2>
     </div>
 
     <Card>
@@ -126,7 +130,7 @@ onMounted(() => {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField v-slot="{ componentField }" name="name">
               <FormItem>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>{{ $t('fields.name') }}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="e.g. Kilogram, Box, Piece"
@@ -139,7 +143,7 @@ onMounted(() => {
 
             <FormField v-slot="{ field }" name="parentId">
               <FormItem>
-                <FormLabel>Parent Unit</FormLabel>
+                <FormLabel>{{ $t('fields.parent') }} {{ $t('modules.unit') }}</FormLabel>
                 <Select v-bind="field">
                   <FormControl>
                     <SelectTrigger>
@@ -147,7 +151,7 @@ onMounted(() => {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="0">None</SelectItem>
+                    <SelectItem value="0">{{ $t('crud.none') }}</SelectItem>
                     <SelectItem
                       v-for="u in parentUnits"
                       :key="u.id"
@@ -163,7 +167,7 @@ onMounted(() => {
 
             <FormField v-slot="{ componentField }" name="symbol">
               <FormItem>
-                <FormLabel>Symbol</FormLabel>
+                <FormLabel>{{ $t('fields.symbol') }}</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="e.g. kg, box, pcs"
@@ -176,7 +180,7 @@ onMounted(() => {
 
             <FormField v-slot="{ componentField }" name="conversionFactor">
               <FormItem>
-                <FormLabel>Conversion Factor</FormLabel>
+                <FormLabel>{{ $t('fields.conversionFactor') }}</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -192,7 +196,7 @@ onMounted(() => {
 
             <FormField v-slot="{ componentField }" name="defaultPrice">
               <FormItem>
-                <FormLabel>Default Price</FormLabel>
+                <FormLabel>{{ $t('fields.defaultPrice') }}</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -211,7 +215,7 @@ onMounted(() => {
               >
                 <div class="space-y-0.5">
                   <FormLabel class="text-base font-semibold"
-                    >Calculate Details</FormLabel
+                    >{{ $t('fields.isCalculateDetail') }}</FormLabel
                   >
                   <FormDescription>
                     Enable detail calculation for this unit.
@@ -244,13 +248,9 @@ onMounted(() => {
         </form>
       </CardContent>
       <CardFooter class="flex justify-end gap-2 border-t px-6 py-4">
-        <Button variant="outline" @click="router.back()" :disabled="submitting">
-          Cancel
-        </Button>
+        <Button variant="outline" @click="router.back()" :disabled="submitting">{{ $t('crud.cancel') }}</Button>
         <Button type="submit" form="unitForm" :disabled="submitting">
-          <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-          Create Unit
-        </Button>
+          <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />{{ $t('crud.create', { module: $t('modules.unit') }) }}</Button>
       </CardFooter>
     </Card>
   </div>

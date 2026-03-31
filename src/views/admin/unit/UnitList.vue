@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive, watch } from "vue";
 import { useRouter } from "vue-router";
+
 import {
   Table,
   TableBody,
@@ -30,6 +31,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+
 import {
   Select,
   SelectContent,
@@ -64,6 +66,7 @@ import type { Unit } from "@/types/unit";
 import type { PaginationMeta } from "@/types/common";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
+
 
 const router = useRouter();
 const unitService = new UnitService();
@@ -206,9 +209,7 @@ onMounted(() => {
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <h2 class="text-3xl font-bold tracking-tight text-foreground">
-        Units
-      </h2>
+      <h2 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('modules.units') }}</h2>
       <div class="flex items-center gap-2">
         <Button
           variant="outline"
@@ -219,8 +220,7 @@ onMounted(() => {
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
         <Button @click="router.push('/admin/units/create')">
-          <Plus class="mr-2 h-4 w-4" /> Add Unit
-        </Button>
+          <Plus class="mr-2 h-4 w-4" />{{ $t('crud.createBtn') }} {{ $t('modules.unit') }}</Button>
       </div>
     </div>
 
@@ -231,7 +231,7 @@ onMounted(() => {
         />
         <Input
           type="search"
-          placeholder="Search by name..."
+          :placeholder="$t('crud.search', { module: $t('modules.brand') })"
           class="pl-8"
           v-model="searchQuery"
         />
@@ -242,9 +242,9 @@ onMounted(() => {
           <SelectValue placeholder="Status" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Status</SelectItem>
-          <SelectItem value="active">Active</SelectItem>
-          <SelectItem value="inactive">Inactive</SelectItem>
+          <SelectItem value="all">{{ $t('crud.allStatus') }}</SelectItem>
+          <SelectItem value="active">{{ $t('crud.active') }}</SelectItem>
+          <SelectItem value="inactive">{{ $t('crud.inactive') }}</SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -254,21 +254,20 @@ onMounted(() => {
         <TableHeader>
           <TableRow>
             <TableHead class="w-[40px]">#</TableHead>
-            <TableHead class="w-[120px]">Code</TableHead>
+            <TableHead class="w-[120px]">{{ $t('fields.code') }}</TableHead>
             <TableHead>
               <Button
                 variant="ghost"
                 @click="handleSort('name')"
                 class="-ml-4 h-8 font-medium"
-              >
-                Name <ArrowUpDown class="ml-1 h-3 w-3" />
+              >{{ $t('fields.name') }}<ArrowUpDown class="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
-            <TableHead>Symbol</TableHead>
+            <TableHead>{{ $t('fields.symbol') }}</TableHead>
             <TableHead>Conv. Factor</TableHead>
-            <TableHead>Calculate Details</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead class="text-right">Actions</TableHead>
+            <TableHead>{{ $t('fields.isCalculateDetail') }}</TableHead>
+            <TableHead>{{ $t('fields.status') }}</TableHead>
+            <TableHead class="text-right">{{ $t('crud.actions') }}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -335,7 +334,7 @@ onMounted(() => {
                   <DropdownMenuContent align="end" class="w-[180px]">
                     <DropdownMenuLabel
                       class="text-xs uppercase text-muted-foreground font-bold"
-                      >Actions</DropdownMenuLabel
+                      >{{ $t('crud.actions') }}</DropdownMenuLabel
                     >
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -350,15 +349,13 @@ onMounted(() => {
                       "
                       class="cursor-pointer"
                     >
-                      <Pencil class="mr-2 h-4 w-4 opacity-70" /> Edit
-                    </DropdownMenuItem>
+                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{ $t('crud.editBtn') }}</DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       class="text-destructive focus:text-destructive cursor-pointer font-medium"
                       @click="openDeleteDialog(unit.id)"
                     >
-                      <Trash2 class="mr-2 h-4 w-4" /> Delete
-                    </DropdownMenuItem>
+                      <Trash2 class="mr-2 h-4 w-4" />{{ $t('crud.delete') }}</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
@@ -371,9 +368,7 @@ onMounted(() => {
             >
               <div class="flex flex-col items-center justify-center gap-3">
                 <Tag class="h-10 w-10 opacity-10" />
-                <p class="font-medium">
-                  No units found.
-                </p>
+                <p class="font-medium">{{ $t('crud.noRecords', { module: $t('modules.units') }) }}</p>
                 <Button
                   v-if="searchQuery || statusFilter !== 'all'"
                   variant="outline"
@@ -462,14 +457,12 @@ onMounted(() => {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel @click="isDeleteDialogOpen = false"
-            >Cancel</AlertDialogCancel
+            >{{ $t('crud.cancel') }}</AlertDialogCancel
           >
           <AlertDialogAction
             @click="confirmDelete"
             class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
-            Delete
-          </AlertDialogAction>
+          >{{ $t('crud.delete') }}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

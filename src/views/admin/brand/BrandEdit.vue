@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
+
 import {
   FormControl,
   FormDescription,
@@ -14,6 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+
 import {
   Select,
   SelectContent,
@@ -22,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+
 import {
   Card,
   CardContent,
@@ -34,6 +39,7 @@ import { BrandService } from "@/services/brand/brand.service";
 import ImageUpload from "@/components/upload/ImageUpload.vue";
 import type { Brand } from "@/types/brand";
 import { toast } from "vue-sonner";
+
 
 const router = useRouter();
 const route = useRoute();
@@ -140,7 +146,7 @@ onMounted(() => {
       <Button variant="outline" size="icon" @click="router.back()">
         <ChevronLeft class="h-4 w-4" />
       </Button>
-      <h2 class="text-3xl font-bold tracking-tight">Edit Brand</h2>
+      <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.edit', { module: $t('modules.brand') }) }}</h2>
     </div>
 
     <Card v-if="loading" class="flex items-center justify-center min-h-[400px]">
@@ -160,7 +166,7 @@ onMounted(() => {
                 <FormItem>
                   <FormLabel
                     class="text-sm font-bold uppercase tracking-wider text-muted-foreground/80"
-                    >Brand Image</FormLabel
+                    >{{ $t('modules.brand') }} {{ $t('crud.image') }}</FormLabel
                   >
                   <FormControl>
                     <ImageUpload
@@ -178,7 +184,7 @@ onMounted(() => {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField v-slot="{ componentField }" name="name">
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>{{ $t('fields.name') }}</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Brand Name"
@@ -191,7 +197,7 @@ onMounted(() => {
 
                 <FormField v-slot="{ componentField }" name="code">
                   <FormItem>
-                    <FormLabel>Code</FormLabel>
+                    <FormLabel>{{ $t('fields.code') }}</FormLabel>
                     <FormControl>
                       <Input
                         v-bind="componentField"
@@ -205,7 +211,7 @@ onMounted(() => {
 
                 <FormField v-slot="{ componentField }" name="slug">
                   <FormItem>
-                    <FormLabel>Slug</FormLabel>
+                    <FormLabel>{{ $t('fields.slug') }}</FormLabel>
                     <FormControl>
                       <Input
                         v-bind="componentField"
@@ -219,7 +225,7 @@ onMounted(() => {
 
                 <FormField v-slot="{ field }" name="parentId">
                   <FormItem>
-                    <FormLabel>Parent Brand</FormLabel>
+                    <FormLabel>{{ $t('fields.parent') }} {{ $t('modules.brand') }}</FormLabel>
                     <Select v-bind="field">
                       <FormControl>
                         <SelectTrigger>
@@ -227,7 +233,7 @@ onMounted(() => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="0">None</SelectItem>
+                        <SelectItem value="0">{{ $t('crud.none') }}</SelectItem>
                         <SelectItem
                           v-for="brand in parentBrands"
                           :key="brand.id"
@@ -244,7 +250,7 @@ onMounted(() => {
                 <div class="md:col-span-2">
                   <FormField v-slot="{ componentField }" name="description">
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>{{ $t('fields.description') }}</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Enter brand description"
@@ -281,9 +287,7 @@ onMounted(() => {
         </form>
       </CardContent>
       <CardFooter class="flex justify-end gap-2 border-t px-6 py-4">
-        <Button variant="outline" @click="router.back()" :disabled="submitting">
-          Cancel
-        </Button>
+        <Button variant="outline" @click="router.back()" :disabled="submitting">{{ $t('crud.cancel') }}</Button>
         <Button type="submit" form="brandForm" :disabled="submitting">
           <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
           Update Brand
