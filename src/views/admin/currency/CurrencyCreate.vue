@@ -160,7 +160,7 @@ async function onSubmit(values: any) {
             </FormField>
 
             <div class="md:col-span-2">
-              <FormField v-slot="{ value, handleChange }" name="status">
+              <FormField name="status">
                 <FormItem
                   class="flex flex-row items-center justify-between rounded-lg border p-4"
                 >
@@ -174,8 +174,7 @@ async function onSubmit(values: any) {
                   </div>
                   <FormControl>
                     <Switch
-                      :checked="value"
-                      @update:checked="handleChange"
+                      v-model="form.values.status"
                     />
                   </FormControl>
                 </FormItem>
