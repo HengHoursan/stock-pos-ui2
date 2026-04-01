@@ -114,7 +114,7 @@ async function fetchCategories() {
     }
   } catch (error) {
     console.error("Fetch categories error:", error);
-    toast.error("Failed to fetch categories.");
+    toast.error(t('crud.errorFetch', { module: t('modules.categories') }));
   } finally {
     loading.value = false;
   }
@@ -156,12 +156,10 @@ async function toggleStatus(category: Category) {
     });
     if (response.success) {
       category.status = newStatus;
-      toast.success(
-        `Category ${newStatus ? "enabled" : "disabled"} successfully`,
-      );
+      toast.success(t('crud.successUpdate', { module: t('modules.category') }));
     }
   } catch (error) {
-    toast.error("Failed to update status");
+    toast.error(t('crud.errorUpdate', { module: t('modules.category') }));
   }
 }
 
@@ -176,13 +174,13 @@ async function confirmDelete() {
   try {
     const response = await categoryService.softDelete(categoryToDelete.value);
     if (response.success) {
-      toast.success("Category deleted successfully");
+      toast.success(t('crud.successDelete', { module: t('modules.category') }));
       fetchCategories();
     } else {
-      toast.error(response.message || "Failed to delete category");
+      toast.error(response.message || t('crud.errorDelete', { module: t('modules.category') }));
     }
   } catch (error) {
-    toast.error("Failed to delete category");
+    toast.error(t('crud.errorDelete', { module: t('modules.category') }));
   } finally {
     isDeleteDialogOpen.value = false;
     categoryToDelete.value = null;
@@ -229,7 +227,7 @@ onMounted(() => {
         />
         <Input
           type="search"
-          :placeholder="$t('crud.search', { module: $t('modules.brand') })"
+          :placeholder="$t('crud.search', { module: $t('modules.category') })"
           class="pl-8"
           v-model="searchQuery"
         />
@@ -275,7 +273,7 @@ onMounted(() => {
                 class="flex items-center justify-center text-muted-foreground italic text-sm"
               >
                 <Loader2 class="h-4 w-4 animate-spin mr-2" />
-                <span>Fetching data...</span>
+                <span>{{ $t('crud.fetchingData') }}</span>
               </div>
             </TableCell>
           </TableRow>
@@ -324,7 +322,7 @@ onMounted(() => {
                   class="cursor-pointer font-bold px-3 transition-all hover:opacity-80 active:scale-95"
                   @click="toggleStatus(category)"
                 >
-                  {{ category.status ? "Active" : "Inactive" }}
+                  {{ category.status ? $t('crud.active') : $t('crud.inactive') }}
                 </Badge>
               </TableCell>
               <TableCell class="text-right">
@@ -348,7 +346,7 @@ onMounted(() => {
                       @click="router.push(`/admin/categories/${category.id}`)"
                       class="cursor-pointer"
                     >
-                      <Eye class="mr-2 h-4 w-4 opacity-70" /> View
+                      <Eye class="mr-2 h-4 w-4 opacity-70" /> {{ $t('crud.viewBtn') }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       @click="
@@ -386,7 +384,7 @@ onMounted(() => {
                   "
                   class="h-8"
                 >
-                  Reset Filters
+                  {{ $t('crud.resetFilters') }}
                 </Button>
               </div>
             </TableCell>
@@ -402,7 +400,7 @@ onMounted(() => {
         <div class="flex items-center gap-2">
           <span
             class="text-sm font-medium text-muted-foreground whitespace-nowrap"
-            >Rows per page</span
+            >{{ $t('crud.rowsPerPage') }}</span
           >
           <Select
             :model-value="pagination.limit.toString()"
@@ -461,10 +459,9 @@ onMounted(() => {
     <AlertDialog v-model:open="isDeleteDialogOpen">
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>{{ $t('crud.confirmDelete') }}</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the
-            category and remove its data from our servers.
+            {{ $t('crud.confirmDeleteDesc', { module: $t('modules.category') }) }}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

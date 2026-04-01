@@ -99,7 +99,7 @@ async function fetchData() {
         status: u.status,
       });
     } else {
-      toast.error("Unit not found");
+      toast.error(t('crud.notFound', { module: t('modules.unit') }));
       router.push("/admin/units");
     }
 
@@ -109,7 +109,7 @@ async function fetchData() {
       );
     }
   } catch (error) {
-    toast.error("Failed to fetch data");
+    toast.error(t('crud.errorFetch', { module: t('modules.unit') }));
   } finally {
     loading.value = false;
   }
@@ -128,13 +128,13 @@ const onSubmit = form.handleSubmit(async (values) => {
     };
     const response = await unitService.update(payload);
     if (response.success) {
-      toast.success("Unit updated successfully");
+      toast.success(t('crud.successUpdate', { module: t('modules.unit') }));
       router.push("/admin/units");
     } else {
-      toast.error(response.message || "Failed to update unit");
+      toast.error(response.message || t('crud.errorUpdate', { module: t('modules.unit') }));
     }
   } catch (error) {
-    toast.error("An error occurred while updating the unit");
+    toast.error(t('crud.errorGeneral'));
   } finally {
     submitting.value = false;
   }
@@ -160,7 +160,7 @@ onMounted(() => {
 
     <Card v-else>
       <CardHeader>
-        <CardTitle>Unit Information</CardTitle>
+        <CardTitle>{{ $t('crud.info', { module: $t('modules.unit') }) }}</CardTitle>
       </CardHeader>
       <CardContent>
         <form @submit="onSubmit" id="unitForm" class="space-y-6">
@@ -208,7 +208,7 @@ onMounted(() => {
 
             <FormField v-slot="{ field }" name="parentId">
               <FormItem>
-                <FormLabel>{{ $t('fields.parent') }} {{ $t('modules.unit') }}</FormLabel>
+                <FormLabel>{{ $t('fields.parentOf', { module: $t('modules.unit') }) }}</FormLabel>
                 <Select v-bind="field">
                   <FormControl>
                     <SelectTrigger>
@@ -254,7 +254,7 @@ onMounted(() => {
                     v-bind="componentField"
                   />
                 </FormControl>
-                <FormDescription>Relative to base unit.</FormDescription>
+                <FormDescription>{{ $t('fields.relativeToBase', { module: $t('modules.unit') }) }}</FormDescription>
                 <FormMessage />
               </FormItem>
             </FormField>
@@ -283,7 +283,7 @@ onMounted(() => {
                     >{{ $t('fields.isCalculateDetail') }}</FormLabel
                   >
                   <FormDescription>
-                    Enable detail calculation for this unit.
+                    {{ $t('fields.calculateDetailInfo', { module: $t('modules.unit') }) }}
                   </FormDescription>
                 </div>
                 <FormControl>
@@ -298,10 +298,10 @@ onMounted(() => {
               >
                 <div class="space-y-0.5">
                   <FormLabel class="text-base font-semibold"
-                    >Active Status</FormLabel
+                    >{{ $t('fields.activeStatus') }}</FormLabel
                   >
                   <FormDescription>
-                    Enable or disable this unit.
+                    {{ $t('fields.statusDescription', { module: $t('modules.unit') }) }}
                   </FormDescription>
                 </div>
                 <FormControl>
@@ -316,7 +316,7 @@ onMounted(() => {
         <Button variant="outline" @click="router.back()" :disabled="submitting">{{ $t('crud.cancel') }}</Button>
         <Button type="submit" form="unitForm" :disabled="submitting">
           <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-          Update Unit
+          {{ $t('crud.updateBtn', { module: $t('modules.unit') }) }}
         </Button>
       </CardFooter>
     </Card>

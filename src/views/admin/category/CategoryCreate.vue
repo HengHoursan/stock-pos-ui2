@@ -90,13 +90,13 @@ const onSubmit = form.handleSubmit(async (values) => {
     };
     const response = await categoryService.create(payload);
     if (response.success) {
-      toast.success("Category created successfully");
+      toast.success(t('crud.successCreate', { module: t('modules.category') }));
       router.push("/admin/categories");
     } else {
-      toast.error(response.message || "Failed to create category");
+      toast.error(response.message || t('crud.errorCreate', { module: t('modules.category') }));
     }
   } catch (error) {
-    toast.error("An error occurred while creating the category");
+    toast.error(t('crud.errorGeneral'));
   } finally {
     submitting.value = false;
   }
@@ -120,7 +120,7 @@ onMounted(() => {
 
     <Card>
       <CardHeader>
-        <CardTitle>Category Information</CardTitle>
+        <CardTitle>{{ $t('crud.info', { module: $t('modules.category') }) }}</CardTitle>
       </CardHeader>
       <CardContent>
         <form @submit="onSubmit" id="categoryForm" class="space-y-6">
@@ -162,7 +162,7 @@ onMounted(() => {
 
                 <FormField v-slot="{ field }" name="parentId">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.parent') }} {{ $t('modules.category') }}</FormLabel>
+                    <FormLabel>{{ $t('fields.parentOf', { module: $t('modules.category') }) }}</FormLabel>
                     <Select v-bind="field">
                       <FormControl>
                         <SelectTrigger>
@@ -206,10 +206,10 @@ onMounted(() => {
                     >
                       <div class="space-y-0.5">
                         <FormLabel class="text-base font-semibold"
-                          >Active Status</FormLabel
+                          >{{ $t('fields.activeStatus') }}</FormLabel
                         >
                         <FormDescription>
-                          Enable or disable this category.
+                          {{ $t('fields.statusDescription', { module: $t('modules.category') }) }}
                         </FormDescription>
                       </div>
                       <FormControl>

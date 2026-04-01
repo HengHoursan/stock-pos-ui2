@@ -90,7 +90,7 @@ async function fetchData() {
         status: cat.status,
       });
     } else {
-      toast.error("Category not found");
+      toast.error(t('crud.notFound', { module: t('modules.category') }));
       router.push("/admin/categories");
     }
 
@@ -100,7 +100,7 @@ async function fetchData() {
       );
     }
   } catch (error) {
-    toast.error("Failed to fetch data");
+    toast.error(t('crud.errorFetch', { module: t('modules.category') }));
   } finally {
     loading.value = false;
   }
@@ -119,13 +119,13 @@ const onSubmit = form.handleSubmit(async (values) => {
     };
     const response = await categoryService.update(payload);
     if (response.success) {
-      toast.success("Category updated successfully");
+      toast.success(t('crud.successUpdate', { module: t('modules.category') }));
       router.push("/admin/categories");
     } else {
-      toast.error(response.message || "Failed to update category");
+      toast.error(response.message || t('crud.errorUpdate', { module: t('modules.category') }));
     }
   } catch (error) {
-    toast.error("An error occurred while updating the category");
+    toast.error(t('crud.errorGeneral'));
   } finally {
     submitting.value = false;
   }
@@ -142,7 +142,9 @@ onMounted(() => {
       <Button variant="outline" size="icon" @click="router.back()">
         <ChevronLeft class="h-4 w-4" />
       </Button>
-      <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.edit', { module: $t('modules.category') }) }}</h2>
+      <h2 class="text-3xl font-bold tracking-tight">
+        {{ $t("crud.edit", { module: $t("modules.category") }) }}
+      </h2>
     </div>
 
     <Card v-if="loading" class="flex items-center justify-center min-h-[400px]">
@@ -151,7 +153,7 @@ onMounted(() => {
 
     <Card v-else>
       <CardHeader>
-        <CardTitle>Category Information</CardTitle>
+        <CardTitle>{{ $t('crud.info', { module: $t('modules.category') }) }}</CardTitle>
       </CardHeader>
       <CardContent>
         <form @submit="onSubmit" id="categoryForm" class="space-y-6">
@@ -162,7 +164,8 @@ onMounted(() => {
                 <FormItem>
                   <FormLabel
                     class="text-sm font-bold uppercase tracking-wider text-muted-foreground/80"
-                    >{{ $t('modules.category') }} {{ $t('crud.image') }}</FormLabel
+                    >{{ $t("modules.category") }}
+                    {{ $t("crud.image") }}</FormLabel
                   >
                   <FormControl>
                     <ImageUpload
@@ -180,7 +183,7 @@ onMounted(() => {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField v-slot="{ componentField }" name="name">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.name') }}</FormLabel>
+                    <FormLabel>{{ $t("fields.name") }}</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Category Name"
@@ -193,7 +196,7 @@ onMounted(() => {
 
                 <FormField v-slot="{ componentField }" name="code">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.code') }}</FormLabel>
+                    <FormLabel>{{ $t("fields.code") }}</FormLabel>
                     <FormControl>
                       <Input
                         v-bind="componentField"
@@ -207,7 +210,7 @@ onMounted(() => {
 
                 <FormField v-slot="{ componentField }" name="slug">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.slug') }}</FormLabel>
+                    <FormLabel>{{ $t("fields.slug") }}</FormLabel>
                     <FormControl>
                       <Input
                         v-bind="componentField"
@@ -221,7 +224,7 @@ onMounted(() => {
 
                 <FormField v-slot="{ field }" name="parentId">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.parent') }} {{ $t('modules.category') }}</FormLabel>
+                    <FormLabel>{{ $t("fields.parentOf", { module: $t("modules.category") }) }}</FormLabel>
                     <Select v-bind="field">
                       <FormControl>
                         <SelectTrigger>
@@ -229,7 +232,7 @@ onMounted(() => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="0">{{ $t('crud.none') }}</SelectItem>
+                        <SelectItem value="0">{{ $t("crud.none") }}</SelectItem>
                         <SelectItem
                           v-for="cat in parentCategories"
                           :key="cat.id"
@@ -246,7 +249,7 @@ onMounted(() => {
                 <div class="md:col-span-2">
                   <FormField v-slot="{ componentField }" name="description">
                     <FormItem>
-                      <FormLabel>{{ $t('fields.description') }}</FormLabel>
+                      <FormLabel>{{ $t("fields.description") }}</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Enter category description"
@@ -265,10 +268,10 @@ onMounted(() => {
                     >
                       <div class="space-y-0.5">
                         <FormLabel class="text-base font-semibold"
-                          >Active Status</FormLabel
+                          >{{ $t('fields.activeStatus') }}</FormLabel
                         >
                         <FormDescription>
-                          Enable or disable this category.
+                          {{ $t('fields.statusDescription', { module: $t('modules.category') }) }}
                         </FormDescription>
                       </div>
                       <FormControl>
@@ -283,10 +286,15 @@ onMounted(() => {
         </form>
       </CardContent>
       <CardFooter class="flex justify-end gap-2 border-t px-6 py-4">
-        <Button variant="outline" @click="router.back()" :disabled="submitting">{{ $t('crud.cancel') }}</Button>
+        <Button
+          variant="outline"
+          @click="router.back()"
+          :disabled="submitting"
+          >{{ $t("crud.cancel") }}</Button
+        >
         <Button type="submit" form="categoryForm" :disabled="submitting">
           <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-          Update Category
+          {{ $t("crud.updateBtn", { module: $t("modules.category") }) }}
         </Button>
       </CardFooter>
     </Card>

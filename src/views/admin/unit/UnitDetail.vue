@@ -35,11 +35,11 @@ async function fetchUnit() {
         }
       }
     } else {
-      toast.error("Unit not found");
+      toast.error(t('crud.notFound', { module: t('modules.unit') }));
       router.push("/admin/units");
     }
   } catch (error) {
-    toast.error("Failed to fetch unit details");
+    toast.error(t('crud.errorFetch', { module: t('modules.unit') }));
   } finally {
     loading.value = false;
   }
@@ -50,11 +50,11 @@ async function deleteUnit() {
   try {
     const response = await unitService.softDelete(unitId);
     if (response.success) {
-      toast.success("Unit deleted successfully");
+      toast.success(t('crud.successDelete', { module: t('modules.unit') }));
       router.push("/admin/units");
     }
   } catch (error) {
-    toast.error("Failed to delete unit");
+    toast.error(t('crud.errorDelete', { module: t('modules.unit') }));
   }
 }
 
@@ -137,7 +137,7 @@ onMounted(() => {
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Folder class="mr-2 h-4 w-4" />{{ $t('fields.parent') }} {{ $t('modules.unit') }}</div>
+                  <Folder class="mr-2 h-4 w-4" />{{ $t('fields.parentOf', { module: $t('modules.unit') }) }}</div>
                 <p class="font-medium text-base">
                   <template v-if="parentUnit">
                     <router-link :to="`/admin/units/${parentUnit.id}`" class="text-primary hover:underline inline-flex items-center">

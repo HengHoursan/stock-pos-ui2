@@ -34,11 +34,11 @@ async function fetchCategory() {
         }
       }
     } else {
-      toast.error("Category not found");
+      toast.error(t('crud.notFound', { module: t('modules.category') }));
       router.push("/admin/categories");
     }
   } catch (error) {
-    toast.error("Failed to fetch category details");
+    toast.error(t('crud.errorFetch', { module: t('modules.category') }));
   } finally {
     loading.value = false;
   }
@@ -49,11 +49,11 @@ async function deleteCategory() {
   try {
     const response = await categoryService.softDelete(categoryId);
     if (response.success) {
-      toast.success("Category deleted successfully");
+      toast.success(t('crud.successDelete', { module: t('modules.category') }));
       router.push("/admin/categories");
     }
   } catch (error) {
-    toast.error("Failed to delete category");
+    toast.error(t('crud.errorDelete', { module: t('modules.category') }));
   }
 }
 
@@ -93,7 +93,7 @@ onMounted(() => {
       <!-- Image Section -->
       <Card class="lg:col-span-1 overflow-hidden h-fit">
         <CardHeader class="pb-3">
-          <CardTitle class="text-lg">{{ $t('modules.category') }} {{ $t('crud.image') }}</CardTitle>
+          <CardTitle class="text-lg">{{ $t('crud.image') }}</CardTitle>
         </CardHeader>
         <CardContent>
           <div class="aspect-square relative rounded-lg border bg-muted/50 flex items-center justify-center overflow-hidden">
@@ -134,7 +134,7 @@ onMounted(() => {
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Folder class="mr-2 h-4 w-4" />{{ $t('fields.parent') }} {{ $t('modules.category') }}</div>
+                  <Folder class="mr-2 h-4 w-4" />{{ $t('fields.parentOf', { module: $t('modules.category') }) }}</div>
                 <p class="font-medium text-base">
                   <template v-if="parentCategory">
                     <router-link :to="`/admin/categories/${parentCategory.id}`" class="text-primary hover:underline inline-flex items-center">

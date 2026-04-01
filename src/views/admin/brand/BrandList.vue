@@ -1,5 +1,6 @@
 <script setup lang="ts">
-
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import { ref, onMounted, reactive, watch } from "vue";
 import { useRouter } from "vue-router";
 
@@ -68,7 +69,6 @@ import type { PaginationMeta } from "@/types/common";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
 
-
 const router = useRouter();
 const brandService = new BrandService();
 
@@ -117,7 +117,7 @@ async function fetchBrands() {
     }
   } catch (error) {
     console.error("Fetch brands error:", error);
-    toast.error("Failed to fetch brands.");
+    toast.error(t('crud.errorFetch', { module: t('modules.brands') }));
   } finally {
     loading.value = false;
   }
@@ -159,12 +159,10 @@ async function toggleStatus(brand: Brand) {
     });
     if (response.success) {
       brand.status = newStatus;
-      toast.success(
-        `Brand ${newStatus ? "enabled" : "disabled"} successfully`,
-      );
+      toast.success(t('crud.successUpdate', { module: t('modules.brand') }));
     }
   } catch (error) {
-    toast.error("Failed to update status");
+    toast.error(t('crud.errorUpdate', { module: t('modules.brand') }));
   }
 }
 
@@ -179,13 +177,13 @@ async function confirmDelete() {
   try {
     const response = await brandService.softDelete(brandToDelete.value);
     if (response.success) {
-      toast.success("Brand deleted successfully");
+      toast.success(t('crud.successDelete', { module: t('modules.brand') }));
       fetchBrands();
     } else {
-      toast.error(response.message || "Failed to delete brand");
+      toast.error(response.message || t('crud.errorDelete', { module: t('modules.brand') }));
     }
   } catch (error) {
-    toast.error("Failed to delete brand");
+    toast.error(t('crud.errorDelete', { module: t('modules.brand') }));
   } finally {
     isDeleteDialogOpen.value = false;
     brandToDelete.value = null;
@@ -210,7 +208,9 @@ onMounted(() => {
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <h2 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('modules.brands') }}</h2>
+      <h2 class="text-3xl font-bold tracking-tight text-foreground">
+        {{ $t("modules.brands") }}
+      </h2>
       <div class="flex items-center gap-2">
         <Button
           variant="outline"
@@ -221,7 +221,9 @@ onMounted(() => {
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
         <Button @click="router.push('/admin/brands/create')">
-          <Plus class="mr-2 h-4 w-4" />{{ $t('crud.createBtn') }} {{ $t('modules.brand') }}</Button>
+          <Plus class="mr-2 h-4 w-4" />{{ $t("crud.createBtn") }}
+          {{ $t("modules.brand") }}</Button
+        >
       </div>
     </div>
 
@@ -243,9 +245,9 @@ onMounted(() => {
           <SelectValue placeholder="Status" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">{{ $t('crud.allStatus') }}</SelectItem>
-          <SelectItem value="active">{{ $t('crud.active') }}</SelectItem>
-          <SelectItem value="inactive">{{ $t('crud.inactive') }}</SelectItem>
+          <SelectItem value="all">{{ $t("crud.allStatus") }}</SelectItem>
+          <SelectItem value="active">{{ $t("crud.active") }}</SelectItem>
+          <SelectItem value="inactive">{{ $t("crud.inactive") }}</SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -255,20 +257,22 @@ onMounted(() => {
         <TableHeader>
           <TableRow>
             <TableHead class="w-[20px]">#</TableHead>
-            <TableHead class="w-[180px]">{{ $t('fields.code') }}</TableHead>
-            <TableHead class="w-[250px]">{{ $t('crud.image') }}</TableHead>
+            <TableHead class="w-[180px]">{{ $t("fields.code") }}</TableHead>
+            <TableHead class="w-[250px]">{{ $t("crud.image") }}</TableHead>
             <TableHead>
               <Button
                 variant="ghost"
                 @click="handleSort('name')"
                 class="-ml-4 h-8 font-medium"
-              >{{ $t('fields.name') }}<ArrowUpDown class="ml-1 h-3 w-3" />
+                >{{ $t("fields.name") }}<ArrowUpDown class="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
-            <TableHead>{{ $t('fields.slug') }}</TableHead>
-            <TableHead class="max-w-[200px]">{{ $t('fields.description') }}</TableHead>
-            <TableHead>{{ $t('fields.status') }}</TableHead>
-            <TableHead class="text-right">{{ $t('crud.actions') }}</TableHead>
+            <TableHead>{{ $t("fields.slug") }}</TableHead>
+            <TableHead class="max-w-[200px]">{{
+              $t("fields.description")
+            }}</TableHead>
+            <TableHead>{{ $t("fields.status") }}</TableHead>
+            <TableHead class="text-right">{{ $t("crud.actions") }}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -278,15 +282,12 @@ onMounted(() => {
                 class="flex items-center justify-center text-muted-foreground italic text-sm"
               >
                 <Loader2 class="h-4 w-4 animate-spin mr-2" />
-                <span>Fetching data...</span>
+                <span>{{ $t('crud.fetchingData') }}</span>
               </div>
             </TableCell>
           </TableRow>
           <template v-else-if="brands.length > 0">
-            <TableRow
-              v-for="(brand, index) in brands"
-              :key="brand.id"
-            >
+            <TableRow v-for="(brand, index) in brands" :key="brand.id">
               <TableCell class="font-medium text-muted-foreground">
                 {{ (pagination.page - 1) * pagination.limit + index + 1 }}
               </TableCell>
@@ -319,7 +320,7 @@ onMounted(() => {
               >
               <TableCell
                 class="text-muted-foreground text-xs truncate max-w-[200px]"
-                >{{ brand.description || '-' }}</TableCell
+                >{{ brand.description || "-" }}</TableCell
               >
               <TableCell class="w-[100px]">
                 <Badge
@@ -327,7 +328,7 @@ onMounted(() => {
                   class="cursor-pointer font-bold px-3 transition-all hover:opacity-80 active:scale-95"
                   @click="toggleStatus(brand)"
                 >
-                  {{ brand.status ? "Active" : "Inactive" }}
+                  {{ brand.status ? $t('crud.active') : $t('crud.inactive') }}
                 </Badge>
               </TableCell>
               <TableCell class="text-right">
@@ -344,28 +345,34 @@ onMounted(() => {
                   <DropdownMenuContent align="end" class="w-[180px]">
                     <DropdownMenuLabel
                       class="text-xs uppercase text-muted-foreground font-bold"
-                      >{{ $t('crud.actions') }}</DropdownMenuLabel
+                      >{{ $t("crud.actions") }}</DropdownMenuLabel
                     >
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       @click="router.push(`/admin/brands/${brand.id}`)"
                       class="cursor-pointer"
                     >
-                      <Eye class="mr-2 h-4 w-4 opacity-70" /> View
+                      <Eye class="mr-2 h-4 w-4 opacity-70" />{{
+                        $t("crud.viewBtn")
+                      }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      @click="
-                        router.push(`/admin/brands/${brand.id}/edit`)
-                      "
+                      @click="router.push(`/admin/brands/${brand.id}/edit`)"
                       class="cursor-pointer"
                     >
-                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{ $t('crud.editBtn') }}</DropdownMenuItem>
+                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{
+                        $t("crud.editBtn")
+                      }}</DropdownMenuItem
+                    >
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       class="text-destructive focus:text-destructive cursor-pointer font-medium"
                       @click="openDeleteDialog(brand.id)"
                     >
-                      <Trash2 class="mr-2 h-4 w-4" />{{ $t('crud.delete') }}</DropdownMenuItem>
+                      <Trash2 class="mr-2 h-4 w-4" />{{
+                        $t("crud.delete")
+                      }}</DropdownMenuItem
+                    >
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
@@ -378,7 +385,9 @@ onMounted(() => {
             >
               <div class="flex flex-col items-center justify-center gap-3">
                 <Tag class="h-10 w-10 opacity-10" />
-                <p class="font-medium">{{ $t('crud.noRecords', { module: $t('modules.brands') }) }}</p>
+                <p class="font-medium">
+                  {{ $t("crud.noRecords", { module: $t("modules.brands") }) }}
+                </p>
                 <Button
                   v-if="searchQuery || statusFilter !== 'all'"
                   variant="outline"
@@ -389,7 +398,7 @@ onMounted(() => {
                   "
                   class="h-8"
                 >
-                  Reset Filters
+                  {{ $t('crud.resetFilters') }}
                 </Button>
               </div>
             </TableCell>
@@ -403,8 +412,9 @@ onMounted(() => {
     >
       <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">
-          <span class="text-sm font-medium text-muted-foreground whitespace-nowrap"
-            >Rows per page</span
+          <span
+            class="text-sm font-medium text-muted-foreground whitespace-nowrap"
+            >{{ $t('crud.rowsPerPage') }}</span
           >
           <Select
             :model-value="pagination.limit.toString()"
@@ -434,8 +444,10 @@ onMounted(() => {
           @update:page="handlePageChange"
         >
           <PaginationContent v-slot="{ items }" class="flex items-center gap-1">
-            <PaginationPrevious class="h-8 px-2 text-foreground font-medium border-0 hover:bg-muted/50 bg-transparent" />
-            
+            <PaginationPrevious
+              class="h-8 px-2 text-foreground font-medium border-0 hover:bg-muted/50 bg-transparent"
+            />
+
             <template v-for="(item, index) in items">
               <PaginationItem
                 v-if="item.type === 'page'"
@@ -448,8 +460,10 @@ onMounted(() => {
               </PaginationItem>
               <PaginationEllipsis v-else :key="item.type" :index="index" />
             </template>
-            
-            <PaginationNext class="h-8 px-2 text-foreground font-medium border-0 hover:bg-muted/50 bg-transparent" />
+
+            <PaginationNext
+              class="h-8 px-2 text-foreground font-medium border-0 hover:bg-muted/50 bg-transparent"
+            />
           </PaginationContent>
         </Pagination>
       </div>
@@ -459,20 +473,20 @@ onMounted(() => {
     <AlertDialog v-model:open="isDeleteDialogOpen">
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>{{ $t('crud.confirmDelete') }}</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the
-            brand and remove its data from our servers.
+            {{ $t('crud.confirmDeleteDesc', { module: $t('modules.brand') }) }}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel @click="isDeleteDialogOpen = false"
-            >{{ $t('crud.cancel') }}</AlertDialogCancel
-          >
+          <AlertDialogCancel @click="isDeleteDialogOpen = false">{{
+            $t("crud.cancel")
+          }}</AlertDialogCancel>
           <AlertDialogAction
             @click="confirmDelete"
             class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >{{ $t('crud.delete') }}</AlertDialogAction>
+            >{{ $t("crud.delete") }}</AlertDialogAction
+          >
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

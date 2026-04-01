@@ -94,7 +94,7 @@ async function fetchData() {
         status: brand.status,
       });
     } else {
-      toast.error("Brand not found");
+      toast.error(t('crud.notFound', { module: t('modules.brand') }));
       router.push("/admin/brands");
     }
 
@@ -104,7 +104,7 @@ async function fetchData() {
       );
     }
   } catch (error) {
-    toast.error("Failed to fetch data");
+    toast.error(t('crud.errorFetch', { module: t('modules.brand') }));
   } finally {
     loading.value = false;
   }
@@ -123,13 +123,13 @@ const onSubmit = form.handleSubmit(async (values) => {
     };
     const response = await brandService.update(payload);
     if (response.success) {
-      toast.success("Brand updated successfully");
+      toast.success(t('crud.successUpdate', { module: t('modules.brand') }));
       router.push("/admin/brands");
     } else {
-      toast.error(response.message || "Failed to update brand");
+      toast.error(response.message || t('crud.errorUpdate', { module: t('modules.brand') }));
     }
   } catch (error) {
-    toast.error("An error occurred while updating the brand");
+    toast.error(t('crud.errorGeneral'));
   } finally {
     submitting.value = false;
   }
@@ -155,7 +155,7 @@ onMounted(() => {
 
     <Card v-else>
       <CardHeader>
-        <CardTitle>Brand Information</CardTitle>
+        <CardTitle>{{ $t('crud.info', { module: $t('modules.brand') }) }}</CardTitle>
       </CardHeader>
       <CardContent>
         <form @submit="onSubmit" id="brandForm" class="space-y-6">
@@ -225,7 +225,7 @@ onMounted(() => {
 
                 <FormField v-slot="{ field }" name="parentId">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.parent') }} {{ $t('modules.brand') }}</FormLabel>
+                    <FormLabel>{{ $t('fields.parentOf', { module: $t('modules.brand') }) }}</FormLabel>
                     <Select v-bind="field">
                       <FormControl>
                         <SelectTrigger>
@@ -269,10 +269,10 @@ onMounted(() => {
                     >
                       <div class="space-y-0.5">
                         <FormLabel class="text-base font-semibold"
-                          >Active Status</FormLabel
+                          >{{ $t('fields.activeStatus') }}</FormLabel
                         >
                         <FormDescription>
-                          Enable or disable this brand.
+                          {{ $t('fields.statusDescription', { module: $t('modules.brand') }) }}
                         </FormDescription>
                       </div>
                       <FormControl>
@@ -290,7 +290,7 @@ onMounted(() => {
         <Button variant="outline" @click="router.back()" :disabled="submitting">{{ $t('crud.cancel') }}</Button>
         <Button type="submit" form="brandForm" :disabled="submitting">
           <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-          Update Brand
+          {{ $t('crud.updateBtn', { module: $t('modules.brand') }) }}
         </Button>
       </CardFooter>
     </Card>

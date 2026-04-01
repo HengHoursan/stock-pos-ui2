@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 import { ref, onMounted, reactive, watch } from "vue";
 import { useRouter } from "vue-router";
 
@@ -116,7 +118,7 @@ async function fetchUnits() {
     }
   } catch (error) {
     console.error("Fetch units error:", error);
-    toast.error("Failed to fetch units.");
+    toast.error(t('crud.errorFetch', { module: t('modules.units') }));
   } finally {
     loading.value = false;
   }
@@ -158,12 +160,10 @@ async function toggleStatus(unit: Unit) {
     });
     if (response.success) {
       unit.status = newStatus;
-      toast.success(
-        `Unit ${newStatus ? "enabled" : "disabled"} successfully`,
-      );
+      toast.success(t('crud.successUpdate', { module: t('modules.unit') }));
     }
   } catch (error) {
-    toast.error("Failed to update status");
+    toast.error(t('crud.errorUpdate', { module: t('modules.unit') }));
   }
 }
 
@@ -178,13 +178,13 @@ async function confirmDelete() {
   try {
     const response = await unitService.softDelete(unitToDelete.value);
     if (response.success) {
-      toast.success("Unit deleted successfully");
+      toast.success(t('crud.successDelete', { module: t('modules.unit') }));
       fetchUnits();
     } else {
-      toast.error(response.message || "Failed to delete unit");
+      toast.error(response.message || t('crud.errorDelete', { module: t('modules.unit') }));
     }
   } catch (error) {
-    toast.error("Failed to delete unit");
+    toast.error(t('crud.errorDelete', { module: t('modules.unit') }));
   } finally {
     isDeleteDialogOpen.value = false;
     unitToDelete.value = null;
@@ -264,7 +264,7 @@ onMounted(() => {
               </Button>
             </TableHead>
             <TableHead>{{ $t('fields.symbol') }}</TableHead>
-            <TableHead>Conv. Factor</TableHead>
+            <TableHead>{{ $t('fields.conversionFactor') }}</TableHead>
             <TableHead>{{ $t('fields.isCalculateDetail') }}</TableHead>
             <TableHead>{{ $t('fields.status') }}</TableHead>
             <TableHead class="text-right">{{ $t('crud.actions') }}</TableHead>
@@ -277,7 +277,7 @@ onMounted(() => {
                 class="flex items-center justify-center text-muted-foreground italic text-sm"
               >
                 <Loader2 class="h-4 w-4 animate-spin mr-2" />
-                <span>Fetching data...</span>
+                <span>{{ $t('crud.fetchingData') }}</span>
               </div>
             </TableCell>
           </TableRow>
@@ -317,7 +317,7 @@ onMounted(() => {
                   class="cursor-pointer font-bold px-3 transition-all hover:opacity-80 active:scale-95"
                   @click="toggleStatus(unit)"
                 >
-                  {{ unit.status ? "Active" : "Inactive" }}
+                  {{ unit.status ? $t('crud.active') : $t('crud.inactive') }}
                 </Badge>
               </TableCell>
               <TableCell class="text-right">
@@ -341,7 +341,7 @@ onMounted(() => {
                       @click="router.push(`/admin/units/${unit.id}`)"
                       class="cursor-pointer"
                     >
-                      <Eye class="mr-2 h-4 w-4 opacity-70" /> View
+                      <Eye class="mr-2 h-4 w-4 opacity-70" /> {{ $t('crud.viewBtn') }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       @click="
@@ -379,7 +379,7 @@ onMounted(() => {
                   "
                   class="h-8"
                 >
-                  Reset Filters
+                  {{ $t('crud.resetFilters') }}
                 </Button>
               </div>
             </TableCell>
@@ -394,7 +394,7 @@ onMounted(() => {
       <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">
           <span class="text-sm font-medium text-muted-foreground whitespace-nowrap"
-            >Rows per page</span
+            >{{ $t('crud.rowsPerPage') }}</span
           >
           <Select
             :model-value="pagination.limit.toString()"
@@ -449,10 +449,9 @@ onMounted(() => {
     <AlertDialog v-model:open="isDeleteDialogOpen">
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle>{{ $t('crud.confirmDelete') }}</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the
-            unit and remove its data from our servers.
+            {{ $t('crud.confirmDeleteDesc', { module: $t('modules.unit') }) }}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

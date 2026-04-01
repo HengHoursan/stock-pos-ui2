@@ -94,13 +94,13 @@ const onSubmit = form.handleSubmit(async (values) => {
     };
     const response = await brandService.create(payload);
     if (response.success) {
-      toast.success("Brand created successfully");
+      toast.success(t('crud.successCreate', { module: t('modules.brand') }));
       router.push("/admin/brands");
     } else {
-      toast.error(response.message || "Failed to create brand");
+      toast.error(response.message || t('crud.errorCreate', { module: t('modules.brand') }));
     }
   } catch (error) {
-    toast.error("An error occurred while creating the brand");
+    toast.error(t('crud.errorGeneral'));
   } finally {
     submitting.value = false;
   }
@@ -124,7 +124,7 @@ onMounted(() => {
 
     <Card>
       <CardHeader>
-        <CardTitle>Brand Information</CardTitle>
+        <CardTitle>{{ $t('crud.info', { module: $t('modules.brand') }) }}</CardTitle>
       </CardHeader>
       <CardContent>
         <form @submit="onSubmit" id="brandForm" class="space-y-6">
@@ -166,7 +166,7 @@ onMounted(() => {
 
                 <FormField v-slot="{ field }" name="parentId">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.parent') }} {{ $t('modules.brand') }}</FormLabel>
+                    <FormLabel>{{ $t('fields.parentOf', { module: $t('modules.brand') }) }}</FormLabel>
                     <Select v-bind="field">
                       <FormControl>
                         <SelectTrigger>
@@ -210,10 +210,10 @@ onMounted(() => {
                     >
                       <div class="space-y-0.5">
                         <FormLabel class="text-base font-semibold"
-                          >Active Status</FormLabel
+                          >{{ $t('fields.activeStatus') }}</FormLabel
                         >
                         <FormDescription>
-                          Enable or disable this brand.
+                          {{ $t('fields.statusDescription', { module: $t('modules.brand') }) }}
                         </FormDescription>
                       </div>
                       <FormControl>
