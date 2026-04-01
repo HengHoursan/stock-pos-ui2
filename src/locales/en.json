@@ -19,7 +19,13 @@
     "addBrand": "Add New Brand",
     "units": "Units",
     "allUnits": "All Units",
-    "addUnit": "Add New Unit"
+    "addUnit": "Add New Unit",
+    "currencies": "Currencies",
+    "allCurrencies": "All Currencies",
+    "addCurrency": "Add New Currency",
+    "discounts": "Discounts",
+    "allDiscounts": "All Discounts",
+    "addDiscount": "Add New Discount"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -49,6 +55,8 @@
     "totalCategories": "Total Categories",
     "totalUnits": "Total Units",
     "totalUsers": "Total Users",
+    "totalCurrencies": "Total Currencies",
+    "totalDiscounts": "Total Discounts",
     "thisMonth": "{change} this month",
     "noChange": "No change"
   },
@@ -115,7 +123,25 @@
     "isCalculateDetail": "Calculate Detail",
     "calculateDetailInfo": "Enable detail calculation for this {module}",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "country": "Country",
+    "currency": "Currency",
+    "thousandSeparator": "Thousand Separator",
+    "decimalSeparator": "Decimal Separator",
+    "discountType": "Discount Type",
+    "discountAmount": "Discount Amount",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "fixed": "Fixed",
+    "percentage": "Percentage",
+    "selectDate": "Select Date",
+    "selectStartDate": "Select Start Date",
+    "selectEndDate": "Select End Date",
+    "preview": "Preview",
+    "formattedExample": "Formatted Example",
+    "discountPreview": "Discount Preview",
+    "before": "Before",
+    "after": "After"
   },
   "pagination": {
     "previous": "Previous",
@@ -127,6 +153,10 @@
     "brand": "Brand",
     "brands": "Brands",
     "unit": "Unit",
-    "units": "Units"
+    "units": "Units",
+    "currency": "Currency",
+    "currencies": "Currencies",
+    "discount": "Discount",
+    "discounts": "Discounts"
   }
 }

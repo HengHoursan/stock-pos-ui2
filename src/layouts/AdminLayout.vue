@@ -50,6 +50,8 @@ import {
   List,
   Bookmark,
   Ruler,
+  Coins,
+  TicketPercent,
 } from "lucide-vue-next";
 import {
   Collapsible,
@@ -101,6 +103,30 @@ const navItems = [
       },
     ],
   },
+  {
+    titleKey: "menu.currencies",
+    icon: Coins,
+    children: [
+      { titleKey: "menu.allCurrencies", url: "/admin/currencies", icon: List },
+      {
+        titleKey: "menu.addCurrency",
+        url: "/admin/currencies/create",
+        icon: Plus,
+      },
+    ],
+  },
+  {
+    titleKey: "menu.discounts",
+    icon: TicketPercent,
+    children: [
+      { titleKey: "menu.allDiscounts", url: "/admin/discounts", icon: List },
+      {
+        titleKey: "menu.addDiscount",
+        url: "/admin/discounts/create",
+        icon: Plus,
+      },
+    ],
+  },
 ];
 
 const currentLocaleItem = computed(() => {
@@ -124,6 +150,10 @@ const currentPageTitle = computed(() => {
     BrandCreate: "menu.addBrand",
     Units: "menu.allUnits",
     UnitCreate: "menu.addUnit",
+    Currencies: "menu.allCurrencies",
+    CurrencyCreate: "menu.addCurrency",
+    Discounts: "menu.allDiscounts",
+    DiscountCreate: "menu.addDiscount",
   };
 
   if (routeKeyMap[routeName]) {

@@ -102,6 +102,50 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../views/admin/unit/UnitEdit.vue'),
       },
 
+      // Currency CRUD
+      {
+        path: 'admin/currencies',
+        name: 'Currencies',
+        component: () => import('../views/admin/currency/CurrencyList.vue'),
+      },
+      {
+        path: 'admin/currencies/create',
+        name: 'CurrencyCreate',
+        component: () => import('../views/admin/currency/CurrencyCreate.vue'),
+      },
+      {
+        path: 'admin/currencies/:id',
+        name: 'CurrencyDetail',
+        component: () => import('../views/admin/currency/CurrencyDetail.vue'),
+      },
+      {
+        path: 'admin/currencies/:id/edit',
+        name: 'CurrencyEdit',
+        component: () => import('../views/admin/currency/CurrencyEdit.vue'),
+      },
+
+      // Discount CRUD
+      {
+        path: 'admin/discounts',
+        name: 'Discounts',
+        component: () => import('../views/admin/discount/DiscountList.vue'),
+      },
+      {
+        path: 'admin/discounts/create',
+        name: 'DiscountCreate',
+        component: () => import('../views/admin/discount/DiscountCreate.vue'),
+      },
+      {
+        path: 'admin/discounts/:id',
+        name: 'DiscountDetail',
+        component: () => import('../views/admin/discount/DiscountDetail.vue'),
+      },
+      {
+        path: 'admin/discounts/:id/edit',
+        name: 'DiscountEdit',
+        component: () => import('../views/admin/discount/DiscountEdit.vue'),
+      },
+
     ],
   },
 

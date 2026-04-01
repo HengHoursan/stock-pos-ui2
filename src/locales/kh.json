@@ -19,7 +19,13 @@
     "addBrand": "បន្ថែមម៉ាក",
     "units": "ខ្នាត",
     "allUnits": "ខ្នាតទាំងអស់",
-    "addUnit": "បន្ថែមខ្នាត"
+    "addUnit": "បន្ថែមខ្នាត",
+    "currencies": "រូបិយប័ណ្ណ",
+    "allCurrencies": "រូបិយប័ណ្ណទាំងអស់",
+    "addCurrency": "បន្ថែមរូបិយប័ណ្ណ",
+    "discounts": "ការបញ្ចុះតម្លៃ",
+    "allDiscounts": "ការបញ្ចុះតម្លៃទាំងអស់",
+    "addDiscount": "បន្ថែមការបញ្ចុះតម្លៃ"
   },
   "auth": {
     "welcomeBack": "សូមស្វាគមន៍ត្រលប់មកវិញ",
@@ -49,6 +55,8 @@
     "totalCategories": "ប្រភេទសរុប",
     "totalUnits": "ខ្នាតសរុប",
     "totalUsers": "អ្នកប្រើប្រាស់សរុប",
+    "totalCurrencies": "រូបិយប័ណ្ណសរុប",
+    "totalDiscounts": "ការបញ្ចុះតម្លៃសរុប",
     "thisMonth": "{change} ក្នុងខែនេះ",
     "noChange": "គ្មានការផ្លាស់ប្តូរ"
   },
@@ -115,7 +123,25 @@
     "isCalculateDetail": "គណនាលម្អិត",
     "calculateDetailInfo": "បើកការគណនាលម្អិតសម្រាប់{module}នេះ",
     "yes": "បាទ/ចាស",
-    "no": "ទេ"
+    "no": "ទេ",
+    "country": "ប្រទេស",
+    "currency": "រូបិយប័ណ្ណ",
+    "thousandSeparator": "សញ្ញាខណ្ឌខ្ទង់ពាន់",
+    "decimalSeparator": "សញ្ញាខណ្ឌទសភាគ",
+    "discountType": "ប្រភេទបញ្ចុះតម្លៃ",
+    "discountAmount": "ចំនួនបញ្ចុះតម្លៃ",
+    "startDate": "ថ្ងៃចាប់ផ្តើម",
+    "endDate": "ថ្ងៃបញ្ចប់",
+    "fixed": "ចំនួនថេរ",
+    "percentage": "ភាគរយ",
+    "selectDate": "ជ្រើសរើសកាលបរិច្ឆេទ",
+    "selectStartDate": "ជ្រើសរើសថ្ងៃចាប់ផ្តើម",
+    "selectEndDate": "ជ្រើសរើសថ្ងៃបញ្ចប់",
+    "preview": "ការមើលជាមុន",
+    "formattedExample": "ឧទាហរណ៍ការកំណត់ទម្រង់",
+    "discountPreview": "ការមើលការបញ្ចុះតម្លៃជាមុន",
+    "before": "មុន",
+    "after": "ក្រោយ"
   },
   "pagination": {
     "previous": "ត្រឡប់ក្រោយ",
@@ -127,6 +153,10 @@
     "brand": "ម៉ាក",
     "brands": "ម៉ាកទាំងអស់",
     "unit": "ខ្នាត",
-    "units": "ខ្នាតទាំងអស់"
+    "units": "ខ្នាតទាំងអស់",
+    "currency": "រូបិយប័ណ្ណ",
+    "currencies": "រូបិយប័ណ្ណទាំងអស់",
+    "discount": "ការបញ្ចុះតម្លៃ",
+    "discounts": "ការបញ្ចុះតម្លៃទាំងអស់"
   }
 }
