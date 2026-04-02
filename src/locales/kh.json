@@ -102,7 +102,12 @@
     "errorUpdate": "មិនអាចកែប្រែ {module}",
     "errorDelete": "មិនអាចលុប {module}",
     "notFound": "រកមិនឃើញ {module}",
-    "errorGeneral": "មានបញ្ហាបច្ចេកទេសមិននឹកស្មាន"
+    "errorGeneral": "មានបញ្ហាបច្ចេកទេសមិននឹកស្មាន",
+    "selectCountry": "ជ្រើសរើសប្រទេស...",
+    "typeToSearch": "វាយដើម្បីស្វែងរក...",
+    "noCountryFound": "រកមិនឃើញប្រទេសនោះទេ",
+    "useCustom": "ប្រើតម្លៃផ្ទាល់ខ្លួន",
+    "selectType": "ជ្រើសរើសប្រភេទ"
   },
   "fields": {
     "name": "ឈ្មោះ",
@@ -141,7 +146,8 @@
     "formattedExample": "ឧទាហរណ៍ការកំណត់ទម្រង់",
     "discountPreview": "ការមើលការបញ្ចុះតម្លៃជាមុន",
     "before": "មុន",
-    "after": "ក្រោយ"
+    "after": "ក្រោយ",
+    "formatPreview": "ការមើលការកំណត់ទម្រង់ជាមុន"
   },
   "pagination": {
     "previous": "ត្រឡប់ក្រោយ",

@@ -17,7 +17,13 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -26,11 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  ChevronLeft,
-  Loader2,
-  TicketPercent,
-} from "lucide-vue-next";
+import { ChevronLeft, Loader2, TicketPercent } from "lucide-vue-next";
 import { DiscountService } from "@/services/discount/discount.service";
 import { toast } from "vue-sonner";
 import DatePicker from "@/components/DatePicker.vue";
@@ -41,17 +43,23 @@ const discountService = new DiscountService();
 const isSubmitting = ref(false);
 
 const formSchema = toTypedSchema(
-  zod.object({
-    code: zod.string().min(1, t("auth.usernameRequired")).max(50),
-    discountType: zod.enum(["percentage", "fixed"]),
-    discountAmount: zod.number().min(0),
-    discountStartDate: zod.string().min(1, t("fields.selectStartDate")),
-    discountEndDate: zod.string().min(1, t("fields.selectEndDate")),
-    status: zod.boolean().default(true),
-  }).refine((data) => new Date(data.discountEndDate) > new Date(data.discountStartDate), {
-    message: "End date must be after start date",
-    path: ["discountEndDate"],
-  })
+  zod
+    .object({
+      code: zod.string().min(1, t("auth.usernameRequired")).max(50),
+      discountType: zod.enum(["percentage", "fixed"]),
+      discountAmount: zod.number().min(0),
+      discountStartDate: zod.string().min(1, t("fields.selectStartDate")),
+      discountEndDate: zod.string().min(1, t("fields.selectEndDate")),
+      status: zod.boolean().default(true),
+    })
+    .refine(
+      (data) =>
+        new Date(data.discountEndDate) > new Date(data.discountStartDate),
+      {
+        message: "End date must be after start date",
+        path: ["discountEndDate"],
+      },
+    ),
 );
 
 const form = useForm({
@@ -60,7 +68,9 @@ const form = useForm({
     status: true,
     discountType: "percentage",
     discountStartDate: new Date().toISOString().slice(0, 16),
-    discountEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+    discountEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .slice(0, 16),
   },
 });
 
@@ -72,7 +82,10 @@ async function onSubmit(values: any) {
       toast.success(t("crud.successCreate", { module: t("modules.discount") }));
       router.push("/admin/discounts");
     } else {
-      toast.error(response.message || t("crud.errorCreate", { module: t("modules.discount") }));
+      toast.error(
+        response.message ||
+          t("crud.errorCreate", { module: t("modules.discount") }),
+      );
     }
   } catch (error) {
     toast.error(t("crud.errorCreate", { module: t("modules.discount") }));
@@ -83,7 +96,8 @@ async function onSubmit(values: any) {
 </script>
 
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 pb-8">
+    <!-- Header Section -->
     <div class="flex items-center gap-4">
       <Button
         variant="ghost"
@@ -109,35 +123,48 @@ async function onSubmit(values: any) {
               {{ $t("crud.info", { module: $t("modules.discount") }) }}
             </CardTitle>
           </CardHeader>
-          <CardContent class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <CardContent
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            <!-- Discount Code -->
             <FormField v-slot="{ componentField }" name="code">
-              <FormItem class="md:col-span-2">
+              <FormItem class="md:col-span-2 lg:col-span-3">
                 <FormLabel>{{ $t("fields.code") }}</FormLabel>
                 <FormControl>
-                  <Input placeholder="SUMMER2025, OFF50..." v-bind="componentField" class="uppercase" />
+                  <Input
+                    placeholder="SUMMER2025, OFF50..."
+                    v-bind="componentField"
+                    class="uppercase"
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             </FormField>
 
+            <!-- Discount Type -->
             <FormField v-slot="{ value, handleChange }" name="discountType">
               <FormItem>
                 <FormLabel>{{ $t("fields.discountType") }}</FormLabel>
                 <Select :model-value="value" @update:model-value="handleChange">
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
+                      <SelectValue :placeholder="$t('crud.selectType')" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="percentage">{{ $t("fields.percentage") }}</SelectItem>
-                    <SelectItem value="fixed">{{ $t("fields.fixed") }}</SelectItem>
+                    <SelectItem value="percentage">{{
+                      $t("fields.percentage")
+                    }}</SelectItem>
+                    <SelectItem value="fixed">{{
+                      $t("fields.fixed")
+                    }}</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
               </FormItem>
             </FormField>
 
+            <!-- Discount Amount -->
             <FormField v-slot="{ componentField }" name="discountAmount">
               <FormItem>
                 <FormLabel>{{ $t("fields.discountAmount") }}</FormLabel>
@@ -146,14 +173,23 @@ async function onSubmit(values: any) {
                     type="number"
                     step="0.01"
                     v-bind="componentField"
-                    @input="form.setFieldValue('discountAmount', parseFloat($event.target.value))"
+                    @input="
+                      form.setFieldValue(
+                        'discountAmount',
+                        parseFloat($event.target.value),
+                      )
+                    "
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             </FormField>
 
-            <FormField v-slot="{ value, handleChange }" name="discountStartDate">
+            <!-- Start Date -->
+            <FormField
+              v-slot="{ value, handleChange }"
+              name="discountStartDate"
+            >
               <FormItem>
                 <FormLabel>{{ $t("fields.startDate") }}</FormLabel>
                 <FormControl>
@@ -167,6 +203,7 @@ async function onSubmit(values: any) {
               </FormItem>
             </FormField>
 
+            <!-- End Date -->
             <FormField v-slot="{ value, handleChange }" name="discountEndDate">
               <FormItem>
                 <FormLabel>{{ $t("fields.endDate") }}</FormLabel>
@@ -181,30 +218,32 @@ async function onSubmit(values: any) {
               </FormItem>
             </FormField>
 
-            <div class="md:col-span-2">
-              <FormField v-slot="{ value, handleChange }" name="status">
+            <!-- Status -->
+            <div class="md:col-span-2 lg:col-span-3 border-t pt-6">
+              <FormField name="status">
                 <FormItem
                   class="flex flex-row items-center justify-between rounded-lg border p-4"
                 >
                   <div class="space-y-0.5">
-                    <FormLabel class="text-base">
+                    <FormLabel class="text-base font-semibold">
                       {{ $t("fields.activeStatus") }}
                     </FormLabel>
                     <FormDescription>
-                      {{ $t("fields.statusDescription", { module: $t("modules.discount") }) }}
+                      {{
+                        $t("fields.statusDescription", {
+                          module: $t("modules.discount"),
+                        })
+                      }}
                     </FormDescription>
                   </div>
                   <FormControl>
-                    <Switch
-                      :checked="value"
-                      @update:checked="handleChange"
-                    />
+                    <Switch v-model="form.values.status" />
                   </FormControl>
                 </FormItem>
               </FormField>
             </div>
           </CardContent>
-          <CardFooter class="flex justify-end gap-2 border-t pt-6 pb-6 mt-4">
+          <CardFooter class="flex justify-end gap-2 border-t pt-6 pb-6">
             <Button
               type="button"
               variant="outline"

@@ -102,7 +102,12 @@
     "errorUpdate": "Failed to update {module}",
     "errorDelete": "Failed to delete {module}",
     "notFound": "{module} not found",
-    "errorGeneral": "An unexpected error occurred"
+    "errorGeneral": "An unexpected error occurred",
+    "selectCountry": "Select a country...",
+    "typeToSearch": "Type to search...",
+    "noCountryFound": "No country found.",
+    "useCustom": "Use custom",
+    "selectType": "Select type"
   },
   "fields": {
     "name": "Name",
@@ -141,7 +146,8 @@
     "formattedExample": "Formatted Example",
     "discountPreview": "Discount Preview",
     "before": "Before",
-    "after": "After"
+    "after": "After",
+    "formatPreview": "Format Preview"
   },
   "pagination": {
     "previous": "Previous",
