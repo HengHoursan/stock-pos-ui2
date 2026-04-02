@@ -135,7 +135,7 @@ onMounted(() => {
                 <FormLabel>{{ $t('fields.name') }}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="e.g. Kilogram, Box, Piece"
+                    :placeholder="$t('fields.enterUnitName')"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -149,7 +149,7 @@ onMounted(() => {
                 <Select v-bind="field">
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a parent unit" />
+                      <SelectValue :placeholder="$t('fields.selectParentUnit')" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -172,7 +172,7 @@ onMounted(() => {
                 <FormLabel>{{ $t('fields.symbol') }}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="e.g. kg, box, pcs"
+                    :placeholder="$t('fields.enterSymbol')"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -211,7 +211,7 @@ onMounted(() => {
               </FormItem>
             </FormField>
 
-            <FormField name="isCalculateDetail">
+            <FormField v-slot="{ value, handleChange }" name="isCalculateDetail">
               <FormItem
                 class="flex flex-row items-center justify-between rounded-lg border p-4"
               >
@@ -224,25 +224,19 @@ onMounted(() => {
                   </FormDescription>
                 </div>
                 <FormControl>
-                  <Switch v-model="form.values.isCalculateDetail" />
+                  <Switch :checked="value" @update:checked="handleChange" />
                 </FormControl>
               </FormItem>
             </FormField>
 
-            <FormField name="status">
-              <FormItem
-                class="flex flex-row items-center justify-between rounded-lg border p-4 md:col-span-2"
-              >
+            <FormField v-slot="{ value, handleChange }" name="status">
+              <FormItem class="flex flex-row items-center justify-between rounded-lg border p-4">
                 <div class="space-y-0.5">
-                  <FormLabel class="text-base font-semibold"
-                    >{{ $t('fields.activeStatus') }}</FormLabel
-                  >
-                  <FormDescription>
-                    {{ $t('fields.statusDescription', { module: $t('modules.unit') }) }}
-                  </FormDescription>
+                  <FormLabel class="text-base font-semibold">{{ $t('fields.activeStatus') }}</FormLabel>
+                  <FormDescription>{{ $t('fields.statusDescription', { module: $t('modules.unit') }) }}</FormDescription>
                 </div>
                 <FormControl>
-                  <Switch v-model="form.values.status" />
+                  <Switch :checked="value" @update:checked="handleChange" />
                 </FormControl>
               </FormItem>
             </FormField>

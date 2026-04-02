@@ -125,27 +125,27 @@ const routes: RouteRecordRaw[] = [
       },
 
       // Discount CRUD
+      // Product CRUD
       {
-        path: 'admin/discounts',
-        name: 'Discounts',
-        component: () => import('../views/admin/discount/DiscountList.vue'),
+        path: 'admin/products',
+        name: 'Products',
+        component: () => import('../views/admin/product/ProductList.vue'),
       },
       {
-        path: 'admin/discounts/create',
-        name: 'DiscountCreate',
-        component: () => import('../views/admin/discount/DiscountCreate.vue'),
+        path: 'admin/products/create',
+        name: 'ProductCreate',
+        component: () => import('../views/admin/product/ProductCreate.vue'),
       },
       {
-        path: 'admin/discounts/:id',
-        name: 'DiscountDetail',
-        component: () => import('../views/admin/discount/DiscountDetail.vue'),
+        path: 'admin/products/:id',
+        name: 'ProductDetail',
+        component: () => import('../views/admin/product/ProductDetail.vue'),
       },
       {
-        path: 'admin/discounts/:id/edit',
-        name: 'DiscountEdit',
-        component: () => import('../views/admin/discount/DiscountEdit.vue'),
+        path: 'admin/products/:id/edit',
+        name: 'ProductEdit',
+        component: () => import('../views/admin/product/ProductEdit.vue'),
       },
-
     ],
   },
 

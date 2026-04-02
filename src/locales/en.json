@@ -25,7 +25,10 @@
     "addCurrency": "Add New Currency",
     "discounts": "Discounts",
     "allDiscounts": "All Discounts",
-    "addDiscount": "Add New Discount"
+    "addDiscount": "Add New Discount",
+    "products": "Products",
+    "allProducts": "All Products",
+    "addProduct": "Add New Product"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -147,7 +150,44 @@
     "discountPreview": "Discount Preview",
     "before": "Before",
     "after": "After",
-    "formatPreview": "Format Preview"
+    "formatPreview": "Format Preview",
+    "sku": "SKU",
+    "barcodeType": "Barcode Type",
+    "photo": "Photo",
+    "alertQuantity": "Alert Quantity",
+    "purchasePrice": "Purchase Price",
+    "salePrice": "Sale Price",
+    "currentStock": "Current Stock",
+    "stockNumber": "Stock Number",
+    "expiryDate": "Expiry Date",
+    "expiryType": "Expiry Type",
+    "forSelling": "For Selling",
+    "isManufacture": "Is Manufacture",
+    "manageStock": "Manage Stock",
+    "autoGenerate": "Auto-generated if empty",
+    "selectOption": "Select option",
+    "enterProductName": "Enter product name",
+    "enterDescription": "Enter description",
+    "enterName": "Enter name",
+    "enterUnitName": "e.g. Kilogram, Box, Piece",
+    "enterSymbol": "e.g. kg, box, pcs",
+    "enterBrandName": "Brand Name",
+    "enterCategoryName": "Category Name",
+    "enterCurrencyCode": "USD, KHR...",
+    "enterCurrencyName": "US Dollar, Riel...",
+    "enterSymbolCurrency": "$, ៛...",
+    "selectParentCategory": "Select a parent category",
+    "selectParentBrand": "Select a parent brand",
+    "selectParentUnit": "Select a parent unit",
+    "emailPlaceholder": "m@example.com",
+    "namePlaceholder": "John Doe",
+    "filterByStatus": "Status",
+    "selectBarcodeType": "Select barcode type",
+    "expiryTypes": {
+      "none": "None",
+      "bestBefore": "Best Before",
+      "expiry": "Expiry"
+    }
   },
   "pagination": {
     "previous": "Previous",
@@ -163,6 +203,8 @@
     "currency": "Currency",
     "currencies": "Currencies",
     "discount": "Discount",
-    "discounts": "Discounts"
+    "discounts": "Discounts",
+    "product": "Product",
+    "products": "Products"
   }
 }

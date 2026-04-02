@@ -235,7 +235,7 @@ onMounted(() => {
 
       <Select v-model="statusFilter">
         <SelectTrigger class="w-full sm:w-[180px]">
-          <SelectValue placeholder="Status" />
+          <SelectValue :placeholder="$t('fields.filterByStatus')" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">{{ $t('crud.allStatus') }}</SelectItem>

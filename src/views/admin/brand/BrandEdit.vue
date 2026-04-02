@@ -187,7 +187,7 @@ onMounted(() => {
                     <FormLabel>{{ $t('fields.name') }}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Brand Name"
+                        :placeholder="$t('fields.enterBrandName')"
                         v-bind="componentField"
                       />
                     </FormControl>
@@ -229,7 +229,7 @@ onMounted(() => {
                     <Select v-bind="field">
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a parent brand" />
+                          <SelectValue :placeholder="$t('fields.selectParentBrand')" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -253,7 +253,7 @@ onMounted(() => {
                       <FormLabel>{{ $t('fields.description') }}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Enter brand description"
+                          :placeholder="$t('fields.enterDescription')"
                           v-bind="componentField"
                         />
                       </FormControl>
@@ -263,7 +263,7 @@ onMounted(() => {
                 </div>
 
                 <div class="md:col-span-2">
-                  <FormField name="status">
+                  <FormField v-slot="{ value, handleChange }" name="status">
                     <FormItem
                       class="flex flex-row items-center justify-between rounded-lg border p-4"
                     >
@@ -276,7 +276,7 @@ onMounted(() => {
                         </FormDescription>
                       </div>
                       <FormControl>
-                        <Switch v-model="form.values.status" />
+                        <Switch :checked="value" @update:checked="handleChange" />
                       </FormControl>
                     </FormItem>
                   </FormField>

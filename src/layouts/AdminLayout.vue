@@ -51,7 +51,7 @@ import {
   Bookmark,
   Ruler,
   Coins,
-  TicketPercent,
+  Package,
 } from "lucide-vue-next";
 import {
   Collapsible,
@@ -116,13 +116,13 @@ const navItems = [
     ],
   },
   {
-    titleKey: "menu.discounts",
-    icon: TicketPercent,
+    titleKey: "menu.products",
+    icon: Package,
     children: [
-      { titleKey: "menu.allDiscounts", url: "/admin/discounts", icon: List },
+      { titleKey: "menu.allProducts", url: "/admin/products", icon: List },
       {
-        titleKey: "menu.addDiscount",
-        url: "/admin/discounts/create",
+        titleKey: "menu.addProduct",
+        url: "/admin/products/create",
         icon: Plus,
       },
     ],
@@ -152,8 +152,10 @@ const currentPageTitle = computed(() => {
     UnitCreate: "menu.addUnit",
     Currencies: "menu.allCurrencies",
     CurrencyCreate: "menu.addCurrency",
-    Discounts: "menu.allDiscounts",
-    DiscountCreate: "menu.addDiscount",
+    Products: "menu.allProducts",
+    ProductCreate: "menu.addProduct",
+    ProductEdit: "crud.editBtn",
+    ProductDetail: "crud.viewBtn",
   };
 
   if (routeKeyMap[routeName]) {

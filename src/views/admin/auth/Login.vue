@@ -85,7 +85,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                 <FormControl>
                   <Input
                     type="email"
-                    placeholder="m@example.com"
+                    :placeholder="$t('fields.emailPlaceholder')"
                     v-bind="componentField"
                     :disabled="isLoading"
                   />

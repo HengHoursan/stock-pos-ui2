@@ -1,6 +1,6 @@
-import { Category } from './category';
-import { Brand } from './brand';
-import { Unit } from './unit';
+import type { Category } from "./category";
+import type { Brand } from "./brand";
+import type { Unit } from "./unit";
 
 export interface ProductDetail {
   id: number;

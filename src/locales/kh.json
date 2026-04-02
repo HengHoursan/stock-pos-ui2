@@ -25,7 +25,10 @@
     "addCurrency": "បន្ថែមរូបិយប័ណ្ណ",
     "discounts": "ការបញ្ចុះតម្លៃ",
     "allDiscounts": "ការបញ្ចុះតម្លៃទាំងអស់",
-    "addDiscount": "បន្ថែមការបញ្ចុះតម្លៃ"
+    "addDiscount": "បន្ថែមការបញ្ចុះតម្លៃ",
+    "products": "ផលិតផល",
+    "allProducts": "ផលិតផលទាំងអស់",
+    "addProduct": "បន្ថែមផលិតផល"
   },
   "auth": {
     "welcomeBack": "សូមស្វាគមន៍ត្រលប់មកវិញ",
@@ -147,7 +150,44 @@
     "discountPreview": "ការមើលការបញ្ចុះតម្លៃជាមុន",
     "before": "មុន",
     "after": "ក្រោយ",
-    "formatPreview": "ការមើលការកំណត់ទម្រង់ជាមុន"
+    "formatPreview": "ការមើលការកំណត់ទម្រង់ជាមុន",
+    "sku": "SKU",
+    "barcodeType": "ប្រភេទបារកូដ",
+    "photo": "រូបថត",
+    "alertQuantity": "បរិមាណត្រូវជូនដំណឹង",
+    "purchasePrice": "តម្លៃទិញ",
+    "salePrice": "តម្លៃលក់",
+    "currentStock": "ស្តុកបច្ចុប្បន្ន",
+    "stockNumber": "លេខស្តុក",
+    "expiryDate": "ថ្ងៃផុតកំណត់",
+    "expiryType": "ប្រភេទការផុតកំណត់",
+    "forSelling": "សម្រាប់លក់",
+    "isManufacture": "ផលិតផលផលិតខ្លួនឯង",
+    "manageStock": "គ្រប់គ្រងស្តុក",
+    "autoGenerate": "បង្កើតដោយស្វ័យប្រវត្តិប្រសិនបើទទេ",
+    "selectOption": "ជ្រើសរើសជម្រើស",
+    "enterProductName": "បញ្ចូលឈ្មោះផលិតផល",
+    "enterDescription": "បញ្ចូលការពិពណ៌នា",
+    "enterName": "បញ្ចូលឈ្មោះ",
+    "enterUnitName": "ឧ. គីឡូក្រាម ប្រអប់ ដុំ",
+    "enterSymbol": "ឧ. kg, box, pcs",
+    "enterBrandName": "ឈ្មោះម៉ាក",
+    "enterCategoryName": "ឈ្មោះប្រភេទ",
+    "enterCurrencyCode": "USD, KHR...",
+    "enterCurrencyName": "ដុល្លារអាមេរិក រៀល...",
+    "enterSymbolCurrency": "$org ៛...",
+    "selectParentCategory": "ជ្រើសរើសប្រភេទមេ",
+    "selectParentBrand": "ជ្រើសរើសម៉ាកមេ",
+    "selectParentUnit": "ជ្រើសរើសខ្នាតមេ",
+    "emailPlaceholder": "m@example.com",
+    "namePlaceholder": "John Doe",
+    "filterByStatus": "ស្ថានភាព",
+    "selectBarcodeType": "ជ្រើសរើសប្រភេទបារកូដ",
+    "expiryTypes": {
+      "none": "គ្មាន",
+      "bestBefore": "ល្អបំផុតមុនថ្ងៃ",
+      "expiry": "កាលបរិច្ឆេទផុតកំណត់"
+    }
   },
   "pagination": {
     "previous": "ត្រឡប់ក្រោយ",
@@ -163,6 +203,8 @@
     "currency": "រូបិយប័ណ្ណ",
     "currencies": "រូបិយប័ណ្ណទាំងអស់",
     "discount": "ការបញ្ចុះតម្លៃ",
-    "discounts": "ការបញ្ចុះតម្លៃទាំងអស់"
+    "discounts": "ការបញ្ចុះតម្លៃទាំងអស់",
+    "product": "ផលិតផល",
+    "products": "ផលិតផលទាំងអស់"
   }
 }

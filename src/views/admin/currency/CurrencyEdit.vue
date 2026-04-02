@@ -236,7 +236,7 @@ onMounted(() => {
                 <FormLabel>{{ $t("fields.code") }}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="USD, KHR..."
+                    :placeholder="$t('fields.enterCurrencyCode')"
                     v-bind="componentField"
                     class="uppercase"
                   />
@@ -327,7 +327,7 @@ onMounted(() => {
                 <FormLabel>{{ $t("fields.currency") }}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="US Dollar, Riel..."
+                    :placeholder="$t('fields.enterCurrencyName')"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -366,7 +366,7 @@ onMounted(() => {
             </FormField>
 
             <div class="md:col-span-2 lg:col-span-3 border-t pt-6">
-              <FormField name="status">
+              <FormField v-slot="{ value, handleChange }" name="status">
                 <FormItem
                   class="flex flex-row items-center justify-between rounded-lg border p-4"
                 >
@@ -383,7 +383,7 @@ onMounted(() => {
                     </FormDescription>
                   </div>
                   <FormControl>
-                    <Switch v-model="form.values.status" />
+                    <Switch :checked="value" @update:checked="handleChange" />
                   </FormControl>
                 </FormItem>
               </FormField>

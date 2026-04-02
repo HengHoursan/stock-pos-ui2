@@ -80,7 +80,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                 <FormLabel>{{ $t('auth.username') }}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="John Doe"
+                    :placeholder="$t('fields.namePlaceholder')"
                     v-bind="componentField"
                     :disabled="isLoading"
                   />
@@ -95,7 +95,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                 <FormControl>
                   <Input
                     type="email"
-                    placeholder="m@example.com"
+                    :placeholder="$t('fields.emailPlaceholder')"
                     v-bind="componentField"
                     :disabled="isLoading"
                   />
