@@ -383,7 +383,7 @@ onMounted(() => {
                     </FormDescription>
                   </div>
                   <FormControl>
-                    <Switch :checked="value" @update:checked="handleChange" />
+                    <Switch :checked="!!value" @update:checked="(v: boolean) => handleChange(v)" />
                   </FormControl>
                 </FormItem>
               </FormField>

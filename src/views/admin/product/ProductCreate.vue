@@ -61,7 +61,7 @@ const formSchema = toTypedSchema(
     photoPath: z.string().optional(),
     status: z.boolean().default(true),
     forSelling: z.boolean().default(true),
-    isManufacture: z.boolean().default(false),
+    isManufacture: z.boolean().default(true),
     manageStock: z.boolean().default(true),
     // Detail fields
     purchasePrice: z.number().default(0),
@@ -83,7 +83,7 @@ const form = useForm({
     alertQuantity: 0,
     status: true,
     forSelling: true,
-    isManufacture: false,
+    isManufacture: true,
     manageStock: true,
     purchasePrice: 0,
     salePrice: 0,
@@ -425,7 +425,7 @@ onMounted(() => {
                     $t("fields.activeStatus")
                   }}</FormLabel>
                    <FormControl>
-                    <Switch :checked="value" @update:checked="handleChange" />
+                    <Switch :checked="!!value" @update:checked="(v: boolean) => handleChange(v)" />
                   </FormControl>
                 </FormItem>
               </FormField>
@@ -438,7 +438,7 @@ onMounted(() => {
                     $t("fields.manageStock")
                   }}</FormLabel>
                    <FormControl>
-                    <Switch :checked="value" @update:checked="handleChange" />
+                    <Switch :checked="!!value" @update:checked="(v: boolean) => handleChange(v)" />
                   </FormControl>
                 </FormItem>
               </FormField>
@@ -451,7 +451,7 @@ onMounted(() => {
                     $t("fields.forSelling")
                   }}</FormLabel>
                    <FormControl>
-                    <Switch :checked="value" @update:checked="handleChange" />
+                    <Switch :checked="!!value" @update:checked="(v: boolean) => handleChange(v)" />
                   </FormControl>
                 </FormItem>
               </FormField>
@@ -464,7 +464,7 @@ onMounted(() => {
                     $t("fields.isManufacture")
                   }}</FormLabel>
                    <FormControl>
-                    <Switch :checked="value" @update:checked="handleChange" />
+                    <Switch :checked="!!value" @update:checked="(v: boolean) => handleChange(v)" />
                   </FormControl>
                 </FormItem>
               </FormField>

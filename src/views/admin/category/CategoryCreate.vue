@@ -31,7 +31,7 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import { ChevronLeft, Loader2 } from "lucide-vue-next";
+import { ChevronLeft, Loader2, Camera } from "lucide-vue-next";
 import { CategoryService } from "@/services/category/category.service";
 import ImageUpload from "@/components/upload/ImageUpload.vue";
 import type { Category } from "@/types/category";
@@ -126,22 +126,28 @@ onMounted(() => {
         <form @submit="onSubmit" id="categoryForm" class="space-y-6">
           <div class="flex flex-col lg:flex-row gap-8">
             <!-- Left Side: Image Upload -->
-            <div class="flex flex-col items-center gap-4 shrink-0">
-              <FormField v-slot="{ value, handleChange }" name="imageUrl">
-                <FormItem>
-                  <FormLabel
-                    class="text-sm font-bold uppercase tracking-wider text-muted-foreground/80"
-                    >{{ $t('modules.category') }} {{ $t('crud.image') }}</FormLabel
-                  >
-                  <FormControl>
-                    <ImageUpload
-                      :image-url="value"
-                      @update:image-url="handleChange"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
+            <div class="w-full lg:w-72 shrink-0">
+              <Card>
+                <CardHeader>
+                  <CardTitle class="flex items-center gap-2">
+                    <Camera class="h-5 w-5 text-primary" />
+                    {{ $t('fields.photo') }}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent class="flex justify-center py-4">
+                  <FormField v-slot="{ value, handleChange }" name="imageUrl">
+                    <FormItem>
+                      <FormControl>
+                        <ImageUpload
+                          :image-url="value"
+                          @update:image-url="handleChange"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  </FormField>
+                </CardContent>
+              </Card>
             </div>
 
             <!-- Right Side: Form Fields -->
@@ -213,7 +219,7 @@ onMounted(() => {
                         </FormDescription>
                       </div>
                       <FormControl>
-                        <Switch :checked="value" @update:checked="handleChange" />
+                        <Switch :checked="!!value" @update:checked="(v: boolean) => handleChange(v)" />
                       </FormControl>
                     </FormItem>
                   </FormField>
