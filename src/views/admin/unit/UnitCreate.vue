@@ -224,7 +224,7 @@ onMounted(() => {
                   </FormDescription>
                 </div>
                 <FormControl>
-                  <Switch :checked="!!value" @update:checked="(v: boolean) => handleChange(v)" />
+                  <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
                 </FormControl>
               </FormItem>
             </FormField>
@@ -236,7 +236,7 @@ onMounted(() => {
                   <FormDescription>{{ $t('fields.statusDescription', { module: $t('modules.unit') }) }}</FormDescription>
                 </div>
                 <FormControl>
-                  <Switch :checked="!!value" @update:checked="(v: boolean) => handleChange(v)" />
+                  <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
                 </FormControl>
               </FormItem>
             </FormField>

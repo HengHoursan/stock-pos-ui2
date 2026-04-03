@@ -179,7 +179,7 @@
     "selectParentCategory": "Select a parent category",
     "selectParentBrand": "Select a parent brand",
     "selectParentUnit": "Select a parent unit",
-    "emailPlaceholder": "m@example.com",
+    "emailPlaceholder": "m{'@'}example.com",
     "namePlaceholder": "John Doe",
     "filterByStatus": "Status",
     "selectBarcodeType": "Select barcode type",

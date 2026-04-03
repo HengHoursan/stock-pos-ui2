@@ -425,7 +425,7 @@ onMounted(() => {
                     $t("fields.activeStatus")
                   }}</FormLabel>
                    <FormControl>
-                    <Switch :checked="!!value" @update:checked="(v: boolean) => handleChange(v)" />
+                    <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
                   </FormControl>
                 </FormItem>
               </FormField>
@@ -438,7 +438,7 @@ onMounted(() => {
                     $t("fields.manageStock")
                   }}</FormLabel>
                    <FormControl>
-                    <Switch :checked="!!value" @update:checked="(v: boolean) => handleChange(v)" />
+                    <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
                   </FormControl>
                 </FormItem>
               </FormField>
@@ -451,7 +451,7 @@ onMounted(() => {
                     $t("fields.forSelling")
                   }}</FormLabel>
                    <FormControl>
-                    <Switch :checked="!!value" @update:checked="(v: boolean) => handleChange(v)" />
+                    <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
                   </FormControl>
                 </FormItem>
               </FormField>
@@ -464,7 +464,7 @@ onMounted(() => {
                     $t("fields.isManufacture")
                   }}</FormLabel>
                    <FormControl>
-                    <Switch :checked="!!value" @update:checked="(v: boolean) => handleChange(v)" />
+                    <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
                   </FormControl>
                 </FormItem>
               </FormField>

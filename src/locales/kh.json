@@ -179,7 +179,7 @@
     "selectParentCategory": "ជ្រើសរើសប្រភេទមេ",
     "selectParentBrand": "ជ្រើសរើសម៉ាកមេ",
     "selectParentUnit": "ជ្រើសរើសខ្នាតមេ",
-    "emailPlaceholder": "m@example.com",
+    "emailPlaceholder": "m{'@'}example.com",
     "namePlaceholder": "John Doe",
     "filterByStatus": "ស្ថានភាព",
     "selectBarcodeType": "ជ្រើសរើសប្រភេទបារកូដ",

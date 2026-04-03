@@ -399,7 +399,7 @@ onMounted(() => {
                   <FormItem class="flex flex-row items-center justify-between rounded-lg border p-3">
                     <FormLabel class="text-sm font-medium">{{ $t('fields.activeStatus') }}</FormLabel>
                     <FormControl>
-                      <Switch :checked="!!value" @update:checked="(v: boolean) => handleChange(v)" />
+                      <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
                     </FormControl>
                   </FormItem>
                 </FormField>
@@ -408,7 +408,7 @@ onMounted(() => {
                   <FormItem class="flex flex-row items-center justify-between rounded-lg border p-3">
                     <FormLabel class="text-sm font-medium">{{ $t('fields.manageStock') }}</FormLabel>
                     <FormControl>
-                      <Switch :checked="!!value" @update:checked="(v: boolean) => handleChange(v)" />
+                      <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
                     </FormControl>
                   </FormItem>
                 </FormField>
@@ -417,7 +417,7 @@ onMounted(() => {
                   <FormItem class="flex flex-row items-center justify-between rounded-lg border p-3">
                     <FormLabel class="text-sm font-medium">{{ $t('fields.forSelling') }}</FormLabel>
                     <FormControl>
-                      <Switch :checked="!!value" @update:checked="(v: boolean) => handleChange(v)" />
+                      <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
                     </FormControl>
                   </FormItem>
                 </FormField>
@@ -426,7 +426,7 @@ onMounted(() => {
                   <FormItem class="flex flex-row items-center justify-between rounded-lg border p-3">
                     <FormLabel class="text-sm font-medium">{{ $t('fields.isManufacture') }}</FormLabel>
                     <FormControl>
-                      <Switch :checked="!!value" @update:checked="(v: boolean) => handleChange(v)" />
+                      <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
                     </FormControl>
                   </FormItem>
                 </FormField>
