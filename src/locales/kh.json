@@ -28,7 +28,13 @@
     "addDiscount": "បន្ថែមការបញ្ចុះតម្លៃ",
     "products": "ផលិតផល",
     "allProducts": "ផលិតផលទាំងអស់",
-    "addProduct": "បន្ថែមផលិតផល"
+    "addProduct": "បន្ថែមផលិតផល",
+    "suppliers": "អ្នកផ្គត់ផ្គង់",
+    "allSuppliers": "អ្នកផ្គត់ផ្គង់ទាំងអស់",
+    "addSupplier": "បន្ថែមអ្នកផ្គត់ផ្គង់ថ្មី",
+    "customers": "អតិថិជន",
+    "allCustomers": "អតិថិជនទាំងអស់",
+    "addCustomer": "បន្ថែមអតិថិជនថ្មី"
   },
   "auth": {
     "welcomeBack": "សូមស្វាគមន៍ត្រលប់មកវិញ",
@@ -183,6 +189,12 @@
     "namePlaceholder": "John Doe",
     "filterByStatus": "ស្ថានភាព",
     "selectBarcodeType": "ជ្រើសរើសប្រភេទបារកូដ",
+    "nameLatin": "ឈ្មោះឡាតាំង",
+    "phoneNumber": "លេខទូរស័ព្ទ",
+    "address": "អាសយដ្ឋាន",
+    "type": "ប្រភេទ",
+    "dineIn": "ញ៉ាំក្នុងហាង",
+    "dineOut": "ខ្ចប់ទៅក្រៅ",
     "expiryTypes": {
       "none": "គ្មាន",
       "bestBefore": "ល្អបំផុតមុនថ្ងៃ",
@@ -205,6 +217,10 @@
     "discount": "ការបញ្ចុះតម្លៃ",
     "discounts": "ការបញ្ចុះតម្លៃទាំងអស់",
     "product": "ផលិតផល",
-    "products": "ផលិតផលទាំងអស់"
+    "products": "ផលិតផលទាំងអស់",
+    "supplier": "អ្នកផ្គត់ផ្គង់",
+    "suppliers": "អ្នកផ្គត់ផ្គង់ទាំងអស់",
+    "customer": "អតិថិជន",
+    "customers": "អតិថិជនទាំងអស់"
   }
 }

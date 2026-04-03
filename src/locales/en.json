@@ -28,7 +28,13 @@
     "addDiscount": "Add New Discount",
     "products": "Products",
     "allProducts": "All Products",
-    "addProduct": "Add New Product"
+    "addProduct": "Add New Product",
+    "suppliers": "Suppliers",
+    "allSuppliers": "All Suppliers",
+    "addSupplier": "Add New Supplier",
+    "customers": "Customers",
+    "allCustomers": "All Customers",
+    "addCustomer": "Add New Customer"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -183,6 +189,12 @@
     "namePlaceholder": "John Doe",
     "filterByStatus": "Status",
     "selectBarcodeType": "Select barcode type",
+    "nameLatin": "Latin Name",
+    "phoneNumber": "Phone Number",
+    "address": "Address",
+    "type": "Type",
+    "dineIn": "Dine In",
+    "dineOut": "Dine Out",
     "expiryTypes": {
       "none": "None",
       "bestBefore": "Best Before",
@@ -205,6 +217,10 @@
     "discount": "Discount",
     "discounts": "Discounts",
     "product": "Product",
-    "products": "Products"
+    "products": "Products",
+    "supplier": "Supplier",
+    "suppliers": "Suppliers",
+    "customer": "Customer",
+    "customers": "Customers"
   }
 }

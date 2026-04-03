@@ -146,6 +146,50 @@ const routes: RouteRecordRaw[] = [
         name: 'ProductEdit',
         component: () => import('../views/admin/product/ProductEdit.vue'),
       },
+
+      // Supplier CRUD
+      {
+        path: 'admin/suppliers',
+        name: 'Suppliers',
+        component: () => import('../views/admin/supplier/SupplierList.vue'),
+      },
+      {
+        path: 'admin/suppliers/create',
+        name: 'SupplierCreate',
+        component: () => import('../views/admin/supplier/SupplierCreate.vue'),
+      },
+      {
+        path: 'admin/suppliers/:id',
+        name: 'SupplierDetail',
+        component: () => import('../views/admin/supplier/SupplierDetail.vue'),
+      },
+      {
+        path: 'admin/suppliers/:id/edit',
+        name: 'SupplierEdit',
+        component: () => import('../views/admin/supplier/SupplierEdit.vue'),
+      },
+
+      // Customer CRUD
+      {
+        path: 'admin/customers',
+        name: 'Customers',
+        component: () => import('../views/admin/customer/CustomerList.vue'),
+      },
+      {
+        path: 'admin/customers/create',
+        name: 'CustomerCreate',
+        component: () => import('../views/admin/customer/CustomerCreate.vue'),
+      },
+      {
+        path: 'admin/customers/:id',
+        name: 'CustomerDetail',
+        component: () => import('../views/admin/customer/CustomerDetail.vue'),
+      },
+      {
+        path: 'admin/customers/:id/edit',
+        name: 'CustomerEdit',
+        component: () => import('../views/admin/customer/CustomerEdit.vue'),
+      },
     ],
   },
 

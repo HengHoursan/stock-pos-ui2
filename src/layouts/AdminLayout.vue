@@ -52,6 +52,8 @@ import {
   Ruler,
   Coins,
   Package,
+  Truck,
+  Users,
 } from "lucide-vue-next";
 import {
   Collapsible,
@@ -127,6 +129,30 @@ const navItems = [
       },
     ],
   },
+  {
+    titleKey: "menu.suppliers",
+    icon: Truck,
+    children: [
+      { titleKey: "menu.allSuppliers", url: "/admin/suppliers", icon: List },
+      {
+        titleKey: "menu.addSupplier",
+        url: "/admin/suppliers/create",
+        icon: Plus,
+      },
+    ],
+  },
+  {
+    titleKey: "menu.customers",
+    icon: Users,
+    children: [
+      { titleKey: "menu.allCustomers", url: "/admin/customers", icon: List },
+      {
+        titleKey: "menu.addCustomer",
+        url: "/admin/customers/create",
+        icon: Plus,
+      },
+    ],
+  },
 ];
 
 const currentLocaleItem = computed(() => {
@@ -154,8 +180,13 @@ const currentPageTitle = computed(() => {
     CurrencyCreate: "menu.addCurrency",
     Products: "menu.allProducts",
     ProductCreate: "menu.addProduct",
-    ProductEdit: "crud.editBtn",
     ProductDetail: "crud.viewBtn",
+    Suppliers: "menu.allSuppliers",
+    SupplierCreate: "menu.addSupplier",
+    SupplierEdit: "crud.editBtn",
+    Customers: "menu.allCustomers",
+    CustomerCreate: "menu.addCustomer",
+    CustomerEdit: "crud.editBtn",
   };
 
   if (routeKeyMap[routeName]) {

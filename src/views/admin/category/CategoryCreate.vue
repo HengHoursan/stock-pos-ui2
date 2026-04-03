@@ -16,6 +16,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/Textarea";
 import {
   Select,
   SelectContent,
@@ -207,7 +208,7 @@ onMounted(() => {
                     <FormItem>
                       <FormLabel>{{ $t("fields.description") }}</FormLabel>
                       <FormControl>
-                        <Input
+                        <Textarea
                           :placeholder="$t('fields.enterDescription')"
                           v-bind="componentField"
                         />

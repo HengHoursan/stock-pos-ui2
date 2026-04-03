@@ -16,6 +16,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/Textarea";
 import {
   Select,
   SelectContent,
@@ -90,7 +91,7 @@ async function fetchData() {
         status: cat.status,
       });
     } else {
-      toast.error(t('crud.notFound', { module: t('modules.category') }));
+      toast.error(t("crud.notFound", { module: t("modules.category") }));
       router.push("/admin/categories");
     }
 
@@ -100,7 +101,7 @@ async function fetchData() {
       );
     }
   } catch (error) {
-    toast.error(t('crud.errorFetch', { module: t('modules.category') }));
+    toast.error(t("crud.errorFetch", { module: t("modules.category") }));
   } finally {
     loading.value = false;
   }
@@ -119,13 +120,16 @@ const onSubmit = form.handleSubmit(async (values) => {
     };
     const response = await categoryService.update(payload);
     if (response.success) {
-      toast.success(t('crud.successUpdate', { module: t('modules.category') }));
+      toast.success(t("crud.successUpdate", { module: t("modules.category") }));
       router.push("/admin/categories");
     } else {
-      toast.error(response.message || t('crud.errorUpdate', { module: t('modules.category') }));
+      toast.error(
+        response.message ||
+          t("crud.errorUpdate", { module: t("modules.category") }),
+      );
     }
   } catch (error) {
-    toast.error(t('crud.errorGeneral'));
+    toast.error(t("crud.errorGeneral"));
   } finally {
     submitting.value = false;
   }
@@ -153,7 +157,9 @@ onMounted(() => {
 
     <Card v-else>
       <CardHeader>
-        <CardTitle>{{ $t('crud.info', { module: $t('modules.category') }) }}</CardTitle>
+        <CardTitle>{{
+          $t("crud.info", { module: $t("modules.category") })
+        }}</CardTitle>
       </CardHeader>
       <CardContent>
         <form @submit="onSubmit" id="categoryForm" class="space-y-6">
@@ -164,7 +170,7 @@ onMounted(() => {
                 <CardHeader>
                   <CardTitle class="flex items-center gap-2">
                     <Camera class="h-5 w-5 text-primary" />
-                    {{ $t('fields.photo') }}
+                    {{ $t("fields.photo") }}
                   </CardTitle>
                 </CardHeader>
                 <CardContent class="flex justify-center py-4">
@@ -229,11 +235,15 @@ onMounted(() => {
 
                 <FormField v-slot="{ field }" name="parentId">
                   <FormItem>
-                    <FormLabel>{{ $t("fields.parentOf", { module: $t("modules.category") }) }}</FormLabel>
+                    <FormLabel>{{
+                      $t("fields.parentOf", { module: $t("modules.category") })
+                    }}</FormLabel>
                     <Select v-bind="field">
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue :placeholder="$t('fields.selectParentCategory')" />
+                          <SelectValue
+                            :placeholder="$t('fields.selectParentCategory')"
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -256,7 +266,7 @@ onMounted(() => {
                     <FormItem>
                       <FormLabel>{{ $t("fields.description") }}</FormLabel>
                       <FormControl>
-                        <Input
+                        <Textarea
                           :placeholder="$t('fields.enterDescription')"
                           v-bind="componentField"
                         />
@@ -272,15 +282,22 @@ onMounted(() => {
                       class="flex flex-row items-center justify-between rounded-lg border p-4"
                     >
                       <div class="space-y-0.5">
-                        <FormLabel class="text-base font-semibold"
-                          >{{ $t('fields.activeStatus') }}</FormLabel
-                        >
+                        <FormLabel class="text-base font-semibold">{{
+                          $t("fields.activeStatus")
+                        }}</FormLabel>
                         <FormDescription>
-                          {{ $t('fields.statusDescription', { module: $t('modules.category') }) }}
+                          {{
+                            $t("fields.statusDescription", {
+                              module: $t("modules.category"),
+                            })
+                          }}
                         </FormDescription>
                       </div>
                       <FormControl>
-                        <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
+                        <Switch
+                          :model-value="!!value"
+                          @update:model-value="(v: boolean) => handleChange(v)"
+                        />
                       </FormControl>
                     </FormItem>
                   </FormField>

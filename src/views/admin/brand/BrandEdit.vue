@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import Textarea from "@/components/ui/textarea/Textarea.vue";
 
 import {
   Select,
@@ -258,11 +259,11 @@ onMounted(() => {
                     <FormItem>
                       <FormLabel>{{ $t('fields.description') }}</FormLabel>
                       <FormControl>
-                        <Input
-                          :placeholder="$t('fields.enterDescription')"
-                          v-bind="componentField"
-                        />
-                      </FormControl>
+                      <Textarea
+                        :placeholder="$t('fields.enterDescription')"
+                        v-bind="componentField"
+                      />
+                    </FormControl>
                       <FormMessage />
                     </FormItem>
                   </FormField>
