@@ -62,9 +62,8 @@ import {
   Loader2,
 } from "lucide-vue-next";
 import { SupplierService } from "@/services/supplier/supplier.service";
-import type { Supplier } from "@/types/supplier";
-import { CustomerType } from "@/types/customer_type";
-import type { PaginationMeta } from "@/types/common";
+import type { Supplier, PaginationMeta } from "@/types";
+import { CustomerType } from "@/types";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
 
@@ -74,7 +73,7 @@ const supplierService = new SupplierService();
 const suppliers = ref<Supplier[]>([]);
 const loading = ref(true);
 const searchQuery = ref("");
-const statusFilter = ref("all");
+const statusFilter = ref<string | undefined>(undefined);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -105,8 +104,8 @@ async function fetchSuppliers() {
       payload.search = searchQuery.value.trim();
     }
 
-    if (statusFilter.value !== "all") {
-      payload.filter = statusFilter.value;
+    if (statusFilter.value && statusFilter.value !== "all") {
+      payload.filter = { status: statusFilter.value };
     }
 
     const response = await supplierService.getList(payload);
@@ -245,7 +244,7 @@ onMounted(() => {
 
       <Select v-model="statusFilter">
         <SelectTrigger class="w-full sm:w-[180px]">
-          <SelectValue :placeholder="$t('fields.filterByStatus')" />
+          <SelectValue :placeholder="$t('crud.filterByStatus')" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">{{ $t("crud.allStatus") }}</SelectItem>
@@ -383,12 +382,12 @@ onMounted(() => {
                   {{ $t("crud.noRecords", { module: $t("modules.suppliers") }) }}
                 </p>
                 <Button
-                  v-if="searchQuery || statusFilter !== 'all'"
+                  v-if="searchQuery || (statusFilter && statusFilter !== 'all')"
                   variant="outline"
                   size="sm"
                   @click="
                     searchQuery = '';
-                    statusFilter = 'all';
+                    statusFilter = undefined;
                   "
                   class="h-8"
                 >

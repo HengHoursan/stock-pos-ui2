@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, Pencil, Trash2, Loader2, Tag, Calendar, Globe, AlignLeft, Barcode, Folder } from "lucide-vue-next";
 import { CategoryService } from "@/services/category/category.service";
-import type { Category } from "@/types/category";
+import type { Category } from "@/types";
 import { toast } from "vue-sonner";
 
 const router = useRouter();

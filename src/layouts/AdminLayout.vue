@@ -54,6 +54,7 @@ import {
   Package,
   Truck,
   Users,
+  History,
 } from "lucide-vue-next";
 import {
   Collapsible,
@@ -153,6 +154,18 @@ const navItems = [
       },
     ],
   },
+  {
+    titleKey: "menu.transactions",
+    icon: History,
+    children: [
+      { titleKey: "menu.allTransactions", url: "/admin/transactions", icon: List },
+      {
+        titleKey: "menu.addTransaction",
+        url: "/admin/transactions/create",
+        icon: Plus,
+      },
+    ],
+  },
 ];
 
 const currentLocaleItem = computed(() => {
@@ -187,6 +200,9 @@ const currentPageTitle = computed(() => {
     Customers: "menu.allCustomers",
     CustomerCreate: "menu.addCustomer",
     CustomerEdit: "crud.editBtn",
+    Transactions: "menu.allTransactions",
+    TransactionCreate: "menu.addTransaction",
+    TransactionDetail: "crud.viewBtn",
   };
 
   if (routeKeyMap[routeName]) {

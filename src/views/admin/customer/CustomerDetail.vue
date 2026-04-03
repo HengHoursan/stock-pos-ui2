@@ -21,8 +21,8 @@ import {
   AlignLeft,
 } from "lucide-vue-next";
 import { CustomerService } from "@/services/customer/customer.service";
-import type { Customer } from "@/types/customer";
-import { CustomerType } from "@/types/customer_type";
+import type { Customer } from "@/types";
+import { CustomerType } from "@/types";
 import { toast } from "vue-sonner";
 
 const router = useRouter();

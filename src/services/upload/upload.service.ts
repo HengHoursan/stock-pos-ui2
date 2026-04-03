@@ -1,5 +1,5 @@
 import { BaseService } from "../base/base.service";
-import type { ApiResponse } from "@/types/common";
+import type { ApiResponse } from "@/types";
 
 export interface UploadResponse {
   image_url: string;

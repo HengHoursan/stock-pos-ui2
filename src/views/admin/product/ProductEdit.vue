@@ -36,9 +36,7 @@ import { BrandService } from "@/services/brand/brand.service";
 import { UnitService } from "@/services/unit/unit.service";
 import DatePicker from "@/components/DatePicker.vue";
 import ImageUpload from "@/components/upload/ImageUpload.vue";
-import type { Category } from "@/types/category";
-import type { Brand } from "@/types/brand";
-import type { Unit } from "@/types/unit";
+import type { Category, Brand, Unit } from "@/types";
 import { toast } from "vue-sonner";
 
 const router = useRouter();
@@ -247,8 +245,13 @@ onMounted(() => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem v-for="cat in categories" :key="cat.id" :value="String(cat.id)">
-                          {{ cat.name }}
+                        <template v-if="categories.length > 0">
+                          <SelectItem v-for="cat in categories" :key="cat.id" :value="String(cat.id)">
+                            {{ cat.name }}
+                          </SelectItem>
+                        </template>
+                        <SelectItem v-else disabled value="none" class="text-muted-foreground italic text-xs py-3 text-center">
+                          {{ $t('common.noData') }}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -267,8 +270,13 @@ onMounted(() => {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="0">{{ $t('crud.none') }}</SelectItem>
-                        <SelectItem v-for="brand in brands" :key="brand.id" :value="String(brand.id)">
-                          {{ brand.name }}
+                        <template v-if="brands.length > 0">
+                          <SelectItem v-for="brand in brands" :key="brand.id" :value="String(brand.id)">
+                            {{ brand.name }}
+                          </SelectItem>
+                        </template>
+                        <SelectItem v-else disabled value="none" class="text-muted-foreground italic text-xs py-3 text-center">
+                          {{ $t('common.noData') }}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -286,8 +294,13 @@ onMounted(() => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem v-for="u in units" :key="u.id" :value="String(u.id)">
-                          {{ u.name }}
+                        <template v-if="units.length > 0">
+                          <SelectItem v-for="u in units" :key="u.id" :value="String(u.id)">
+                            {{ u.name }}
+                          </SelectItem>
+                        </template>
+                        <SelectItem v-else disabled value="none" class="text-muted-foreground italic text-xs py-3 text-center">
+                          {{ $t('common.noData') }}
                         </SelectItem>
                       </SelectContent>
                     </Select>

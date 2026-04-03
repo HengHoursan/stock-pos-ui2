@@ -3,9 +3,11 @@ import type {
   Category, 
   CreateCategoryRequest, 
   UpdateCategoryRequest, 
-  UpdateCategoryStatusRequest 
-} from "@/types/category";
-import type { ApiResponse, PaginationRequest, PaginationResponse } from "@/types/common";
+  UpdateCategoryStatusRequest,
+  ApiResponse, 
+  PaginationRequest, 
+  PaginationResponse 
+} from "@/types";
 
 export class CategoryService extends BaseService {
   async getAll(): Promise<ApiResponse<Category[]>> {

@@ -3,7 +3,8 @@
     "welcome": "Welcome to Stock POS",
     "login": "Login",
     "logout": "Logout",
-    "home": "Home"
+    "home": "Home",
+    "noData": "No data available"
   },
   "layout": {
     "adminPanel": "Admin Panel",
@@ -34,7 +35,10 @@
     "addSupplier": "Add New Supplier",
     "customers": "Customers",
     "allCustomers": "All Customers",
-    "addCustomer": "Add New Customer"
+    "addCustomer": "Add New Customer",
+    "transactions": "Transactions",
+    "allTransactions": "All Transactions",
+    "addTransaction": "Add Transaction"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -77,7 +81,9 @@
     "detail": "{module} Details",
     "search": "Search {module}...",
     "filterStatus": "Filter by status",
+    "all": "All",
     "allStatus": "All Statuses",
+    "allTypes": "All Types",
     "active": "Active",
     "inactive": "Inactive",
     "actions": "Actions",
@@ -102,7 +108,13 @@
     "loading": "Loading...",
     "fetchingData": "Fetching data...",
     "rowsPerPage": "Rows per page",
+    "filterByStatus": "Filter by Status",
     "resetFilters": "Reset Filters",
+    "filterByCategory": "Filter by Category",
+    "filterByBrand": "Filter by Brand",
+    "filterByUnit": "Filter by Unit",
+    "filterByProduct": "Filter by Product",
+    "filterByType": "Filter by Type",
     "successCreate": "Successfully created {module}",
     "successUpdate": "{module} updated successfully",
     "successDelete": "{module} deleted successfully",
@@ -195,11 +207,24 @@
     "type": "Type",
     "dineIn": "Dine In",
     "dineOut": "Dine Out",
+    "transactionCode": "Transaction Code",
+    "transactionDate": "Transaction Date",
+    "transactionType": "Transaction Type",
+    "beginningStock": "Beginning Stock",
+    "quantity": "Quantity",
+    "afterStock": "After Stock",
+    "remarks": "Remarks",
+    "stockIn": "Stock In",
+    "stockOut": "Stock Out",
+    "adjustment": "Adjustment",
+    "productId": "Product",
     "expiryTypes": {
       "none": "None",
       "bestBefore": "Best Before",
       "expiry": "Expiry"
-    }
+    },
+    "internalMemo": "Internal Memo",
+    "internalMemoDescription": "Stock adjustments will impact financial records and inventory reconciliation. Ensure the quantity and type are accurate before saving."
   },
   "pagination": {
     "previous": "Previous",
@@ -221,6 +246,8 @@
     "supplier": "Supplier",
     "suppliers": "Suppliers",
     "customer": "Customer",
-    "customers": "Customers"
+    "customers": "Customers",
+    "transaction": "Transaction",
+    "transactions": "Transactions"
   }
 }

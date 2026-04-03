@@ -190,6 +190,23 @@ const routes: RouteRecordRaw[] = [
         name: 'CustomerEdit',
         component: () => import('../views/admin/customer/CustomerEdit.vue'),
       },
+
+      // Transaction CRUD
+      {
+        path: 'admin/transactions',
+        name: 'Transactions',
+        component: () => import('../views/admin/transaction/TransactionList.vue'),
+      },
+      {
+        path: 'admin/transactions/create',
+        name: 'TransactionCreate',
+        component: () => import('../views/admin/transaction/TransactionCreate.vue'),
+      },
+      {
+        path: 'admin/transactions/:id',
+        name: 'TransactionDetail',
+        component: () => import('../views/admin/transaction/TransactionDetail.vue'),
+      },
     ],
   },
 

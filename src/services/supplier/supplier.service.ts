@@ -3,9 +3,11 @@ import type {
   Supplier, 
   CreateSupplierRequest, 
   UpdateSupplierRequest, 
-  UpdateSupplierStatusRequest 
-} from "@/types/supplier";
-import type { ApiResponse, PaginationRequest, PaginationResponse } from "@/types/common";
+  UpdateSupplierStatusRequest,
+  ApiResponse, 
+  PaginationRequest, 
+  PaginationResponse 
+} from "@/types";
 
 export class SupplierService extends BaseService {
   async getAll(): Promise<ApiResponse<Supplier[]>> {

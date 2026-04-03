@@ -24,7 +24,7 @@ import {
   Clock 
 } from "lucide-vue-next";
 import { ProductService } from "@/services/product/product.service";
-import type { Product } from "@/types/product";
+import type { Product } from "@/types";
 import { toast } from "vue-sonner";
 
 const router = useRouter();

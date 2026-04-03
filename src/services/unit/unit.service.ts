@@ -3,9 +3,11 @@ import type {
   Unit, 
   CreateUnitRequest, 
   UpdateUnitRequest, 
-  UpdateUnitStatusRequest 
-} from "@/types/unit";
-import type { ApiResponse, PaginationRequest, PaginationResponse } from "@/types/common";
+  UpdateUnitStatusRequest,
+  ApiResponse, 
+  PaginationRequest, 
+  PaginationResponse 
+} from "@/types";
 
 export class UnitService extends BaseService {
   async getAll(): Promise<ApiResponse<Unit[]>> {

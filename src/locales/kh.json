@@ -3,7 +3,8 @@
     "welcome": "សូមស្វាគមន៍មកកាន់ Stock POS",
     "login": "ចូលប្រព័ន្ធ",
     "logout": "ចាកចេញ",
-    "home": "ទំព័រដើម"
+    "home": "ទំព័រដើម",
+    "noData": "មិនមានទិន្នន័យ"
   },
   "layout": {
     "adminPanel": "ផ្ទាំងគ្រប់គ្រង",
@@ -34,7 +35,10 @@
     "addSupplier": "បន្ថែមអ្នកផ្គត់ផ្គង់ថ្មី",
     "customers": "អតិថិជន",
     "allCustomers": "អតិថិជនទាំងអស់",
-    "addCustomer": "បន្ថែមអតិថិជនថ្មី"
+    "addCustomer": "បន្ថែមអតិថិជនថ្មី",
+    "transactions": "ប្រតិបត្តិការ",
+    "allTransactions": "ប្រតិបត្តិការទាំងអស់",
+    "addTransaction": "បន្ថែមប្រតិបត្តិការ"
   },
   "auth": {
     "welcomeBack": "សូមស្វាគមន៍ត្រលប់មកវិញ",
@@ -77,7 +81,9 @@
     "detail": "ព័ត៌មានលម្អិត {module}",
     "search": "ស្វែងរក {module}...",
     "filterStatus": "ចម្រាញ់តាមស្ថានភាព",
+    "all": "ទាំងអស់",
     "allStatus": "ស្ថានភាពទាំងអស់",
+    "allTypes": "ប្រភេទទាំងអស់",
     "active": "សកម្ម",
     "inactive": "អសកម្ម",
     "actions": "សកម្មភាព",
@@ -97,12 +103,18 @@
     "info": "ព័ត៌មាន {module}",
     "changeImage": "ប្ដូររូបភាព",
     "uploadImage": "ជ្រើសរើសរូបភាព",
-    "none": "គ្មាន",
+  "none": "គ្មាន",
     "selectParent": "ជ្រើសរើសមេ",
     "loading": "កំពុងផ្ទុក...",
     "fetchingData": "កំពុងទាញយកទិន្នន័យ...",
     "rowsPerPage": "ជួរក្នុងមួយទំព័រ",
     "resetFilters": "កំណត់ឡើងវិញ",
+    "filterByStatus": "ចម្រាញ់តាមស្ថានភាព",
+    "filterByCategory": "ចម្រាញ់តាមប្រភេទ",
+    "filterByBrand": "ចម្រាញ់តាមម៉ាក",
+    "filterByUnit": "ចម្រាញ់តាមខ្នាត",
+    "filterByProduct": "ចម្រាញ់តាមផលិតផល",
+    "filterByType": "ចម្រាញ់តាមប្រភេទ",
     "successCreate": "បានបង្កើត {module} ដោយជោគជ័យ",
     "successUpdate": "បានកែប្រែ {module} ដោយជោគជ័យ",
     "successDelete": "បានលុប {module} ដោយជោគជ័យ",
@@ -195,11 +207,24 @@
     "type": "ប្រភេទ",
     "dineIn": "ញ៉ាំក្នុងហាង",
     "dineOut": "ខ្ចប់ទៅក្រៅ",
+    "transactionCode": "កូដប្រតិបត្តិការ",
+    "transactionDate": "ថ្ងៃប្រតិបត្តិការ",
+    "transactionType": "ប្រភេទប្រតិបត្តិការ",
+    "beginningStock": "ស្តុកដើមគ្រា",
+    "quantity": "បរិមាណ",
+    "afterStock": "ស្តុកក្រោយប្រតិបត្តិការ",
+    "remarks": "សម្គាល់",
+    "stockIn": "ចូលស្តុក",
+    "stockOut": "ចេញស្តុក",
+    "adjustment": "ការកែតម្រូវ",
+    "productId": "ផលិតផល",
     "expiryTypes": {
       "none": "គ្មាន",
       "bestBefore": "ល្អបំផុតមុនថ្ងៃ",
       "expiry": "កាលបរិច្ឆេទផុតកំណត់"
-    }
+    },
+    "internalMemo": "កំណត់សម្គាល់ផ្ទៃក្នុង",
+    "internalMemoDescription": "ការកែតម្រូវស្តុកនឹងប៉ះពាល់ដល់កំណត់ត្រាហិរញ្ញវត្ថុ និងការផ្ទៀងផ្ទាត់សារពើភ័ណ្ឌ។ សូមប្រាកដថាបរិមាណ និងប្រភេទមានភាពត្រឹមត្រូវមុនពេលរក្សាទុក។"
   },
   "pagination": {
     "previous": "ត្រឡប់ក្រោយ",
@@ -221,6 +246,8 @@
     "supplier": "អ្នកផ្គត់ផ្គង់",
     "suppliers": "អ្នកផ្គត់ផ្គង់ទាំងអស់",
     "customer": "អតិថិជន",
-    "customers": "អតិថិជនទាំងអស់"
+    "customers": "អតិថិជនទាំងអស់",
+    "transaction": "ប្រតិបត្តិការ",
+    "transactions": "ប្រតិបត្តិការទាំងអស់"
   }
 }

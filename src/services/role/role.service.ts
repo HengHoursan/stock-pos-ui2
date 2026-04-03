@@ -1,6 +1,13 @@
 import { BaseService } from "@/services/base/base.service";
-import type { ApiResponse, PaginationRequest, PaginationResponse } from "@/types/common";
-import type { Role, CreateRoleRequest, UpdateRoleRequest, UpdateRoleStatusRequest } from "@/types/role";
+import type { 
+  Role, 
+  CreateRoleRequest, 
+  UpdateRoleRequest, 
+  UpdateRoleStatusRequest,
+  ApiResponse, 
+  PaginationRequest, 
+  PaginationResponse 
+} from "@/types";
 
 export class RoleService extends BaseService {
   async getAll(): Promise<ApiResponse<Role[]>> {

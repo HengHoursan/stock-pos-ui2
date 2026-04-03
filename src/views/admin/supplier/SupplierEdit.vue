@@ -44,7 +44,7 @@ import {
   Settings,
 } from "lucide-vue-next";
 import { SupplierService } from "@/services/supplier/supplier.service";
-import { CustomerType } from "@/types/customer_type";
+import { CustomerType } from "@/types";
 import { toast } from "vue-sonner";
 
 const router = useRouter();

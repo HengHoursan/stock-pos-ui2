@@ -35,7 +35,7 @@ import {
 import { ChevronLeft, Loader2, Camera } from "lucide-vue-next";
 import { CategoryService } from "@/services/category/category.service";
 import ImageUpload from "@/components/upload/ImageUpload.vue";
-import type { Category } from "@/types/category";
+import type { Category } from "@/types";
 import { toast } from "vue-sonner";
 
 const router = useRouter();
@@ -190,12 +190,17 @@ onMounted(() => {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="0">{{ $t("crud.none") }}</SelectItem>
-                        <SelectItem
-                          v-for="cat in parentCategories"
-                          :key="cat.id"
-                          :value="String(cat.id)"
-                        >
-                          {{ cat.name }}
+                        <template v-if="parentCategories.length > 0">
+                          <SelectItem
+                            v-for="cat in parentCategories"
+                            :key="cat.id"
+                            :value="String(cat.id)"
+                          >
+                            {{ cat.name }}
+                          </SelectItem>
+                        </template>
+                        <SelectItem v-else disabled value="none" class="text-muted-foreground italic text-xs py-3 text-center">
+                          {{ $t('common.noData') }}
                         </SelectItem>
                       </SelectContent>
                     </Select>

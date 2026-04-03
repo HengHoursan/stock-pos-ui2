@@ -64,8 +64,7 @@ import {
   XCircle
 } from "lucide-vue-next";
 import { UnitService } from "@/services/unit/unit.service";
-import type { Unit } from "@/types/unit";
-import type { PaginationMeta } from "@/types/common";
+import type { Unit, PaginationMeta } from "@/types";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
 
@@ -76,7 +75,7 @@ const unitService = new UnitService();
 const units = ref<Unit[]>([]);
 const loading = ref(true);
 const searchQuery = ref("");
-const statusFilter = ref("all");
+const statusFilter = ref<string | undefined>(undefined);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -107,8 +106,8 @@ async function fetchUnits() {
       payload.search = searchQuery.value.trim();
     }
 
-    if (statusFilter.value !== "all") {
-      payload.filter = statusFilter.value;
+    if (statusFilter.value && statusFilter.value !== "all") {
+      payload.filter = { status: statusFilter.value };
     }
 
     const response = await unitService.getList(payload);
@@ -231,7 +230,7 @@ onMounted(() => {
         />
         <Input
           type="search"
-          :placeholder="$t('crud.search', { module: $t('modules.brand') })"
+          :placeholder="$t('crud.search', { module: $t('modules.unit') })"
           class="pl-8"
           v-model="searchQuery"
         />
@@ -239,7 +238,7 @@ onMounted(() => {
 
       <Select v-model="statusFilter">
         <SelectTrigger class="w-full sm:w-[180px]">
-          <SelectValue :placeholder="$t('fields.filterByStatus')" />
+          <SelectValue :placeholder="$t('crud.filterByStatus')" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">{{ $t('crud.allStatus') }}</SelectItem>
@@ -370,12 +369,12 @@ onMounted(() => {
                 <Tag class="h-10 w-10 opacity-10" />
                 <p class="font-medium">{{ $t('crud.noRecords', { module: $t('modules.units') }) }}</p>
                 <Button
-                  v-if="searchQuery || statusFilter !== 'all'"
+                  v-if="searchQuery || (statusFilter && statusFilter !== 'all')"
                   variant="outline"
                   size="sm"
                   @click="
                     searchQuery = '';
-                    statusFilter = 'all';
+                    statusFilter = undefined;
                   "
                   class="h-8"
                 >

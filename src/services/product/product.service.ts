@@ -3,9 +3,11 @@ import type {
   Product, 
   CreateProductRequest, 
   UpdateProductRequest, 
-  UpdateProductStatusRequest 
-} from "@/types/product";
-import type { ApiResponse, PaginationRequest, PaginationResponse } from "@/types/common";
+  UpdateProductStatusRequest,
+  ApiResponse, 
+  PaginationRequest, 
+  PaginationResponse 
+} from "@/types";
 
 export class ProductService extends BaseService {
   async getAll(): Promise<ApiResponse<Product[]>> {

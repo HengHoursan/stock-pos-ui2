@@ -1,6 +1,12 @@
 import { BaseService } from "@/services/base/base.service";
-import type { ApiResponse, PaginationResponse } from "@/types/common";
-import type { Currency, CreateCurrencyRequest, UpdateCurrencyRequest, UpdateCurrencyStatusRequest } from "@/types/currency";
+import type { 
+  Currency, 
+  CreateCurrencyRequest, 
+  UpdateCurrencyRequest, 
+  UpdateCurrencyStatusRequest,
+  ApiResponse, 
+  PaginationResponse 
+} from "@/types";
 
 export class CurrencyService extends BaseService {
   async getAll(): Promise<ApiResponse<Currency[]>> {

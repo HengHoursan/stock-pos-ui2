@@ -3,9 +3,11 @@ import type {
   Customer, 
   CreateCustomerRequest, 
   UpdateCustomerRequest, 
-  UpdateCustomerStatusRequest 
-} from "@/types/customer";
-import type { ApiResponse, PaginationRequest, PaginationResponse } from "@/types/common";
+  UpdateCustomerStatusRequest,
+  ApiResponse, 
+  PaginationRequest, 
+  PaginationResponse 
+} from "@/types";
 
 export class CustomerService extends BaseService {
   async getAll(): Promise<ApiResponse<Customer[]>> {

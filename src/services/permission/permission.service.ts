@@ -1,6 +1,11 @@
 import { BaseService } from "@/services/base/base.service";
-import type { ApiResponse, PaginationResponse } from "@/types/common";
-import type { Permission, CreatePermissionRequest, UpdatePermissionRequest } from "@/types/permission";
+import type { 
+  Permission, 
+  CreatePermissionRequest, 
+  UpdatePermissionRequest,
+  ApiResponse, 
+  PaginationResponse 
+} from "@/types";
 
 export class PermissionService extends BaseService {
   async getAll(): Promise<ApiResponse<Permission[]>> {

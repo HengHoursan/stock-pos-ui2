@@ -62,9 +62,8 @@ import {
   Loader2,
 } from "lucide-vue-next";
 import { CustomerService } from "@/services/customer/customer.service";
-import type { Customer } from "@/types/customer";
-import { CustomerType } from "@/types/customer_type";
-import type { PaginationMeta } from "@/types/common";
+import type { Customer, PaginationMeta } from "@/types";
+import { CustomerType } from "@/types";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
 
@@ -74,7 +73,8 @@ const customerService = new CustomerService();
 const customers = ref<Customer[]>([]);
 const loading = ref(true);
 const searchQuery = ref("");
-const statusFilter = ref("all");
+const statusFilter = ref<string | undefined>(undefined);
+const customerTypeFilter = ref<string | undefined>(undefined);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -105,8 +105,16 @@ async function fetchCustomers() {
       payload.search = searchQuery.value.trim();
     }
 
-    if (statusFilter.value !== "all") {
-      payload.filter = statusFilter.value;
+    const filters: Record<string, string> = {};
+    if (statusFilter.value && statusFilter.value !== "all") {
+      filters.status = statusFilter.value;
+    }
+    if (customerTypeFilter.value && customerTypeFilter.value !== "all") {
+      filters.customerType = customerTypeFilter.value;
+    }
+
+    if (Object.keys(filters).length > 0) {
+      payload.filter = filters;
     }
 
     const response = await customerService.getList(payload);
@@ -131,7 +139,7 @@ watch(searchQuery, () => {
   debouncedFetch();
 });
 
-watch(statusFilter, () => {
+watch([statusFilter, customerTypeFilter], () => {
   pagination.page = 1;
   fetchCustomers();
 });
@@ -245,12 +253,23 @@ onMounted(() => {
 
       <Select v-model="statusFilter">
         <SelectTrigger class="w-full sm:w-[180px]">
-          <SelectValue :placeholder="$t('fields.filterByStatus')" />
+          <SelectValue :placeholder="$t('crud.filterByStatus')" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">{{ $t("crud.allStatus") }}</SelectItem>
           <SelectItem value="active">{{ $t("crud.active") }}</SelectItem>
           <SelectItem value="inactive">{{ $t("crud.inactive") }}</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select v-model="customerTypeFilter">
+        <SelectTrigger class="w-full sm:w-[180px]">
+          <SelectValue :placeholder="$t('crud.filterByType')" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{{ $t("crud.allTypes") }}</SelectItem>
+          <SelectItem :value="String(CustomerType.DINE_IN)">{{ $t('fields.dineIn') }}</SelectItem>
+          <SelectItem :value="String(CustomerType.DINE_OUT)">{{ $t('fields.dineOut') }}</SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -383,12 +402,13 @@ onMounted(() => {
                   {{ $t("crud.noRecords", { module: $t("modules.customers") }) }}
                 </p>
                 <Button
-                  v-if="searchQuery || statusFilter !== 'all'"
+                  v-if="searchQuery || (statusFilter && statusFilter !== 'all') || (customerTypeFilter && customerTypeFilter !== 'all')"
                   variant="outline"
                   size="sm"
                   @click="
                     searchQuery = '';
-                    statusFilter = 'all';
+                    statusFilter = undefined;
+                    customerTypeFilter = undefined;
                   "
                   class="h-8"
                 >

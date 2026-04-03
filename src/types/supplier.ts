@@ -1,4 +1,4 @@
-import { CustomerType } from './customer_type';
+import { CustomerType } from './enums/customer_type';
 
 export interface Supplier {
   id: number;

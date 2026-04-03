@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/card";
 import { ChevronLeft, Loader2 } from "lucide-vue-next";
 import { UnitService } from "@/services/unit/unit.service";
-import type { Unit } from "@/types/unit";
+import type { Unit } from "@/types";
 import { toast } from "vue-sonner";
 
 
@@ -217,12 +217,17 @@ onMounted(() => {
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="0">{{ $t('crud.none') }}</SelectItem>
-                    <SelectItem
-                      v-for="u in parentUnits"
-                      :key="u.id"
-                      :value="String(u.id)"
-                    >
-                      {{ u.name }}
+                    <template v-if="parentUnits.length > 0">
+                      <SelectItem
+                        v-for="u in parentUnits"
+                        :key="u.id"
+                        :value="String(u.id)"
+                      >
+                        {{ u.name }}
+                      </SelectItem>
+                    </template>
+                    <SelectItem v-else disabled value="none" class="text-muted-foreground italic text-xs py-3 text-center">
+                      {{ $t('common.noData') }}
                     </SelectItem>
                   </SelectContent>
                 </Select>

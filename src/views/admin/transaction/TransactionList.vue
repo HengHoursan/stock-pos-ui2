@@ -41,8 +41,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-
 import {
   Pagination,
   PaginationContent,
@@ -56,47 +54,53 @@ import {
   Plus,
   Search,
   Eye,
-  Pencil,
   Trash2,
   ArrowUpDown,
-  Tag,
+  History,
   RefreshCw,
   Loader2,
+  ArrowUpRight,
+  ArrowDownLeft,
+  Settings2,
 } from "lucide-vue-next";
-import { BrandService } from "@/services/brand/brand.service";
-import type { Brand, PaginationMeta } from "@/types";
+import { TransactionService } from "@/services/transaction/transaction.service";
+import { ProductService } from "@/services/product/product.service";
+import type { Transaction, PaginationMeta } from "@/types";
+import { TransactionType } from "@/types";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
+import { formatDateTime } from "@/utils/format";
 
 const router = useRouter();
-const brandService = new BrandService();
+const transactionService = new TransactionService();
+const productService = new ProductService();
 
-const brands = ref<Brand[]>([]);
+const transactions = ref<Transaction[]>([]);
+const products = ref<any[]>([]); // Using any for simplicity as we only need id/name
+
 const loading = ref(true);
 const searchQuery = ref("");
-const statusFilter = ref<string | undefined>(undefined);
+const typeFilter = ref<string | undefined>(undefined);
+const productIdFilter = ref<string | undefined>(undefined);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
   limit: 10,
   totalItems: 0,
   totalPages: 0,
-  sortBy: "createdAt",
+  sortBy: "transactionDate",
   sortOrder: "desc",
 });
 
 const isDeleteDialogOpen = ref(false);
-const brandToDelete = ref<number | null>(null);
+const transactionToDelete = ref<number | null>(null);
 
-async function fetchBrands() {
+async function fetchTransactions() {
   loading.value = true;
   try {
-    const pageNum = Number(pagination.page) || 1;
-    const limitNum = Number(pagination.limit) || 10;
-
     const payload: any = {
-      page: pageNum,
-      limit: limitNum,
+      page: pagination.page,
+      limit: pagination.limit,
       sortBy: pagination.sortBy,
       sortOrder: pagination.sortOrder,
     };
@@ -105,18 +109,26 @@ async function fetchBrands() {
       payload.search = searchQuery.value.trim();
     }
 
-    if (statusFilter.value && statusFilter.value !== "all") {
-      payload.filter = { status: statusFilter.value };
+    const filters: Record<string, string> = {};
+    if (typeFilter.value && typeFilter.value !== "all") {
+      filters.transactionType = typeFilter.value;
+    }
+    if (productIdFilter.value && productIdFilter.value !== "all") {
+      filters.productId = productIdFilter.value;
     }
 
-    const response = await brandService.getList(payload);
+    if (Object.keys(filters).length > 0) {
+      payload.filter = filters;
+    }
+
+    const response = await transactionService.getList(payload);
     if (response.success && response.data) {
-      brands.value = response.data.data;
+      transactions.value = response.data.data;
       Object.assign(pagination, response.data.meta);
     }
   } catch (error) {
-    console.error("Fetch brands error:", error);
-    toast.error(t('crud.errorFetch', { module: t('modules.brands') }));
+    console.error("Fetch transactions error:", error);
+    toast.error(t("crud.errorFetch", { module: t("modules.transactions") }));
   } finally {
     loading.value = false;
   }
@@ -124,68 +136,57 @@ async function fetchBrands() {
 
 const debouncedFetch = useDebounceFn(() => {
   pagination.page = 1;
-  fetchBrands();
+  fetchTransactions();
 }, 500);
 
 watch(searchQuery, () => {
   debouncedFetch();
 });
 
-watch(statusFilter, () => {
+watch([typeFilter, productIdFilter], () => {
   pagination.page = 1;
-  fetchBrands();
+  fetchTransactions();
 });
 
 watch(
   () => pagination.limit,
   () => {
     pagination.page = 1;
-    fetchBrands();
+    fetchTransactions();
   },
 );
 
 function handlePageChange(page: number) {
   pagination.page = page;
-  fetchBrands();
-}
-
-async function toggleStatus(brand: Brand) {
-  try {
-    const newStatus = !brand.status;
-    const response = await brandService.updateStatus({
-      id: brand.id,
-      status: newStatus,
-    });
-    if (response.success) {
-      brand.status = newStatus;
-      toast.success(t('crud.successUpdate', { module: t('modules.brand') }));
-    }
-  } catch (error) {
-    toast.error(t('crud.errorUpdate', { module: t('modules.brand') }));
-  }
+  fetchTransactions();
 }
 
 function openDeleteDialog(id: number) {
-  brandToDelete.value = id;
+  transactionToDelete.value = id;
   isDeleteDialogOpen.value = true;
 }
 
 async function confirmDelete() {
-  if (!brandToDelete.value) return;
+  if (!transactionToDelete.value) return;
 
   try {
-    const response = await brandService.softDelete(brandToDelete.value);
+    const response = await transactionService.delete(transactionToDelete.value);
     if (response.success) {
-      toast.success(t('crud.successDelete', { module: t('modules.brand') }));
-      fetchBrands();
+      toast.success(
+        t("crud.successDelete", { module: t("modules.transaction") }),
+      );
+      fetchTransactions();
     } else {
-      toast.error(response.message || t('crud.errorDelete', { module: t('modules.brand') }));
+      toast.error(
+        response.message ||
+          t("crud.errorDelete", { module: t("modules.transaction") }),
+      );
     }
   } catch (error) {
-    toast.error(t('crud.errorDelete', { module: t('modules.brand') }));
+    toast.error(t("crud.errorDelete", { module: t("modules.transaction") }));
   } finally {
     isDeleteDialogOpen.value = false;
-    brandToDelete.value = null;
+    transactionToDelete.value = null;
   }
 }
 
@@ -196,11 +197,52 @@ function handleSort(column: string) {
     pagination.sortBy = column;
     pagination.sortOrder = "asc";
   }
-  fetchBrands();
+  fetchTransactions();
+}
+
+function getTypeInfo(type: TransactionType) {
+  switch (type) {
+    case TransactionType.IN:
+      return {
+        label: t("fields.stockIn"),
+        color: "bg-green-500/10 text-green-600 border-green-500/20",
+        icon: ArrowUpRight,
+      };
+    case TransactionType.OUT:
+      return {
+        label: t("fields.stockOut"),
+        color: "bg-red-500/10 text-red-600 border-red-500/20",
+        icon: ArrowDownLeft,
+      };
+    case TransactionType.ADJUSTMENT:
+      return {
+        label: t("fields.adjustment"),
+        color: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+        icon: Settings2,
+      };
+    default:
+      return {
+        label: "Unknown",
+        color: "bg-gray-500/10 text-gray-600 border-gray-500/20",
+        icon: History,
+      };
+  }
+}
+
+async function fetchFilterOptions() {
+  try {
+    const response = await productService.getAll();
+    if (response.success) {
+      products.value = response.data || [];
+    }
+  } catch (error) {
+    console.error("Fetch filter options error:", error);
+  }
 }
 
 onMounted(() => {
-  fetchBrands();
+  fetchTransactions();
+  fetchFilterOptions();
 });
 </script>
 
@@ -208,20 +250,20 @@ onMounted(() => {
   <div class="space-y-4">
     <div class="flex items-center justify-between">
       <h2 class="text-3xl font-bold tracking-tight text-foreground">
-        {{ $t("modules.brands") }}
+        {{ $t("modules.transactions") }}
       </h2>
       <div class="flex items-center gap-2">
         <Button
           variant="outline"
           size="icon"
-          @click="fetchBrands"
+          @click="fetchTransactions"
           :disabled="loading"
         >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button @click="router.push('/admin/brands/create')">
+        <Button @click="router.push('/admin/transactions/create')">
           <Plus class="mr-2 h-4 w-4" />{{ $t("crud.createBtn") }}
-          {{ $t("modules.brand") }}</Button
+          {{ $t("modules.transaction") }}</Button
         >
       </div>
     </div>
@@ -233,20 +275,41 @@ onMounted(() => {
         />
         <Input
           type="search"
-          :placeholder="$t('crud.search', { module: $t('modules.brand') })"
+          :placeholder="
+            $t('crud.search', { module: $t('modules.transaction') })
+          "
           class="pl-8"
           v-model="searchQuery"
         />
       </div>
 
-      <Select v-model="statusFilter">
+      <Select v-model="typeFilter">
         <SelectTrigger class="w-full sm:w-[180px]">
-          <SelectValue :placeholder="$t('crud.filterByStatus')" />
+          <SelectValue :placeholder="$t('crud.filterByType')" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">{{ $t("crud.allStatus") }}</SelectItem>
-          <SelectItem value="active">{{ $t("crud.active") }}</SelectItem>
-          <SelectItem value="inactive">{{ $t("crud.inactive") }}</SelectItem>
+          <SelectItem value="all">{{ $t("crud.allTypes") }}</SelectItem>
+          <SelectItem :value="String(TransactionType.IN)">{{
+            $t("fields.stockIn")
+          }}</SelectItem>
+          <SelectItem :value="String(TransactionType.OUT)">{{
+            $t("fields.stockOut")
+          }}</SelectItem>
+          <SelectItem :value="String(TransactionType.ADJUSTMENT)">{{
+            $t("fields.adjustment")
+          }}</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select v-model="productIdFilter">
+        <SelectTrigger class="w-full sm:w-[220px]">
+          <SelectValue :placeholder="$t('crud.filterByProduct')" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{{ $t("modules.products") }}</SelectItem>
+          <SelectItem v-for="product in products" :key="product.id" :value="String(product.id)">
+            {{ product.name }}
+          </SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -256,79 +319,93 @@ onMounted(() => {
         <TableHeader>
           <TableRow>
             <TableHead class="w-[20px]">#</TableHead>
-            <TableHead class="w-[180px]">{{ $t("fields.code") }}</TableHead>
-            <TableHead class="w-[250px]">{{ $t("crud.image") }}</TableHead>
             <TableHead>
               <Button
                 variant="ghost"
-                @click="handleSort('name')"
+                @click="handleSort('transactionDate')"
                 class="-ml-4 h-8 font-medium"
-                >{{ $t("fields.name") }}<ArrowUpDown class="ml-1 h-3 w-3" />
+                >{{ $t("fields.transactionDate")
+                }}<ArrowUpDown class="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
-            <TableHead>{{ $t("fields.slug") }}</TableHead>
-            <TableHead class="max-w-[200px]">{{
-              $t("fields.description")
+            <TableHead>{{ $t("fields.transactionCode") }}</TableHead>
+            <TableHead>{{ $t("fields.transactionType") }}</TableHead>
+            <TableHead>{{ $t("modules.product") }}</TableHead>
+            <TableHead class="text-right">{{
+              $t("fields.beginningStock")
             }}</TableHead>
-            <TableHead>{{ $t("fields.status") }}</TableHead>
+            <TableHead class="text-right">{{
+              $t("fields.quantity")
+            }}</TableHead>
+            <TableHead class="text-right">{{
+              $t("fields.afterStock")
+            }}</TableHead>
             <TableHead class="text-right">{{ $t("crud.actions") }}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow v-if="loading && brands.length === 0">
-            <TableCell colspan="8" class="h-24 text-center">
+          <TableRow v-if="loading && transactions.length === 0">
+            <TableCell colspan="9" class="h-24 text-center">
               <div
                 class="flex items-center justify-center text-muted-foreground italic text-sm"
               >
                 <Loader2 class="h-4 w-4 animate-spin mr-2" />
-                <span>{{ $t('crud.fetchingData') }}</span>
+                <span>{{ $t("crud.fetchingData") }}</span>
               </div>
             </TableCell>
           </TableRow>
-          <template v-else-if="brands.length > 0">
-            <TableRow v-for="(brand, index) in brands" :key="brand.id">
+          <template v-else-if="transactions.length > 0">
+            <TableRow
+              v-for="(transaction, index) in transactions"
+              :key="transaction.id"
+            >
               <TableCell class="font-medium text-muted-foreground">
                 {{ (pagination.page - 1) * pagination.limit + index + 1 }}
+              </TableCell>
+              <TableCell class="text-sm font-medium">
+                {{ formatDateTime(transaction.transactionDate) }}
               </TableCell>
               <TableCell>
                 <code
                   class="bg-muted px-2 py-0.5 rounded text-[10px] font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
-                  >{{ brand.code }}</code
+                  >{{ transaction.transactionCode }}</code
                 >
               </TableCell>
               <TableCell>
-                <Avatar
-                  class="h-9 w-9 rounded-lg border bg-muted transition-transform hover:scale-105"
-                >
-                  <AvatarImage
-                    v-if="brand.imageUrl"
-                    :src="brand.imageUrl"
-                    :alt="brand.name"
-                  />
-                  <AvatarFallback class="rounded-lg">
-                    <Tag class="h-4 w-4 text-muted-foreground/40" />
-                  </AvatarFallback>
-                </Avatar>
-              </TableCell>
-              <TableCell class="font-semibold text-foreground/90">{{
-                brand.name
-              }}</TableCell>
-              <TableCell
-                class="text-muted-foreground text-xs font-medium truncate max-w-[140px] italic"
-                >{{ brand.slug }}</TableCell
-              >
-              <TableCell
-                class="text-muted-foreground text-xs truncate max-w-[200px]"
-                >{{ brand.description || "-" }}</TableCell
-              >
-              <TableCell class="w-[100px]">
                 <Badge
-                  :variant="brand.status ? 'success' : 'warning'"
-                  class="cursor-pointer font-bold px-3 transition-all hover:opacity-80 active:scale-95"
-                  @click="toggleStatus(brand)"
+                  variant="outline"
+                  :class="[
+                    getTypeInfo(transaction.transactionType).color,
+                    'font-bold px-2 py-0 border italic text-[10px] uppercase tracking-wider',
+                  ]"
                 >
-                  {{ brand.status ? $t('crud.active') : $t('crud.inactive') }}
+                  {{ getTypeInfo(transaction.transactionType).label }}
                 </Badge>
+              </TableCell>
+              <TableCell class="font-semibold text-foreground/90">
+                {{ transaction.product?.name || "-" }}
+              </TableCell>
+              <TableCell class="text-right text-muted-foreground font-mono">
+                {{ transaction.beginningStock }}
+              </TableCell>
+              <TableCell
+                class="text-right font-bold font-mono"
+                :class="
+                  transaction.transactionType === TransactionType.IN
+                    ? 'text-green-600'
+                    : transaction.transactionType === TransactionType.OUT
+                      ? 'text-red-600'
+                      : 'text-blue-600'
+                "
+              >
+                {{
+                  transaction.transactionType === TransactionType.OUT
+                    ? "-"
+                    : "+"
+                }}{{ transaction.quantity }}
+              </TableCell>
+              <TableCell class="text-right font-bold text-foreground font-mono">
+                {{ transaction.afterStock }}
               </TableCell>
               <TableCell class="text-right">
                 <DropdownMenu>
@@ -348,25 +425,19 @@ onMounted(() => {
                     >
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      @click="router.push(`/admin/brands/${brand.id}`)"
+                      @click="
+                        router.push(`/admin/transactions/${transaction.id}`)
+                      "
                       class="cursor-pointer"
                     >
                       <Eye class="mr-2 h-4 w-4 opacity-70" />{{
                         $t("crud.viewBtn")
                       }}
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      @click="router.push(`/admin/brands/${brand.id}/edit`)"
-                      class="cursor-pointer"
-                    >
-                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{
-                        $t("crud.editBtn")
-                      }}</DropdownMenuItem
-                    >
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       class="text-destructive focus:text-destructive cursor-pointer font-medium"
-                      @click="openDeleteDialog(brand.id)"
+                      @click="openDeleteDialog(transaction.id)"
                     >
                       <Trash2 class="mr-2 h-4 w-4" />{{
                         $t("crud.delete")
@@ -379,25 +450,28 @@ onMounted(() => {
           </template>
           <TableRow v-else>
             <TableCell
-              colspan="8"
+              colspan="9"
               class="h-32 text-center text-muted-foreground"
             >
               <div class="flex flex-col items-center justify-center gap-3">
-                <Tag class="h-10 w-10 opacity-10" />
+                <History class="h-10 w-10 opacity-10" />
                 <p class="font-medium">
-                  {{ $t("crud.noRecords", { module: $t("modules.brands") }) }}
+                  {{
+                    $t("crud.noRecords", { module: $t("modules.transactions") })
+                  }}
                 </p>
                 <Button
-                  v-if="searchQuery || (statusFilter && statusFilter !== 'all')"
+                  v-if="searchQuery || (typeFilter && typeFilter !== 'all') || (productIdFilter && productIdFilter !== 'all')"
                   variant="outline"
                   size="sm"
                   @click="
                     searchQuery = '';
-                    statusFilter = undefined;
+                    typeFilter = undefined;
+                    productIdFilter = undefined;
                   "
                   class="h-8"
                 >
-                  {{ $t('crud.resetFilters') }}
+                  {{ $t("crud.resetFilters") }}
                 </Button>
               </div>
             </TableCell>
@@ -413,7 +487,7 @@ onMounted(() => {
         <div class="flex items-center gap-2">
           <span
             class="text-sm font-medium text-muted-foreground whitespace-nowrap"
-            >{{ $t('crud.rowsPerPage') }}</span
+            >{{ $t("crud.rowsPerPage") }}</span
           >
           <Select
             :model-value="pagination.limit.toString()"
@@ -468,13 +542,16 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Delete Confirmation Dialog -->
     <AlertDialog v-model:open="isDeleteDialogOpen">
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{{ $t('crud.confirmDelete') }}</AlertDialogTitle>
+          <AlertDialogTitle>{{ $t("crud.confirmDelete") }}</AlertDialogTitle>
           <AlertDialogDescription>
-            {{ $t('crud.confirmDeleteDesc', { module: $t('modules.brand') }) }}
+            {{
+              $t("crud.confirmDeleteDesc", {
+                module: $t("modules.transaction"),
+              })
+            }}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

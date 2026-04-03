@@ -3,9 +3,11 @@ import type {
   Brand, 
   CreateBrandRequest, 
   UpdateBrandRequest, 
-  UpdateBrandStatusRequest 
-} from "@/types/brand";
-import type { ApiResponse, PaginationRequest, PaginationResponse } from "@/types/common";
+  UpdateBrandStatusRequest,
+  ApiResponse, 
+  PaginationRequest, 
+  PaginationResponse 
+} from "@/types";
 
 export class BrandService extends BaseService {
   async getAll(): Promise<ApiResponse<Brand[]>> {

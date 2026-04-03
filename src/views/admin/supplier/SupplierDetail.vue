@@ -19,11 +19,10 @@ import {
   MapPin,
   Settings,
   AlignLeft,
-  Barcode,
 } from "lucide-vue-next";
 import { SupplierService } from "@/services/supplier/supplier.service";
-import type { Supplier } from "@/types/supplier";
-import { CustomerType } from "@/types/customer_type";
+import type { Supplier } from "@/types";
+import { CustomerType } from "@/types";
 import { toast } from "vue-sonner";
 
 const router = useRouter();

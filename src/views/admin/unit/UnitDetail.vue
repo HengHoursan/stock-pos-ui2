@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, Pencil, Trash2, Loader2, Ruler, Calendar, Globe, AlignLeft, Barcode, Folder, Calculator, Coins, Type } from "lucide-vue-next";
 import { UnitService } from "@/services/unit/unit.service";
-import type { Unit } from "@/types/unit";
+import type { Unit } from "@/types";
 import { toast } from "vue-sonner";
 
 

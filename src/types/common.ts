@@ -23,7 +23,7 @@ export interface PaginationRequest {
   sortBy: string;
   sortOrder: "asc" | "desc";
   search?: string;
-  filter?: string;
+  filter?: Record<string, string>;
 }
 
 // Matches backend PaginationResponse<T>

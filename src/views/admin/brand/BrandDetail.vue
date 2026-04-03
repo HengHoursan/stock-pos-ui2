@@ -19,7 +19,7 @@ import {
   Folder,
 } from "lucide-vue-next";
 import { BrandService } from "@/services/brand/brand.service";
-import type { Brand } from "@/types/brand";
+import type { Brand } from "@/types";
 import { toast } from "vue-sonner";
 
 const router = useRouter();

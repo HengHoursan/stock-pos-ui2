@@ -64,18 +64,36 @@ import {
   Ruler
 } from "lucide-vue-next";
 import { ProductService } from "@/services/product/product.service";
-import type { Product } from "@/types/product";
-import type { PaginationMeta } from "@/types/common";
+import { CategoryService } from "@/services/category/category.service";
+import { BrandService } from "@/services/brand/brand.service";
+import { UnitService } from "@/services/unit/unit.service";
+import type { 
+  Product, 
+  Category, 
+  Brand, 
+  Unit, 
+  PaginationMeta 
+} from "@/types";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
 
 const router = useRouter();
 const productService = new ProductService();
+const categoryService = new CategoryService();
+const brandService = new BrandService();
+const unitService = new UnitService();
 
 const products = ref<Product[]>([]);
+const categories = ref<Category[]>([]);
+const brands = ref<Brand[]>([]);
+const units = ref<Unit[]>([]);
+
 const loading = ref(true);
 const searchQuery = ref("");
-const statusFilter = ref("all");
+const statusFilter = ref<string | undefined>(undefined);
+const categoryIdFilter = ref<string | undefined>(undefined);
+const brandIdFilter = ref<string | undefined>(undefined);
+const unitIdFilter = ref<string | undefined>(undefined);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -106,8 +124,23 @@ async function fetchProducts() {
       payload.search = searchQuery.value.trim();
     }
 
-    if (statusFilter.value !== "all") {
-      payload.filter = statusFilter.value;
+    // Build the filter object
+    const filters: Record<string, string> = {};
+    if (statusFilter.value && statusFilter.value !== "all") {
+      filters.status = statusFilter.value;
+    }
+    if (categoryIdFilter.value && categoryIdFilter.value !== "all") {
+      filters.categoryId = categoryIdFilter.value;
+    }
+    if (brandIdFilter.value && brandIdFilter.value !== "all") {
+      filters.brandId = brandIdFilter.value;
+    }
+    if (unitIdFilter.value && unitIdFilter.value !== "all") {
+      filters.unitId = unitIdFilter.value;
+    }
+
+    if (Object.keys(filters).length > 0) {
+      payload.filter = filters;
     }
 
     const response = await productService.getList(payload);
@@ -132,7 +165,7 @@ watch(searchQuery, () => {
   debouncedFetch();
 });
 
-watch(statusFilter, () => {
+watch([statusFilter, categoryIdFilter, brandIdFilter, unitIdFilter], () => {
   pagination.page = 1;
   fetchProducts();
 });
@@ -204,8 +237,24 @@ const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
 };
 
+async function fetchFilterOptions() {
+  try {
+    const [catRes, brandRes, unitRes] = await Promise.all([
+      categoryService.getAll(),
+      brandService.getAll(),
+      unitService.getAll()
+    ]);
+    if (catRes.success) categories.value = catRes.data || [];
+    if (brandRes.success) brands.value = brandRes.data || [];
+    if (unitRes.success) units.value = unitRes.data || [];
+  } catch (error) {
+    console.error("Fetch filter options error:", error);
+  }
+}
+
 onMounted(() => {
   fetchProducts();
+  fetchFilterOptions();
 });
 </script>
 
@@ -242,12 +291,48 @@ onMounted(() => {
 
       <Select v-model="statusFilter">
         <SelectTrigger class="w-full sm:w-[180px]">
-          <SelectValue :placeholder="$t('fields.filterByStatus')" />
+          <SelectValue :placeholder="$t('crud.filterByStatus')" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">{{ $t('crud.allStatus') }}</SelectItem>
           <SelectItem value="active">{{ $t('crud.active') }}</SelectItem>
           <SelectItem value="inactive">{{ $t('crud.inactive') }}</SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select v-model="categoryIdFilter">
+        <SelectTrigger class="w-full sm:w-[180px]">
+          <SelectValue :placeholder="$t('crud.filterByCategory')" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{{ $t('modules.categories') }}</SelectItem>
+          <SelectItem v-for="cat in categories" :key="cat.id" :value="cat.id.toString()">
+            {{ cat.name }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select v-model="brandIdFilter">
+        <SelectTrigger class="w-full sm:w-[180px]">
+          <SelectValue :placeholder="$t('crud.filterByBrand')" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{{ $t('modules.brands') }}</SelectItem>
+          <SelectItem v-for="brand in brands" :key="brand.id" :value="brand.id.toString()">
+            {{ brand.name }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+
+      <Select v-model="unitIdFilter">
+        <SelectTrigger class="w-full sm:w-[180px]">
+          <SelectValue :placeholder="$t('crud.filterByUnit')" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{{ $t('modules.units') }}</SelectItem>
+          <SelectItem v-for="unit in units" :key="unit.id" :value="unit.id.toString()">
+            {{ unit.name }}
+          </SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -410,12 +495,15 @@ onMounted(() => {
                 <Package class="h-10 w-10 opacity-10" />
                 <p class="font-medium">{{ $t('crud.noRecords', { module: $t('modules.products') }) }}</p>
                 <Button
-                  v-if="searchQuery || statusFilter !== 'all'"
+                  v-if="searchQuery || (statusFilter && statusFilter !== 'all') || (categoryIdFilter && categoryIdFilter !== 'all') || (brandIdFilter && brandIdFilter !== 'all') || (unitIdFilter && unitIdFilter !== 'all')"
                   variant="outline"
                   size="sm"
                   @click="
                     searchQuery = '';
-                    statusFilter = 'all';
+                    statusFilter = undefined;
+                    categoryIdFilter = undefined;
+                    brandIdFilter = undefined;
+                    unitIdFilter = undefined;
                   "
                   class="h-8"
                 >

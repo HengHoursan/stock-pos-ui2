@@ -17,7 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Textarea } from "@/components/ui/Textarea";
 
 import {
   Select,
@@ -37,7 +37,7 @@ import {
 } from "@/components/ui/card";
 import { ChevronLeft, Loader2, UserPlus, Phone, MapPin, Settings } from "lucide-vue-next";
 import { SupplierService } from "@/services/supplier/supplier.service";
-import { CustomerType } from "@/types/customer_type";
+import { CustomerType } from "@/types";
 import { toast } from "vue-sonner";
 
 const router = useRouter();

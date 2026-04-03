@@ -1,6 +1,13 @@
 import { BaseService } from "@/services/base/base.service";
-import type { User, CreateUserRequest, UpdateUserRequest, UpdateUserStatusRequest } from "@/types/auth";
-import type { ApiResponse, PaginationRequest, PaginationResponse } from "@/types/common";
+import type { 
+  User, 
+  CreateUserRequest, 
+  UpdateUserRequest, 
+  UpdateUserStatusRequest,
+  ApiResponse, 
+  PaginationRequest, 
+  PaginationResponse 
+} from "@/types";
 
 export class UserService extends BaseService {
   async getMe(): Promise<ApiResponse<User>> {
