@@ -34,6 +34,7 @@ const routes: RouteRecordRaw[] = [
         path: 'dashboard',
         name: 'Dashboard',
         component: () => import('../views/admin/dashboard/DashboardIndex.vue'),
+        meta: { title: 'menu.dashboard' },
       },
 
       // Category CRUD
@@ -41,21 +42,25 @@ const routes: RouteRecordRaw[] = [
         path: 'admin/categories',
         name: 'Categories',
         component: () => import('../views/admin/category/CategoryList.vue'),
+        meta: { title: 'menu.allCategories' },
       },
       {
         path: 'admin/categories/create',
         name: 'CategoryCreate',
         component: () => import('../views/admin/category/CategoryCreate.vue'),
+        meta: { title: 'menu.addCategory' },
       },
       {
         path: 'admin/categories/:id',
         name: 'CategoryDetail',
         component: () => import('../views/admin/category/CategoryDetail.vue'),
+        meta: { title: 'crud.viewBtn' },
       },
       {
         path: 'admin/categories/:id/edit',
         name: 'CategoryEdit',
         component: () => import('../views/admin/category/CategoryEdit.vue'),
+        meta: { title: 'crud.editBtn' },
       },
 
       // Brand CRUD
@@ -63,21 +68,25 @@ const routes: RouteRecordRaw[] = [
         path: 'admin/brands',
         name: 'Brands',
         component: () => import('../views/admin/brand/BrandList.vue'),
+        meta: { title: 'menu.allBrands' },
       },
       {
         path: 'admin/brands/create',
         name: 'BrandCreate',
         component: () => import('../views/admin/brand/BrandCreate.vue'),
+        meta: { title: 'menu.addBrand' },
       },
       {
         path: 'admin/brands/:id',
         name: 'BrandDetail',
         component: () => import('../views/admin/brand/BrandDetail.vue'),
+        meta: { title: 'crud.viewBtn' },
       },
       {
         path: 'admin/brands/:id/edit',
         name: 'BrandEdit',
         component: () => import('../views/admin/brand/BrandEdit.vue'),
+        meta: { title: 'crud.editBtn' },
       },
 
       // Unit CRUD
@@ -85,21 +94,25 @@ const routes: RouteRecordRaw[] = [
         path: 'admin/units',
         name: 'Units',
         component: () => import('../views/admin/unit/UnitList.vue'),
+        meta: { title: 'menu.allUnits' },
       },
       {
         path: 'admin/units/create',
         name: 'UnitCreate',
         component: () => import('../views/admin/unit/UnitCreate.vue'),
+        meta: { title: 'menu.addUnit' },
       },
       {
         path: 'admin/units/:id',
         name: 'UnitDetail',
         component: () => import('../views/admin/unit/UnitDetail.vue'),
+        meta: { title: 'crud.viewBtn' },
       },
       {
         path: 'admin/units/:id/edit',
         name: 'UnitEdit',
         component: () => import('../views/admin/unit/UnitEdit.vue'),
+        meta: { title: 'crud.editBtn' },
       },
 
       // Currency CRUD
@@ -107,21 +120,25 @@ const routes: RouteRecordRaw[] = [
         path: 'admin/currencies',
         name: 'Currencies',
         component: () => import('../views/admin/currency/CurrencyList.vue'),
+        meta: { title: 'menu.allCurrencies' },
       },
       {
         path: 'admin/currencies/create',
         name: 'CurrencyCreate',
         component: () => import('../views/admin/currency/CurrencyCreate.vue'),
+        meta: { title: 'menu.addCurrency' },
       },
       {
         path: 'admin/currencies/:id',
         name: 'CurrencyDetail',
         component: () => import('../views/admin/currency/CurrencyDetail.vue'),
+        meta: { title: 'crud.viewBtn' },
       },
       {
         path: 'admin/currencies/:id/edit',
         name: 'CurrencyEdit',
         component: () => import('../views/admin/currency/CurrencyEdit.vue'),
+        meta: { title: 'crud.editBtn' },
       },
 
       // Discount CRUD
@@ -130,21 +147,25 @@ const routes: RouteRecordRaw[] = [
         path: 'admin/products',
         name: 'Products',
         component: () => import('../views/admin/product/ProductList.vue'),
+        meta: { title: 'menu.allProducts' },
       },
       {
         path: 'admin/products/create',
         name: 'ProductCreate',
         component: () => import('../views/admin/product/ProductCreate.vue'),
+        meta: { title: 'menu.addProduct' },
       },
       {
         path: 'admin/products/:id',
         name: 'ProductDetail',
         component: () => import('../views/admin/product/ProductDetail.vue'),
+        meta: { title: 'crud.viewBtn' },
       },
       {
         path: 'admin/products/:id/edit',
         name: 'ProductEdit',
         component: () => import('../views/admin/product/ProductEdit.vue'),
+        meta: { title: 'crud.editBtn' },
       },
 
       // Supplier CRUD
@@ -152,21 +173,25 @@ const routes: RouteRecordRaw[] = [
         path: 'admin/suppliers',
         name: 'Suppliers',
         component: () => import('../views/admin/supplier/SupplierList.vue'),
+        meta: { title: 'menu.allSuppliers' },
       },
       {
         path: 'admin/suppliers/create',
         name: 'SupplierCreate',
         component: () => import('../views/admin/supplier/SupplierCreate.vue'),
+        meta: { title: 'menu.addSupplier' },
       },
       {
         path: 'admin/suppliers/:id',
         name: 'SupplierDetail',
         component: () => import('../views/admin/supplier/SupplierDetail.vue'),
+        meta: { title: 'crud.viewBtn' },
       },
       {
         path: 'admin/suppliers/:id/edit',
         name: 'SupplierEdit',
         component: () => import('../views/admin/supplier/SupplierEdit.vue'),
+        meta: { title: 'crud.editBtn' },
       },
 
       // Customer CRUD
@@ -174,21 +199,25 @@ const routes: RouteRecordRaw[] = [
         path: 'admin/customers',
         name: 'Customers',
         component: () => import('../views/admin/customer/CustomerList.vue'),
+        meta: { title: 'menu.allCustomers' },
       },
       {
         path: 'admin/customers/create',
         name: 'CustomerCreate',
         component: () => import('../views/admin/customer/CustomerCreate.vue'),
+        meta: { title: 'menu.addCustomer' },
       },
       {
         path: 'admin/customers/:id',
         name: 'CustomerDetail',
         component: () => import('../views/admin/customer/CustomerDetail.vue'),
+        meta: { title: 'crud.viewBtn' },
       },
       {
         path: 'admin/customers/:id/edit',
         name: 'CustomerEdit',
         component: () => import('../views/admin/customer/CustomerEdit.vue'),
+        meta: { title: 'crud.editBtn' },
       },
 
       // Transaction CRUD
@@ -196,16 +225,19 @@ const routes: RouteRecordRaw[] = [
         path: 'admin/transactions',
         name: 'Transactions',
         component: () => import('../views/admin/transaction/TransactionList.vue'),
+        meta: { title: 'menu.allTransactions' },
       },
       {
         path: 'admin/transactions/create',
         name: 'TransactionCreate',
         component: () => import('../views/admin/transaction/TransactionCreate.vue'),
+        meta: { title: 'menu.addTransaction' },
       },
       {
         path: 'admin/transactions/:id',
         name: 'TransactionDetail',
         component: () => import('../views/admin/transaction/TransactionDetail.vue'),
+        meta: { title: 'crud.viewBtn' },
       },
     ],
   },

@@ -62,6 +62,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useAuthStore } from "@/stores/auth";
+import ModeToggle from "@/components/ModeToggle.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -177,38 +178,11 @@ function changeLanguage(code: "en" | "kh") {
 }
 
 const currentPageTitle = computed(() => {
-  // Translate current page title conditionally or just return raw
-  // In a robust app, we'd map route names to i18n keys
-  const routeName = String(route.name ?? "Page");
-  
-  const routeKeyMap: Record<string, string> = {
-    Dashboard: "menu.dashboard",
-    Categories: "menu.allCategories",
-    CategoryCreate: "menu.addCategory",
-    Brands: "menu.allBrands",
-    BrandCreate: "menu.addBrand",
-    Units: "menu.allUnits",
-    UnitCreate: "menu.addUnit",
-    Currencies: "menu.allCurrencies",
-    CurrencyCreate: "menu.addCurrency",
-    Products: "menu.allProducts",
-    ProductCreate: "menu.addProduct",
-    ProductDetail: "crud.viewBtn",
-    Suppliers: "menu.allSuppliers",
-    SupplierCreate: "menu.addSupplier",
-    SupplierEdit: "crud.editBtn",
-    Customers: "menu.allCustomers",
-    CustomerCreate: "menu.addCustomer",
-    CustomerEdit: "crud.editBtn",
-    Transactions: "menu.allTransactions",
-    TransactionCreate: "menu.addTransaction",
-    TransactionDetail: "crud.viewBtn",
-  };
-
-  if (routeKeyMap[routeName]) {
-    return t(routeKeyMap[routeName]);
+  const titleKey = route.meta.title as string | undefined;
+  if (titleKey) {
+    return t(titleKey);
   }
-  return routeName;
+  return String(route.name ?? "Page");
 });
 
 const userInitials = computed(() => {
@@ -278,12 +252,12 @@ onMounted(() => {
                           v-for="subItem in item.children"
                           :key="subItem.titleKey"
                         >
-                          <SidebarMenuSubButton as-child>
+                          <SidebarMenuSubButton as-child :class="{ 'bg-primary/10 text-primary font-semibold ring-1 ring-primary/20': route.path === subItem.url }">
                             <RouterLink :to="subItem.url">
                               <component
                                 :is="subItem.icon"
                                 v-if="subItem.icon"
-                                class="size-4"
+                                :class="['size-4', route.path === subItem.url ? 'text-primary' : 'text-muted-foreground']"
                               />
                               <span>{{ $t(subItem.titleKey) }}</span>
                             </RouterLink>
@@ -293,9 +267,9 @@ onMounted(() => {
                     </CollapsibleContent>
                   </div>
                 </Collapsible>
-                <SidebarMenuButton v-else as-child :tooltip="$t(item.titleKey)">
+                <SidebarMenuButton v-else as-child :tooltip="$t(item.titleKey)" :class="{ 'bg-primary/10 text-primary font-semibold ring-1 ring-primary/20': route.path === item.url }">
                   <RouterLink :to="item.url">
-                    <component :is="item.icon" />
+                    <component :is="item.icon" :class="route.path === item.url ? 'text-primary' : 'text-muted-foreground'" />
                     <span>{{ $t(item.titleKey) }}</span>
                   </RouterLink>
                 </SidebarMenuButton>
@@ -367,49 +341,54 @@ onMounted(() => {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink as-child>
-                  <RouterLink to="/">{{ $t('common.home') }}</RouterLink>
+                  <RouterLink to="/" class="hover:text-primary transition-colors">{{ $t('common.home') }}</RouterLink>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <template v-if="route.name !== 'Dashboard'">
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>{{ currentPageTitle }}</BreadcrumbPage>
+                  <BreadcrumbPage class="text-primary font-semibold">{{ currentPageTitle }}</BreadcrumbPage>
                 </BreadcrumbItem>
               </template>
             </BreadcrumbList>
           </Breadcrumb>
         </div>
 
-        <!-- Language Switcher: Dropdown -->
-        <DropdownMenu>
-          <DropdownMenuTrigger as-child>
-            <Button variant="outline" size="sm" class="h-8 gap-2 px-3 text-sm font-medium">
-              <img
-                :src="currentLocaleItem.flag"
-                :alt="currentLocaleItem.name"
-                class="h-3.5 w-5 rounded-sm object-cover shadow-[0_0_0_1px_rgba(0,0,0,0.10)]"
-              />
-              <span>{{ currentLocaleItem.nativeName }}</span>
-              <ChevronsUpDown class="h-3.5 w-3.5 opacity-50" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" class="w-44">
-            <DropdownMenuItem
-              v-for="lang in availableLocales"
-              :key="lang.code"
-              class="cursor-pointer gap-2"
-              @click="changeLanguage(lang.code as 'en' | 'kh')"
-            >
-              <img
-                :src="lang.flag"
-                :alt="lang.name"
-                class="h-3.5 w-5 rounded-sm object-cover shadow-[0_0_0_1px_rgba(0,0,0,0.10)]"
-              />
-              <span class="flex-1">{{ lang.name }}</span>
-              <span v-if="locale === lang.code" class="text-primary text-xs font-bold">✓</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div class="flex items-center gap-3">
+          <!-- Theme Toggle -->
+          <ModeToggle />
+
+          <!-- Language Switcher: Dropdown -->
+          <DropdownMenu>
+            <DropdownMenuTrigger as-child>
+              <Button variant="outline" size="sm" class="h-8 gap-2 px-3 text-sm font-medium border-muted-foreground/20 hover:border-primary/50 transition-colors">
+                <img
+                  :src="currentLocaleItem.flag"
+                  :alt="currentLocaleItem.name"
+                  class="h-3.5 w-5 rounded-sm object-cover shadow-[0_0_0_1px_rgba(0,0,0,0.10)]"
+                />
+                <span class="hidden sm:inline">{{ currentLocaleItem.nativeName }}</span>
+                <ChevronsUpDown class="h-3.5 w-3.5 opacity-50" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" class="w-44">
+              <DropdownMenuItem
+                v-for="lang in availableLocales"
+                :key="lang.code"
+                class="cursor-pointer gap-2"
+                @click="changeLanguage(lang.code as 'en' | 'kh')"
+              >
+                <img
+                  :src="lang.flag"
+                  :alt="lang.name"
+                  class="h-3.5 w-5 rounded-sm object-cover shadow-[0_0_0_1px_rgba(0,0,0,0.10)]"
+                />
+                <span class="flex-1">{{ lang.name }}</span>
+                <span v-if="locale === lang.code" class="text-primary text-xs font-bold">✓</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </header>
 
       <main class="flex flex-1 flex-col gap-4 p-4 w-full">
