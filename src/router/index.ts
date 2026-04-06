@@ -201,24 +201,24 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../views/admin/customer/CustomerList.vue'),
         meta: { title: 'menu.allCustomers' },
       },
-      {
+      /* {
         path: 'admin/customers/create',
         name: 'CustomerCreate',
         component: () => import('../views/admin/customer/CustomerCreate.vue'),
         meta: { title: 'menu.addCustomer' },
-      },
+      }, */
       {
         path: 'admin/customers/:id',
         name: 'CustomerDetail',
         component: () => import('../views/admin/customer/CustomerDetail.vue'),
         meta: { title: 'crud.viewBtn' },
       },
-      {
+      /* {
         path: 'admin/customers/:id/edit',
         name: 'CustomerEdit',
         component: () => import('../views/admin/customer/CustomerEdit.vue'),
         meta: { title: 'crud.editBtn' },
-      },
+      }, */
 
       // Transaction CRUD
       {

@@ -2,7 +2,7 @@
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { ref, onMounted, reactive, watch } from "vue";
-import { useRouter } from "vue-router";
+// import { useRouter } from "vue-router";
 
 import {
   Table,
@@ -12,15 +12,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
+/* import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
+} from "@/components/ui/dropdown-menu"; */
+/* import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -29,7 +29,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/components/ui/alert-dialog"; */
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -50,16 +50,15 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import {
-  MoreHorizontal,
-  Plus,
   Search,
-  Eye,
-  Pencil,
-  Trash2,
   ArrowUpDown,
   Users,
   RefreshCw,
   Loader2,
+  CheckCircle2,
+  XCircle,
+  UtensilsCrossed,
+  ShoppingBag,
 } from "lucide-vue-next";
 import { CustomerService } from "@/services/customer/customer.service";
 import type { Customer, PaginationMeta } from "@/types";
@@ -67,7 +66,7 @@ import { CustomerType } from "@/types";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
 
-const router = useRouter();
+// const router = useRouter();
 const customerService = new CustomerService();
 
 const customers = ref<Customer[]>([]);
@@ -85,8 +84,8 @@ const pagination = reactive<PaginationMeta>({
   sortOrder: "desc",
 });
 
-const isDeleteDialogOpen = ref(false);
-const customerToDelete = ref<number | null>(null);
+// const isDeleteDialogOpen = ref(false);
+// const customerToDelete = ref<number | null>(null);
 
 async function fetchCustomers() {
   loading.value = true;
@@ -124,7 +123,7 @@ async function fetchCustomers() {
     }
   } catch (error) {
     console.error("Fetch customers error:", error);
-    toast.error(t('crud.errorFetch', { module: t('modules.customers') }));
+    toast.error(t("crud.errorFetch", { module: t("modules.customers") }));
   } finally {
     loading.value = false;
   }
@@ -157,7 +156,7 @@ function handlePageChange(page: number) {
   fetchCustomers();
 }
 
-async function toggleStatus(customer: Customer) {
+/* async function toggleStatus(customer: Customer) {
   try {
     const newStatus = !customer.status;
     const response = await customerService.updateStatus({
@@ -171,9 +170,9 @@ async function toggleStatus(customer: Customer) {
   } catch (error) {
     toast.error(t('crud.errorUpdate', { module: t('modules.customer') }));
   }
-}
+} */
 
-function openDeleteDialog(id: number) {
+/* function openDeleteDialog(id: number) {
   customerToDelete.value = id;
   isDeleteDialogOpen.value = true;
 }
@@ -195,7 +194,7 @@ async function confirmDelete() {
     isDeleteDialogOpen.value = false;
     customerToDelete.value = null;
   }
-}
+} */
 
 function handleSort(column: string) {
   if (pagination.sortBy === column) {
@@ -208,7 +207,9 @@ function handleSort(column: string) {
 }
 
 function getTypeLabel(type: CustomerType) {
-  return type === CustomerType.DINE_IN ? t('fields.dineIn') : t('fields.dineOut');
+  return type === CustomerType.DINE_IN
+    ? t("fields.dineIn")
+    : t("fields.dineOut");
 }
 
 onMounted(() => {
@@ -231,10 +232,10 @@ onMounted(() => {
         >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button @click="router.push('/admin/customers/create')">
+        <!-- <Button @click="router.push('/admin/customers/create')">
           <Plus class="mr-2 h-4 w-4" />{{ $t("crud.createBtn") }}
           {{ $t("modules.customer") }}</Button
-        >
+        > -->
       </div>
     </div>
 
@@ -268,8 +269,12 @@ onMounted(() => {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">{{ $t("crud.allTypes") }}</SelectItem>
-          <SelectItem :value="String(CustomerType.DINE_IN)">{{ $t('fields.dineIn') }}</SelectItem>
-          <SelectItem :value="String(CustomerType.DINE_OUT)">{{ $t('fields.dineOut') }}</SelectItem>
+          <SelectItem :value="String(CustomerType.DINE_IN)">{{
+            $t("fields.dineIn")
+          }}</SelectItem>
+          <SelectItem :value="String(CustomerType.DINE_OUT)">{{
+            $t("fields.dineOut")
+          }}</SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -303,7 +308,7 @@ onMounted(() => {
                 class="flex items-center justify-center text-muted-foreground italic text-sm"
               >
                 <Loader2 class="h-4 w-4 animate-spin mr-2" />
-                <span>{{ $t('crud.fetchingData') }}</span>
+                <span>{{ $t("crud.fetchingData") }}</span>
               </div>
             </TableCell>
           </TableRow>
@@ -318,7 +323,9 @@ onMounted(() => {
                   >{{ customer.code }}</code
                 >
               </TableCell>
-              <TableCell class="font-semibold text-base text-foreground/90 tracking-tight">
+              <TableCell
+                class="font-semibold text-base text-foreground/90 tracking-tight"
+              >
                 {{ customer.name }}
               </TableCell>
               <TableCell class="text-muted-foreground text-sm">{{
@@ -327,24 +334,47 @@ onMounted(() => {
               <TableCell class="text-muted-foreground text-sm">{{
                 customer.email || "-"
               }}</TableCell>
-              <TableCell class="text-muted-foreground text-sm font-mono italic">{{
-                customer.phoneNumber || "-"
-              }}</TableCell>
+              <TableCell
+                class="text-muted-foreground text-sm font-mono italic"
+                >{{ customer.phoneNumber || "-" }}</TableCell
+              >
               <TableCell>
-                <Badge variant="outline" class="font-medium px-2 py-0 border-primary/20 text-primary bg-primary/5">
-                  {{ getTypeLabel(customer.type) }}
+                <Badge
+                  variant="outline"
+                  :class="[
+                    'flex w-fit items-center gap-1.5 px-3 py-1 font-bold transition-all',
+                    customer.type === CustomerType.DINE_IN
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      : 'bg-orange-50 text-orange-700 border-orange-200',
+                  ]"
+                >
+                  <UtensilsCrossed
+                    v-if="customer.type === CustomerType.DINE_IN"
+                    class="h-3.5 w-3.5"
+                  />
+
+                  <ShoppingBag v-else class="h-3.5 w-3.5" />
+
+                  <span class="text-[10px] uppercase tracking-wider">{{
+                    getTypeLabel(customer.type)
+                  }}</span>
                 </Badge>
               </TableCell>
               <TableCell class="w-[100px]">
                 <Badge
                   :variant="customer.status ? 'success' : 'warning'"
-                  class="cursor-pointer font-bold px-3 transition-all hover:opacity-80 active:scale-95"
-                  @click="toggleStatus(customer)"
+                  class="flex items-center gap-1.5 px-3 py-1 font-bold cursor-default"
                 >
-                  {{ customer.status ? $t('crud.active') : $t('crud.inactive') }}
+                  <CheckCircle2 v-if="customer.status" class="h-3.5 w-3.5" />
+                  <XCircle v-else class="h-3.5 w-3.5" />
+                  <span class="text-[10px] uppercase tracking-wider">
+                    {{
+                      customer.status ? $t("crud.active") : $t("crud.inactive")
+                    }}
+                  </span>
                 </Badge>
               </TableCell>
-              <TableCell class="text-right">
+              <!-- <TableCell class="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger as-child>
                     <Button
@@ -388,7 +418,7 @@ onMounted(() => {
                     >
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </TableCell>
+              </TableCell> -->
             </TableRow>
           </template>
           <TableRow v-else>
@@ -399,10 +429,16 @@ onMounted(() => {
               <div class="flex flex-col items-center justify-center gap-3">
                 <Users class="h-10 w-10 opacity-10" />
                 <p class="font-medium">
-                  {{ $t("crud.noRecords", { module: $t("modules.customers") }) }}
+                  {{
+                    $t("crud.noRecords", { module: $t("modules.customers") })
+                  }}
                 </p>
                 <Button
-                  v-if="searchQuery || (statusFilter && statusFilter !== 'all') || (customerTypeFilter && customerTypeFilter !== 'all')"
+                  v-if="
+                    searchQuery ||
+                    (statusFilter && statusFilter !== 'all') ||
+                    (customerTypeFilter && customerTypeFilter !== 'all')
+                  "
                   variant="outline"
                   size="sm"
                   @click="
@@ -412,7 +448,7 @@ onMounted(() => {
                   "
                   class="h-8"
                 >
-                  {{ $t('crud.resetFilters') }}
+                  {{ $t("crud.resetFilters") }}
                 </Button>
               </div>
             </TableCell>
@@ -428,7 +464,8 @@ onMounted(() => {
         <div class="flex items-center gap-2">
           <span
             class="text-sm font-medium text-muted-foreground whitespace-nowrap"
-            >{{ $t('crud.rowsPerPage') }}</span>
+            >{{ $t("crud.rowsPerPage") }}</span
+          >
           <Select
             :model-value="pagination.limit.toString()"
             @update:model-value="
@@ -483,10 +520,11 @@ onMounted(() => {
     </div>
 
     <!-- Delete Confirmation Dialog -->
-    <AlertDialog v-model:open="isDeleteDialogOpen">
+    <!-- <AlertDialog v-model:open="isDeleteDialogOpen">
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{{ $t('crud.confirmDelete') }}</AlertDialogTitle>
+          <AlertDialogHeader>
           <AlertDialogDescription>
             {{ $t('crud.confirmDeleteDesc', { module: $t('modules.customer') }) }}
           </AlertDialogDescription>
@@ -502,6 +540,6 @@ onMounted(() => {
           >
         </AlertDialogFooter>
       </AlertDialogContent>
-    </AlertDialog>
+    </AlertDialog> -->
   </div>
 </template>

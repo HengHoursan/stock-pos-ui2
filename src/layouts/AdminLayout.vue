@@ -70,19 +70,24 @@ const router = useRouter();
 const authStore = useAuthStore();
 const { locale, t } = useI18n();
 
-const navDomains = [
+interface NavItem {
+  titleKey: string;
+  icon: any;
+  url?: string;
+  children?: { titleKey: string; url: string; icon: any }[];
+}
+
+interface NavDomain {
+  domainKey: string;
+  items: NavItem[];
+}
+
+const navDomains: NavDomain[] = [
   {
     domainKey: "layout.posDomain",
     items: [
       { titleKey: "menu.dashboard", url: "/dashboard", icon: LayoutDashboard },
-      {
-        titleKey: "menu.customers",
-        icon: Users,
-        children: [
-          { titleKey: "menu.allCustomers", url: "/admin/customers", icon: List },
-          { titleKey: "menu.addCustomer", url: "/admin/customers/create", icon: Plus },
-        ],
-      },
+      { titleKey: "menu.customers", url: "/admin/customers", icon: Users },
     ]
   },
   {
@@ -264,9 +269,9 @@ onMounted(() => {
                     </CollapsibleContent>
                   </div>
                 </Collapsible>
-                <SidebarMenuButton v-else as-child :tooltip="$t(item.titleKey)" :class="{ 'bg-primary/10 text-primary font-semibold ring-1 ring-primary/20': route.path === item.url }">
-                  <RouterLink :to="item.url">
-                    <component :is="item.icon" :class="route.path === item.url ? 'text-primary' : 'text-muted-foreground'" />
+                <SidebarMenuButton v-else as-child :tooltip="$t(item.titleKey)" :class="{ 'bg-primary/10 text-primary font-semibold ring-1 ring-primary/20': item.url && route.path === item.url }">
+                  <RouterLink :to="item.url || ''">
+                    <component :is="item.icon" :class="item.url && route.path === item.url ? 'text-primary' : 'text-muted-foreground'" />
                     <span>{{ $t(item.titleKey) }}</span>
                   </RouterLink>
                 </SidebarMenuButton>
