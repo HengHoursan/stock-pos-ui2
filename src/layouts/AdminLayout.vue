@@ -54,6 +54,7 @@ import {
   Package,
   Truck,
   Users,
+  UserCog,
   History,
 } from "lucide-vue-next";
 import {
@@ -69,104 +70,100 @@ const router = useRouter();
 const authStore = useAuthStore();
 const { locale, t } = useI18n();
 
-const navItems = [
-  { titleKey: "menu.dashboard", url: "/dashboard", icon: LayoutDashboard },
+const navDomains = [
   {
-    titleKey: "menu.categories",
-    icon: Tag,
-    children: [
-      { titleKey: "menu.allCategories", url: "/admin/categories", icon: List },
+    domainKey: "layout.posDomain",
+    items: [
+      { titleKey: "menu.dashboard", url: "/dashboard", icon: LayoutDashboard },
       {
-        titleKey: "menu.addCategory",
-        url: "/admin/categories/create",
-        icon: Plus,
+        titleKey: "menu.customers",
+        icon: Users,
+        children: [
+          { titleKey: "menu.allCustomers", url: "/admin/customers", icon: List },
+          { titleKey: "menu.addCustomer", url: "/admin/customers/create", icon: Plus },
+        ],
       },
-    ],
+    ]
   },
   {
-    titleKey: "menu.brands",
-    icon: Bookmark,
-    children: [
-      { titleKey: "menu.allBrands", url: "/admin/brands", icon: List },
+    domainKey: "layout.stockDomain",
+    items: [
       {
-        titleKey: "menu.addBrand",
-        url: "/admin/brands/create",
-        icon: Plus,
+        titleKey: "menu.transactions",
+        icon: History,
+        children: [
+          { titleKey: "menu.allTransactions", url: "/admin/transactions", icon: List },
+          { titleKey: "menu.addTransaction", url: "/admin/transactions/create", icon: Plus },
+        ],
       },
-    ],
+    ]
   },
   {
-    titleKey: "menu.units",
-    icon: Ruler,
-    children: [
-      { titleKey: "menu.allUnits", url: "/admin/units", icon: List },
+    domainKey: "layout.inventoryDomain",
+    items: [
       {
-        titleKey: "menu.addUnit",
-        url: "/admin/units/create",
-        icon: Plus,
+        titleKey: "menu.products",
+        icon: Package,
+        children: [
+          { titleKey: "menu.allProducts", url: "/admin/products", icon: List },
+          { titleKey: "menu.addProduct", url: "/admin/products/create", icon: Plus },
+        ],
       },
-    ],
+      {
+        titleKey: "menu.categories",
+        icon: Tag,
+        children: [
+          { titleKey: "menu.allCategories", url: "/admin/categories", icon: List },
+          { titleKey: "menu.addCategory", url: "/admin/categories/create", icon: Plus },
+        ],
+      },
+      {
+        titleKey: "menu.brands",
+        icon: Bookmark,
+        children: [
+          { titleKey: "menu.allBrands", url: "/admin/brands", icon: List },
+          { titleKey: "menu.addBrand", url: "/admin/brands/create", icon: Plus },
+        ],
+      },
+      {
+        titleKey: "menu.units",
+        icon: Ruler,
+        children: [
+          { titleKey: "menu.allUnits", url: "/admin/units", icon: List },
+          { titleKey: "menu.addUnit", url: "/admin/units/create", icon: Plus },
+        ],
+      },
+    ]
   },
   {
-    titleKey: "menu.currencies",
-    icon: Coins,
-    children: [
-      { titleKey: "menu.allCurrencies", url: "/admin/currencies", icon: List },
+    domainKey: "layout.settingsDomain",
+    items: [
       {
-        titleKey: "menu.addCurrency",
-        url: "/admin/currencies/create",
-        icon: Plus,
+        titleKey: "menu.currencies",
+        icon: Coins,
+        children: [
+          { titleKey: "menu.allCurrencies", url: "/admin/currencies", icon: List },
+          { titleKey: "menu.addCurrency", url: "/admin/currencies/create", icon: Plus },
+        ],
       },
-    ],
-  },
-  {
-    titleKey: "menu.products",
-    icon: Package,
-    children: [
-      { titleKey: "menu.allProducts", url: "/admin/products", icon: List },
       {
-        titleKey: "menu.addProduct",
-        url: "/admin/products/create",
-        icon: Plus,
+        titleKey: "menu.users",
+        icon: UserCog,
+        children: [
+          { titleKey: "menu.allUsers", url: "/admin/users", icon: List },
+          { titleKey: "menu.addUser", url: "/admin/users/create", icon: Plus },
+        ],
       },
-    ],
-  },
-  {
-    titleKey: "menu.suppliers",
-    icon: Truck,
-    children: [
-      { titleKey: "menu.allSuppliers", url: "/admin/suppliers", icon: List },
       {
-        titleKey: "menu.addSupplier",
-        url: "/admin/suppliers/create",
-        icon: Plus,
+        titleKey: "menu.suppliers",
+        icon: Truck,
+        children: [
+          { titleKey: "menu.allSuppliers", url: "/admin/suppliers", icon: List },
+          { titleKey: "menu.addSupplier", url: "/admin/suppliers/create", icon: Plus },
+        ],
       },
-    ],
-  },
-  {
-    titleKey: "menu.customers",
-    icon: Users,
-    children: [
-      { titleKey: "menu.allCustomers", url: "/admin/customers", icon: List },
-      {
-        titleKey: "menu.addCustomer",
-        url: "/admin/customers/create",
-        icon: Plus,
-      },
-    ],
-  },
-  {
-    titleKey: "menu.transactions",
-    icon: History,
-    children: [
-      { titleKey: "menu.allTransactions", url: "/admin/transactions", icon: List },
-      {
-        titleKey: "menu.addTransaction",
-        url: "/admin/transactions/create",
-        icon: Plus,
-      },
-    ],
-  },
+    ]
+  }
 ];
 
 const currentLocaleItem = computed(() => {
@@ -226,11 +223,11 @@ onMounted(() => {
 
       <!-- Navigation -->
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>{{ $t('layout.mainMenu') }}</SidebarGroupLabel>
+        <SidebarGroup v-for="domain in navDomains" :key="domain.domainKey">
+          <SidebarGroupLabel>{{ $t(domain.domainKey) }}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem v-for="item in navItems" :key="item.titleKey">
+              <SidebarMenuItem v-for="item in domain.items" :key="item.titleKey">
                 <Collapsible
                   v-if="item.children"
                   as-child

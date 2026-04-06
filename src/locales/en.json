@@ -8,7 +8,11 @@
   },
   "layout": {
     "adminPanel": "Admin Panel",
-    "mainMenu": "Main Menu"
+    "mainMenu": "Main Menu",
+    "posDomain": "Point of Sale",
+    "stockDomain": "Stock",
+    "inventoryDomain": "Inventory",
+    "settingsDomain": "Settings"
   },
   "menu": {
     "dashboard": "Dashboard",
@@ -38,7 +42,10 @@
     "addCustomer": "Add New Customer",
     "transactions": "Transactions",
     "allTransactions": "All Transactions",
-    "addTransaction": "Add Transaction"
+    "addTransaction": "Add Transaction",
+    "users": "Users",
+    "allUsers": "All Users",
+    "addUser": "Add New User"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -64,6 +71,10 @@
   },
   "dashboard": {
     "title": "Dashboard",
+    "pointOfSale": "Point of Sale",
+    "stock": "Stock",
+    "inventory": "Inventory",
+    "settings": "Settings",
     "totalBrands": "Total Brands",
     "totalCategories": "Total Categories",
     "totalUnits": "Total Units",
@@ -248,6 +259,8 @@
     "customer": "Customer",
     "customers": "Customers",
     "transaction": "Transaction",
-    "transactions": "Transactions"
+    "transactions": "Transactions",
+    "user": "User",
+    "users": "Users"
   }
 }

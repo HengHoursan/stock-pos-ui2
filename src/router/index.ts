@@ -239,6 +239,26 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../views/admin/transaction/TransactionDetail.vue'),
         meta: { title: 'crud.viewBtn' },
       },
+
+      // User CRUD
+      {
+        path: 'admin/users',
+        name: 'Users',
+        component: () => import('../views/admin/user/UserList.vue'),
+        meta: { title: 'menu.allUsers' },
+      },
+      {
+        path: 'admin/users/create',
+        name: 'UserCreate',
+        component: () => import('../views/admin/user/UserCreate.vue'),
+        meta: { title: 'menu.addUser' },
+      },
+      {
+        path: 'admin/users/:id/edit',
+        name: 'UserEdit',
+        component: () => import('../views/admin/user/UserEdit.vue'),
+        meta: { title: 'crud.editBtn' },
+      },
     ],
   },
 

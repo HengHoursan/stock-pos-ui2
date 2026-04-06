@@ -8,7 +8,11 @@
   },
   "layout": {
     "adminPanel": "ផ្ទាំងគ្រប់គ្រង",
-    "mainMenu": "ម៉ឺនុយដើម"
+    "mainMenu": "ម៉ឺនុយដើម",
+    "posDomain": "ចំណុចលក់ (POS)",
+    "stockDomain": "ស្តុក",
+    "inventoryDomain": "បញ្ជីសារពើភណ្ឌ",
+    "settingsDomain": "ការកំណត់"
   },
   "menu": {
     "dashboard": "ផ្ទាំងរូបភាព",
@@ -38,7 +42,10 @@
     "addCustomer": "បន្ថែមអតិថិជនថ្មី",
     "transactions": "ប្រតិបត្តិការ",
     "allTransactions": "ប្រតិបត្តិការទាំងអស់",
-    "addTransaction": "បន្ថែមប្រតិបត្តិការ"
+    "addTransaction": "បន្ថែមប្រតិបត្តិការ",
+    "users": "អ្នកប្រើប្រាស់",
+    "allUsers": "អ្នកប្រើប្រាស់ទាំងអស់",
+    "addUser": "បន្ថែមអ្នកប្រើប្រាស់ថ្មី"
   },
   "auth": {
     "welcomeBack": "សូមស្វាគមន៍ត្រលប់មកវិញ",
@@ -64,6 +71,10 @@
   },
   "dashboard": {
     "title": "ផ្ទាំងរូបភាព",
+    "pointOfSale": "ចំណុចលក់ (POS)",
+    "stock": "ស្តុក",
+    "inventory": "បញ្ជីសារពើភណ្ឌ",
+    "settings": "ការកំណត់",
     "totalBrands": "ម៉ាកសរុប",
     "totalCategories": "ប្រភេទសរុប",
     "totalUnits": "ខ្នាតសរុប",
@@ -248,6 +259,8 @@
     "customer": "អតិថិជន",
     "customers": "អតិថិជនទាំងអស់",
     "transaction": "ប្រតិបត្តិការ",
-    "transactions": "ប្រតិបត្តិការទាំងអស់"
+    "transactions": "ប្រតិបត្តិការទាំងអស់",
+    "user": "អ្នកប្រើប្រាស់",
+    "users": "អ្នកប្រើប្រាស់ទាំងអស់"
   }
 }
