@@ -304,15 +304,15 @@ onMounted(() => {
                   </AvatarFallback>
                 </Avatar>
               </TableCell>
-              <TableCell class="font-semibold text-foreground/90">{{
+              <TableCell class="font-semibold text-base text-foreground/90">{{
                 category.name
               }}</TableCell>
               <TableCell
-                class="text-muted-foreground text-xs font-medium truncate max-w-[140px] italic"
+                class="text-muted-foreground text-sm font-medium truncate max-w-[140px] italic"
                 >{{ category.slug }}</TableCell
               >
               <TableCell
-                class="text-muted-foreground text-xs truncate max-w-[200px]"
+                class="text-muted-foreground text-sm truncate max-w-[200px]"
                 >{{ category.description || "-" }}</TableCell
               >
               <TableCell class="w-[100px]">

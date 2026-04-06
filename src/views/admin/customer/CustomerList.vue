@@ -314,13 +314,13 @@ onMounted(() => {
               </TableCell>
               <TableCell>
                 <code
-                  class="bg-muted px-2 py-0.5 rounded text-[10px] font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
+                  class="bg-muted px-2 py-0.5 rounded text-xs font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
                   >{{ customer.code }}</code
                 >
               </TableCell>
-              <TableCell class="font-semibold text-foreground/90">{{
-                customer.name
-              }}</TableCell>
+              <TableCell class="font-semibold text-base text-foreground/90 tracking-tight">
+                {{ customer.name }}
+              </TableCell>
               <TableCell class="text-muted-foreground text-sm">{{
                 customer.nameLatin || "-"
               }}</TableCell>

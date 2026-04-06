@@ -294,11 +294,11 @@ onMounted(() => {
               </TableCell>
               <TableCell>
                 <code
-                  class="bg-muted px-2 py-0.5 rounded text-[10px] font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
+                  class="bg-muted px-2 py-0.5 rounded text-xs font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
                   >{{ supplier.code }}</code
                 >
               </TableCell>
-              <TableCell class="font-semibold text-foreground/90">{{
+              <TableCell class="font-semibold text-base text-foreground/90">{{
                 supplier.name
               }}</TableCell>
               <TableCell class="text-muted-foreground text-sm">{{

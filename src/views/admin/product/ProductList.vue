@@ -58,10 +58,7 @@ import {
   ArrowUpDown,
   Package,
   RefreshCw,
-  Loader2,
-  Tag,
-  Bookmark,
-  Ruler
+  Loader2
 } from "lucide-vue-next";
 import { ProductService } from "@/services/product/product.service";
 import { CategoryService } from "@/services/category/category.service";
@@ -382,7 +379,7 @@ onMounted(() => {
               </TableCell>
               <TableCell>
                 <code
-                  class="bg-muted px-2 py-0.5 rounded text-[10px] font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
+                  class="bg-muted px-2 py-0.5 rounded text-xs font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
                   >{{ product.code }}</code
                 >
               </TableCell>
@@ -400,31 +397,28 @@ onMounted(() => {
                   </AvatarFallback>
                 </Avatar>
               </TableCell>
-              <TableCell class="font-semibold text-foreground/90">{{
+              <TableCell class="font-semibold text-base text-foreground/90">{{
                 product.name
               }}</TableCell>
               <TableCell>
-                <div v-if="product.category" class="flex items-center gap-1">
-                   <Tag class="h-3 w-3 text-primary opacity-60" />
-                   <span class="text-xs font-medium">{{ product.category.name }}</span>
+                <div v-if="product.category">
+                   <span class="text-sm font-medium">{{ product.category.name }}</span>
                 </div>
-                <span v-else class="text-xs text-muted-foreground">-</span>
+                <span v-else class="text-sm text-muted-foreground">-</span>
               </TableCell>
               <TableCell>
-                <div v-if="product.brand" class="flex items-center gap-1">
-                   <Bookmark class="h-3 w-3 text-primary opacity-60" />
-                   <span class="text-xs font-medium">{{ product.brand.name }}</span>
+                <div v-if="product.brand">
+                   <span class="text-sm font-medium">{{ product.brand.name }}</span>
                 </div>
-                <span v-else class="text-xs text-muted-foreground">-</span>
+                <span v-else class="text-sm text-muted-foreground">-</span>
               </TableCell>
               <TableCell>
-                <div v-if="product.unit" class="flex items-center gap-1">
-                   <Ruler class="h-3 w-3 text-primary opacity-60" />
-                   <span class="text-xs font-medium">{{ product.unit.name }}</span>
+                <div v-if="product.unit">
+                   <span class="text-sm font-medium">{{ product.unit.name }}</span>
                 </div>
-                <span v-else class="text-xs text-muted-foreground">-</span>
+                <span v-else class="text-sm text-muted-foreground">-</span>
               </TableCell>
-              <TableCell class="text-right font-mono text-sm font-bold text-primary">
+              <TableCell class="text-right font-mono text-base font-bold text-primary">
                 {{ formatCurrency(product.detail?.salePrice || 0) }}
               </TableCell>
               <TableCell class="text-center">

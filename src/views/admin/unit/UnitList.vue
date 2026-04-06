@@ -290,25 +290,37 @@ onMounted(() => {
               </TableCell>
               <TableCell>
                 <code
-                  class="bg-muted px-2 py-0.5 rounded text-[10px] font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
+                  class="bg-muted px-2 py-0.5 rounded text-xs font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
                   >
                   {{ unit.code }}
                 </code>
               </TableCell>
-              <TableCell class="font-semibold text-foreground/90">{{
+              <TableCell class="font-semibold text-base text-foreground/90">{{
                 unit.name
               }}</TableCell>
               <TableCell>
-                <Badge variant="outline" class="font-mono bg-muted/50">{{ unit.symbol }}</Badge>
-              </TableCell>
-              <TableCell class="text-muted-foreground font-medium">
-                {{ unit.conversionFactor }}
+                <Badge variant="outline" class="font-mono bg-muted/50 text-sm">{{ unit.symbol }}</Badge>
               </TableCell>
               <TableCell>
-                <div class="flex items-center gap-1.5">
-                  <CheckCircle2 v-if="unit.isCalculateDetail" class="h-4 w-4 text-emerald-500" />
-                  <XCircle v-else class="h-4 w-4 text-muted-foreground/50" />
+                <div class="flex items-center">
+                  <Badge variant="outline" class="font-mono text-xs bg-muted/30 border-muted-foreground/20 px-2 py-1 flex items-center gap-1.5 whitespace-nowrap">
+                    <span class="text-muted-foreground/60 font-bold">×</span>
+                    <span class="font-bold text-foreground/80 tracking-tight">{{ unit.conversionFactor || '1' }}</span>
+                  </Badge>
                 </div>
+              </TableCell>
+              <TableCell>
+                <Badge 
+                  :variant="unit.isCalculateDetail ? 'success' : 'outline'" 
+                  :class="[
+                    'flex w-fit items-center gap-1.5 px-3 py-1 font-bold transition-all truncate',
+                    unit.isCalculateDetail ? '' : 'bg-muted/30 text-muted-foreground/60 border-muted-foreground/20'
+                  ]"
+                >
+                  <CheckCircle2 v-if="unit.isCalculateDetail" class="h-3.5 w-3.5" />
+                  <XCircle v-else class="h-3.5 w-3.5" />
+                  <span class="text-[10px] uppercase tracking-wider">{{ unit.isCalculateDetail ? $t('fields.yes') : $t('fields.no') }}</span>
+                </Badge>
               </TableCell>
               <TableCell class="w-[100px]">
                 <Badge

@@ -257,7 +257,7 @@ onMounted(() => {
               </Button>
             </TableHead>
             <TableHead>{{ $t('auth.email') }}</TableHead>
-            <TableHead>Role</TableHead>
+            <TableHead>{{ $t('auth.role') }}</TableHead>
             <TableHead>{{ $t('fields.status') }}</TableHead>
             <TableHead class="text-right">{{ $t('crud.actions') }}</TableHead>
           </TableRow>
@@ -288,13 +288,13 @@ onMounted(() => {
                   </AvatarFallback>
                 </Avatar>
               </TableCell>
-              <TableCell class="font-semibold text-foreground/90">
+              <TableCell class="font-semibold text-base text-foreground/90">
                 {{ user.username }}
               </TableCell>
-              <TableCell class="text-muted-foreground">{{ user.email }}</TableCell>
+              <TableCell class="text-muted-foreground text-sm">{{ user.email }}</TableCell>
               <TableCell>
-                <Badge variant="outline" v-if="user.role">{{ user.role.name }}</Badge>
-                <span v-else class="text-muted-foreground italic text-xs">No Role</span>
+                <Badge variant="outline" v-if="user.role" class="text-sm font-medium">{{ user.role.name }}</Badge>
+                <span v-else class="text-muted-foreground italic text-sm">{{ $t('crud.none') }}</span>
               </TableCell>
               <TableCell class="w-[100px]">
                 <Badge

@@ -286,19 +286,19 @@ onMounted(() => {
               </TableCell>
               <TableCell>
                 <code
-                  class="bg-muted px-2 py-0.5 rounded text-[10px] font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
+                  class="bg-muted px-2 py-0.5 rounded text-xs font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
                   >
                   {{ currency.code }}
                 </code>
               </TableCell>
-              <TableCell class="font-semibold text-foreground/90">{{
-                currency.currency
-              }}</TableCell>
-              <TableCell class="text-muted-foreground">
+              <TableCell class="font-semibold text-base text-foreground/90 tracking-tight">
+                {{ currency.currency }}
+              </TableCell>
+              <TableCell class="text-muted-foreground text-sm">
                 {{ currency.country }}
               </TableCell>
               <TableCell>
-                <Badge variant="outline" class="font-mono bg-muted/50">{{ currency.symbol }}</Badge>
+                <Badge variant="outline" class="font-mono bg-muted/50 text-sm">{{ currency.symbol }}</Badge>
               </TableCell>
               <TableCell class="w-[100px]">
                 <Badge

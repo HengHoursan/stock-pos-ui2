@@ -362,12 +362,12 @@ onMounted(() => {
               <TableCell class="font-medium text-muted-foreground">
                 {{ (pagination.page - 1) * pagination.limit + index + 1 }}
               </TableCell>
-              <TableCell class="text-sm font-medium">
+              <TableCell class="text-base font-medium">
                 {{ formatDateTime(transaction.transactionDate) }}
               </TableCell>
               <TableCell>
                 <code
-                  class="bg-muted px-2 py-0.5 rounded text-[10px] font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
+                  class="bg-muted px-2 py-0.5 rounded text-xs font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
                   >{{ transaction.transactionCode }}</code
                 >
               </TableCell>
@@ -382,14 +382,14 @@ onMounted(() => {
                   {{ getTypeInfo(transaction.transactionType).label }}
                 </Badge>
               </TableCell>
-              <TableCell class="font-semibold text-foreground/90">
+              <TableCell class="font-semibold text-base text-foreground/90 uppercase tracking-tight">
                 {{ transaction.product?.name || "-" }}
               </TableCell>
-              <TableCell class="text-right text-muted-foreground font-mono">
+              <TableCell class="text-right text-muted-foreground font-mono text-base">
                 {{ transaction.beginningStock }}
               </TableCell>
               <TableCell
-                class="text-right font-bold font-mono"
+                class="text-right font-bold font-mono text-base"
                 :class="
                   transaction.transactionType === TransactionType.IN
                     ? 'text-green-600'
@@ -404,7 +404,7 @@ onMounted(() => {
                     : "+"
                 }}{{ transaction.quantity }}
               </TableCell>
-              <TableCell class="text-right font-bold text-foreground font-mono">
+              <TableCell class="text-right font-bold text-foreground font-mono text-base">
                 {{ transaction.afterStock }}
               </TableCell>
               <TableCell class="text-right">
