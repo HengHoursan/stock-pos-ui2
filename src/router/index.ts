@@ -240,6 +240,106 @@ const routes: RouteRecordRaw[] = [
         meta: { title: 'crud.viewBtn' },
       },
 
+      // Purchase Quotation CRUD
+      {
+        path: 'admin/purchase-quotations',
+        name: 'PurchaseQuotations',
+        component: () => import('../views/admin/purchase_quotation/PurchaseQuotationList.vue'),
+        meta: { title: 'menu.allPurchaseQuotations' },
+      },
+      {
+        path: 'admin/purchase-quotations/create',
+        name: 'PurchaseQuotationCreate',
+        component: () => import('../views/admin/purchase_quotation/PurchaseQuotationCreate.vue'),
+        meta: { title: 'menu.addPurchaseQuotation' },
+      },
+      {
+        path: 'admin/purchase-quotations/:id',
+        name: 'PurchaseQuotationDetail',
+        component: () => import('../views/admin/purchase_quotation/PurchaseQuotationDetail.vue'),
+        meta: { title: 'crud.viewBtn' },
+      },
+
+      // Purchase Order CRUD
+      {
+        path: 'admin/purchase-orders',
+        name: 'PurchaseOrders',
+        component: () => import('../views/admin/purchase_order/PurchaseOrderList.vue'),
+        meta: { title: 'menu.allPurchaseOrders' },
+      },
+      {
+        path: 'admin/purchase-orders/create',
+        name: 'PurchaseOrderCreate',
+        component: () => import('../views/admin/purchase_order/PurchaseOrderCreate.vue'),
+        meta: { title: 'menu.addPurchaseOrder' },
+      },
+      {
+        path: 'admin/purchase-orders/:id',
+        name: 'PurchaseOrderDetail',
+        component: () => import('../views/admin/purchase_order/PurchaseOrderDetail.vue'),
+        meta: { title: 'crud.viewBtn' },
+      },
+
+      // Purchase Invoice CRUD
+      {
+        path: 'admin/purchase-invoices',
+        name: 'PurchaseInvoices',
+        component: () => import('../views/admin/purchase_invoice/PurchaseInvoiceList.vue'),
+        meta: { title: 'menu.allPurchaseInvoices' },
+      },
+      {
+        path: 'admin/purchase-invoices/create',
+        name: 'PurchaseInvoiceCreate',
+        component: () => import('../views/admin/purchase_invoice/PurchaseInvoiceCreate.vue'),
+        meta: { title: 'menu.addPurchaseInvoice' },
+      },
+      {
+        path: 'admin/purchase-invoices/:id',
+        name: 'PurchaseInvoiceDetail',
+        component: () => import('../views/admin/purchase_invoice/PurchaseInvoiceDetail.vue'),
+        meta: { title: 'crud.viewBtn' },
+      },
+
+      // Sale Order CRUD
+      {
+        path: 'admin/sale-orders',
+        name: 'SaleOrders',
+        component: () => import('../views/admin/sale_order/SaleOrderList.vue'),
+        meta: { title: 'menu.allSaleOrders' },
+      },
+      {
+        path: 'admin/sale-orders/create',
+        name: 'SaleOrderCreate',
+        component: () => import('../views/admin/sale_order/SaleOrderCreate.vue'),
+        meta: { title: 'menu.addSaleOrder' },
+      },
+      {
+        path: 'admin/sale-orders/:id',
+        name: 'SaleOrderDetail',
+        component: () => import('../views/admin/sale_order/SaleOrderDetail.vue'),
+        meta: { title: 'crud.viewBtn' },
+      },
+
+      // Sale Invoice CRUD
+      {
+        path: 'admin/sale-invoices',
+        name: 'SaleInvoices',
+        component: () => import('../views/admin/sale_invoice/SaleInvoiceList.vue'),
+        meta: { title: 'menu.allSaleInvoices' },
+      },
+      {
+        path: 'admin/sale-invoices/create',
+        name: 'SaleInvoiceCreate',
+        component: () => import('../views/admin/sale_invoice/SaleInvoiceCreate.vue'),
+        meta: { title: 'menu.addSaleInvoice' },
+      },
+      {
+        path: 'admin/sale-invoices/:id',
+        name: 'SaleInvoiceDetail',
+        component: () => import('../views/admin/sale_invoice/SaleInvoiceDetail.vue'),
+        meta: { title: 'crud.viewBtn' },
+      },
+
       // User CRUD
       {
         path: 'admin/users',

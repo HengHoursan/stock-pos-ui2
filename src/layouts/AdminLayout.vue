@@ -47,7 +47,6 @@ import {
   ChevronsUpDown,
   ChevronRight,
   Plus,
-  List,
   Bookmark,
   Ruler,
   Coins,
@@ -56,6 +55,14 @@ import {
   Users,
   UserCog,
   History,
+  FileText,
+  ShoppingBag,
+  Receipt,
+  ArrowRightLeft,
+  CreditCard,
+  Layers,
+  ShieldCheck,
+  Globe,
 } from "lucide-vue-next";
 import {
   Collapsible,
@@ -88,6 +95,14 @@ const navDomains: NavDomain[] = [
     items: [
       { titleKey: "menu.dashboard", url: "/dashboard", icon: LayoutDashboard },
       { titleKey: "menu.customers", url: "/admin/customers", icon: Users },
+      { 
+        titleKey: "menu.sales", 
+        icon: Coins,
+        children: [
+          { titleKey: "menu.saleOrders", url: "/admin/sale-orders", icon: Package },
+          { titleKey: "menu.saleInvoices", url: "/admin/sale-invoices", icon: CreditCard },
+        ]
+      }
     ]
   },
   {
@@ -97,10 +112,19 @@ const navDomains: NavDomain[] = [
         titleKey: "menu.transactions",
         icon: History,
         children: [
-          { titleKey: "menu.allTransactions", url: "/admin/transactions", icon: List },
+          { titleKey: "menu.allTransactions", url: "/admin/transactions", icon: ArrowRightLeft },
           { titleKey: "menu.addTransaction", url: "/admin/transactions/create", icon: Plus },
         ],
       },
+      {
+        titleKey: "menu.purchases",
+        icon: Truck,
+        children: [
+          { titleKey: "menu.purchaseQuotations", url: "/admin/purchase-quotations", icon: FileText },
+          { titleKey: "menu.purchaseOrders", url: "/admin/purchase-orders", icon: ShoppingBag },
+          { titleKey: "menu.purchaseInvoices", url: "/admin/purchase-invoices", icon: Receipt },
+        ]
+      }
     ]
   },
   {
@@ -110,7 +134,7 @@ const navDomains: NavDomain[] = [
         titleKey: "menu.products",
         icon: Package,
         children: [
-          { titleKey: "menu.allProducts", url: "/admin/products", icon: List },
+          { titleKey: "menu.allProducts", url: "/admin/products", icon: Package },
           { titleKey: "menu.addProduct", url: "/admin/products/create", icon: Plus },
         ],
       },
@@ -118,7 +142,7 @@ const navDomains: NavDomain[] = [
         titleKey: "menu.categories",
         icon: Tag,
         children: [
-          { titleKey: "menu.allCategories", url: "/admin/categories", icon: List },
+          { titleKey: "menu.allCategories", url: "/admin/categories", icon: Layers },
           { titleKey: "menu.addCategory", url: "/admin/categories/create", icon: Plus },
         ],
       },
@@ -126,7 +150,7 @@ const navDomains: NavDomain[] = [
         titleKey: "menu.brands",
         icon: Bookmark,
         children: [
-          { titleKey: "menu.allBrands", url: "/admin/brands", icon: List },
+          { titleKey: "menu.allBrands", url: "/admin/brands", icon: Bookmark },
           { titleKey: "menu.addBrand", url: "/admin/brands/create", icon: Plus },
         ],
       },
@@ -134,7 +158,7 @@ const navDomains: NavDomain[] = [
         titleKey: "menu.units",
         icon: Ruler,
         children: [
-          { titleKey: "menu.allUnits", url: "/admin/units", icon: List },
+          { titleKey: "menu.allUnits", url: "/admin/units", icon: Ruler },
           { titleKey: "menu.addUnit", url: "/admin/units/create", icon: Plus },
         ],
       },
@@ -147,7 +171,7 @@ const navDomains: NavDomain[] = [
         titleKey: "menu.currencies",
         icon: Coins,
         children: [
-          { titleKey: "menu.allCurrencies", url: "/admin/currencies", icon: List },
+          { titleKey: "menu.allCurrencies", url: "/admin/currencies", icon: Coins },
           { titleKey: "menu.addCurrency", url: "/admin/currencies/create", icon: Plus },
         ],
       },
@@ -155,7 +179,7 @@ const navDomains: NavDomain[] = [
         titleKey: "menu.users",
         icon: UserCog,
         children: [
-          { titleKey: "menu.allUsers", url: "/admin/users", icon: List },
+          { titleKey: "menu.allUsers", url: "/admin/users", icon: ShieldCheck },
           { titleKey: "menu.addUser", url: "/admin/users/create", icon: Plus },
         ],
       },
@@ -163,7 +187,7 @@ const navDomains: NavDomain[] = [
         titleKey: "menu.suppliers",
         icon: Truck,
         children: [
-          { titleKey: "menu.allSuppliers", url: "/admin/suppliers", icon: List },
+          { titleKey: "menu.allSuppliers", url: "/admin/suppliers", icon: Globe },
           { titleKey: "menu.addSupplier", url: "/admin/suppliers/create", icon: Plus },
         ],
       },
@@ -236,6 +260,7 @@ onMounted(() => {
                 <Collapsible
                   v-if="item.children"
                   as-child
+                  :default-open="item.children.some(child => route.path.startsWith(child.url))"
                   class="group/collapsible"
                 >
                   <div>

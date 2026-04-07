@@ -45,7 +45,22 @@
     "addTransaction": "បន្ថែមប្រតិបត្តិការ",
     "users": "អ្នកប្រើប្រាស់",
     "allUsers": "អ្នកប្រើប្រាស់ទាំងអស់",
-    "addUser": "បន្ថែមអ្នកប្រើប្រាស់ថ្មី"
+    "addUser": "បន្ថែមអ្នកប្រើប្រាស់",
+    "purchaseQuotations": "ការទិញ",
+    "allPurchaseQuotations": "ការសម្រង់តម្លៃ",
+    "addPurchaseQuotation": "បង្កើត",
+    "purchaseOrders": "ការបញ្ជាទិញ",
+    "allPurchaseOrders": "ការបញ្ជាទិញ",
+    "addPurchaseOrder": "បង្កើត",
+    "purchaseInvoices": "វិក្កយបត្រ",
+    "allPurchaseInvoices": "វិក្កយបត្រ",
+    "addPurchaseInvoice": "បង្កើត",
+    "saleOrders": "ការបញ្ជាទិញ",
+    "allSaleOrders": "ការបញ្ជាទិញ",
+    "addSaleOrder": "បង្កើត",
+    "saleInvoices": "វិក្កយបត្រ",
+    "allSaleInvoices": "វិក្កយបត្រ",
+    "addSaleInvoice": "បង្កើត"
   },
   "auth": {
     "welcomeBack": "សូមស្វាគមន៍ត្រលប់មកវិញ",
@@ -237,7 +252,58 @@
       "expiry": "កាលបរិច្ឆេទផុតកំណត់"
     },
     "internalMemo": "កំណត់សម្គាល់ផ្ទៃក្នុង",
-    "internalMemoDescription": "ការកែតម្រូវស្តុកនឹងប៉ះពាល់ដល់កំណត់ត្រាហិរញ្ញវត្ថុ និងការផ្ទៀងផ្ទាត់សារពើភ័ណ្ឌ។ សូមប្រាកដថាបរិមាណ និងប្រភេទមានភាពត្រឹមត្រូវមុនពេលរក្សាទុក។"
+    "internalMemoDescription": "ការកែតម្រូវស្តុកនឹងប៉ះពាល់ដល់កំណត់ត្រាហិរញ្ញវត្ថុ និងការផ្ទៀងផ្ទាត់សារពើភ័ណ្ឌ។ សូមប្រាកដថាបរិមាណ និងប្រភេទមានភាពត្រឹមត្រូវមុនពេលរក្សាទុក។",
+    "quotationDate": "ថ្ងៃសម្រង់តម្លៃ",
+    "orderDate": "ថ្ងៃបញ្ជាទិញ",
+    "invoiceDate": "ថ្ងៃវិក្កយបត្រ",
+    "totalLine": "ចំនួនមុខទំនិញ",
+    "totalCloseLine": "មុខទំនិញដែលបានបិទ",
+    "paidAmount": "ចំនួនប្រាក់បានបង់",
+    "totalPrice": "តម្លៃសរុប",
+    "balanceDue": "ប្រាក់ជំពាក់",
+    "paymentDetails": "ព័ត៌មានលម្អិតការទូទាត់",
+    "details": "ព័ត៌មានលម្អិត",
+    "fromQuotation": "ពីការសម្រង់តម្លៃ",
+    "fromOrder": "ពីការបញ្ជាទិញ",
+    "price": "តំលៃ",
+    "unitPrice": "តំលៃឯកត្តា",
+    "sellingPrice": "តំលៃលក់",
+    "rowTotal": "សរុប",
+    "grandTotal": "សរុបបូក",
+    "isCancel": "បានបោះបង់?",
+    "invoiceStockUpdateInfo": "ការបង្កើតវិក្កយបត្រនឹងធ្វើឱ្យសមតុល្យស្តុកទំនិញដែលបានជ្រើសរើស កើនឡើងដោយស្វ័យប្រវត្តិ។",
+    "saleOrderInfo": "បង្កើតការបញ្ជាទិញថ្មី។ វាមិនដកស្តុកចេញទេ រហូតដល់វាត្រូវបានចេញវិក្កយបត្រ។",
+    "saleInvoiceStockDeductInfo": "ការបង្កើតវិក្កយបត្រនឹងដកស្តុកទំនិញដែលបានជ្រើសរើសដោយស្វ័យប្រវត្តិ យោងតាមការកំណត់ក្នុង POS។",
+    "invoiceDeleteWarning": "ការព្រមាន៖ ការលុបវិក្កយបត្រនឹងត្រឡប់ការផ្លាស់ប្តូរស្តុកដែលពាក់ព័ន្ធទាំងអស់មកវិញ។",
+    "saleInvoiceDeleteWarning": "ការព្រមាន៖ ការលុបវិក្កយបត្រលក់នឹងបញ្ជូនទំនិញដែលបានលក់ទាំងអស់ត្រឡប់ទៅក្នុងស្តុកវិញ។",
+    "notForSale": "មិនសម្រាប់លក់",
+    "items": "មុខទំនិញ",
+    "closed": "បានបិទ",
+    "statusLabels": {
+      "pending": "រង់ចាំ",
+      "partial": "មួយផ្នែក",
+      "completed": "រួចរាល់",
+      "draft": "សេចក្តីព្រាង",
+      "cancelled": "បានបោះបង់"
+    },
+    "paymentMethodLabels": {
+      "cash": "សាច់ប្រាក់",
+      "transfer": "ផ្ទេរប្រាក់",
+      "other": "ផ្សេងៗ"
+    }
+  },
+  "actions": {
+    "generateOrder": "បង្កើតការបញ្ជាទិញ",
+    "generateInvoice": "បង្កើតវិក្កយបត្រ",
+    "cancelInvoice": "បោះបង់វិក្កយបត្រ",
+    "addProduct": "បន្ថែមផលិតផល"
+  },
+  "validation": {
+    "required": "{field} គឺចាំបាច់",
+    "min": "{field} ត្រូវតែយ៉ាងហោចណាស់ {min}",
+    "paidAmountNegative": "ចំនួនប្រាក់ដែលបានបង់មិនអាចអវិជ្ជមានបានទេ",
+    "atLeastOneItem": "ត្រូវមានផលិតផលយ៉ាងហោចណាស់មួយ",
+    "loadedFromSource": "បានទាញយកទិន្នន័យពី {source}"
   },
   "pagination": {
     "previous": "ត្រឡប់ក្រោយ",
@@ -263,7 +329,17 @@
     "transaction": "ប្រតិបត្តិការ",
     "transactions": "ប្រតិបត្តិការទាំងអស់",
     "user": "អ្នកប្រើប្រាស់",
-    "users": "អ្នកប្រើប្រាស់ទាំងអស់"
+    "users": "អ្នកប្រើប្រាស់ទាំងអស់",
+    "purchaseQuotation": "ការសម្រង់តម្លៃ",
+    "purchaseQuotations": "ការសម្រង់តម្លៃ",
+    "purchaseOrder": "ការបញ្ជាទិញ",
+    "purchaseOrders": "ការបញ្ជាទិញ",
+    "purchaseInvoice": "វិក្កយបត្រ",
+    "purchaseInvoices": "វិក្កយបត្រ",
+    "saleOrder": "ការបញ្ជាទិញ",
+    "saleOrders": "ការបញ្ជាទិញ",
+    "saleInvoice": "វិក្កយបត្រ",
+    "saleInvoices": "វិក្កយបត្រ"
   },
   "roles": {
     "superadmin": "អ្នកគ្រប់គ្រងជាន់ខ្ពស់",

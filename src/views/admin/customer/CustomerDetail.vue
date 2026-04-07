@@ -8,8 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   ChevronLeft,
-  Pencil,
-  Trash2,
   Loader2,
   Users,
   Calendar,
@@ -50,18 +48,7 @@ async function fetchCustomer() {
   }
 }
 
-async function deleteCustomer() {
-  if (!confirm(t("crud.confirmDelete"))) return;
-  try {
-    const response = await customerService.softDelete(customerId);
-    if (response.success) {
-      toast.success(t("crud.successDelete", { module: t("modules.customer") }));
-      router.push("/admin/customers");
-    }
-  } catch (error) {
-    toast.error(t("crud.errorDelete", { module: t("modules.customer") }));
-  }
-}
+
 
 function getTypeLabel(type: CustomerType) {
   return type === CustomerType.DINE_IN
