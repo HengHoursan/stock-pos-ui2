@@ -62,7 +62,12 @@
     "addSaleOrder": "បង្កើត",
     "saleInvoices": "វិក្កយបត្រ",
     "allSaleInvoices": "វិក្កយបត្រ",
-    "addSaleInvoice": "បង្កើត"
+    "addSaleInvoice": "បង្កើត",
+    "purchaseReturns": "ការបង្វិលផលិតផលទិញ",
+    "purchasePayments": "ការបង់ប្រាក់ទិញ",
+    "saleQuotations": "ការសម្រង់តម្លៃលក់",
+    "salePayments": "ការបង់ប្រាក់លក់",
+    "saleReturns": "ការបង្វិលផលិតផលលក់"
   },
   "auth": {
     "welcomeBack": "សូមស្វាគមន៍ត្រលប់មកវិញ",
@@ -248,6 +253,8 @@
     "stockOut": "ចេញស្តុក",
     "adjustment": "ការកែតម្រូវ",
     "productId": "ផលិតផល",
+    "customerId": "អតិថិជន",
+    "supplierId": "អ្នកផ្គត់ផ្គង់",
     "expiryTypes": {
       "none": "គ្មាន",
       "bestBefore": "ល្អបំផុតមុនថ្ងៃ",
@@ -258,11 +265,15 @@
     "quotationDate": "ថ្ងៃសម្រង់តម្លៃ",
     "orderDate": "ថ្ងៃបញ្ជាទិញ",
     "invoiceDate": "ថ្ងៃវិក្កយបត្រ",
+    "returnDate": "ថ្ងៃបង្វិលត្រលប់",
+    "date": "កាលបរិច្ឆេទ",
+    "paymentId": "លេខសំគាល់ការបង់ប្រាក់",
     "totalLine": "ចំនួនមុខទំនិញ",
     "totalCloseLine": "មុខទំនិញដែលបានបិទ",
     "paidAmount": "ចំនួនប្រាក់បានបង់",
     "totalPrice": "តម្លៃសរុប",
     "balanceDue": "ប្រាក់ជំពាក់",
+    "remainingBalance": "សមតុល្យនៅសល់",
     "paymentDetails": "ព័ត៌មានលម្អិតការទូទាត់",
     "details": "ព័ត៌មានលម្អិត",
     "fromQuotation": "ពីការសម្រង់តម្លៃ",
@@ -278,6 +289,12 @@
     "saleInvoiceStockDeductInfo": "ការបង្កើតវិក្កយបត្រនឹងដកស្តុកទំនិញដែលបានជ្រើសរើសដោយស្វ័យប្រវត្តិ យោងតាមការកំណត់ក្នុង POS។",
     "invoiceDeleteWarning": "ការព្រមាន៖ ការលុបវិក្កយបត្រនឹងត្រឡប់ការផ្លាស់ប្តូរស្តុកដែលពាក់ព័ន្ធទាំងអស់មកវិញ។",
     "saleInvoiceDeleteWarning": "ការព្រមាន៖ ការលុបវិក្កយបត្រលក់នឹងបញ្ជូនទំនិញដែលបានលក់ទាំងអស់ត្រឡប់ទៅក្នុងស្តុកវិញ។",
+    "saleReturnInfo": "ដំណើរការបង្វិលផលិតផលពីអតិថិជន។",
+    "purchaseReturnInfo": "ដំណើរការបង្វិលផលិតផលទៅឱ្យអ្នកផ្គត់ផ្គង់។",
+    "completedOnly": "បានបញ្ចប់ប៉ុណ្ណោះ",
+    "balanceInfo": "ព័ត៌មានសមតុល្យ",
+    "paidBeforeThis": "បានបង់ (មុនពេលនេះ)",
+    "paidTotal": "សរុបដែលបានបង់",
     "notForSale": "មិនសម្រាប់លក់",
     "items": "មុខទំនិញ",
     "closed": "បានបិទ",
@@ -286,7 +303,11 @@
       "partial": "មួយផ្នែក",
       "completed": "រួចរាល់",
       "draft": "សេចក្តីព្រាង",
-      "cancelled": "បានបោះបង់"
+      "cancelled": "បានបោះបង់",
+      "sent": "បានផ្ញើ",
+      "accepted": "បានទទួលយក",
+      "rejected": "បានបដិសេធ",
+      "expired": "ហួសកំណត់"
     },
     "paymentMethodLabels": {
       "cash": "សាច់ប្រាក់",
@@ -304,8 +325,10 @@
     "required": "{field} គឺចាំបាច់",
     "min": "{field} ត្រូវតែយ៉ាងហោចណាស់ {min}",
     "paidAmountNegative": "ចំនួនប្រាក់ដែលបានបង់មិនអាចអវិជ្ជមានបានទេ",
-    "atLeastOneItem": "ត្រូវមានផលិតផលយ៉ាងហោចណាស់មួយ",
-    "loadedFromSource": "បានទាញយកទិន្នន័យពី {source}"
+    "atLeastOneItem": "យ៉ាងហោចណាស់មានទំនិញមួយត្រូវបានទាមទារ",
+    "loadedFromSource": "បានទាញយកទិន្នន័យពី {source}",
+    "paymentExceedsBalance": "សម្គាល់៖ ចំនួនទឹកប្រាក់ដែលបង់លើសពីសមតុល្យដែលនៅសល់។",
+    "onlyDraftEditable": "មានតែទិន្នន័យសេចក្តីព្រាងប៉ុណ្ណោះដែលអាចកែសម្រួលបាន"
   },
   "pagination": {
     "previous": "ត្រឡប់ក្រោយ",
@@ -341,7 +364,17 @@
     "saleOrder": "ការបញ្ជាទិញ",
     "saleOrders": "ការបញ្ជាទិញ",
     "saleInvoice": "វិក្កយបត្រ",
-    "saleInvoices": "វិក្កយបត្រ"
+    "saleInvoices": "វិក្កយបត្រ",
+    "purchaseReturn": "ការបង្វិលផលិតផលទិញ",
+    "purchaseReturns": "ការបង្វិលផលិតផលទិញ",
+    "purchasePayment": "ការបង់ប្រាក់ទិញ",
+    "purchasePayments": "ការបង់ប្រាក់ទិញ",
+    "saleQuotation": "ការសម្រង់តម្លៃលក់",
+    "saleQuotations": "ការសម្រង់តម្លៃលក់",
+    "salePayment": "ការបង់ប្រាក់លក់",
+    "salePayments": "ការបង់ប្រាក់លក់",
+    "saleReturn": "ការបង្វិលផលិតផលលក់",
+    "saleReturns": "ការបង្វិលផលិតផលលក់"
   },
   "roles": {
     "superadmin": "អ្នកគ្រប់គ្រងជាន់ខ្ពស់",

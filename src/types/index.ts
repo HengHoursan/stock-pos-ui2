@@ -17,3 +17,8 @@ export * from './purchase_order';
 export * from './purchase_invoice';
 export * from './sale_order';
 export * from './sale_invoice';
+export * from './purchase_payment';
+export * from './purchase_return';
+export * from './sale_quotation';
+export * from './sale_payment';
+export * from './sale_return';

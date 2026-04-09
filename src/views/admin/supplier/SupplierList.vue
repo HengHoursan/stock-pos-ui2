@@ -81,7 +81,7 @@ const pagination = reactive<PaginationMeta>({
   totalItems: 0,
   totalPages: 0,
   sortBy: "createdAt",
-  sortOrder: "desc",
+  sortOrder: "DESC",
 });
 
 const isDeleteDialogOpen = ref(false);
@@ -190,10 +190,10 @@ async function confirmDelete() {
 
 function handleSort(column: string) {
   if (pagination.sortBy === column) {
-    pagination.sortOrder = pagination.sortOrder === "asc" ? "desc" : "asc";
+    pagination.sortOrder = pagination.sortOrder === "ASC" ? "DESC" : "ASC";
   } else {
     pagination.sortBy = column;
-    pagination.sortOrder = "asc";
+    pagination.sortOrder = "ASC";
   }
   fetchSuppliers();
 }

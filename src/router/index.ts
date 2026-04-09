@@ -300,6 +300,58 @@ const routes: RouteRecordRaw[] = [
         meta: { title: 'crud.viewBtn' },
       },
 
+      // Purchase Payment CRUD
+      {
+        path: 'admin/purchase-payments',
+        name: 'PurchasePayments',
+        component: () => import('../views/admin/purchase_payment/PurchasePaymentList.vue'),
+        meta: { title: 'menu.purchasePayments' },
+      },
+      {
+        path: 'admin/purchase-payments/create',
+        name: 'PurchasePaymentCreate',
+        component: () => import('../views/admin/purchase_payment/PurchasePaymentCreate.vue'),
+        meta: { title: 'menu.addPurchasePayment' },
+      },
+      {
+        path: 'admin/purchase-payments/:id',
+        name: 'PurchasePaymentDetail',
+        component: () => import('../views/admin/purchase_payment/PurchasePaymentDetail.vue'),
+        meta: { title: 'crud.viewBtn' },
+      },
+      {
+        path: 'admin/purchase-payments/:id/edit',
+        name: 'PurchasePaymentEdit',
+        component: () => import('../views/admin/purchase_payment/PurchasePaymentEdit.vue'),
+        meta: { title: 'crud.editBtn' },
+      },
+
+      // Purchase Return CRUD
+      {
+        path: 'admin/purchase-returns',
+        name: 'PurchaseReturns',
+        component: () => import('../views/admin/purchase_return/PurchaseReturnList.vue'),
+        meta: { title: 'menu.purchaseReturns' },
+      },
+      {
+        path: 'admin/purchase-returns/create',
+        name: 'PurchaseReturnCreate',
+        component: () => import('../views/admin/purchase_return/PurchaseReturnCreate.vue'),
+        meta: { title: 'menu.addPurchaseReturn' },
+      },
+      {
+        path: 'admin/purchase-returns/:id',
+        name: 'PurchaseReturnDetail',
+        component: () => import('../views/admin/purchase_return/PurchaseReturnDetail.vue'),
+        meta: { title: 'crud.viewBtn' },
+      },
+      {
+        path: 'admin/purchase-returns/:id/edit',
+        name: 'PurchaseReturnEdit',
+        component: () => import('../views/admin/purchase_return/PurchaseReturnEdit.vue'),
+        meta: { title: 'crud.editBtn' },
+      },
+
       // Sale Order CRUD
       {
         path: 'admin/sale-orders',
@@ -338,6 +390,84 @@ const routes: RouteRecordRaw[] = [
         name: 'SaleInvoiceDetail',
         component: () => import('../views/admin/sale_invoice/SaleInvoiceDetail.vue'),
         meta: { title: 'crud.viewBtn' },
+      },
+
+      // Sale Return CRUD
+      {
+        path: 'admin/sale-returns',
+        name: 'SaleReturns',
+        component: () => import('../views/admin/sale_return/SaleReturnList.vue'),
+        meta: { title: 'menu.saleReturns' },
+      },
+      {
+        path: 'admin/sale-returns/create',
+        name: 'SaleReturnCreate',
+        component: () => import('../views/admin/sale_return/SaleReturnCreate.vue'),
+        meta: { title: 'menu.addSaleReturn' },
+      },
+      {
+        path: 'admin/sale-returns/:id',
+        name: 'SaleReturnDetail',
+        component: () => import('../views/admin/sale_return/SaleReturnDetail.vue'),
+        meta: { title: 'crud.viewBtn' },
+      },
+      {
+        path: 'admin/sale-returns/:id/edit',
+        name: 'SaleReturnEdit',
+        component: () => import('../views/admin/sale_return/SaleReturnEdit.vue'),
+        meta: { title: 'crud.editBtn' },
+      },
+
+      // Sale Payment CRUD
+      {
+        path: 'admin/sale-payments',
+        name: 'SalePayments',
+        component: () => import('../views/admin/sale_payment/SalePaymentList.vue'),
+        meta: { title: 'menu.salePayments' },
+      },
+      {
+        path: 'admin/sale-payments/create',
+        name: 'SalePaymentCreate',
+        component: () => import('../views/admin/sale_payment/SalePaymentCreate.vue'),
+        meta: { title: 'menu.addSalePayment' },
+      },
+      {
+        path: 'admin/sale-payments/:id',
+        name: 'SalePaymentDetail',
+        component: () => import('../views/admin/sale_payment/SalePaymentDetail.vue'),
+        meta: { title: 'crud.viewBtn' },
+      },
+      {
+        path: 'admin/sale-payments/:id/edit',
+        name: 'SalePaymentEdit',
+        component: () => import('../views/admin/sale_payment/SalePaymentEdit.vue'),
+        meta: { title: 'crud.editBtn' },
+      },
+
+      // Sale Quotation CRUD
+      {
+        path: 'admin/sale-quotations',
+        name: 'SaleQuotations',
+        component: () => import('../views/admin/sale_quotation/SaleQuotationList.vue'),
+        meta: { title: 'menu.saleQuotations' },
+      },
+      {
+        path: 'admin/sale-quotations/create',
+        name: 'SaleQuotationCreate',
+        component: () => import('../views/admin/sale_quotation/SaleQuotationCreate.vue'),
+        meta: { title: 'menu.addSaleQuotation' },
+      },
+      {
+        path: 'admin/sale-quotations/:id',
+        name: 'SaleQuotationDetail',
+        component: () => import('../views/admin/sale_payment/SaleQuotationDetail.vue'),
+        meta: { title: 'crud.viewBtn' },
+      },
+      {
+        path: 'admin/sale-quotations/:id/edit',
+        name: 'SaleQuotationEdit',
+        component: () => import('../views/admin/sale_quotation/SaleQuotationEdit.vue'),
+        meta: { title: 'crud.editBtn' },
       },
 
       // User CRUD

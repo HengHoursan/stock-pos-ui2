@@ -63,6 +63,8 @@ import {
   Layers,
   ShieldCheck,
   Globe,
+  RotateCcw,
+  Banknote,
 } from "lucide-vue-next";
 import {
   Collapsible,
@@ -100,7 +102,10 @@ const navDomains: NavDomain[] = [
         icon: Coins,
         children: [
           { titleKey: "menu.saleOrders", url: "/admin/sale-orders", icon: Package },
+          { titleKey: "menu.saleQuotations", url: "/admin/sale-quotations", icon: FileText },
           { titleKey: "menu.saleInvoices", url: "/admin/sale-invoices", icon: CreditCard },
+          { titleKey: "menu.salePayments", url: "/admin/sale-payments", icon: Banknote },
+          { titleKey: "menu.saleReturns", url: "/admin/sale-returns", icon: RotateCcw },
         ]
       }
     ]
@@ -123,6 +128,8 @@ const navDomains: NavDomain[] = [
           { titleKey: "menu.purchaseQuotations", url: "/admin/purchase-quotations", icon: FileText },
           { titleKey: "menu.purchaseOrders", url: "/admin/purchase-orders", icon: ShoppingBag },
           { titleKey: "menu.purchaseInvoices", url: "/admin/purchase-invoices", icon: Receipt },
+          { titleKey: "menu.purchasePayments", url: "/admin/purchase-payments", icon: Banknote },
+          { titleKey: "menu.purchaseReturns", url: "/admin/purchase-returns", icon: RotateCcw },
         ]
       }
     ]

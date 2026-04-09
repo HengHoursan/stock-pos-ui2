@@ -4,6 +4,7 @@ const { t } = useI18n();
 import { ref, onMounted, reactive, watch } from "vue";
 import { useRouter } from "vue-router";
 import { formatDateTime } from "@/utils/format";
+
 import {
   Table,
   TableBody,
@@ -57,22 +58,22 @@ import {
   ArrowUpDown,
   RefreshCw,
   Loader2,
-  FileText
+  CreditCard
 } from "lucide-vue-next";
 
-import { PurchaseOrderService } from "@/services/purchase_order/purchase_order.service";
-import type { PurchaseOrder, PaginationMeta } from "@/types";
-import { OrderStatus } from "@/types/enums";
+import { PurchasePaymentService } from "@/services/purchase_payment/purchase_payment.service";
+import type { PurchasePayment, PaginationMeta } from "@/types";
+import { PaymentMethod } from "@/types/enums";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
 
 const router = useRouter();
-const poService = new PurchaseOrderService();
+const ppService = new PurchasePaymentService();
 
-const records = ref<PurchaseOrder[]>([]);
+const records = ref<PurchasePayment[]>([]);
 const loading = ref(true);
 const searchQuery = ref("");
-const statusFilter = ref<string | undefined>(undefined);
+const methodFilter = ref<string | undefined>(undefined);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -98,17 +99,17 @@ async function fetchData() {
     if (searchQuery.value.trim()) {
       payload.search = searchQuery.value.trim();
     }
-    if (statusFilter.value && statusFilter.value !== "all") {
-      payload.filter = { status: statusFilter.value };
+    if (methodFilter.value && methodFilter.value !== "all") {
+      payload.filter = { paymentMethod: methodFilter.value };
     }
-    const response = await poService.getList(payload);
+    const response = await ppService.getList(payload);
     if (response.success && response.data) {
       records.value = response.data.data;
       Object.assign(pagination, response.data.meta);
     }
   } catch (error) {
     console.error("Fetch error:", error);
-    toast.error(t('crud.errorFetch', { module: t('modules.purchaseOrder') }));
+    toast.error(t('crud.errorFetch', { module: t('modules.purchasePayment') }));
   } finally {
     loading.value = false;
   }
@@ -120,7 +121,7 @@ const debouncedFetch = useDebounceFn(() => {
 }, 500);
 
 watch(searchQuery, () => debouncedFetch());
-watch(statusFilter, () => { pagination.page = 1; fetchData(); });
+watch(methodFilter, () => { pagination.page = 1; fetchData(); });
 watch(() => pagination.limit, () => { pagination.page = 1; fetchData(); });
 
 function handlePageChange(page: number) {
@@ -136,15 +137,15 @@ function openDeleteDialog(id: number) {
 async function confirmDelete() {
   if (!recordToDelete.value) return;
   try {
-    const response = await poService.delete(recordToDelete.value);
+    const response = await ppService.softDelete(recordToDelete.value);
     if (response.success) {
-      toast.success(t('crud.successDelete', { module: t('modules.purchaseOrder') }));
+      toast.success(t('crud.successDelete', { module: t('modules.purchasePayment') }));
       fetchData();
     } else {
-      toast.error(response.message || t('crud.errorDelete', { module: t('modules.purchaseOrder') }));
+      toast.error(response.message || t('crud.errorDelete', { module: t('modules.purchasePayment') }));
     }
   } catch (error) {
-    toast.error(t('crud.errorDelete', { module: t('modules.purchaseOrder') }));
+    toast.error(t('crud.errorDelete', { module: t('modules.purchasePayment') }));
   } finally {
     isDeleteDialogOpen.value = false;
     recordToDelete.value = null;
@@ -162,15 +163,15 @@ function handleSort(column: string) {
 }
 
 function formatCurrency(val: number) {
-  return val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return (val || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function getStatusBadge(status: OrderStatus) {
-  switch(Number(status)) {
-    case OrderStatus.PENDING: return { variant: 'warning', label: t('fields.statusLabels.pending') };
-    case OrderStatus.PARTIAL: return { variant: 'default', label: t('fields.statusLabels.partial') };
-    case OrderStatus.COMPLETED: return { variant: 'success', label: t('fields.statusLabels.completed') };
-    default: return { variant: 'outline', label: t('crud.all') };
+function getPaymentMethodLabel(pm: PaymentMethod) {
+  switch (Number(pm)) {
+    case PaymentMethod.CASH: return t('fields.paymentMethodLabels.cash');
+    case PaymentMethod.TRANSFER: return t('fields.paymentMethodLabels.transfer');
+    case PaymentMethod.OTHER: return t('fields.paymentMethodLabels.other');
+    default: return 'N/A';
   }
 }
 
@@ -183,14 +184,14 @@ onMounted(() => {
   <div class="space-y-4">
     <div class="flex items-center justify-between">
       <h2 class="text-3xl font-bold tracking-tight text-foreground">
-        {{ $t("menu.purchaseOrders") }}
+        {{ $t("menu.purchasePayments") }}
       </h2>
       <div class="flex items-center gap-2">
         <Button variant="outline" size="icon" @click="fetchData" :disabled="loading">
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button @click="router.push('/admin/purchase-orders/create')">
-          <Plus class="mr-2 h-4 w-4" />{{ $t("menu.addPurchaseOrder") }}
+        <Button @click="router.push('/admin/purchase-payments/create')">
+          <Plus class="mr-2 h-4 w-4" />{{ $t("crud.createBtn") }}
         </Button>
       </div>
     </div>
@@ -200,21 +201,21 @@ onMounted(() => {
         <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
-          :placeholder="$t('crud.search', { module: $t('modules.purchaseOrder') })"
+          :placeholder="$t('crud.search', { module: $t('modules.purchasePayment') })"
           class="pl-8"
           v-model="searchQuery"
         />
       </div>
 
-      <Select v-model="statusFilter">
+      <Select v-model="methodFilter">
         <SelectTrigger class="w-full sm:w-[180px]">
-          <SelectValue :placeholder="$t('crud.filterByStatus')" />
+          <SelectValue :placeholder="$t('fields.paymentMethod')" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">{{ $t("crud.allStatus") }}</SelectItem>
-          <SelectItem :value="String(OrderStatus.PENDING)">{{ $t("fields.statusLabels.pending") }}</SelectItem>
-          <SelectItem :value="String(OrderStatus.PARTIAL)">{{ $t("fields.statusLabels.partial") }}</SelectItem>
-          <SelectItem :value="String(OrderStatus.COMPLETED)">{{ $t("fields.statusLabels.completed") }}</SelectItem>
+          <SelectItem value="all">{{ $t("crud.all") }}</SelectItem>
+          <SelectItem :value="String(PaymentMethod.CASH)">{{ $t("fields.paymentMethodLabels.cash") }}</SelectItem>
+          <SelectItem :value="String(PaymentMethod.TRANSFER)">{{ $t("fields.paymentMethodLabels.transfer") }}</SelectItem>
+          <SelectItem :value="String(PaymentMethod.OTHER)">{{ $t("fields.paymentMethodLabels.other") }}</SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -224,22 +225,21 @@ onMounted(() => {
         <TableHeader>
           <TableRow>
             <TableHead class="w-[50px]">#</TableHead>
-            <TableHead class="w-[120px]">{{ $t("fields.code") }}</TableHead>
-            <TableHead>{{ $t("fields.supplierId") }}</TableHead>
+            <TableHead class="w-[150px]">{{ $t("fields.code") }}</TableHead>
+            <TableHead>{{ $t("modules.purchaseInvoice") }}</TableHead>
             <TableHead>
-              <Button variant="ghost" @click="handleSort('orderDate')" class="-ml-4 h-8 font-medium">
-                {{ $t("fields.orderDate") }}<ArrowUpDown class="ml-1 h-3 w-3" />
+              <Button variant="ghost" @click="handleSort('paymentDate')" class="-ml-4 h-8 font-medium">
+                {{ $t("fields.transactionDate") }}<ArrowUpDown class="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
-            <TableHead class="text-center">{{ $t("fields.totalLine") }}</TableHead>
-            <TableHead class="text-right">{{ $t("fields.totalPrice") }}</TableHead>
-            <TableHead class="text-center">{{ $t("fields.status") }}</TableHead>
+            <TableHead class="text-right">{{ $t("fields.paymentMethod") }}</TableHead>
+            <TableHead class="text-right">{{ $t("fields.paidAmount") }}</TableHead>
             <TableHead class="text-right">{{ $t("crud.actions") }}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           <TableRow v-if="loading && records.length === 0">
-            <TableCell colspan="8" class="h-24 text-center">
+            <TableCell colspan="7" class="h-24 text-center">
               <div class="flex items-center justify-center text-muted-foreground italic text-sm">
                 <Loader2 class="h-4 w-4 animate-spin mr-2" />
                 <span>{{ $t('crud.fetchingData') }}</span>
@@ -257,21 +257,18 @@ onMounted(() => {
                 </code>
               </TableCell>
               <TableCell class="font-medium">
-                {{ record.supplier?.name || `Supplier ID ${record.supplierId}` }}
+                {{ record.purchaseInvoice?.code || `Invoice ID ${record.purchaseInvoiceId}` }}
               </TableCell>
               <TableCell class="text-foreground/90">
-                {{ formatDateTime(record.orderDate) }}
+                {{ formatDateTime(record.paymentDate) }}
               </TableCell>
-              <TableCell class="text-center">
-                {{ record.totalLine }} ({{ record.totalCloseLine }} {{ $t('fields.closed') }})
-              </TableCell>
-              <TableCell class="text-right font-mono text-primary font-semibold">
-                {{ formatCurrency(record.totalPrice) }}
-              </TableCell>
-              <TableCell class="text-center">
-                <Badge :variant="getStatusBadge(record.status).variant as any" class="font-medium text-xs px-2 py-0">
-                  {{ getStatusBadge(record.status).label }}
+              <TableCell class="text-right">
+                <Badge variant="outline" class="font-medium">
+                  {{ getPaymentMethodLabel(record.paymentMethod) }}
                 </Badge>
+              </TableCell>
+              <TableCell class="text-right font-mono text-success font-semibold">
+                + {{ formatCurrency(record.amount) }}
               </TableCell>
               <TableCell class="text-right">
                 <DropdownMenu>
@@ -286,8 +283,11 @@ onMounted(() => {
                       {{ $t("crud.actions") }}
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem @click="router.push(`/admin/purchase-orders/${record.id}`)" class="cursor-pointer">
+                    <DropdownMenuItem @click="router.push(`/admin/purchase-payments/${record.id}`)" class="cursor-pointer">
                       <Eye class="mr-2 h-4 w-4 opacity-70" />{{ $t("crud.viewBtn") }}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem @click="router.push(`/admin/purchase-payments/${record.id}/edit`)" class="cursor-pointer">
+                      {{ $t("crud.editBtn") }}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem class="text-destructive focus:text-destructive cursor-pointer font-medium" @click="openDeleteDialog(record.id)">
@@ -299,15 +299,15 @@ onMounted(() => {
             </TableRow>
           </template>
           <TableRow v-else>
-            <TableCell colspan="8" class="h-32 text-center text-muted-foreground">
+            <TableCell colspan="7" class="h-32 text-center text-muted-foreground">
               <div class="flex flex-col items-center justify-center gap-3">
-                <FileText class="h-10 w-10 opacity-10" />
-                <p class="font-medium">{{ $t("crud.noRecords", { module: $t("modules.purchaseOrders") }) }}</p>
+                <CreditCard class="h-10 w-10 opacity-10" />
+                <p class="font-medium">{{ $t("crud.noRecords", { module: $t("modules.purchasePayments") }) }}</p>
                 <Button
-                  v-if="searchQuery || (statusFilter && statusFilter !== 'all')"
+                  v-if="searchQuery || (methodFilter && methodFilter !== 'all')"
                   variant="outline"
                   size="sm"
-                  @click="searchQuery = ''; statusFilter = undefined;"
+                  @click="searchQuery = ''; methodFilter = undefined;"
                   class="h-8"
                 >
                   {{ $t('crud.resetFilters') }}
@@ -357,7 +357,7 @@ onMounted(() => {
         <AlertDialogHeader>
           <AlertDialogTitle>{{ $t('crud.confirmDelete') }}</AlertDialogTitle>
           <AlertDialogDescription>
-            {{ $t('crud.confirmDeleteDesc', { module: $t('modules.purchaseOrder') }) }}
+            {{ $t('crud.confirmDeleteDesc', { module: $t('modules.purchasePayment') }) }}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

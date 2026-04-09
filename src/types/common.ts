@@ -13,7 +13,7 @@ export interface PaginationMeta {
   totalItems: number;
   totalPages: number;
   sortBy: string;
-  sortOrder: "asc" | "desc";
+  sortOrder: "ASC" | "DESC";
 }
 
 // Matches backend PaginationRequest
@@ -21,7 +21,7 @@ export interface PaginationRequest {
   page: number;
   limit: number;
   sortBy: string;
-  sortOrder: "asc" | "desc";
+  sortOrder: "ASC" | "DESC";
   search?: string;
   filter?: Record<string, string>;
 }

@@ -4,6 +4,7 @@ const { t } = useI18n();
 import { ref, onMounted, reactive, watch } from "vue";
 import { useRouter } from "vue-router";
 import { formatDateTime } from "@/utils/format";
+
 import {
   Table,
   TableBody,
@@ -60,16 +61,16 @@ import {
   FileText
 } from "lucide-vue-next";
 
-import { PurchaseOrderService } from "@/services/purchase_order/purchase_order.service";
-import type { PurchaseOrder, PaginationMeta } from "@/types";
-import { OrderStatus } from "@/types/enums";
+import { PurchaseReturnService } from "@/services/purchase_return/purchase_return.service";
+import type { PurchaseReturn, PaginationMeta } from "@/types";
+import { InvoiceStatus } from "@/types/enums";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
 
 const router = useRouter();
-const poService = new PurchaseOrderService();
+const prService = new PurchaseReturnService();
 
-const records = ref<PurchaseOrder[]>([]);
+const records = ref<PurchaseReturn[]>([]);
 const loading = ref(true);
 const searchQuery = ref("");
 const statusFilter = ref<string | undefined>(undefined);
@@ -101,14 +102,14 @@ async function fetchData() {
     if (statusFilter.value && statusFilter.value !== "all") {
       payload.filter = { status: statusFilter.value };
     }
-    const response = await poService.getList(payload);
+    const response = await prService.getList(payload);
     if (response.success && response.data) {
       records.value = response.data.data;
       Object.assign(pagination, response.data.meta);
     }
   } catch (error) {
     console.error("Fetch error:", error);
-    toast.error(t('crud.errorFetch', { module: t('modules.purchaseOrder') }));
+    toast.error(t('crud.errorFetch', { module: t('modules.purchaseReturn') }));
   } finally {
     loading.value = false;
   }
@@ -136,15 +137,14 @@ function openDeleteDialog(id: number) {
 async function confirmDelete() {
   if (!recordToDelete.value) return;
   try {
-    const response = await poService.delete(recordToDelete.value);
+    const response = await prService.softDelete(recordToDelete.value);
     if (response.success) {
-      toast.success(t('crud.successDelete', { module: t('modules.purchaseOrder') }));
+      toast.success(t('crud.successDelete', { module: t('modules.purchaseReturn') }));
       fetchData();
     } else {
-      toast.error(response.message || t('crud.errorDelete', { module: t('modules.purchaseOrder') }));
     }
   } catch (error) {
-    toast.error(t('crud.errorDelete', { module: t('modules.purchaseOrder') }));
+    toast.error(t('crud.errorDelete', { module: t('modules.purchaseReturn') }));
   } finally {
     isDeleteDialogOpen.value = false;
     recordToDelete.value = null;
@@ -162,14 +162,13 @@ function handleSort(column: string) {
 }
 
 function formatCurrency(val: number) {
-  return val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return (val || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function getStatusBadge(status: OrderStatus) {
-  switch(Number(status)) {
-    case OrderStatus.PENDING: return { variant: 'warning', label: t('fields.statusLabels.pending') };
-    case OrderStatus.PARTIAL: return { variant: 'default', label: t('fields.statusLabels.partial') };
-    case OrderStatus.COMPLETED: return { variant: 'success', label: t('fields.statusLabels.completed') };
+function getStatusBadge(record: PurchaseReturn) {
+  switch(Number(record.status)) {
+    case InvoiceStatus.DRAFT: return { variant: 'secondary', label: t('fields.statusLabels.draft') };
+    case InvoiceStatus.COMPLETED: return { variant: 'success', label: t('fields.statusLabels.completed') };
     default: return { variant: 'outline', label: t('crud.all') };
   }
 }
@@ -183,14 +182,14 @@ onMounted(() => {
   <div class="space-y-4">
     <div class="flex items-center justify-between">
       <h2 class="text-3xl font-bold tracking-tight text-foreground">
-        {{ $t("menu.purchaseOrders") }}
+        {{ $t("menu.purchaseReturns") }}
       </h2>
       <div class="flex items-center gap-2">
         <Button variant="outline" size="icon" @click="fetchData" :disabled="loading">
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button @click="router.push('/admin/purchase-orders/create')">
-          <Plus class="mr-2 h-4 w-4" />{{ $t("menu.addPurchaseOrder") }}
+        <Button @click="router.push('/admin/purchase-returns/create')">
+          <Plus class="mr-2 h-4 w-4" />{{ $t("crud.createBtn") }}
         </Button>
       </div>
     </div>
@@ -200,7 +199,7 @@ onMounted(() => {
         <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
-          :placeholder="$t('crud.search', { module: $t('modules.purchaseOrder') })"
+          :placeholder="$t('crud.search', { module: $t('modules.purchaseReturn') })"
           class="pl-8"
           v-model="searchQuery"
         />
@@ -212,9 +211,8 @@ onMounted(() => {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">{{ $t("crud.allStatus") }}</SelectItem>
-          <SelectItem :value="String(OrderStatus.PENDING)">{{ $t("fields.statusLabels.pending") }}</SelectItem>
-          <SelectItem :value="String(OrderStatus.PARTIAL)">{{ $t("fields.statusLabels.partial") }}</SelectItem>
-          <SelectItem :value="String(OrderStatus.COMPLETED)">{{ $t("fields.statusLabels.completed") }}</SelectItem>
+          <SelectItem :value="String(InvoiceStatus.DRAFT)">{{ $t("fields.statusLabels.draft") }}</SelectItem>
+          <SelectItem :value="String(InvoiceStatus.COMPLETED)">{{ $t("fields.statusLabels.completed") }}</SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -224,11 +222,11 @@ onMounted(() => {
         <TableHeader>
           <TableRow>
             <TableHead class="w-[50px]">#</TableHead>
-            <TableHead class="w-[120px]">{{ $t("fields.code") }}</TableHead>
+            <TableHead class="w-[150px]">{{ $t("fields.code") }}</TableHead>
             <TableHead>{{ $t("fields.supplierId") }}</TableHead>
             <TableHead>
-              <Button variant="ghost" @click="handleSort('orderDate')" class="-ml-4 h-8 font-medium">
-                {{ $t("fields.orderDate") }}<ArrowUpDown class="ml-1 h-3 w-3" />
+              <Button variant="ghost" @click="handleSort('returnDate')" class="-ml-4 h-8 font-medium">
+                {{ $t("fields.date") }}<ArrowUpDown class="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
             <TableHead class="text-center">{{ $t("fields.totalLine") }}</TableHead>
@@ -260,21 +258,21 @@ onMounted(() => {
                 {{ record.supplier?.name || `Supplier ID ${record.supplierId}` }}
               </TableCell>
               <TableCell class="text-foreground/90">
-                {{ formatDateTime(record.orderDate) }}
+                {{ formatDateTime(record.returnDate) }}
               </TableCell>
               <TableCell class="text-center">
-                {{ record.totalLine }} ({{ record.totalCloseLine }} {{ $t('fields.closed') }})
+                {{ record.totalLine }} {{ $t('fields.items') }}
               </TableCell>
               <TableCell class="text-right font-mono text-primary font-semibold">
                 {{ formatCurrency(record.totalPrice) }}
               </TableCell>
               <TableCell class="text-center">
-                <Badge :variant="getStatusBadge(record.status).variant as any" class="font-medium text-xs px-2 py-0">
-                  {{ getStatusBadge(record.status).label }}
+                <Badge :variant="getStatusBadge(record).variant as any" class="font-medium text-xs px-2 py-0">
+                  {{ getStatusBadge(record).label }}
                 </Badge>
               </TableCell>
               <TableCell class="text-right">
-                <DropdownMenu>
+                <DropdownMenu drop-down-menu-content-align="end">
                   <DropdownMenuTrigger as-child>
                     <Button variant="ghost" class="h-8 w-8 p-0 hover:bg-muted/80 rounded-full">
                       <span class="sr-only">Open menu</span>
@@ -286,8 +284,11 @@ onMounted(() => {
                       {{ $t("crud.actions") }}
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem @click="router.push(`/admin/purchase-orders/${record.id}`)" class="cursor-pointer">
+                    <DropdownMenuItem @click="router.push(`/admin/purchase-returns/${record.id}`)" class="cursor-pointer">
                       <Eye class="mr-2 h-4 w-4 opacity-70" />{{ $t("crud.viewBtn") }}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem v-if="record.status === InvoiceStatus.DRAFT" @click="router.push(`/admin/purchase-returns/${record.id}/edit`)" class="cursor-pointer">
+                      {{ $t("crud.editBtn") }}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem class="text-destructive focus:text-destructive cursor-pointer font-medium" @click="openDeleteDialog(record.id)">
@@ -302,7 +303,7 @@ onMounted(() => {
             <TableCell colspan="8" class="h-32 text-center text-muted-foreground">
               <div class="flex flex-col items-center justify-center gap-3">
                 <FileText class="h-10 w-10 opacity-10" />
-                <p class="font-medium">{{ $t("crud.noRecords", { module: $t("modules.purchaseOrders") }) }}</p>
+                <p class="font-medium">{{ $t("crud.noRecords", { module: $t("modules.purchaseReturns") }) }}</p>
                 <Button
                   v-if="searchQuery || (statusFilter && statusFilter !== 'all')"
                   variant="outline"
@@ -357,7 +358,7 @@ onMounted(() => {
         <AlertDialogHeader>
           <AlertDialogTitle>{{ $t('crud.confirmDelete') }}</AlertDialogTitle>
           <AlertDialogDescription>
-            {{ $t('crud.confirmDeleteDesc', { module: $t('modules.purchaseOrder') }) }}
+            {{ $t('crud.confirmDeleteDesc', { module: $t('modules.purchaseReturn') }) }}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
