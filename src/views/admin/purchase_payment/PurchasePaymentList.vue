@@ -60,20 +60,25 @@ import {
   Loader2,
   CreditCard
 } from "lucide-vue-next";
-
+import DateRangePicker from "@/components/DateRangePicker.vue";
 import { PurchasePaymentService } from "@/services/purchase_payment/purchase_payment.service";
-import type { PurchasePayment, PaginationMeta } from "@/types";
+import { SupplierService } from "@/services/supplier/supplier.service";
+import type { PurchasePayment, PaginationMeta, Supplier } from "@/types";
 import { PaymentMethod } from "@/types/enums";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
 
 const router = useRouter();
 const ppService = new PurchasePaymentService();
+const supplierService = new SupplierService();
 
 const records = ref<PurchasePayment[]>([]);
+const suppliers = ref<Supplier[]>([]);
 const loading = ref(true);
 const searchQuery = ref("");
 const methodFilter = ref<string | undefined>(undefined);
+const supplierFilter = ref<string | undefined>(undefined);
+const dateRange = ref<{ start: string | null; end: string | null } | null>(null);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -99,9 +104,21 @@ async function fetchData() {
     if (searchQuery.value.trim()) {
       payload.search = searchQuery.value.trim();
     }
+    
+    payload.filter = {};
     if (methodFilter.value && methodFilter.value !== "all") {
-      payload.filter = { paymentMethod: methodFilter.value };
+      payload.filter.paymentMethod = methodFilter.value;
     }
+    if (supplierFilter.value && supplierFilter.value !== "all") {
+      payload.filter.supplierId = supplierFilter.value;
+    }
+    if (dateRange.value?.start) {
+      payload.filter.startDate = dateRange.value.start;
+    }
+    if (dateRange.value?.end) {
+      payload.filter.endDate = dateRange.value.end;
+    }
+
     const response = await ppService.getList(payload);
     if (response.success && response.data) {
       records.value = response.data.data;
@@ -115,6 +132,17 @@ async function fetchData() {
   }
 }
 
+async function fetchSuppliers() {
+  try {
+    const response = await supplierService.getAll();
+    if (response.success && response.data) {
+      suppliers.value = response.data;
+    }
+  } catch (error) {
+    console.error("Fetch suppliers error:", error);
+  }
+}
+
 const debouncedFetch = useDebounceFn(() => {
   pagination.page = 1;
   fetchData();
@@ -122,6 +150,8 @@ const debouncedFetch = useDebounceFn(() => {
 
 watch(searchQuery, () => debouncedFetch());
 watch(methodFilter, () => { pagination.page = 1; fetchData(); });
+watch(supplierFilter, () => { pagination.page = 1; fetchData(); });
+watch(dateRange, () => { pagination.page = 1; fetchData(); });
 watch(() => pagination.limit, () => { pagination.page = 1; fetchData(); });
 
 function handlePageChange(page: number) {
@@ -177,6 +207,7 @@ function getPaymentMethodLabel(pm: PaymentMethod) {
 
 onMounted(() => {
   fetchData();
+  fetchSuppliers();
 });
 </script>
 
@@ -196,19 +227,37 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="flex flex-col sm:flex-row items-center gap-4">
-      <div class="relative flex-1 w-full max-w-sm">
+    <div class="flex flex-wrap items-center gap-2">
+      <div class="relative flex-1 min-w-[200px] max-w-sm">
         <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
           :placeholder="$t('crud.search', { module: $t('modules.purchasePayment') })"
-          class="pl-8"
+          class="pl-8 bg-background/50 border-border/60 shadow-sm transition-all focus:ring-2 focus:ring-primary/20"
           v-model="searchQuery"
         />
       </div>
 
+      <DateRangePicker 
+        v-model="dateRange"
+        class="w-full sm:w-[260px] shadow-sm"
+        placeholder="Filter by Date"
+      />
+
+      <Select v-model="supplierFilter">
+        <SelectTrigger class="w-full sm:w-[200px] bg-background/50 border-border/60 shadow-sm">
+          <SelectValue :placeholder="$t('fields.supplierId')" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{{ $t("crud.all") }} {{ $t("fields.supplierId") }}</SelectItem>
+          <SelectItem v-for="s in suppliers" :key="s.id" :value="String(s.id)">
+            {{ s.name }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+
       <Select v-model="methodFilter">
-        <SelectTrigger class="w-full sm:w-[180px]">
+        <SelectTrigger class="w-full sm:w-[180px] bg-background/50 border-border/60 shadow-sm">
           <SelectValue :placeholder="$t('fields.paymentMethod')" />
         </SelectTrigger>
         <SelectContent>
@@ -218,6 +267,17 @@ onMounted(() => {
           <SelectItem :value="String(PaymentMethod.OTHER)">{{ $t("fields.paymentMethodLabels.other") }}</SelectItem>
         </SelectContent>
       </Select>
+
+      <Button 
+        v-if="searchQuery || (methodFilter && methodFilter !== 'all') || (supplierFilter && supplierFilter !== 'all') || dateRange"
+        variant="ghost" 
+        size="sm"
+        @click="searchQuery = ''; methodFilter = undefined; supplierFilter = undefined; dateRange = null;"
+        class="h-9 px-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+      >
+        <RefreshCw class="mr-2 h-4 w-4" />
+        {{ $t('crud.resetFilters') }}
+      </Button>
     </div>
 
     <div class="rounded-md border bg-card overflow-hidden shadow-sm">
@@ -304,10 +364,10 @@ onMounted(() => {
                 <CreditCard class="h-10 w-10 opacity-10" />
                 <p class="font-medium">{{ $t("crud.noRecords", { module: $t("modules.purchasePayments") }) }}</p>
                 <Button
-                  v-if="searchQuery || (methodFilter && methodFilter !== 'all')"
+                  v-if="searchQuery || (methodFilter && methodFilter !== 'all') || (supplierFilter && supplierFilter !== 'all') || dateRange"
                   variant="outline"
                   size="sm"
-                  @click="searchQuery = ''; methodFilter = undefined;"
+                  @click="searchQuery = ''; methodFilter = undefined; supplierFilter = undefined; dateRange = null;"
                   class="h-8"
                 >
                   {{ $t('crud.resetFilters') }}

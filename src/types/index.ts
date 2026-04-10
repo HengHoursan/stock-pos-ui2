@@ -22,3 +22,4 @@ export * from './purchase_return';
 export * from './sale_quotation';
 export * from './sale_payment';
 export * from './sale_return';
+export * from './report';

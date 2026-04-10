@@ -65,6 +65,10 @@ import {
   Globe,
   RotateCcw,
   Banknote,
+  LineChart,
+  BarChart3,
+  TrendingUp,
+  PieChart,
 } from "lucide-vue-next";
 import {
   Collapsible,
@@ -196,6 +200,22 @@ const navDomains: NavDomain[] = [
         children: [
           { titleKey: "menu.allSuppliers", url: "/admin/suppliers", icon: Globe },
           { titleKey: "menu.addSupplier", url: "/admin/suppliers/create", icon: Plus },
+        ],
+      },
+    ]
+  },
+  {
+    domainKey: "layout.reportsDomain",
+    items: [
+      {
+        titleKey: "menu.analytics",
+        icon: LineChart,
+        children: [
+          { titleKey: "menu.salesReport", url: "/admin/reports/sales", icon: TrendingUp },
+          { titleKey: "menu.purchasesReport", url: "/admin/reports/purchases", icon: ShoppingBag },
+          { titleKey: "menu.inventoryReport", url: "/admin/reports/inventory", icon: Package },
+          { titleKey: "menu.plReport", url: "/admin/reports/profit-loss", icon: PieChart },
+          { titleKey: "menu.topPerformers", url: "/admin/reports/top-performers", icon: BarChart3 },
         ],
       },
     ]

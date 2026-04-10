@@ -35,6 +35,30 @@ export function formatFullDateTime(date: string | Date | null | undefined): stri
 }
 
 /**
+ * Formats a date for filenames (YYYY-MM-DD_HH-mm)
+ */
+export function formatDateForFilename(date: Date = new Date()): string {
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  const yyyy = date.getFullYear();
+  const MM = pad(date.getMonth() + 1);
+  const dd = pad(date.getDate());
+  const HH = pad(date.getHours());
+  const mm = pad(date.getMinutes());
+  return `${yyyy}-${MM}-${dd}_${HH}-${mm}`;
+}
+
+/**
+ * Formats a number as a currency string.
+ */
+export function formatCurrency(amount: number | string | null | undefined): string {
+  const value = typeof amount === 'string' ? parseFloat(amount) : amount;
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value || 0);
+}
+
+/**
  * Converts a Date object to a local ISO string (YYYY-MM-DDTHH:mm) suitable for input[type="datetime-local"].
  */
 export function toLocalISOString(date: Date): string {

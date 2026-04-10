@@ -59,20 +59,25 @@ import {
   Loader2,
   FileText
 } from "lucide-vue-next";
-
+import DateRangePicker from "@/components/DateRangePicker.vue";
 import { PurchaseOrderService } from "@/services/purchase_order/purchase_order.service";
-import type { PurchaseOrder, PaginationMeta } from "@/types";
+import { SupplierService } from "@/services/supplier/supplier.service";
+import type { PurchaseOrder, PaginationMeta, Supplier } from "@/types";
 import { OrderStatus } from "@/types/enums";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
 
 const router = useRouter();
 const poService = new PurchaseOrderService();
+const supplierService = new SupplierService();
 
 const records = ref<PurchaseOrder[]>([]);
+const suppliers = ref<Supplier[]>([]);
 const loading = ref(true);
 const searchQuery = ref("");
 const statusFilter = ref<string | undefined>(undefined);
+const supplierFilter = ref<string | undefined>(undefined);
+const dateRange = ref<{ start: string | null; end: string | null } | null>(null);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -98,9 +103,21 @@ async function fetchData() {
     if (searchQuery.value.trim()) {
       payload.search = searchQuery.value.trim();
     }
+    
+    payload.filter = {};
     if (statusFilter.value && statusFilter.value !== "all") {
-      payload.filter = { status: statusFilter.value };
+      payload.filter.status = statusFilter.value;
     }
+    if (supplierFilter.value && supplierFilter.value !== "all") {
+      payload.filter.supplierId = supplierFilter.value;
+    }
+    if (dateRange.value?.start) {
+      payload.filter.startDate = dateRange.value.start;
+    }
+    if (dateRange.value?.end) {
+      payload.filter.endDate = dateRange.value.end;
+    }
+
     const response = await poService.getList(payload);
     if (response.success && response.data) {
       records.value = response.data.data;
@@ -114,6 +131,17 @@ async function fetchData() {
   }
 }
 
+async function fetchSuppliers() {
+  try {
+    const response = await supplierService.getAll();
+    if (response.success && response.data) {
+      suppliers.value = response.data;
+    }
+  } catch (error) {
+    console.error("Fetch suppliers error:", error);
+  }
+}
+
 const debouncedFetch = useDebounceFn(() => {
   pagination.page = 1;
   fetchData();
@@ -121,6 +149,8 @@ const debouncedFetch = useDebounceFn(() => {
 
 watch(searchQuery, () => debouncedFetch());
 watch(statusFilter, () => { pagination.page = 1; fetchData(); });
+watch(supplierFilter, () => { pagination.page = 1; fetchData(); });
+watch(dateRange, () => { pagination.page = 1; fetchData(); });
 watch(() => pagination.limit, () => { pagination.page = 1; fetchData(); });
 
 function handlePageChange(page: number) {
@@ -140,8 +170,6 @@ async function confirmDelete() {
     if (response.success) {
       toast.success(t('crud.successDelete', { module: t('modules.purchaseOrder') }));
       fetchData();
-    } else {
-      toast.error(response.message || t('crud.errorDelete', { module: t('modules.purchaseOrder') }));
     }
   } catch (error) {
     toast.error(t('crud.errorDelete', { module: t('modules.purchaseOrder') }));
@@ -176,6 +204,7 @@ function getStatusBadge(status: OrderStatus) {
 
 onMounted(() => {
   fetchData();
+  fetchSuppliers();
 });
 </script>
 
@@ -195,19 +224,37 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="flex flex-col sm:flex-row items-center gap-4">
-      <div class="relative flex-1 w-full max-w-sm">
+    <div class="flex flex-wrap items-center gap-2">
+      <div class="relative flex-1 min-w-[200px] max-w-sm">
         <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
           :placeholder="$t('crud.search', { module: $t('modules.purchaseOrder') })"
-          class="pl-8"
+          class="pl-8 bg-background/50 border-border/60 shadow-sm transition-all focus:ring-2 focus:ring-primary/20"
           v-model="searchQuery"
         />
       </div>
 
+      <DateRangePicker 
+        v-model="dateRange"
+        class="w-full sm:w-[260px] shadow-sm"
+        placeholder="Filter by Date"
+      />
+
+      <Select v-model="supplierFilter">
+        <SelectTrigger class="w-full sm:w-[200px] bg-background/50 border-border/60 shadow-sm">
+          <SelectValue :placeholder="$t('fields.supplierId')" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">{{ $t("crud.all") }} {{ $t("fields.supplierId") }}</SelectItem>
+          <SelectItem v-for="s in suppliers" :key="s.id" :value="String(s.id)">
+            {{ s.name }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
+
       <Select v-model="statusFilter">
-        <SelectTrigger class="w-full sm:w-[180px]">
+        <SelectTrigger class="w-full sm:w-[180px] bg-background/50 border-border/60 shadow-sm">
           <SelectValue :placeholder="$t('crud.filterByStatus')" />
         </SelectTrigger>
         <SelectContent>
@@ -217,6 +264,17 @@ onMounted(() => {
           <SelectItem :value="String(OrderStatus.COMPLETED)">{{ $t("fields.statusLabels.completed") }}</SelectItem>
         </SelectContent>
       </Select>
+
+      <Button 
+        v-if="searchQuery || (statusFilter && statusFilter !== 'all') || (supplierFilter && supplierFilter !== 'all') || dateRange"
+        variant="ghost" 
+        size="sm"
+        @click="searchQuery = ''; statusFilter = undefined; supplierFilter = undefined; dateRange = null;"
+        class="h-9 px-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+      >
+        <RefreshCw class="mr-2 h-4 w-4" />
+        {{ $t('crud.resetFilters') }}
+      </Button>
     </div>
 
     <div class="rounded-md border bg-card overflow-hidden shadow-sm">
@@ -274,7 +332,7 @@ onMounted(() => {
                 </Badge>
               </TableCell>
               <TableCell class="text-right">
-                <DropdownMenu>
+                <DropdownMenu align="end">
                   <DropdownMenuTrigger as-child>
                     <Button variant="ghost" class="h-8 w-8 p-0 hover:bg-muted/80 rounded-full">
                       <span class="sr-only">Open menu</span>
@@ -304,10 +362,10 @@ onMounted(() => {
                 <FileText class="h-10 w-10 opacity-10" />
                 <p class="font-medium">{{ $t("crud.noRecords", { module: $t("modules.purchaseOrders") }) }}</p>
                 <Button
-                  v-if="searchQuery || (statusFilter && statusFilter !== 'all')"
+                  v-if="searchQuery || (statusFilter && statusFilter !== 'all') || (supplierFilter && supplierFilter !== 'all') || dateRange"
                   variant="outline"
                   size="sm"
-                  @click="searchQuery = ''; statusFilter = undefined;"
+                  @click="searchQuery = ''; statusFilter = undefined; supplierFilter = undefined; dateRange = null;"
                   class="h-8"
                 >
                   {{ $t('crud.resetFilters') }}

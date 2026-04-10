@@ -58,7 +58,7 @@ import {
   Loader2,
   FileText
 } from "lucide-vue-next";
-
+import DateRangePicker from "@/components/DateRangePicker.vue";
 import { PurchaseQuotationService } from "@/services/purchase_quotation/purchase_quotation.service";
 import type { PurchaseQuotation, PaginationMeta } from "@/types";
 import { toast } from "vue-sonner";
@@ -70,6 +70,7 @@ const pqService = new PurchaseQuotationService();
 const records = ref<PurchaseQuotation[]>([]);
 const loading = ref(true);
 const searchQuery = ref("");
+const dateRange = ref<{ start: string | null; end: string | null } | null>(null);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -95,6 +96,15 @@ async function fetchData() {
     if (searchQuery.value.trim()) {
       payload.search = searchQuery.value.trim();
     }
+    
+    payload.filter = {};
+    if (dateRange.value?.start) {
+      payload.filter.startDate = dateRange.value.start;
+    }
+    if (dateRange.value?.end) {
+      payload.filter.endDate = dateRange.value.end;
+    }
+
     const response = await pqService.getList(payload);
     if (response.success && response.data) {
       records.value = response.data.data;
@@ -114,6 +124,7 @@ const debouncedFetch = useDebounceFn(() => {
 }, 500);
 
 watch(searchQuery, () => debouncedFetch());
+watch(dateRange, () => { pagination.page = 1; fetchData(); });
 watch(() => pagination.limit, () => { pagination.page = 1; fetchData(); });
 
 function handlePageChange(page: number) {
@@ -133,8 +144,6 @@ async function confirmDelete() {
     if (response.success) {
       toast.success(t('crud.successDelete', { module: t('modules.purchaseQuotation') }));
       fetchData();
-    } else {
-      toast.error(response.message || t('crud.errorDelete', { module: t('modules.purchaseQuotation') }));
     }
   } catch (error) {
     toast.error(t('crud.errorDelete', { module: t('modules.purchaseQuotation') }));
@@ -155,7 +164,7 @@ function handleSort(column: string) {
 }
 
 function formatCurrency(val: number) {
-  return val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return (val || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 onMounted(() => {
@@ -179,16 +188,33 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="flex flex-col sm:flex-row items-center gap-4">
-      <div class="relative flex-1 w-full max-w-sm">
+    <div class="flex flex-wrap items-center gap-2">
+      <div class="relative flex-1 min-w-[200px] max-w-sm">
         <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
           :placeholder="$t('crud.search', { module: $t('modules.purchaseQuotation') })"
-          class="pl-8"
+          class="pl-8 bg-background/50 border-border/60 shadow-sm transition-all focus:ring-2 focus:ring-primary/20"
           v-model="searchQuery"
         />
       </div>
+
+      <DateRangePicker 
+        v-model="dateRange"
+        class="w-full sm:w-[260px] shadow-sm"
+        placeholder="Filter by Date"
+      />
+
+      <Button 
+        v-if="searchQuery || dateRange"
+        variant="ghost" 
+        size="sm"
+        @click="searchQuery = ''; dateRange = null;"
+        class="h-9 px-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+      >
+        <RefreshCw class="mr-2 h-4 w-4" />
+        {{ $t('crud.resetFilters') }}
+      </Button>
     </div>
 
     <div class="rounded-md border bg-card overflow-hidden shadow-sm">
@@ -226,7 +252,7 @@ onMounted(() => {
                   {{ record.code }}
                 </code>
               </TableCell>
-              <TableCell class="font-semibold text-base text-foreground/90">
+              <TableCell class="font-medium text-foreground/90">
                 {{ formatDateTime(record.quotationDate) }}
               </TableCell>
               <TableCell class="text-center">
@@ -236,7 +262,7 @@ onMounted(() => {
                 {{ formatCurrency(record.totalPrice) }}
               </TableCell>
               <TableCell class="text-right">
-                <DropdownMenu>
+                <DropdownMenu align="end">
                   <DropdownMenuTrigger as-child>
                     <Button variant="ghost" class="h-8 w-8 p-0 hover:bg-muted/80 rounded-full">
                       <span class="sr-only">Open menu</span>
@@ -266,10 +292,10 @@ onMounted(() => {
                 <FileText class="h-10 w-10 opacity-10" />
                 <p class="font-medium">{{ $t("crud.noRecords", { module: $t("modules.purchaseQuotations") }) }}</p>
                 <Button
-                  v-if="searchQuery"
+                  v-if="searchQuery || dateRange"
                   variant="outline"
                   size="sm"
-                  @click="searchQuery = ''"
+                  @click="searchQuery = ''; dateRange = null;"
                   class="h-8"
                 >
                   {{ $t('crud.resetFilters') }}
