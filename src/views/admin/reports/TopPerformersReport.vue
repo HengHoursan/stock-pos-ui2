@@ -182,28 +182,24 @@ function handleExport(formatType: "excel" | "csv" | "pdf", target: "products" | 
           />
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <div class="text-[10px] uppercase font-bold text-muted-foreground mr-1">{{ $t('reports.export') }}:</div>
             <Button
               @click="handleExport('excel', 'products')"
-              variant="outline"
               size="sm"
-              class="gap-2 border-green-600/50 hover:bg-green-50 hover:text-green-700 transition-colors bg-background"
+              class="gap-2 bg-green-600 hover:bg-green-700 text-white transition-colors cursor-pointer"
             >
               <FileSpreadsheet class="h-4 w-4" /> {{ $t("reports.excel") }}
             </Button>
             <Button
               @click="handleExport('csv', 'products')"
-              variant="outline"
               size="sm"
-              class="gap-2 border-blue-600/50 hover:bg-blue-50 hover:text-blue-700 transition-colors bg-background"
+              class="gap-2 bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer"
             >
               <FileText class="h-4 w-4" /> {{ $t("reports.csv") }}
             </Button>
             <Button
               @click="handleExport('pdf', 'products')"
-              variant="outline"
               size="sm"
-              class="gap-2 border-red-600/50 hover:bg-red-50 hover:text-red-700 transition-colors bg-background"
+              class="gap-2 bg-red-600 hover:bg-red-700 text-white transition-colors cursor-pointer"
             >
               <FileText class="h-4 w-4" /> {{ $t("reports.pdf") }}
             </Button>
@@ -214,12 +210,12 @@ function handleExport(formatType: "excel" | "csv" | "pdf", target: "products" | 
     <!-- Top Grid -->
     <div class="grid gap-6 md:grid-cols-2">
       <!-- Best Selling Products -->
-      <Card class="border-t-4 border-t-yellow-500 shadow-sm relative">
+      <Card class="border-l-4 border-l-yellow-600 shadow-sm relative">
         <CardHeader class="pb-2">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <Package class="h-5 w-5 text-yellow-600" />
-              <CardTitle>{{ $t("reports.bestSellingProducts") }}</CardTitle>
+              <CardTitle class="text-lg font-bold">{{ $t("reports.bestSellingProducts") }}</CardTitle>
             </div>
             <Star class="h-4 w-4 text-yellow-400 fill-yellow-400" />
           </div>
@@ -228,7 +224,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf", target: "products" | 
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div class="rounded-md border bg-background">
+          <div class="rounded-lg border bg-card overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -245,7 +241,8 @@ function handleExport(formatType: "excel" | "csv" | "pdf", target: "products" | 
                 <TableRow v-if="loading">
                   <TableCell colspan="3" class="h-24 text-center">
                     <div class="flex items-center justify-center gap-2">
-                      <Loader2 class="h-4 w-4 animate-spin" />
+                      <Loader2 class="h-4 w-4 animate-spin text-primary" />
+                      <span>{{ $t("crud.loading") }}</span>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -284,15 +281,14 @@ function handleExport(formatType: "excel" | "csv" | "pdf", target: "products" | 
       </Card>
 
       <!-- Top Customers -->
-      <Card class="border-t-4 border-t-blue-500 shadow-sm relative">
+      <Card class="border-l-4 border-l-blue-600 shadow-sm relative">
         <CardHeader class="pb-2">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <Users class="h-5 w-5 text-blue-600" />
-              <CardTitle>{{ $t("reports.topCustomers") }}</CardTitle>
+              <CardTitle class="text-lg font-bold">{{ $t("reports.topCustomers") }}</CardTitle>
             </div>
             <div class="flex items-center gap-1">
-               <Button @click="handleExport('excel', 'customers')" size="icon" variant="ghost" class="h-7 w-7 text-green-600" :title="$t('reports.excel')"><FileSpreadsheet class="h-4 w-4"/></Button>
                <ArrowUpRight class="h-4 w-4 text-blue-400" />
             </div>
           </div>
@@ -301,7 +297,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf", target: "products" | 
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div class="rounded-md border bg-background text-card-foreground">
+          <div class="rounded-lg border bg-card overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -315,7 +311,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf", target: "products" | 
                 <TableRow v-if="loading">
                   <TableCell colspan="2" class="h-24 text-center">
                     <div class="flex items-center justify-center gap-2">
-                      <Loader2 class="h-4 w-4 animate-spin" />
+                      <Loader2 class="h-4 w-4 animate-spin text-primary" />
                     </div>
                   </TableCell>
                 </TableRow>

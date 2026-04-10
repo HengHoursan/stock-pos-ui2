@@ -133,25 +133,22 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
         <div class="flex flex-wrap items-center gap-2">
             <Button
               @click="handleExport('excel')"
-              variant="outline"
               size="sm"
-              class="gap-2 border-green-600/50 hover:bg-green-50 hover:text-green-700 transition-colors bg-background"
+              class="gap-2 bg-green-600 hover:bg-green-700 text-white transition-colors cursor-pointer"
             >
               <FileSpreadsheet class="h-4 w-4" /> {{ $t("reports.excel") }}
             </Button>
             <Button
               @click="handleExport('csv')"
-              variant="outline"
               size="sm"
-              class="gap-2 border-blue-600/50 hover:bg-blue-50 hover:text-blue-700 transition-colors bg-background"
+              class="gap-2 bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer"
             >
               <FileText class="h-4 w-4" /> {{ $t("reports.csv") }}
             </Button>
             <Button
               @click="handleExport('pdf')"
-              variant="outline"
               size="sm"
-              class="gap-2 border-red-600/50 hover:bg-red-50 hover:text-red-700 transition-colors bg-background"
+              class="gap-2 bg-red-600 hover:bg-red-700 text-white transition-colors cursor-pointer"
             >
               <FileText class="h-4 w-4" /> {{ $t("reports.pdf") }}
             </Button>
@@ -168,8 +165,8 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
 
     <div v-else class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       <!-- Revenue & Sales -->
-      <Card class="border-t-4 border-t-green-600">
-        <CardHeader class="pb-2">
+      <Card class="border-l-4 border-l-green-600">
+        <CardHeader class="flex flex-row items-center justify-between pb-2">
           <CardTitle class="text-sm font-medium">{{
             $t("reports.revenue")
           }}</CardTitle>
@@ -186,8 +183,8 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
       </Card>
 
       <!-- COGS -->
-      <Card class="border-t-4 border-t-orange-600">
-        <CardHeader class="pb-2">
+      <Card class="border-l-4 border-l-orange-600">
+        <CardHeader class="flex flex-row items-center justify-between pb-2">
           <CardTitle class="text-sm font-medium">{{
             $t("reports.cogs")
           }}</CardTitle>
@@ -204,15 +201,15 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
       </Card>
 
       <!-- Gross Profit -->
-      <Card class="border-t-4 border-t-blue-600">
-        <CardHeader class="pb-2">
+      <Card class="border-l-4 border-l-blue-600">
+        <CardHeader class="flex flex-row items-center justify-between pb-2">
           <CardTitle class="text-sm font-medium">{{
             $t("reports.grossProfit")
           }}</CardTitle>
           <PieChart class="h-4 w-4 text-blue-600" />
         </CardHeader>
         <CardContent>
-          <div class="text-3xl font-bold text-blue-600 font-mono">
+          <div class="text-3xl font-bold text-blue-600">
             {{ formatCurrency(reportData.grossProfit) }}
           </div>
           <p class="text-xs text-muted-foreground mt-1">
@@ -222,8 +219,8 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
       </Card>
 
       <!-- Operating Expenses (Purchases) -->
-      <Card class="border-t-4 border-t-destructive">
-        <CardHeader class="pb-2">
+      <Card class="border-l-4 border-l-destructive">
+        <CardHeader class="flex flex-row items-center justify-between pb-2">
           <CardTitle class="text-sm font-medium">{{
             $t("reports.otherExpenses")
           }}</CardTitle>
@@ -241,9 +238,9 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
 
       <!-- Net Profit -->
       <Card
-        class="border-t-4 border-t-primary bg-primary/5 md:col-span-2 lg:col-span-1 shadow-lg"
+        class="border-l-4 border-l-primary bg-primary/5 md:col-span-2 lg:col-span-1 shadow-lg"
       >
-        <CardHeader class="pb-2">
+        <CardHeader class="flex flex-row items-center justify-between pb-2">
           <CardTitle class="text-sm font-medium">{{
             $t("reports.netProfit")
           }}</CardTitle>
