@@ -291,7 +291,7 @@ onMounted(() => {
                   {{ currency.code }}
                 </code>
               </TableCell>
-              <TableCell class="font-semibold text-base text-foreground/90 tracking-tight">
+              <TableCell class="font-bold text-base text-foreground/90 tracking-tight">
                 {{ currency.currency }}
               </TableCell>
               <TableCell class="text-muted-foreground text-sm">

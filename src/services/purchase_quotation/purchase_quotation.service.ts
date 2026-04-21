@@ -14,7 +14,7 @@ export class PurchaseQuotationService extends BaseService {
   }
 
   async getDetail(id: number): Promise<ApiResponse<PurchaseQuotation>> {
-    return this.post<ApiResponse<PurchaseQuotation>>("/purchase-quotations/show", { id });
+    return this.post<ApiResponse<PurchaseQuotation>>("/purchase-quotations/detail", { id });
   }
 
   async create(payload: CreatePurchaseQuotationRequest): Promise<ApiResponse<null>> {

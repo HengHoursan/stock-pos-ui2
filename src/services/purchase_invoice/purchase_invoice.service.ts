@@ -15,7 +15,7 @@ export class PurchaseInvoiceService extends BaseService {
   }
 
   async getDetail(id: number): Promise<ApiResponse<PurchaseInvoice>> {
-    return this.post<ApiResponse<PurchaseInvoice>>("/purchase-invoices/show", { id });
+    return this.post<ApiResponse<PurchaseInvoice>>("/purchase-invoices/detail", { id });
   }
 
   async create(payload: CreatePurchaseInvoiceRequest): Promise<ApiResponse<null>> {

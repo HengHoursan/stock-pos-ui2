@@ -112,191 +112,184 @@ onMounted(() => {
     </Card>
 
     <div v-else-if="product" class="grid gap-6 grid-cols-1 lg:grid-cols-3">
-      <!-- Left Column: Image & Quick Stats -->
-      <div class="lg:col-span-1 space-y-6">
-        <Card class="overflow-hidden shadow-md">
-          <CardHeader class="pb-3 border-b bg-muted/20">
-            <CardTitle class="text-lg flex items-center gap-2 uppercase tracking-tight font-bold">
-              <Package class="h-4 w-4 text-primary" />
-              {{ $t('crud.image') }}
-            </CardTitle>
-          </CardHeader>
-          <CardContent class="pt-6">
-            <div class="aspect-square relative rounded-xl border-2 border-dashed bg-muted/30 flex items-center justify-center overflow-hidden transition-all hover:bg-muted/50">
-              <img v-if="product.photoPath" :src="product.photoPath" :alt="product.name" class="h-full w-full object-cover" />
-              <div v-else class="flex flex-col items-center gap-3 text-muted-foreground/40">
-                <Package class="h-20 w-20 opacity-10" />
-                <span class="text-xs font-semibold uppercase tracking-widest">No Image</span>
-              </div>
+      <!-- Image Section -->
+      <Card class="lg:col-span-1 overflow-hidden h-fit">
+        <CardHeader class="pb-3">
+          <CardTitle class="text-lg">{{ $t("crud.image") }}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div class="aspect-square relative rounded-lg border bg-muted/50 flex items-center justify-center overflow-hidden">
+            <img v-if="product.photoPath" :src="product.photoPath" :alt="product.name" class="h-full w-full object-cover" />
+            <div v-else class="flex flex-col items-center gap-2 text-muted-foreground">
+              <Package class="h-12 w-12 opacity-20" />
+              <span class="text-xs">No image available</span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </CardContent>
+      </Card>
 
-        <Card class="shadow-md">
-          <CardHeader class="pb-3 border-b bg-muted/20">
-            <CardTitle class="text-lg flex items-center gap-2 uppercase tracking-tight font-bold text-primary">
-              <DollarSign class="h-4 w-4" />
-              {{ $t('fields.salePrice') }}
-            </CardTitle>
-          </CardHeader>
-          <CardContent class="pt-6">
-            <div class="text-4xl font-extrabold text-primary tracking-tighter">
-              {{ formatCurrency(product.detail?.salePrice || 0) }}
-            </div>
-            <div class="mt-2 flex items-center justify-between text-sm text-muted-foreground border-t pt-3">
-              <span>{{ $t('fields.purchasePrice') }}</span>
-              <span class="font-mono font-bold">{{ formatCurrency(product.detail?.purchasePrice || 0) }}</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card class="shadow-md">
-          <CardHeader class="pb-3 border-b bg-muted/20">
-            <CardTitle class="text-lg flex items-center gap-2 uppercase tracking-tight font-bold">
-              <Box class="h-4 w-4 text-primary" />
-              {{ $t('fields.currentStock') }}
-            </CardTitle>
-          </CardHeader>
-          <CardContent class="pt-6">
-            <div class="flex items-end justify-between">
-               <div class="text-4xl font-extrabold tracking-tighter" :class="(product.detail?.currentStock || 0) <= product.alertQuantity ? 'text-destructive' : 'text-foreground'">
-                {{ product.detail?.currentStock || 0 }}
-                <span class="text-sm font-medium text-muted-foreground ml-1">{{ product.unit?.name }}</span>
-              </div>
-              <Badge variant="outline" class="mb-1 font-mono text-[10px]">
-                {{ product.detail?.stockNumber || 'NO-REF' }}
-              </Badge>
-            </div>
-            <div class="mt-4 flex items-center gap-2 text-xs font-medium bg-red-50 text-red-700 p-2 rounded-md" v-if="(product.detail?.currentStock || 0) <= product.alertQuantity">
-               <AlertTriangle class="h-3 w-3" />
-               Stock Below Alert Quantity ({{ product.alertQuantity }})
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <!-- Right Column: Full Details -->
+      <!-- Details Section -->
       <div class="lg:col-span-2 space-y-6">
-        <Card class="shadow-md">
-          <CardHeader class="pb-3 border-b bg-muted/20">
-            <CardTitle class="text-lg flex items-center gap-2 uppercase tracking-tight font-bold">
-              <AlignLeft class="h-4 w-4 text-primary" />
-              {{ $t('crud.generalInfo') }}
-            </CardTitle>
+        <Card>
+          <CardHeader class="pb-3">
+            <CardTitle class="text-lg">{{ $t("crud.generalInfo") }}</CardTitle>
           </CardHeader>
-          <CardContent class="pt-6">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
+          <CardContent>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="space-y-1">
-                <div class="flex items-center text-xs text-muted-foreground font-bold uppercase tracking-wider">
-                  <Barcode class="mr-2 h-3.5 w-3.5" />{{ $t('fields.code') }}</div>
-                <p class="font-mono text-base font-bold">{{ product.code }}</p>
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <Package class="mr-2 h-4 w-4" />{{ $t("fields.name") }}
+                </div>
+                <p class="font-medium text-base">{{ product.name }}</p>
               </div>
 
               <div class="space-y-1">
-                <div class="flex items-center text-xs text-muted-foreground font-bold uppercase tracking-wider">
-                  <Barcode class="mr-2 h-3.5 w-3.5" />{{ $t('fields.sku') }}</div>
-                <p class="font-mono text-base font-bold">{{ product.skuCode || 'N/A' }}</p>
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <Barcode class="mr-2 h-4 w-4" />{{ $t("fields.code") }}
+                </div>
+                <p class="font-medium text-base">{{ product.code || "N/A" }}</p>
               </div>
 
               <div class="space-y-1">
-                <div class="flex items-center text-xs text-muted-foreground font-bold uppercase tracking-wider">
-                  <Barcode class="mr-2 h-3.5 w-3.5" />{{ $t('fields.barcodeType') }}</div>
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <Barcode class="mr-2 h-4 w-4" />{{ $t("fields.sku") }}
+                </div>
+                <p class="font-medium text-base">{{ product.skuCode || "N/A" }}</p>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <Barcode class="mr-2 h-4 w-4" />{{ $t("fields.barcodeType") }}
+                </div>
                 <p class="font-medium text-base">{{ product.barcodeType }}</p>
               </div>
 
               <div class="space-y-1">
-                <div class="flex items-center text-xs text-muted-foreground font-bold uppercase tracking-wider">
-                  <Tag class="mr-2 h-3.5 w-3.5" />{{ $t('modules.category') }}</div>
-                <p class="font-medium text-base text-primary">{{ product.category?.name || 'N/A' }}</p>
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <Tag class="mr-2 h-4 w-4" />{{ $t("modules.category") }}
+                </div>
+                <p class="font-medium text-base">
+                  <span v-if="product.category" class="text-primary hover:underline cursor-pointer" @click="router.push(`/admin/categories/${product.category.id}`)">
+                    {{ product.category.name }}
+                  </span>
+                  <span v-else>{{ $t("crud.none") }}</span>
+                </p>
               </div>
 
               <div class="space-y-1">
-                <div class="flex items-center text-xs text-muted-foreground font-bold uppercase tracking-wider">
-                  <Bookmark class="mr-2 h-3.5 w-3.5" />{{ $t('modules.brand') }}</div>
-                <p class="font-medium text-base text-primary">{{ product.brand?.name || 'N/A' }}</p>
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <Bookmark class="mr-2 h-4 w-4" />{{ $t("modules.brand") }}
+                </div>
+                <p class="font-medium text-base">
+                  <span v-if="product.brand" class="text-primary hover:underline cursor-pointer" @click="router.push(`/admin/brands/${product.brand.id}`)">
+                    {{ product.brand.name }}
+                  </span>
+                  <span v-else>{{ $t("crud.none") }}</span>
+                </p>
               </div>
 
               <div class="space-y-1">
-                <div class="flex items-center text-xs text-muted-foreground font-bold uppercase tracking-wider">
-                  <Ruler class="mr-2 h-3.5 w-3.5" />{{ $t('modules.unit') }}</div>
-                <p class="font-medium text-base text-primary">{{ product.unit?.name || 'N/A' }}</p>
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <Ruler class="mr-2 h-4 w-4" />{{ $t("modules.unit") }}
+                </div>
+                <p class="font-medium text-base">
+                  <span v-if="product.unit" class="text-primary hover:underline cursor-pointer" @click="router.push(`/admin/units/${product.unit.id}`)">
+                    {{ product.unit.name }}
+                  </span>
+                  <span v-else>{{ $t("crud.none") }}</span>
+                </p>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <DollarSign class="mr-2 h-4 w-4" />{{ $t("fields.salePrice") }}
+                </div>
+                <p class="font-medium text-base text-primary">{{ formatCurrency(product.detail?.salePrice || 0) }}</p>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <DollarSign class="mr-2 h-4 w-4" />{{ $t("fields.purchasePrice") }}
+                </div>
+                <p class="font-medium text-base">{{ formatCurrency(product.detail?.purchasePrice || 0) }}</p>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <Box class="mr-2 h-4 w-4" />{{ $t("fields.currentStock") }}
+                </div>
+                <p class="font-medium text-base" :class="(product.detail?.currentStock || 0) <= product.alertQuantity ? 'text-destructive' : ''">
+                  {{ product.detail?.currentStock || 0 }} 
+                  <span class="text-xs text-muted-foreground ml-1">({{ product.detail?.stockNumber || 'NO-REF' }})</span>
+                </p>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <AlertTriangle class="mr-2 h-4 w-4" />Alert Quantity
+                </div>
+                <p class="font-medium text-base">{{ product.alertQuantity }}</p>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <Clock class="mr-2 h-4 w-4" />{{ $t("fields.expiryDate") }}
+                </div>
+                <p class="font-medium text-base">
+                  {{ product.detail?.expiryDate ? new Date(product.detail.expiryDate).toLocaleDateString() : 'N/A' }} 
+                  <span v-if="product.detail?.expiryType !== 'None'" class="text-xs text-muted-foreground ml-1">({{ formatExpiryType(product.detail?.expiryType) }})</span>
+                </p>
+              </div>
+            </div>
+
+            <div class="mt-6 pt-6 border-t">
+              <h4 class="text-sm font-medium mb-4 text-muted-foreground">Settings</h4>
+              <div class="flex flex-wrap gap-4">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs">{{ $t("fields.manageStock") }}:</span>
+                  <Badge :variant="product.manageStock ? 'success' : 'secondary'" class="text-[10px] h-5 px-2 uppercase shadow-sm">
+                    {{ product.manageStock ? 'Yes' : 'No' }}
+                  </Badge>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs">{{ $t("fields.forSelling") }}:</span>
+                  <Badge :variant="product.forSelling ? 'success' : 'secondary'" class="text-[10px] h-5 px-2 uppercase shadow-sm">
+                    {{ product.forSelling ? 'Yes' : 'No' }}
+                  </Badge>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs">{{ $t("fields.isManufacture") }}:</span>
+                  <Badge :variant="product.isManufacture ? 'success' : 'secondary'" class="text-[10px] h-5 px-2 uppercase shadow-sm">
+                    {{ product.isManufacture ? 'Yes' : 'No' }}
+                  </Badge>
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card class="shadow-md">
-           <CardHeader class="pb-3 border-b bg-muted/20">
-            <CardTitle class="text-lg flex items-center gap-2 uppercase tracking-tight font-bold">
-              <ShieldCheck class="h-4 w-4 text-primary" />
-              Settings & Configuration
-            </CardTitle>
+        <Card>
+          <CardHeader class="pb-3">
+            <CardTitle class="text-lg">{{ $t("crud.systemInfo") }}</CardTitle>
           </CardHeader>
-          <CardContent class="pt-6">
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-               <div class="flex flex-col items-center justify-center p-4 rounded-lg bg-muted/20 border border-dashed text-center gap-2">
-                 <span class="text-[10px] uppercase font-bold text-muted-foreground">{{ $t('fields.status') }}</span>
-                 <Badge :variant="product.status ? 'success' : 'warning'" class="h-5 px-3">{{ product.status ? 'Active' : 'Inactive' }}</Badge>
-               </div>
-               <div class="flex flex-col items-center justify-center p-4 rounded-lg bg-muted/20 border border-dashed text-center gap-2">
-                 <span class="text-[10px] uppercase font-bold text-muted-foreground">{{ $t('fields.manageStock') }}</span>
-                 <Badge :variant="product.manageStock ? 'default' : 'secondary'" class="h-5 px-3">{{ product.manageStock ? 'YES' : 'NO' }}</Badge>
-               </div>
-               <div class="flex flex-col items-center justify-center p-4 rounded-lg bg-muted/20 border border-dashed text-center gap-2">
-                 <span class="text-[10px] uppercase font-bold text-muted-foreground">{{ $t('fields.forSelling') }}</span>
-                 <Badge :variant="product.forSelling ? 'default' : 'secondary'" class="h-5 px-3">{{ product.forSelling ? 'YES' : 'NO' }}</Badge>
-               </div>
-               <div class="flex flex-col items-center justify-center p-4 rounded-lg bg-muted/20 border border-dashed text-center gap-2">
-                 <span class="text-[10px] uppercase font-bold text-muted-foreground">{{ $t('fields.isManufacture') }}</span>
-                 <Badge :variant="product.isManufacture ? 'outline' : 'secondary'" class="h-5 px-3">{{ product.isManufacture ? 'YES' : 'NO' }}</Badge>
-               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card v-if="product.detail?.expiryDate || product.detail?.expiryType !== 'None'" class="shadow-md border-orange-100 bg-orange-50/10">
-           <CardHeader class="pb-3 border-b border-orange-100 bg-orange-50/30">
-            <CardTitle class="text-lg flex items-center gap-2 uppercase tracking-tight font-bold text-orange-700">
-              <Clock class="h-4 w-4" />
-              {{ $t('fields.expiryDate') }} Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent class="pt-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
-              <div class="space-y-1">
-                <div class="flex items-center text-xs text-orange-600/70 font-bold uppercase tracking-wider">
-                  <Calendar class="mr-2 h-3.5 w-3.5" />{{ $t('fields.expiryDate') }}</div>
-                <p class="font-bold text-lg text-orange-950">{{ product.detail?.expiryDate ? new Date(product.detail.expiryDate).toLocaleDateString() : 'N/A' }}</p>
-              </div>
-
-              <div class="space-y-1">
-                <div class="flex items-center text-xs text-orange-600/70 font-bold uppercase tracking-wider">
-                  <Tag class="mr-2 h-3.5 w-3.5" />{{ $t('fields.expiryType') }}</div>
-                <p class="font-bold text-lg text-orange-950">{{ formatExpiryType(product.detail?.expiryType) }}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card class="shadow-md">
-          <CardHeader class="pb-3 border-b bg-muted/20">
-            <CardTitle class="text-lg flex items-center gap-2 uppercase tracking-tight font-bold">
-              <Calendar class="h-4 w-4 text-primary" />
-              {{ $t('crud.systemInfo') }}
-            </CardTitle>
-          </CardHeader>
-          <CardContent class="pt-6">
+          <CardContent>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="space-y-1">
-                <div class="flex items-center text-xs text-muted-foreground font-bold uppercase tracking-wider">
-                  <Calendar class="mr-2 h-3.5 w-3.5" />{{ $t('fields.createdAt') }}</div>
-                <p class="font-medium text-sm">{{ new Date(product.createdAt).toLocaleString() }}</p>
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <Calendar class="mr-2 h-4 w-4" />{{ $t("fields.createdAt") }}
+                </div>
+                <p class="font-medium text-base">
+                  {{ new Date(product.createdAt).toLocaleString() }}
+                </p>
               </div>
-              
+
               <div class="space-y-1">
-                <div class="flex items-center text-xs text-muted-foreground font-bold uppercase tracking-wider">
-                  <Calendar class="mr-2 h-3.5 w-3.5" />{{ $t('fields.updatedAt') }}</div>
-                <p class="font-medium text-sm">{{ new Date(product.updatedAt).toLocaleString() }}</p>
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <Calendar class="mr-2 h-4 w-4" />{{ $t("fields.updatedAt") }}
+                </div>
+                <p class="font-medium text-base">
+                  {{ new Date(product.updatedAt).toLocaleString() }}
+                </p>
               </div>
             </div>
           </CardContent>

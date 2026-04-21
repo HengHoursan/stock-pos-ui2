@@ -107,59 +107,57 @@ onMounted(() => {
     </Card>
 
     <div v-else-if="customer" class="grid gap-6 grid-cols-1 lg:grid-cols-3">
-      <!-- Info Summary Card -->
-      <Card
-        class="lg:col-span-1 overflow-hidden h-fit border-primary/10 shadow-sm"
-      >
-        <CardHeader class="pb-3 bg-primary/5 border-b">
-          <CardTitle class="text-lg flex items-center gap-2">
-            <Users class="h-5 w-5 text-primary" />
-            {{ $t("crud.generalInfo") }}
-          </CardTitle>
+      <!-- Image Section -->
+      <Card class="lg:col-span-1 overflow-hidden h-fit">
+        <CardHeader class="pb-3">
+          <CardTitle class="text-lg">{{ $t("crud.image") }}</CardTitle>
         </CardHeader>
-        <CardContent class="pt-6 text-center space-y-4">
-          <div
-            class="mx-auto w-24 h-24 rounded-full bg-muted flex items-center justify-center text-muted-foreground border-2 border-primary/10 shadow-inner"
-          >
-            <Users class="h-12 w-12 opacity-40" />
-          </div>
-          <div>
-            <h3 class="text-xl font-bold">{{ customer.name }}</h3>
-            <p class="text-sm text-muted-foreground font-mono">
-              {{ customer.code }}
-            </p>
-          </div>
-          <div class="pt-4 border-t space-y-3 text-left">
-            <div class="flex items-center gap-3 text-sm">
-              <Settings class="h-4 w-4 text-primary opacity-70" />
-              <span class="font-medium">{{ $t("fields.type") }}:</span>
-              <Badge variant="outline" class="ml-auto">{{
-                getTypeLabel(customer.type)
-              }}</Badge>
-            </div>
-            <div class="flex items-center gap-3 text-sm">
-              <User class="h-4 w-4 text-primary opacity-70" />
-              <span class="font-medium">{{ $t("fields.nameLatin") }}:</span>
-              <span class="ml-auto text-muted-foreground">{{
-                customer.nameLatin || "-"
-              }}</span>
+        <CardContent>
+          <div class="aspect-square relative rounded-lg border bg-muted/50 flex items-center justify-center overflow-hidden">
+            <div class="flex flex-col items-center gap-2 text-muted-foreground">
+              <Users class="h-12 w-12 opacity-20" />
+              <span class="text-xs">No image available</span>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <!-- Details Sections -->
+      <!-- Details Section -->
       <div class="lg:col-span-2 space-y-6">
-        <!-- Contact Information -->
-        <Card class="shadow-sm border-muted-foreground/10">
-          <CardHeader class="pb-3 border-b bg-muted/5">
-            <CardTitle class="text-lg flex items-center gap-2">
-              <Phone class="h-5 w-5 text-primary" />
-              {{ $t("fields.phoneNumber") }} & {{ $t("auth.email") }}
-            </CardTitle>
+        <Card>
+          <CardHeader class="pb-3">
+            <CardTitle class="text-lg">{{ $t("crud.generalInfo") }}</CardTitle>
           </CardHeader>
-          <CardContent class="pt-6">
+          <CardContent>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div class="space-y-1">
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <User class="mr-2 h-4 w-4" />{{ $t("fields.name") }}
+                </div>
+                <p class="font-medium text-base">{{ customer.name }}</p>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <Settings class="mr-2 h-4 w-4" />{{ $t("fields.code") }}
+                </div>
+                <p class="font-medium text-base">{{ customer.code || "N/A" }}</p>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <Settings class="mr-2 h-4 w-4" />{{ $t("fields.type") }}
+                </div>
+                <p class="font-medium text-base">{{ getTypeLabel(customer.type) }}</p>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <User class="mr-2 h-4 w-4" />{{ $t("fields.nameLatin") }}
+                </div>
+                <p class="font-medium text-base">{{ customer.nameLatin || "-" }}</p>
+              </div>
+
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
                   <Mail class="mr-2 h-4 w-4" />{{ $t("auth.email") }}
@@ -171,48 +169,41 @@ onMounted(() => {
                 <div class="flex items-center text-sm text-muted-foreground">
                   <Phone class="mr-2 h-4 w-4" />{{ $t("fields.phoneNumber") }}
                 </div>
-                <p class="font-medium text-base font-mono">
-                  {{ customer.phoneNumber || "-" }}
-                </p>
+                <p class="font-medium text-base font-mono">{{ customer.phoneNumber || "-" }}</p>
               </div>
 
               <div class="sm:col-span-2 space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
                   <MapPin class="mr-2 h-4 w-4" />{{ $t("fields.address") }}
                 </div>
-                <p
-                  class="text-sm leading-relaxed bg-muted/20 p-3 rounded-md border italic"
-                >
+                <p class="text-sm leading-relaxed text-foreground/80 bg-muted/30 p-3 rounded-md">
                   {{ customer.address || "-" }}
                 </p>
               </div>
             </div>
+
+            <div class="mt-6 pt-6 border-t space-y-2">
+              <div class="flex items-center text-sm text-muted-foreground">
+                <AlignLeft class="mr-2 h-4 w-4" />{{ $t("fields.description") }}
+              </div>
+              <p class="text-sm leading-relaxed text-foreground/80 bg-muted/30 p-4 rounded-md">
+                {{ customer.description || "-" }}
+              </p>
+            </div>
           </CardContent>
         </Card>
 
-        <!-- Description & System Info -->
-        <Card class="shadow-sm border-muted-foreground/10">
-          <CardHeader class="pb-3 border-b bg-muted/5">
-            <CardTitle class="text-lg flex items-center gap-2">
-              <AlignLeft class="h-5 w-5 text-primary" />
-              {{ $t("fields.description") }}
-            </CardTitle>
+        <Card>
+          <CardHeader class="pb-3">
+            <CardTitle class="text-lg">{{ $t("crud.systemInfo") }}</CardTitle>
           </CardHeader>
-          <CardContent class="pt-6">
-            <p
-              class="text-sm leading-relaxed text-foreground/80 bg-muted/10 p-4 rounded-md border min-h-[80px]"
-            >
-              {{ customer.description || "-" }}
-            </p>
-
-            <div
-              class="mt-6 pt-6 border-t grid grid-cols-1 sm:grid-cols-2 gap-6"
-            >
+          <CardContent>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
                   <Calendar class="mr-2 h-4 w-4" />{{ $t("fields.createdAt") }}
                 </div>
-                <p class="font-medium text-sm">
+                <p class="font-medium text-base">
                   {{ new Date(customer.createdAt).toLocaleString() }}
                 </p>
               </div>
@@ -221,7 +212,7 @@ onMounted(() => {
                 <div class="flex items-center text-sm text-muted-foreground">
                   <Calendar class="mr-2 h-4 w-4" />{{ $t("fields.updatedAt") }}
                 </div>
-                <p class="font-medium text-sm">
+                <p class="font-medium text-base">
                   {{ new Date(customer.updatedAt).toLocaleString() }}
                 </p>
               </div>

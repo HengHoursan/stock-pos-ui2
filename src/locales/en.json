@@ -4,7 +4,8 @@
     "login": "Login",
     "logout": "Logout",
     "home": "Home",
-    "noData": "No data available"
+    "noData": "No data available",
+    "unknown": "Unknown"
   },
   "layout": {
     "adminPanel": "Admin Panel",
@@ -263,6 +264,7 @@
     "productId": "Product",
     "customerId": "Customer",
     "supplierId": "Supplier",
+    "inventoryRecordedAt": "Inventory recorded at {date}",
     "expiryTypes": {
       "none": "None",
       "bestBefore": "Best Before",

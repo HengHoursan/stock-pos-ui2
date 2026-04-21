@@ -48,7 +48,7 @@ function getTypeInfo(type: TransactionType) {
     case TransactionType.ADJUSTMENT:
       return { label: t('fields.adjustment'), color: 'bg-blue-500/10 text-blue-600 border-blue-500/20', icon: Settings2 };
     default:
-      return { label: 'Unknown', color: 'bg-gray-500/10 text-gray-600 border-gray-500/20', icon: History };
+      return { label: t('common.unknown'), color: 'bg-gray-500/10 text-gray-600 border-gray-500/20', icon: History };
   }
 }
 
@@ -72,15 +72,57 @@ onMounted(() => {
     </div>
 
     <div v-else-if="transaction" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Sidebar Info -->
+      <div class="lg:col-span-1 space-y-6">
+        <Card class="overflow-hidden">
+            <CardHeader class="pb-3 border-b text-primary">
+                <CardTitle class="text-sm uppercase tracking-wider flex items-center gap-2">
+                <Package class="h-4 w-4" />
+                {{ $t('modules.product') }}
+                </CardTitle>
+            </CardHeader>
+            <CardContent class="pt-6">
+                <div v-if="transaction.product" class="space-y-4">
+                    <div class="flex items-center gap-4 border-b pb-4">
+                        <div class="h-12 w-12 rounded bg-muted flex items-center justify-center overflow-hidden border text-muted-foreground font-bold">
+                            <Package v-if="!transaction.product.photoPath" class="h-6 w-6" />
+                            <img v-else :src="transaction.product.photoPath" class="h-full w-full object-cover" />
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-lg leading-none cursor-pointer hover:text-primary transition-colors" @click="router.push(`/admin/products/${transaction.product?.id}`)">
+                                {{ transaction.product.name }}
+                            </h4>
+                            <p class="text-muted-foreground text-[10px] mt-1 font-bold uppercase tracking-widest">{{ transaction.product.code }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 gap-3 mt-4">
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-muted-foreground/5 text-center">
+                            <span class="text-xs font-bold text-muted-foreground uppercase tracking-wider">{{ $t('fields.beginningStock') }}</span>
+                            <span class="font-mono font-bold text-lg leading-none mt-1">{{ Number(transaction.beginningStock) }}</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/20 text-center">
+                            <span class="text-xs font-bold text-primary uppercase tracking-wider">{{ $t('fields.afterStock') }}</span>
+                            <span class="font-mono font-bold text-lg text-primary leading-none mt-1">{{ Number(transaction.afterStock) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </CardContent>
+             <CardFooter class="border-t px-6 py-4 flex flex-col gap-2">
+                 <p class="text-[10px] text-muted-foreground italic text-center w-full">{{ $t('fields.inventoryRecordedAt', { date: formatFullDateTime(transaction.createdAt) }) }}</p>
+            </CardFooter>
+        </Card>
+      </div>
+
       <!-- Main Content -->
-      <Card class="lg:col-span-2 shadow-sm border-muted-foreground/10 overflow-hidden">
-        <CardHeader class="pb-3 border-b bg-muted/5">
+      <Card class="lg:col-span-2">
+        <CardHeader class="pb-3 border-b">
           <div class="flex items-center justify-between">
             <CardTitle class="text-lg flex items-center gap-2">
               <History class="h-5 w-5 text-primary" />
               {{ $t('crud.generalInfo') }}
             </CardTitle>
-            <Badge variant="outline" :class="[getTypeInfo(transaction.transactionType).color, 'font-bold px-3 py-1 border italic uppercase tracking-wider text-xs']">
+            <Badge>
                 {{ getTypeInfo(transaction.transactionType).label }}
             </Badge>
           </div>
@@ -112,7 +154,7 @@ onMounted(() => {
                     <div class="flex items-baseline gap-2">
                         <component :is="getTypeInfo(transaction.transactionType).icon" class="h-5 w-5" :class="transaction.transactionType === TransactionType.IN ? 'text-green-600' : 'text-red-600'" />
                         <span class="text-4xl font-mono font-black" :class="transaction.transactionType === TransactionType.IN ? 'text-green-600' : 'text-red-600'">
-                            {{ transaction.transactionType === TransactionType.OUT ? '-' : '+' }}{{ transaction.quantity }}
+                            {{ transaction.transactionType === TransactionType.OUT ? '-' : '+' }}{{ Number(transaction.quantity) }}
                         </span>
                     </div>
                  </div>
@@ -136,48 +178,6 @@ onMounted(() => {
           </div>
         </CardContent>
       </Card>
-
-      <!-- Sidebar Info -->
-      <div class="space-y-6">
-        <Card class="shadow-sm border-muted-foreground/10 overflow-hidden">
-            <CardHeader class="pb-3 border-b bg-muted/5 text-primary">
-                <CardTitle class="text-sm uppercase tracking-wider flex items-center gap-2">
-                <Package class="h-4 w-4" />
-                {{ $t('modules.product') }}
-                </CardTitle>
-            </CardHeader>
-            <CardContent class="pt-6">
-                <div v-if="transaction.product" class="space-y-4">
-                    <div class="flex items-center gap-4 border-b pb-4">
-                        <div class="h-12 w-12 rounded bg-muted flex items-center justify-center overflow-hidden border text-muted-foreground font-bold">
-                            <Package v-if="!transaction.product.photoPath" class="h-6 w-6" />
-                            <img v-else :src="transaction.product.photoPath" class="h-full w-full object-cover" />
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-lg leading-none cursor-pointer hover:text-primary transition-colors" @click="router.push(`/admin/products/${transaction.product?.id}`)">
-                                {{ transaction.product.name }}
-                            </h4>
-                            <p class="text-muted-foreground text-[10px] mt-1 font-bold uppercase tracking-widest">{{ transaction.product.code }}</p>
-                        </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 gap-3 mt-4">
-                        <div class="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-muted-foreground/5 text-center">
-                            <span class="text-xs font-bold text-muted-foreground uppercase tracking-wider">{{ $t('fields.beginningStock') }}</span>
-                            <span class="font-mono font-bold text-lg leading-none mt-1">{{ transaction.beginningStock }}</span>
-                        </div>
-                        <div class="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/20 text-center">
-                            <span class="text-xs font-bold text-primary uppercase tracking-wider">{{ $t('fields.afterStock') }}</span>
-                            <span class="font-mono font-bold text-lg text-primary leading-none mt-1">{{ transaction.afterStock }}</span>
-                        </div>
-                    </div>
-                </div>
-            </CardContent>
-            <CardFooter class="bg-muted/5 border-t px-6 py-4 flex flex-col gap-2">
-                 <p class="text-[10px] text-muted-foreground italic text-center w-full">Inventory recorded at {{ formatFullDateTime(transaction.createdAt) }}</p>
-            </CardFooter>
-        </Card>
-      </div>
     </div>
   </div>
 </template>

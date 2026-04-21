@@ -222,7 +222,7 @@ function getTypeInfo(type: TransactionType) {
       };
     default:
       return {
-        label: "Unknown",
+        label: t("common.unknown"),
         color: "bg-gray-500/10 text-gray-600 border-gray-500/20",
         icon: History,
       };
@@ -376,17 +376,17 @@ onMounted(() => {
                   variant="outline"
                   :class="[
                     getTypeInfo(transaction.transactionType).color,
-                    'font-bold px-2 py-0 border italic text-[10px] uppercase tracking-wider',
+                    'font-bold px-2 py-0 border text-[10px] uppercase tracking-wider',
                   ]"
                 >
                   {{ getTypeInfo(transaction.transactionType).label }}
                 </Badge>
               </TableCell>
-              <TableCell class="font-semibold text-base text-foreground/90 uppercase tracking-tight">
+              <TableCell class="font-bold text-base text-foreground/90">
                 {{ transaction.product?.name || "-" }}
               </TableCell>
               <TableCell class="text-right text-muted-foreground font-mono text-base">
-                {{ transaction.beginningStock }}
+                {{ Number(transaction.beginningStock) }}
               </TableCell>
               <TableCell
                 class="text-right font-bold font-mono text-base"
@@ -402,10 +402,10 @@ onMounted(() => {
                   transaction.transactionType === TransactionType.OUT
                     ? "-"
                     : "+"
-                }}{{ transaction.quantity }}
+                }}{{ Number(transaction.quantity) }}
               </TableCell>
               <TableCell class="text-right font-bold text-foreground font-mono text-base">
-                {{ transaction.afterStock }}
+                {{ Number(transaction.afterStock) }}
               </TableCell>
               <TableCell class="text-right">
                 <DropdownMenu>

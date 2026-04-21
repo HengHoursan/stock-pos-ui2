@@ -90,15 +90,30 @@ onMounted(() => {
       <Loader2 class="h-8 w-8 animate-spin text-primary" />
     </Card>
 
-    <div v-else-if="unit" class="grid gap-6 grid-cols-1">
+    <div v-else-if="unit" class="grid gap-6 grid-cols-1 lg:grid-cols-3">
+      <!-- Image Section -->
+      <Card class="lg:col-span-1 overflow-hidden h-fit">
+        <CardHeader class="pb-3">
+          <CardTitle class="text-lg">{{ $t("crud.image") }}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div class="aspect-square relative rounded-lg border bg-muted/50 flex items-center justify-center overflow-hidden">
+            <div class="flex flex-col items-center gap-2 text-muted-foreground">
+              <Type class="h-12 w-12 opacity-20" />
+              <span class="text-xs">No image available</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <!-- Details Section -->
-      <div class="space-y-6">
+      <div class="lg:col-span-2 space-y-6">
         <Card>
           <CardHeader class="pb-3">
             <CardTitle class="text-lg">{{ $t('crud.generalInfo') }}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
                   <Type class="mr-2 h-4 w-4" />{{ $t('fields.name') }}</div>

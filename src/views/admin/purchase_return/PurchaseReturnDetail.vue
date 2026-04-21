@@ -103,12 +103,12 @@ onMounted(() => {
       <Loader2 class="h-8 w-8 animate-spin text-primary opacity-50" />
     </div>
 
-    <div v-else-if="record" class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div v-else-if="record" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       
       <!-- General Info -->
       <div class="lg:col-span-1 space-y-6">
         <Card class="shadow-sm border-muted-foreground/10 text-card-foreground">
-          <CardHeader class="pb-3 border-b bg-muted/5">
+          <CardHeader class="pb-3 border-b">
             <CardTitle class="text-lg flex items-center gap-2">
               <FileText class="h-5 w-5 text-primary" />
               {{ $t('crud.generalInfo') }}
@@ -146,9 +146,9 @@ onMounted(() => {
       </div>
 
       <!-- Detail Table -->
-      <div class="lg:col-span-3 space-y-6">
+      <div class="lg:col-span-2 space-y-6">
         <Card class="shadow-sm border-muted-foreground/10 text-card-foreground">
-          <CardHeader class="pb-3 border-b bg-muted/5">
+          <CardHeader class="pb-3 border-b">
             <CardTitle class="text-lg flex items-center gap-2">
               <Package class="h-5 w-5 text-primary" />
               {{ $t('fields.details') }}

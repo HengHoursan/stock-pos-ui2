@@ -72,7 +72,7 @@ async function fetchDetail() {
 }
 
 function formatCurrency(val: number) {
-  return val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return (Number(val) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 onMounted(() => {
@@ -109,12 +109,12 @@ onMounted(() => {
       <Loader2 class="h-8 w-8 animate-spin text-primary opacity-50" />
     </div>
 
-    <div v-else-if="record" class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div v-else-if="record" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       
       <!-- Side panel for attributes -->
       <div class="lg:col-span-1 space-y-6">
-        <Card class="shadow-sm border-muted-foreground/10">
-          <CardHeader class="pb-3 border-b bg-muted/5">
+        <Card>
+          <CardHeader class="pb-3 border-b">
             <CardTitle class="text-lg flex items-center gap-2">
               <FileText class="h-5 w-5 text-primary" />
               {{ $t('crud.generalInfo') }}
@@ -143,8 +143,8 @@ onMounted(() => {
         </Card>
 
         <!-- Payment Info sidebar -->
-        <Card class="shadow-sm border-muted-foreground/10">
-          <CardHeader class="pb-3 border-b bg-muted/5">
+        <Card>
+          <CardHeader class="pb-3 border-b">
             <CardTitle class="text-lg flex items-center gap-2">
               <CreditCard class="h-5 w-5 text-primary" />
               {{ $t('fields.paymentDetails') }}
@@ -175,9 +175,9 @@ onMounted(() => {
       </div>
 
       <!-- Main panel for details -->
-      <div class="lg:col-span-3 space-y-6">
-        <Card class="shadow-sm border-muted-foreground/10">
-          <CardHeader class="pb-3 border-b bg-muted/5">
+      <div class="lg:col-span-2 space-y-6">
+        <Card>
+          <CardHeader class="pb-3 border-b">
             <CardTitle class="text-lg flex items-center gap-2">
               <Package class="h-5 w-5 text-primary" />
               {{ $t('fields.details') }}

@@ -15,7 +15,7 @@ export class SaleOrderService extends BaseService {
   }
 
   async getDetail(id: number): Promise<ApiResponse<SaleOrder>> {
-    return this.post<ApiResponse<SaleOrder>>("/sale-orders/show", { id });
+    return this.post<ApiResponse<SaleOrder>>("/sale-orders/detail", { id });
   }
 
   async create(payload: CreateSaleOrderRequest): Promise<ApiResponse<null>> {

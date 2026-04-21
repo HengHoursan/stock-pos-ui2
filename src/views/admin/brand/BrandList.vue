@@ -310,7 +310,7 @@ onMounted(() => {
                   </AvatarFallback>
                 </Avatar>
               </TableCell>
-              <TableCell class="font-semibold text-base text-foreground/90">{{
+              <TableCell class="font-bold text-base text-foreground/90">{{
                 brand.name
               }}</TableCell>
               <TableCell

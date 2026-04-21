@@ -6,13 +6,10 @@ import { CurrencyService } from "@/services/currency/currency.service";
 import type { Currency } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   ChevronLeft,
   Pencil,
   Calendar,
-  Clock,
   Globe,
   Coins,
   BadgeCent,
@@ -98,102 +95,97 @@ onMounted(() => {
       <p class="text-muted-foreground animate-pulse">{{ $t("crud.fetchingData") }}</p>
     </div>
 
-    <div v-else-if="currency" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <!-- Left Column: Basic Info -->
-      <div class="md:col-span-2 space-y-6">
-        <Card class="border-border/50 shadow-sm overflow-hidden bg-card/50 backdrop-blur-sm">
-          <CardHeader class="border-b bg-muted/20 pb-4">
-            <div class="flex items-center gap-2">
-              <div class="p-2 bg-primary/10 rounded-lg">
-                <Coins class="h-4 w-4 text-primary" />
-              </div>
-              <CardTitle class="text-base font-semibold">{{ $t("crud.generalInfo") }}</CardTitle>
+    <div v-else-if="currency" class="grid gap-6 grid-cols-1 lg:grid-cols-3">
+      <!-- Image Section -->
+      <Card class="lg:col-span-1 overflow-hidden h-fit">
+        <CardHeader class="pb-3">
+          <CardTitle class="text-lg">{{ $t("crud.image") }}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div class="aspect-square relative rounded-lg border bg-muted/50 flex items-center justify-center overflow-hidden">
+            <div class="flex flex-col items-center gap-2 text-muted-foreground">
+              <Coins class="h-12 w-12 opacity-20" />
+              <span class="text-xs">No image available</span>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <!-- Details Section -->
+      <div class="lg:col-span-2 space-y-6">
+        <Card>
+          <CardHeader class="pb-3">
+            <CardTitle class="text-lg">{{ $t("crud.generalInfo") }}</CardTitle>
           </CardHeader>
-          <CardContent class="p-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+          <CardContent>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="space-y-1">
-                <p class="text-xs font-bold text-muted-foreground uppercase tracking-wider">{{ $t("fields.code") }}</p>
-                <code class="text-lg font-mono font-bold text-primary bg-primary/5 px-2 py-0.5 rounded border border-primary/10 uppercase">
-                  {{ currency.code }}
-                </code>
-              </div>
-              <div class="space-y-1">
-                <p class="text-xs font-bold text-muted-foreground uppercase tracking-wider">{{ $t("fields.country") }}</p>
-                <div class="flex items-center gap-2">
-                  <Globe class="h-4 w-4 text-muted-foreground/60" />
-                  <p class="text-sm font-semibold text-foreground/90">{{ currency.country }}</p>
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <Coins class="mr-2 h-4 w-4" />{{ $t("fields.currency") }}
                 </div>
+                <p class="font-medium text-base">{{ currency.currency }}</p>
               </div>
+
               <div class="space-y-1">
-                <p class="text-xs font-bold text-muted-foreground uppercase tracking-wider">{{ $t("fields.currency") }}</p>
-                <p class="text-sm font-semibold text-foreground/90">{{ currency.currency }}</p>
-              </div>
-              <div class="space-y-1">
-                <p class="text-xs font-bold text-muted-foreground uppercase tracking-wider">{{ $t("fields.symbol") }}</p>
-                <div class="flex items-center gap-2">
-                  <BadgeCent class="h-4 w-4 text-muted-foreground/60" />
-                  <Badge variant="outline" class="font-mono bg-muted/30 text-base py-0 px-2">{{ currency.symbol || '-' }}</Badge>
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <Globe class="mr-2 h-4 w-4" />{{ $t("fields.country") }}
                 </div>
+                <p class="font-medium text-base">{{ currency.country }}</p>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <BadgeCent class="mr-2 h-4 w-4" />{{ $t("fields.code") }}
+                </div>
+                <p class="font-medium text-base font-mono">{{ currency.code }}</p>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <BadgeCent class="mr-2 h-4 w-4" />{{ $t("fields.symbol") }}
+                </div>
+                <p class="font-medium text-base">{{ currency.symbol || "-" }}</p>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <SeparatorHorizontal class="mr-2 h-4 w-4" />{{ $t("fields.thousandSeparator") }}
+                </div>
+                <p class="font-medium text-base">"{{ currency.thousandSeparator }}"</p>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <SeparatorHorizontal class="mr-2 h-4 w-4" />{{ $t("fields.decimalSeparator") }}
+                </div>
+                <p class="font-medium text-base">"{{ currency.decimalSeparator }}"</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card class="border-border/50 shadow-sm overflow-hidden bg-card/50 backdrop-blur-sm">
-          <CardHeader class="border-b bg-muted/20 pb-4">
-            <div class="flex items-center gap-2">
-              <div class="p-2 bg-primary/10 rounded-lg">
-                <SeparatorHorizontal class="h-4 w-4 text-primary" />
-              </div>
-              <CardTitle class="text-base font-semibold">Formatting Details</CardTitle>
-            </div>
+        <Card>
+          <CardHeader class="pb-3">
+            <CardTitle class="text-lg">{{ $t("crud.systemInfo") }}</CardTitle>
           </CardHeader>
-          <CardContent class="p-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+          <CardContent>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="space-y-1">
-                <p class="text-xs font-bold text-muted-foreground uppercase tracking-wider">{{ $t("fields.thousandSeparator") }}</p>
-                <Badge variant="secondary" class="font-mono text-sm px-3 italic">"{{ currency.thousandSeparator }}"</Badge>
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <Calendar class="mr-2 h-4 w-4" />{{ $t("fields.createdAt") }}
+                </div>
+                <p class="font-medium text-base">
+                  {{ formatDate(currency.createdAt) }}
+                </p>
               </div>
-              <div class="space-y-1">
-                <p class="text-xs font-bold text-muted-foreground uppercase tracking-wider">{{ $t("fields.decimalSeparator") }}</p>
-                <Badge variant="secondary" class="font-mono text-sm px-3 italic">"{{ currency.decimalSeparator }}"</Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
-      <!-- Right Column: System Info -->
-      <div class="space-y-6">
-        <Card class="border-border/50 shadow-sm overflow-hidden bg-card/50 backdrop-blur-sm">
-          <CardHeader class="border-b bg-muted/20 pb-4">
-            <CardTitle class="text-base font-semibold">{{ $t("crud.systemInfo") }}</CardTitle>
-          </CardHeader>
-          <CardContent class="p-6 space-y-6">
-            <div class="space-y-4">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-medium text-muted-foreground uppercase tracking-wider">{{ $t("fields.status") }}</span>
-                <Badge :variant="currency.status ? 'success' : 'warning'" class="font-bold px-3">
-                  {{ currency.status ? $t("crud.active") : $t("crud.inactive") }}
-                </Badge>
-              </div>
-              <Separator class="bg-border/40" />
-              <div class="space-y-2 text-right">
-                <div class="flex items-center justify-between gap-4">
-                  <div class="flex items-center gap-1.5 text-muted-foreground">
-                    <Calendar class="h-3.5 w-3.5" />
-                    <span class="text-[10px] font-bold uppercase tracking-tighter">{{ $t("fields.createdAt") }}</span>
-                  </div>
-                  <span class="text-xs font-medium">{{ formatDate(currency.createdAt) }}</span>
+              <div class="space-y-1">
+                <div class="flex items-center text-sm text-muted-foreground">
+                  <Calendar class="mr-2 h-4 w-4" />{{ $t("fields.updatedAt") }}
                 </div>
-                <div class="flex items-center justify-between gap-4">
-                  <div class="flex items-center gap-1.5 text-muted-foreground">
-                    <Clock class="h-3.5 w-3.5" />
-                    <span class="text-[10px] font-bold uppercase tracking-tighter">{{ $t("fields.updatedAt") }}</span>
-                  </div>
-                  <span class="text-xs font-medium">{{ formatDate(currency.updatedAt) }}</span>
-                </div>
+                <p class="font-medium text-base">
+                  {{ formatDate(currency.updatedAt) }}
+                </p>
               </div>
             </div>
           </CardContent>

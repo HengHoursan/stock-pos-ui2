@@ -298,7 +298,7 @@ onMounted(() => {
                   >{{ supplier.code }}</code
                 >
               </TableCell>
-              <TableCell class="font-semibold text-base text-foreground/90">{{
+              <TableCell class="font-bold text-base text-foreground/90">{{
                 supplier.name
               }}</TableCell>
               <TableCell class="text-muted-foreground text-sm">{{

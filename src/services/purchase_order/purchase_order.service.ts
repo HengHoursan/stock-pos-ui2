@@ -15,7 +15,7 @@ export class PurchaseOrderService extends BaseService {
   }
 
   async getDetail(id: number): Promise<ApiResponse<PurchaseOrder>> {
-    return this.post<ApiResponse<PurchaseOrder>>("/purchase-orders/show", { id });
+    return this.post<ApiResponse<PurchaseOrder>>("/purchase-orders/detail", { id });
   }
 
   async create(payload: CreatePurchaseOrderRequest): Promise<ApiResponse<null>> {

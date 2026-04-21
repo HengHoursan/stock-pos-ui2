@@ -4,7 +4,8 @@
     "login": "ចូលប្រព័ន្ធ",
     "logout": "ចាកចេញ",
     "home": "ទំព័រដើម",
-    "noData": "មិនមានទិន្នន័យ"
+    "noData": "មិនមានទិន្នន័យ",
+    "unknown": "មិនស្គាល់"
   },
   "layout": {
     "adminPanel": "ផ្ទាំងគ្រប់គ្រង",
@@ -264,6 +265,7 @@
     "productId": "ផលិតផល",
     "customerId": "អតិថិជន",
     "supplierId": "អ្នកផ្គត់ផ្គង់",
+    "inventoryRecordedAt": "បញ្ជីសារពើភ័ណ្ឌត្រូវបានកត់ត្រានៅ {date}",
     "expiryTypes": {
       "none": "គ្មាន",
       "bestBefore": "ល្អបំផុតមុនថ្ងៃ",

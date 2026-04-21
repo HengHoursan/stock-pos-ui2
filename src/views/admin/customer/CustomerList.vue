@@ -324,7 +324,7 @@ onMounted(() => {
                 >
               </TableCell>
               <TableCell
-                class="font-semibold text-base text-foreground/90 tracking-tight"
+                class="font-bold text-base text-foreground/90 tracking-tight"
               >
                 {{ customer.name }}
               </TableCell>

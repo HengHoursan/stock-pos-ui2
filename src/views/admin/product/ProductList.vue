@@ -397,7 +397,7 @@ onMounted(() => {
                   </AvatarFallback>
                 </Avatar>
               </TableCell>
-              <TableCell class="font-semibold text-base text-foreground/90">{{
+              <TableCell class="font-bold text-base text-foreground/90">{{
                 product.name
               }}</TableCell>
               <TableCell>
@@ -427,7 +427,7 @@ onMounted(() => {
                   class="font-mono"
                   :class="{ 'text-destructive': (product.detail?.currentStock || 0) <= product.alertQuantity }"
                 >
-                  {{ product.detail?.currentStock || 0 }}
+                  {{ Math.trunc(product.detail?.currentStock || 0) }}
                 </Badge>
               </TableCell>
               <TableCell class="w-[100px]">

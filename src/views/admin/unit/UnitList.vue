@@ -295,7 +295,7 @@ onMounted(() => {
                   {{ unit.code }}
                 </code>
               </TableCell>
-              <TableCell class="font-semibold text-base text-foreground/90">{{
+              <TableCell class="font-bold text-base text-foreground/90">{{
                 unit.name
               }}</TableCell>
               <TableCell>

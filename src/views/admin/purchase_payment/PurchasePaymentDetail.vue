@@ -91,12 +91,12 @@ onMounted(() => {
       <Loader2 class="h-8 w-8 animate-spin text-primary opacity-50" />
     </div>
 
-    <div v-else-if="record" class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div v-else-if="record" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       
       <!-- General Info -->
       <div class="lg:col-span-1 space-y-6">
-        <Card class="shadow-sm border-muted-foreground/10">
-          <CardHeader class="pb-3 border-b bg-muted/5">
+        <Card>
+          <CardHeader class="pb-3 border-b">
             <CardTitle class="text-lg flex items-center gap-2">
               <FileText class="h-5 w-5 text-primary" />
               {{ $t('crud.generalInfo') }}
@@ -121,8 +121,8 @@ onMounted(() => {
         </Card>
 
         <!-- Amount Card -->
-        <Card class="shadow-sm border-success/20 bg-success/5">
-          <CardHeader class="pb-3 border-b border-success/10">
+        <Card>
+          <CardHeader class="pb-3 border-b">
             <CardTitle class="text-lg flex items-center gap-2 text-success">
               <Banknote class="h-5 w-5" />
               {{ $t('fields.paidAmount') }}
@@ -137,9 +137,9 @@ onMounted(() => {
       </div>
 
       <!-- Extended Details -->
-      <div class="lg:col-span-3 space-y-6">
-        <Card class="shadow-sm border-muted-foreground/10">
-          <CardHeader class="pb-3 border-b bg-muted/5">
+      <div class="lg:col-span-2 space-y-6">
+        <Card>
+          <CardHeader class="pb-3 border-b">
             <CardTitle class="text-lg flex items-center gap-2">
               <History class="h-5 w-5 text-primary" />
               {{ $t('fields.paymentDetails') }}
