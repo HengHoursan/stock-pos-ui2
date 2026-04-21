@@ -3,7 +3,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { ref, onMounted, reactive, watch } from "vue";
 import { useRouter } from "vue-router";
-import { formatDateTime } from "@/utils/format";
+import { formatDateTime, formatCurrency } from "@/utils/format";
 import {
   Table,
   TableBody,
@@ -163,9 +163,7 @@ function handleSort(column: string) {
   fetchData();
 }
 
-function formatCurrency(val: number) {
-  return (val || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+
 
 onMounted(() => {
   fetchData();
@@ -202,7 +200,7 @@ onMounted(() => {
       <DateRangePicker 
         v-model="dateRange"
         class="w-full sm:w-[260px] shadow-sm"
-        placeholder="Filter by Date"
+        :placeholder="$t('crud.filterByDate')"
       />
 
       <Button 

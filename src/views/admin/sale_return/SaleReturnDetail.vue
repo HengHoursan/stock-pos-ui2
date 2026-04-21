@@ -3,7 +3,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { formatDateTime } from "@/utils/format";
+import { formatDateTime, formatCurrency } from "@/utils/format";
 import {
   Card,
   CardContent,
@@ -66,9 +66,7 @@ async function fetchDetail() {
   }
 }
 
-function formatCurrency(val: number) {
-  return (val || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+
 
 onMounted(() => {
   fetchDetail();
@@ -139,7 +137,7 @@ onMounted(() => {
           </CardHeader>
           <CardContent class="pt-6">
             <div class="text-center">
-              <span class="text-3xl font-mono font-black text-primary">${{ formatCurrency(record.totalPrice) }}</span>
+               <span class="text-3xl font-mono font-black text-primary">{{ formatCurrency(record.totalPrice) }}</span>
             </div>
           </CardContent>
         </Card>
@@ -189,7 +187,7 @@ onMounted(() => {
               <div class="w-full max-w-sm space-y-3">
                 <div class="flex justify-between items-center text-lg font-black pt-2 border-t border-primary/10">
                   <span class="text-foreground">{{ $t('fields.totalPrice') }}:</span>
-                  <span class="text-primary font-mono">${{ formatCurrency(record.totalPrice) }}</span>
+                  <span class="text-primary font-mono">{{ formatCurrency(record.totalPrice) }}</span>
                 </div>
               </div>
             </div>

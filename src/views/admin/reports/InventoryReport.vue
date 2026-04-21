@@ -5,10 +5,8 @@ import { ReportService } from "@/services/report/report.service";
 import DateRangePicker from "@/components/DateRangePicker.vue";
 import type { InventoryReport, PaginationRequest } from "@/types";
 import {
-  PackageSearch,
   AlertTriangle,
   History,
-  TrendingDown,
   Warehouse,
   Loader2,
   Search,
@@ -147,28 +145,7 @@ function handlePageChange(newPage: number) {
   pagination.page = newPage;
 }
 
-function getPageArray(): (number | string)[] {
-  const totalItems = reportData.value.lowStockAlerts.meta.totalItems;
-  const totalPages = Math.ceil(totalItems / pagination.limit);
-  const current = pagination.page;
-  const delta = 2;
-  const range: (number | string)[] = [];
 
-  if (totalPages <= 1) return [1];
-
-  for (let i = 1; i <= totalPages; i++) {
-    if (
-      i === 1 ||
-      i === totalPages ||
-      (i >= current - delta && i <= current + delta)
-    ) {
-      range.push(i);
-    } else if (range[range.length - 1] !== "...") {
-      range.push("...");
-    }
-  }
-  return range;
-}
 
 /* EXPORT LOGIC */
 const customExportCols: ExportColumn[] = [

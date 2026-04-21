@@ -89,6 +89,8 @@ const formSchema = toTypedSchema(
     symbol: zod.string().max(10).optional().default(""),
     thousandSeparator: zod.string().max(5).optional().default(","),
     decimalSeparator: zod.string().max(5).optional().default("."),
+    exchangeRate: zod.number().min(0).default(1),
+    isDefault: zod.boolean().default(false),
     status: zod.boolean().default(true),
   }),
 );
@@ -117,6 +119,8 @@ async function fetchCurrency() {
         symbol: response.data.symbol || "",
         thousandSeparator: response.data.thousandSeparator || ",",
         decimalSeparator: response.data.decimalSeparator || ".",
+        exchangeRate: response.data.exchangeRate || (response.data.code === 'KHR' ? 4100 : 1),
+        isDefault: response.data.isDefault || false,
         status: response.data.status,
       });
       searchTerm.value = response.data.country;
@@ -355,17 +359,52 @@ onMounted(() => {
               </FormItem>
             </FormField>
 
-            <FormField v-slot="{ componentField }" name="decimalSeparator">
+            <FormField v-slot="{ componentField }" name="exchangeRate">
               <FormItem>
-                <FormLabel>{{ $t("fields.decimalSeparator") }}</FormLabel>
+                <FormLabel class="text-primary font-bold italic underline decoration-primary/30">
+                  {{ $t("fields.exchangeRate") }} (Base: USD)
+                </FormLabel>
                 <FormControl>
-                  <Input v-bind="componentField" maxlength="5" />
+                  <div class="relative">
+                    <Input 
+                      type="number" 
+                      step="0.0001" 
+                      v-bind="componentField" 
+                      :model-value="componentField.modelValue"
+                      @update:model-value="(v) => componentField['onUpdate:modelValue']?.(parseFloat(v as string))"
+                      class="pl-12 font-mono font-bold text-primary border-primary/30 focus:border-primary" 
+                    />
+                    <div class="absolute left-3 top-2.5 text-xs font-bold text-muted-foreground bg-muted px-1.5 rounded border">
+                      1 USD =
+                    </div>
+                  </div>
                 </FormControl>
+                <FormDescription class="text-[10px] italic">
+                  Multiply USD values by this rate for display.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             </FormField>
 
-            <div class="md:col-span-2 lg:col-span-3 border-t pt-6">
+            <div class="md:col-span-2 lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6 border-t pt-6">
+              <FormField v-slot="{ value, handleChange }" name="isDefault">
+                <FormItem
+                  class="flex flex-row items-center justify-between rounded-lg border p-4 bg-primary/5 border-primary/20"
+                >
+                  <div class="space-y-0.5">
+                    <FormLabel class="text-base font-semibold text-primary">
+                      {{ $t("fields.defaultCurrency") }}
+                    </FormLabel>
+                    <FormDescription class="text-xs">
+                      Make this the system's preferred currency.
+                    </FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
+                  </FormControl>
+                </FormItem>
+              </FormField>
+
               <FormField v-slot="{ value, handleChange }" name="status">
                 <FormItem
                   class="flex flex-row items-center justify-between rounded-lg border p-4"
@@ -374,12 +413,8 @@ onMounted(() => {
                     <FormLabel class="text-base font-semibold">
                       {{ $t("fields.activeStatus") }}
                     </FormLabel>
-                    <FormDescription>
-                      {{
-                        $t("fields.statusDescription", {
-                          module: $t("modules.currency"),
-                        })
-                      }}
+                    <FormDescription class="text-xs">
+                      Enable or disable this currency.
                     </FormDescription>
                   </div>
                   <FormControl>

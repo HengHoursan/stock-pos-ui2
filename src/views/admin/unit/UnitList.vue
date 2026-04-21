@@ -75,7 +75,7 @@ const unitService = new UnitService();
 const units = ref<Unit[]>([]);
 const loading = ref(true);
 const searchQuery = ref("");
-const statusFilter = ref<string | undefined>(undefined);
+const statusFilter = ref<string | null>(null);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -208,7 +208,9 @@ onMounted(() => {
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <h2 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('modules.units') }}</h2>
+      <h2 class="text-3xl font-bold tracking-tight text-foreground">
+        {{ $t("modules.units") }}
+      </h2>
       <div class="flex items-center gap-2">
         <Button
           variant="outline"
@@ -219,7 +221,9 @@ onMounted(() => {
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
         <Button @click="router.push('/admin/units/create')">
-          <Plus class="mr-2 h-4 w-4" />{{ $t('crud.createBtn') }} {{ $t('modules.unit') }}</Button>
+          <Plus class="mr-2 h-4 w-4" />{{ $t("crud.createBtn") }}
+          {{ $t("modules.unit") }}</Button
+        >
       </div>
     </div>
 
@@ -241,9 +245,9 @@ onMounted(() => {
           <SelectValue :placeholder="$t('crud.filterByStatus')" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">{{ $t('crud.allStatus') }}</SelectItem>
-          <SelectItem value="active">{{ $t('crud.active') }}</SelectItem>
-          <SelectItem value="inactive">{{ $t('crud.inactive') }}</SelectItem>
+          <SelectItem value="all">{{ $t("crud.allStatus") }}</SelectItem>
+          <SelectItem value="active">{{ $t("crud.active") }}</SelectItem>
+          <SelectItem value="inactive">{{ $t("crud.inactive") }}</SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -252,26 +256,24 @@ onMounted(() => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead class="w-[40px]">#</TableHead>
-            <TableHead class="w-[120px]">{{ $t('fields.code') }}</TableHead>
+            <TableHead class="w-[20px]">#</TableHead>
+            <TableHead class="w-[180px]">{{ $t("fields.code") }}</TableHead>
             <TableHead>
               <Button
                 variant="ghost"
                 @click="handleSort('name')"
                 class="-ml-4 h-8 font-medium"
-              >{{ $t('fields.name') }}<ArrowUpDown class="ml-1 h-3 w-3" />
+                >{{ $t("fields.name") }}<ArrowUpDown class="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
-            <TableHead>{{ $t('fields.symbol') }}</TableHead>
-            <TableHead>{{ $t('fields.conversionFactor') }}</TableHead>
-            <TableHead>{{ $t('fields.isCalculateDetail') }}</TableHead>
-            <TableHead>{{ $t('fields.status') }}</TableHead>
-            <TableHead class="text-right">{{ $t('crud.actions') }}</TableHead>
+            <TableHead>{{ $t("fields.shortName") }}</TableHead>
+            <TableHead>{{ $t("fields.status") }}</TableHead>
+            <TableHead class="text-right">{{ $t("crud.actions") }}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           <TableRow v-if="loading && units.length === 0">
-            <TableCell colspan="8" class="h-24 text-center">
+            <TableCell colspan="6" class="h-24 text-center">
               <div
                 class="flex items-center justify-center text-muted-foreground italic text-sm"
               >
@@ -281,47 +283,22 @@ onMounted(() => {
             </TableCell>
           </TableRow>
           <template v-else-if="units.length > 0">
-            <TableRow
-              v-for="(unit, index) in units"
-              :key="unit.id"
-            >
+            <TableRow v-for="(unit, index) in units" :key="unit.id">
               <TableCell class="font-medium text-muted-foreground">
                 {{ (pagination.page - 1) * pagination.limit + index + 1 }}
               </TableCell>
               <TableCell>
                 <code
-                  class="bg-muted px-2 py-0.5 rounded text-xs font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
-                  >
-                  {{ unit.code }}
-                </code>
+                  class="bg-muted px-2 py-0.5 rounded text-[10px] font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
+                  >{{ unit.code }}</code
+                >
               </TableCell>
               <TableCell class="font-bold text-base text-foreground/90">{{
                 unit.name
               }}</TableCell>
-              <TableCell>
-                <Badge variant="outline" class="font-mono bg-muted/50 text-sm">{{ unit.symbol }}</Badge>
-              </TableCell>
-              <TableCell>
-                <div class="flex items-center">
-                  <Badge variant="outline" class="font-mono text-xs bg-muted/30 border-muted-foreground/20 px-2 py-1 flex items-center gap-1.5 whitespace-nowrap">
-                    <span class="text-muted-foreground/60 font-bold">×</span>
-                    <span class="font-bold text-foreground/80 tracking-tight">{{ unit.conversionFactor || '1' }}</span>
-                  </Badge>
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge 
-                  :variant="unit.isCalculateDetail ? 'success' : 'outline'" 
-                  :class="[
-                    'flex w-fit items-center gap-1.5 px-3 py-1 font-bold transition-all truncate',
-                    unit.isCalculateDetail ? '' : 'bg-muted/30 text-muted-foreground/60 border-muted-foreground/20'
-                  ]"
-                >
-                  <CheckCircle2 v-if="unit.isCalculateDetail" class="h-3.5 w-3.5" />
-                  <XCircle v-else class="h-3.5 w-3.5" />
-                  <span class="text-[10px] uppercase tracking-wider">{{ unit.isCalculateDetail ? $t('fields.yes') : $t('fields.no') }}</span>
-                </Badge>
-              </TableCell>
+              <TableCell class="text-muted-foreground text-sm italic font-medium">{{
+                unit.shortName
+              }}</TableCell>
               <TableCell class="w-[100px]">
                 <Badge
                   :variant="unit.status ? 'success' : 'warning'"
@@ -345,28 +322,34 @@ onMounted(() => {
                   <DropdownMenuContent align="end" class="w-[180px]">
                     <DropdownMenuLabel
                       class="text-xs uppercase text-muted-foreground font-bold"
-                      >{{ $t('crud.actions') }}</DropdownMenuLabel
+                      >{{ $t("crud.actions") }}</DropdownMenuLabel
                     >
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       @click="router.push(`/admin/units/${unit.id}`)"
                       class="cursor-pointer"
                     >
-                      <Eye class="mr-2 h-4 w-4 opacity-70" /> {{ $t('crud.viewBtn') }}
+                      <Eye class="mr-2 h-4 w-4 opacity-70" />{{
+                        $t("crud.viewBtn")
+                      }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      @click="
-                        router.push(`/admin/units/${unit.id}/edit`)
-                      "
+                      @click="router.push(`/admin/units/${unit.id}/edit`)"
                       class="cursor-pointer"
                     >
-                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{ $t('crud.editBtn') }}</DropdownMenuItem>
+                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{
+                        $t("crud.editBtn")
+                      }}</DropdownMenuItem
+                    >
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       class="text-destructive focus:text-destructive cursor-pointer font-medium"
                       @click="openDeleteDialog(unit.id)"
                     >
-                      <Trash2 class="mr-2 h-4 w-4" />{{ $t('crud.delete') }}</DropdownMenuItem>
+                      <Trash2 class="mr-2 h-4 w-4" />{{
+                        $t("crud.delete")
+                      }}</DropdownMenuItem
+                    >
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
@@ -374,19 +357,21 @@ onMounted(() => {
           </template>
           <TableRow v-else>
             <TableCell
-              colspan="8"
+              colspan="6"
               class="h-32 text-center text-muted-foreground"
             >
               <div class="flex flex-col items-center justify-center gap-3">
-                <Tag class="h-10 w-10 opacity-10" />
-                <p class="font-medium">{{ $t('crud.noRecords', { module: $t('modules.units') }) }}</p>
+                <Scale class="h-10 w-10 opacity-10" />
+                <p class="font-medium">
+                  {{ $t("crud.noRecords", { module: $t("modules.units") }) }}
+                </p>
                 <Button
-                  v-if="searchQuery || (statusFilter && statusFilter !== 'all')"
+                  v-if="searchQuery || statusFilter"
                   variant="outline"
                   size="sm"
                   @click="
                     searchQuery = '';
-                    statusFilter = undefined;
+                    statusFilter = null;
                   "
                   class="h-8"
                 >

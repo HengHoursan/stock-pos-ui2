@@ -41,6 +41,8 @@ import { TransactionType } from "@/types";
 import DatePicker from "@/components/DatePicker.vue";
 import { toast } from "vue-sonner";
 import { toLocalISOString } from "@/utils/format";
+import SearchableSelect from "@/components/SearchableSelect.vue";
+import { computed } from "vue";
 
 const router = useRouter();
 const transactionService = new TransactionService();
@@ -104,9 +106,13 @@ const onSubmit = form.handleSubmit(async (values) => {
 
 const selectedProduct = ref<Product | null>(null);
 
+const productOptions = computed(() => 
+    products.value.map(p => ({ label: `${p.name} (${p.code})`, value: p.id }))
+);
+
 function onProductChange(id: any) {
-    const prodId = Number(id);
-    form.setFieldValue('productId', prodId);
+    const prodId = id === null ? undefined : Number(id);
+    form.setFieldValue('productId', prodId as any);
     selectedProduct.value = products.value.find(p => p.id === prodId) || null;
 }
 
@@ -140,23 +146,15 @@ onMounted(() => {
                 <FormField v-slot="{ field }" name="productId">
                 <FormItem>
                     <FormLabel>{{ $t('modules.product') }}</FormLabel>
-                    <Select :model-value="String(field.value || '')" @update:model-value="onProductChange">
                     <FormControl>
-                        <SelectTrigger>
-                        <SelectValue :placeholder="$t('fields.enterProductName')" />
-                        </SelectTrigger>
+                        <SearchableSelect
+                            :model-value="field.value"
+                            @update:model-value="onProductChange"
+                            :options="productOptions"
+                            :placeholder="$t('fields.enterProductName')"
+                            :empty-message="$t('crud.noResults')"
+                        />
                     </FormControl>
-                    <SelectContent>
-                        <template v-if="products.length > 0">
-                            <SelectItem v-for="product in products" :key="product.id" :value="String(product.id)">
-                                {{ product.name }} ({{ product.code }})
-                            </SelectItem>
-                        </template>
-                        <SelectItem v-else disabled value="none" class="text-muted-foreground italic text-xs py-3 text-center">
-                            {{ $t('common.noData') }}
-                        </SelectItem>
-                    </SelectContent>
-                    </Select>
                     <FormMessage />
                 </FormItem>
                 </FormField>

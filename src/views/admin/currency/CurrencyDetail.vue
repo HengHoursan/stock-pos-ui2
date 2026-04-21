@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
+import { formatRate } from "@/utils/format";
 import { CurrencyService } from "@/services/currency/currency.service";
 import type { Currency } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -71,10 +72,15 @@ onMounted(() => {
         >
           <ChevronLeft class="h-5 w-5" />
         </Button>
-        <div>
-          <h2 class="text-3xl font-bold tracking-tight text-foreground/90">
-            {{ $t("crud.detail", { module: $t("modules.currency") }) }}
-          </h2>
+        <div class="space-y-1">
+          <div class="flex items-center gap-3">
+            <h2 class="text-3xl font-bold tracking-tight text-foreground/90">
+              {{ $t("crud.detail", { module: $t("modules.currency") }) }}
+            </h2>
+            <Badge v-if="currency?.isDefault" variant="secondary" class="bg-primary/10 text-primary border-primary/20 px-3 py-0.5">
+              Default System Currency
+            </Badge>
+          </div>
           <p class="text-muted-foreground text-sm">
             Viewing detailed information for {{ currency?.currency || 'Currency' }}
           </p>
@@ -145,6 +151,13 @@ onMounted(() => {
                   <BadgeCent class="mr-2 h-4 w-4" />{{ $t("fields.symbol") }}
                 </div>
                 <p class="font-medium text-base">{{ currency.symbol || "-" }}</p>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex items-center text-sm text-primary font-bold">
+                  <Coins class="mr-2 h-4 w-4" />{{ $t("fields.exchangeRate") || 'Exchange Rate' }}
+                </div>
+                <p class="font-bold text-lg text-primary decoration-primary/20 underline">1 USD = {{ formatRate(currency.exchangeRate || (currency.code === 'KHR' ? 4100 : 1)) }} {{ currency.code }}</p>
               </div>
 
               <div class="space-y-1">

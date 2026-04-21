@@ -47,15 +47,32 @@ export function formatDateForFilename(date: Date = new Date()): string {
   return `${yyyy}-${MM}-${dd}_${HH}-${mm}`;
 }
 
+import { useCurrencyStore } from "@/stores/currency";
+
 /**
- * Formats a number as a currency string.
+ * Formats a number as a currency string using the active system currency.
  */
 export function formatCurrency(amount: number | string | null | undefined): string {
+  let currencyStore;
+  try {
+    currencyStore = useCurrencyStore();
+  } catch (e) {
+    // Fallback if accessed outside of Pinia context
+  }
+
+  const symbol = currencyStore?.activeCurrency?.symbol ?? '$';
+  const rate = currencyStore?.activeCurrency?.exchangeRate ?? 1;
   const value = typeof amount === 'string' ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat('en-US', {
+  
+  // Convert value based on exchange rate
+  const convertedValue = (value || 0) * rate;
+
+  const formatted = new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(value || 0);
+  }).format(convertedValue);
+
+  return `${symbol}${formatted}`;
 }
 
 /**
@@ -64,4 +81,15 @@ export function formatCurrency(amount: number | string | null | undefined): stri
 export function toLocalISOString(date: Date): string {
   const tzOffset = date.getTimezoneOffset() * 60000;
   return new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
+}
+
+/**
+ * Formats an exchange rate naturally (no trailing zeros, up to 4 decimals).
+ */
+export function formatRate(rate: number | string | null | undefined): string {
+  const value = Number(rate || 0);
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 4,
+  }).format(value);
 }

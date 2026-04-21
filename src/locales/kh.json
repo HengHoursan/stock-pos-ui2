@@ -5,7 +5,8 @@
     "logout": "ចាកចេញ",
     "home": "ទំព័រដើម",
     "noData": "មិនមានទិន្នន័យ",
-    "unknown": "មិនស្គាល់"
+    "unknown": "មិនស្គាល់",
+    "logoutSuccess": "ចាកចេញដោយជោគជ័យ"
   },
   "layout": {
     "adminPanel": "ផ្ទាំងគ្រប់គ្រង",
@@ -14,7 +15,11 @@
     "stockDomain": "ស្តុក",
     "inventoryDomain": "បញ្ជីសារពើភណ្ឌ",
     "settingsDomain": "ការកំណត់",
-    "reportsDomain": "របាយការណ៍ និង វិភាគ"
+    "reportsDomain": "របាយការណ៍ និង វិភាគ",
+    "language": "ភាសា",
+    "currency": "រូបិយប័ណ្ណ",
+    "lightMode": "ម៉ូដពន្លឺ",
+    "darkMode": "ម៉ូដងងឹត"
   },
   "menu": {
     "dashboard": "ផ្ទាំងរូបភាព",
@@ -139,6 +144,10 @@
     "confirmDelete": "តើអ្នកពិតជាប្រាកដមែនទេ?",
     "confirmDeleteDesc": "សកម្មភាពនេះមិនអាចត្រឡប់ក្រោយវិញបានទេ។ វានឹងលុប {module} ជាអចិន្ត្រៃយ៍ និងដកទិន្នន័យចេញពីម៉ាស៊ីនបម្រើរបស់យើង។",
     "noRecords": "រកមិនឃើញ {module}",
+    "noResults": "រកមិនឃើញទិន្នន័យ។",
+    "selectAll": "{module}ទាំងអស់",
+    "selectOption": "ជ្រើសរើស {module}",
+    "selectValue": "ជ្រើសរើស {module}",
     "generalInfo": "ព័ត៌មានទូទៅ",
     "systemInfo": "ព័ត៌មានប្រព័ន្ធ",
     "image": "រូបភាព",
@@ -153,6 +162,7 @@
     "fetchingData": "កំពុងទាញយកទិន្នន័យ...",
     "rowsPerPage": "ជួរក្នុងមួយទំព័រ",
     "resetFilters": "កំណត់ឡើងវិញ",
+    "filterByDate": "ចម្រាញ់តាមកាលបរិច្ឆេទ",
     "filterByStatus": "ចម្រាញ់តាមស្ថានភាព",
     "filterByCategory": "ចម្រាញ់តាមប្រភេទ",
     "filterByBrand": "ចម្រាញ់តាមម៉ាក",
@@ -198,6 +208,9 @@
     "currency": "រូបិយប័ណ្ណ",
     "thousandSeparator": "សញ្ញាខណ្ឌខ្ទង់ពាន់",
     "decimalSeparator": "សញ្ញាខណ្ឌទសភាគ",
+    "exchangeRate": "អត្រាប្តូរប្រាក់",
+    "isDefault": "គោល",
+    "defaultCurrency": "រូបិយប័ណ្ណគោល",
     "discountType": "ប្រភេទបញ្ចុះតម្លៃ",
     "discountAmount": "ចំនួនបញ្ចុះតម្លៃ",
     "startDate": "ថ្ងៃចាប់ផ្តើម",
@@ -403,8 +416,11 @@
     "noDataToExport": "មិនមានទិន្នន័យសម្រាប់នាំចេញ",
     "failedToLoad": "មិនអាចទាញយករបាយការណ៍ {module}",
     "totalRevenue": "ចំណូលសរុប",
+    "totalRevenueDesc": "ប្រាក់ចំណូលសរុបពីគ្រប់ប្រភពលក់ទាំងអស់។",
     "netSales": "ការលក់សុទ្ធ",
+    "netSalesDesc": "ចំណូលបន្ទាប់ពីកាត់ការបង្វិលសង និងការបញ្ចុះតម្លៃរួច។",
     "totalReturns": "ការបង្វិលសរុប",
+    "totalReturnsDesc": "តម្លៃសរុបនៃទំនិញដែលអតិថិជនបានបង្វិលសង។",
     "salesByCustomer": "ការលក់តាមអតិថិជន",
     "salesByCustomerDesc": "ព័ត៌មានលម្អិតនៃការទិញរបស់អតិថិជន។",
     "invoicesCount": "ចំនួនវិក្កយបត្រ",
@@ -412,6 +428,7 @@
     "totalCustomers": "អតិថិជនសរុប {count} នាក់",
     "totalExpenses": "ចំណាយលើការទិញសរុប",
     "totalExpensesDesc": "ចំនួនទឹកប្រាក់សរុបដែលបានចំណាយលើវិក្កយបត្រទិញដែលបានបញ្ជាក់។",
+    "totalExpensesPurchaseDesc": "ការចំណាយសរុបសម្រាប់រាល់ប្រតិបត្តិការទិញទាំងអស់។",
     "purchasesBySupplier": "ការទិញតាមអ្នកផ្គត់ផ្គង់",
     "purchasesBySupplierDesc": "ព័ត៌មានលម្អិតនៃការចំណាយលើអ្នកផ្គត់ផ្គង់។",
     "totalSuppliers": "អ្នកផ្គត់ផ្គង់សរុប {count} នាក់",
@@ -421,7 +438,7 @@
     "totalValuation": "ការវាយតម្លៃបញ្ជីសារពើភណ្ឌសរុប",
     "valuationDesc": "គណនាដោយប្រើ ស្តុកបច្ចុប្បន្ន * តម្លៃទិញ។",
     "lowStockAlerts": "ការជូនដំណឹងស្តុកទាប",
-    "lowStockDesc": "ផលិតផលដែលបានដល់ ឬទាបជាងកម្រិតជូនដំណឹង។",
+    "lowStockAlertsDesc": "ផលិតផលដែលបានដល់ ឬទាបជាងកម្រិតជូនដំណឹង។",
     "critical": "ធ្ងន់ធ្ងរ",
     "stockHealthy": "កម្រិតស្តុកទាំងអស់មានសុខភាពល្អ។",
     "totalAlerts": "ការជូនដំណឹងសរុប {count}",
@@ -445,6 +462,8 @@
     "customer": "អតិថិជន",
     "supplier": "អ្នកផ្គត់ផ្គង់",
     "alertQty": "បរិមាណជូនដំណឹង",
-    "status": "ស្ថានភាព"
+    "status": "ស្ថានភាព",
+    "profitable": "មានចំណេញ",
+    "deficit": "ខាត"
   }
 }

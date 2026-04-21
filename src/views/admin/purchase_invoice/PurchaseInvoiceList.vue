@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
-import { ref, onMounted, reactive, watch } from "vue";
+import { ref, onMounted, reactive, watch, computed } from "vue";
 import { useRouter } from "vue-router";
-import { formatDateTime } from "@/utils/format";
+import { formatDateTime, formatCurrency } from "@/utils/format";
 
 import {
   Table,
@@ -68,6 +68,7 @@ import type { PurchaseInvoice, PaginationMeta, Supplier } from "@/types";
 import { InvoiceStatus } from "@/types/enums";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
+import SearchableSelect from "@/components/SearchableSelect.vue";
 
 const router = useRouter();
 const piService = new PurchaseInvoiceService();
@@ -77,8 +78,12 @@ const records = ref<PurchaseInvoice[]>([]);
 const suppliers = ref<Supplier[]>([]);
 const loading = ref(true);
 const searchQuery = ref("");
-const statusFilter = ref<string | undefined>(undefined);
-const supplierFilter = ref<string | undefined>(undefined);
+const statusFilter = ref<string | null>(null);
+const supplierFilter = ref<string | number | null>(null);
+
+const supplierOptions = computed(() => 
+  suppliers.value.map(s => ({ label: s.name, value: s.id }))
+);
 const dateRange = ref<{ start: string | null; end: string | null } | null>(null);
 
 const pagination = reactive<PaginationMeta>({
@@ -191,9 +196,7 @@ function handleSort(column: string) {
   fetchData();
 }
 
-function formatCurrency(val: number) {
-  return val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+
 
 function getStatusBadge(record: PurchaseInvoice) {
   if (record.isCancel) return { variant: 'destructive', label: t('fields.statusLabels.cancelled') };
@@ -240,20 +243,16 @@ onMounted(() => {
       <DateRangePicker 
         v-model="dateRange"
         class="w-full sm:w-[260px] shadow-sm"
-        placeholder="Filter by Date"
+        :placeholder="$t('crud.filterByDate')"
       />
 
-      <Select v-model="supplierFilter">
-        <SelectTrigger class="w-full sm:w-[200px] bg-background/50 border-border/60 shadow-sm">
-          <SelectValue :placeholder="$t('fields.supplierId')" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{{ $t("crud.all") }} {{ $t("fields.supplierId") }}</SelectItem>
-          <SelectItem v-for="s in suppliers" :key="s.id" :value="String(s.id)">
-            {{ s.name }}
-          </SelectItem>
-        </SelectContent>
-      </Select>
+      <SearchableSelect
+        v-model="supplierFilter"
+        :options="supplierOptions"
+        :placeholder="$t('crud.selectOption', { module: $t('modules.supplier') })"
+        :empty-message="$t('crud.noResults')"
+        class="w-full sm:w-[220px]"
+      />
 
       <Select v-model="statusFilter">
         <SelectTrigger class="w-full sm:w-[180px] bg-background/50 border-border/60 shadow-sm">
@@ -267,10 +266,10 @@ onMounted(() => {
       </Select>
 
       <Button 
-        v-if="searchQuery || (statusFilter && statusFilter !== 'all') || (supplierFilter && supplierFilter !== 'all') || dateRange"
+        v-if="searchQuery || (statusFilter && statusFilter !== 'all') || supplierFilter || dateRange"
         variant="ghost" 
         size="sm"
-        @click="searchQuery = ''; statusFilter = undefined; supplierFilter = undefined; dateRange = null;"
+        @click="searchQuery = ''; statusFilter = null; supplierFilter = null; dateRange = null;"
         class="h-9 px-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
       >
         <RefreshCw class="mr-2 h-4 w-4" />
@@ -367,7 +366,7 @@ onMounted(() => {
                   v-if="searchQuery || (statusFilter && statusFilter !== 'all') || (supplierFilter && supplierFilter !== 'all') || dateRange"
                   variant="outline"
                   size="sm"
-                  @click="searchQuery = ''; statusFilter = undefined; supplierFilter = undefined; dateRange = null;"
+                  @click="searchQuery = ''; statusFilter = null; supplierFilter = null; dateRange = null;"
                   class="h-8"
                 >
                   {{ $t('crud.resetFilters') }}

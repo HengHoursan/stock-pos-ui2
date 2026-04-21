@@ -3,7 +3,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { formatDateTime } from "@/utils/format";
+import { formatDateTime, formatCurrency } from "@/utils/format";
 import {
   Card,
   CardContent,
@@ -54,9 +54,7 @@ function getPaymentMethodLabel(pm: PaymentMethod) {
   }
 }
 
-function formatCurrency(val: number) {
-  return (val || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+
 
 onMounted(() => {
   fetchDetail();
@@ -130,7 +128,7 @@ onMounted(() => {
           </CardHeader>
           <CardContent class="pt-6">
             <div class="text-center">
-              <span class="text-3xl font-mono font-black text-success">${{ formatCurrency(record.amount) }}</span>
+               <span class="text-3xl font-mono font-black text-success">{{ formatCurrency(record.amount) }}</span>
             </div>
           </CardContent>
         </Card>
@@ -166,15 +164,15 @@ onMounted(() => {
               <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div>
                   <p class="text-xs text-muted-foreground">{{ $t('fields.totalPrice') }}</p>
-                  <p class="font-mono font-bold">${{ formatCurrency(record.saleInvoice.totalPrice) }}</p>
+                   <p class="font-mono font-bold">{{ formatCurrency(record.saleInvoice?.totalPrice) }}</p>
                 </div>
                 <div>
                   <p class="text-xs text-muted-foreground">{{ $t('fields.totalPaid') }}</p>
-                  <p class="font-mono text-success font-bold">${{ formatCurrency(record.saleInvoice.paidAmount) }}</p>
+                   <p class="font-mono text-success font-bold">{{ formatCurrency(record.saleInvoice?.paidAmount) }}</p>
                 </div>
                 <div>
                   <p class="text-xs text-muted-foreground">{{ $t('fields.balanceDue') }}</p>
-                  <p class="font-mono text-destructive font-black">${{ formatCurrency(Math.max(0, record.saleInvoice.totalPrice - record.saleInvoice.paidAmount)) }}</p>
+                   <p class="font-mono text-destructive font-black">{{ formatCurrency(Math.max(0, (record.saleInvoice?.totalPrice || 0) - (record.saleInvoice?.paidAmount || 0))) }}</p>
                 </div>
               </div>
             </div>

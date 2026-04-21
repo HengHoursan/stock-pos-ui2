@@ -4,6 +4,7 @@ const { t } = useI18n();
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { toLocalISOString } from "@/utils/format";
+import SearchableSelect from "@/components/SearchableSelect.vue";
 
 import { useForm, useFieldArray } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
@@ -34,13 +35,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ChevronLeft, Loader2, FileText, Plus, Trash2, Package, Users } from "lucide-vue-next";
 
 import { SaleQuotationService } from "@/services/sale_quotation/sale_quotation.service";
@@ -60,6 +54,13 @@ const loading = ref(true);
 const submitting = ref(false);
 const products = ref<Product[]>([]);
 const customers = ref<Customer[]>([]);
+
+const customerOptions = computed(() =>
+  customers.value.map(c => ({ label: `${c.name} (${c.code})`, value: c.id }))
+);
+const productOptions = computed(() =>
+  products.value.map(p => ({ label: `[${p.code}] ${p.name}`, value: p.id }))
+);
 
 const formSchema = toTypedSchema(
   z.object({
@@ -244,21 +245,14 @@ const onSubmit = form.handleSubmit(async (values) => {
             <FormField v-slot="{ value, handleChange }" name="customerId">
               <FormItem class="md:col-span-2">
                 <FormLabel>{{ $t('fields.customerId') }}</FormLabel>
-                <Select
-                  :model-value="value ? String(value) : undefined"
-                  @update:model-value="(v) => handleChange(Number(v))"
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue :placeholder="$t('fields.selectOption')" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem v-for="c in customers" :key="c.id" :value="String(c.id)">
-                      {{ c.name }} ({{ c.code }})
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  :model-value="value"
+                  @update:model-value="(v) => handleChange(v ? Number(v) : undefined)"
+                  :options="customerOptions"
+                  :placeholder="$t('fields.selectOption')"
+                  :empty-message="$t('crud.noResults')"
+                  class="w-full"
+                />
                 <FormMessage />
               </FormItem>
             </FormField>
@@ -333,26 +327,19 @@ const onSubmit = form.handleSubmit(async (values) => {
                   <TableCell>
                     <FormField v-slot="{ value, handleChange }" :name="`details[${index}].productId`">
                       <FormItem class="mb-0">
-                        <Select 
-                          :model-value="value ? String(value) : undefined" 
+                        <SearchableSelect
+                          :model-value="value"
                           @update:model-value="(v) => {
-                            handleChange(Number(v));
+                            handleChange(v ? Number(v) : 0);
                             if (!form.values.details?.[index]?.price) {
                               form.setFieldValue(`details[${index}].price` as any, getProductPrice(Number(v)));
                             }
                           }"
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue :placeholder="$t('fields.selectOption')" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem v-for="p in products" :key="p.id" :value="String(p.id)">
-                              [{{ p.code }}] {{ p.name }}
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                          :options="productOptions"
+                          :placeholder="$t('fields.selectOption')"
+                          :empty-message="$t('crud.noResults')"
+                          class="w-full"
+                        />
                         <FormMessage />
                       </FormItem>
                     </FormField>

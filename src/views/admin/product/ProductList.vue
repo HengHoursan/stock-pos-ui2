@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
-import { ref, onMounted, reactive, watch } from "vue";
+import { ref, onMounted, reactive, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 import {
   Table,
@@ -73,6 +73,7 @@ import type {
 } from "@/types";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
+import SearchableSelect from "@/components/SearchableSelect.vue";
 
 const router = useRouter();
 const productService = new ProductService();
@@ -87,10 +88,20 @@ const units = ref<Unit[]>([]);
 
 const loading = ref(true);
 const searchQuery = ref("");
-const statusFilter = ref<string | undefined>(undefined);
-const categoryIdFilter = ref<string | undefined>(undefined);
-const brandIdFilter = ref<string | undefined>(undefined);
-const unitIdFilter = ref<string | undefined>(undefined);
+const statusFilter = ref<string | null>(null);
+const categoryIdFilter = ref<string | number | null>(null);
+const brandIdFilter = ref<string | number | null>(null);
+const unitIdFilter = ref<string | number | null>(null);
+
+const categoryOptions = computed(() =>
+  categories.value.map((c) => ({ label: c.name, value: c.id })),
+);
+const brandOptions = computed(() =>
+  brands.value.map((b) => ({ label: b.name, value: b.id })),
+);
+const unitOptions = computed(() =>
+  units.value.map((u) => ({ label: u.name, value: u.id })),
+);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -122,7 +133,7 @@ async function fetchProducts() {
     }
 
     // Build the filter object
-    const filters: Record<string, string> = {};
+    const filters: Record<string, any> = {};
     if (statusFilter.value && statusFilter.value !== "all") {
       filters.status = statusFilter.value;
     }
@@ -297,41 +308,40 @@ onMounted(() => {
         </SelectContent>
       </Select>
 
-      <Select v-model="categoryIdFilter">
-        <SelectTrigger class="w-full sm:w-[180px]">
-          <SelectValue :placeholder="$t('crud.filterByCategory')" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{{ $t('modules.categories') }}</SelectItem>
-          <SelectItem v-for="cat in categories" :key="cat.id" :value="cat.id.toString()">
-            {{ cat.name }}
-          </SelectItem>
-        </SelectContent>
-      </Select>
+      <SearchableSelect
+        v-model="categoryIdFilter"
+        :options="categoryOptions"
+        :placeholder="$t('crud.selectOption', { module: $t('modules.category') })"
+        :empty-message="$t('crud.noResults')"
+        class="w-full sm:w-[200px]"
+      />
 
-      <Select v-model="brandIdFilter">
-        <SelectTrigger class="w-full sm:w-[180px]">
-          <SelectValue :placeholder="$t('crud.filterByBrand')" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{{ $t('modules.brands') }}</SelectItem>
-          <SelectItem v-for="brand in brands" :key="brand.id" :value="brand.id.toString()">
-            {{ brand.name }}
-          </SelectItem>
-        </SelectContent>
-      </Select>
+      <SearchableSelect
+        v-model="brandIdFilter"
+        :options="brandOptions"
+        :placeholder="$t('crud.selectOption', { module: $t('modules.brand') })"
+        :empty-message="$t('crud.noResults')"
+        class="w-full sm:w-[200px]"
+      />
 
-      <Select v-model="unitIdFilter">
-        <SelectTrigger class="w-full sm:w-[180px]">
-          <SelectValue :placeholder="$t('crud.filterByUnit')" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{{ $t('modules.units') }}</SelectItem>
-          <SelectItem v-for="unit in units" :key="unit.id" :value="unit.id.toString()">
-            {{ unit.name }}
-          </SelectItem>
-        </SelectContent>
-      </Select>
+      <SearchableSelect
+        v-model="unitIdFilter"
+        :options="unitOptions"
+        :placeholder="$t('crud.selectOption', { module: $t('modules.unit') })"
+        :empty-message="$t('crud.noResults')"
+        class="w-full sm:w-[200px]"
+      />
+
+      <Button 
+        v-if="searchQuery || statusFilter || categoryIdFilter || brandIdFilter || unitIdFilter" 
+        variant="ghost" 
+        size="sm"
+        @click="searchQuery = ''; statusFilter = null; categoryIdFilter = null; brandIdFilter = null; unitIdFilter = null;"
+        class="h-9 px-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+      >
+        <RefreshCw class="mr-2 h-4 w-4" />
+        {{ $t('crud.resetFilters') }}
+      </Button>
     </div>
 
     <div class="rounded-md border bg-card overflow-hidden shadow-sm">
@@ -494,10 +504,10 @@ onMounted(() => {
                   size="sm"
                   @click="
                     searchQuery = '';
-                    statusFilter = undefined;
-                    categoryIdFilter = undefined;
-                    brandIdFilter = undefined;
-                    unitIdFilter = undefined;
+                    statusFilter = null;
+                    categoryIdFilter = null;
+                    brandIdFilter = null;
+                    unitIdFilter = null;
                   "
                   class="h-8"
                 >

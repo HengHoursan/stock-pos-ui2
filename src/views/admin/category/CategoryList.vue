@@ -56,7 +56,6 @@ import {
   Pencil,
   Trash2,
   ArrowUpDown,
-  Tag,
   RefreshCw,
   Loader2,
 } from "lucide-vue-next";
@@ -71,7 +70,7 @@ const categoryService = new CategoryService();
 const categories = ref<Category[]>([]);
 const loading = ref(true);
 const searchQuery = ref("");
-const statusFilter = ref<string | undefined>(undefined);
+const statusFilter = ref<string | null>(null);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -204,7 +203,9 @@ onMounted(() => {
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <h2 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('modules.categories') }}</h2>
+      <h2 class="text-3xl font-bold tracking-tight text-foreground">
+        {{ $t("modules.categories") }}
+      </h2>
       <div class="flex items-center gap-2">
         <Button
           variant="outline"
@@ -215,7 +216,9 @@ onMounted(() => {
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
         <Button @click="router.push('/admin/categories/create')">
-          <Plus class="mr-2 h-4 w-4" />{{ $t('crud.createBtn') }} {{ $t('modules.category') }}</Button>
+          <Plus class="mr-2 h-4 w-4" />{{ $t("crud.createBtn") }}
+          {{ $t("modules.category") }}</Button
+        >
       </div>
     </div>
 
@@ -237,9 +240,9 @@ onMounted(() => {
           <SelectValue :placeholder="$t('crud.filterByStatus')" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">{{ $t('crud.allStatus') }}</SelectItem>
-          <SelectItem value="active">{{ $t('crud.active') }}</SelectItem>
-          <SelectItem value="inactive">{{ $t('crud.inactive') }}</SelectItem>
+          <SelectItem value="all">{{ $t("crud.allStatus") }}</SelectItem>
+          <SelectItem value="active">{{ $t("crud.active") }}</SelectItem>
+          <SelectItem value="inactive">{{ $t("crud.inactive") }}</SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -249,20 +252,22 @@ onMounted(() => {
         <TableHeader>
           <TableRow>
             <TableHead class="w-[20px]">#</TableHead>
-            <TableHead class="w-[180px]">{{ $t('fields.code') }}</TableHead>
-            <TableHead class="w-[250px]">{{ $t('crud.image') }}</TableHead>
+            <TableHead class="w-[180px]">{{ $t("fields.code") }}</TableHead>
+            <TableHead class="w-[250px]">{{ $t("crud.image") }}</TableHead>
             <TableHead>
               <Button
                 variant="ghost"
                 @click="handleSort('name')"
                 class="-ml-4 h-8 font-medium"
-              >{{ $t('fields.name') }}<ArrowUpDown class="ml-1 h-3 w-3" />
+                >{{ $t("fields.name") }}<ArrowUpDown class="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
-            <TableHead>{{ $t('fields.slug') }}</TableHead>
-            <TableHead class="max-w-[200px]">{{ $t('fields.description') }}</TableHead>
-            <TableHead>{{ $t('fields.status') }}</TableHead>
-            <TableHead class="text-right">{{ $t('crud.actions') }}</TableHead>
+            <TableHead>{{ $t("fields.slug") }}</TableHead>
+            <TableHead class="max-w-[200px]">{{
+              $t("fields.description")
+            }}</TableHead>
+            <TableHead>{{ $t("fields.status") }}</TableHead>
+            <TableHead class="text-right">{{ $t("crud.actions") }}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -277,10 +282,7 @@ onMounted(() => {
             </TableCell>
           </TableRow>
           <template v-else-if="categories.length > 0">
-            <TableRow
-              v-for="(category, index) in categories"
-              :key="category.id"
-            >
+            <TableRow v-for="(category, index) in categories" :key="category.id">
               <TableCell class="font-medium text-muted-foreground">
                 {{ (pagination.page - 1) * pagination.limit + index + 1 }}
               </TableCell>
@@ -300,7 +302,7 @@ onMounted(() => {
                     :alt="category.name"
                   />
                   <AvatarFallback class="rounded-lg">
-                    <Tag class="h-4 w-4 text-muted-foreground/40" />
+                    <LayoutGrid class="h-4 w-4 text-muted-foreground/40" />
                   </AvatarFallback>
                 </Avatar>
               </TableCell>
@@ -338,28 +340,34 @@ onMounted(() => {
                   <DropdownMenuContent align="end" class="w-[180px]">
                     <DropdownMenuLabel
                       class="text-xs uppercase text-muted-foreground font-bold"
-                      >{{ $t('crud.actions') }}</DropdownMenuLabel
+                      >{{ $t("crud.actions") }}</DropdownMenuLabel
                     >
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       @click="router.push(`/admin/categories/${category.id}`)"
                       class="cursor-pointer"
                     >
-                      <Eye class="mr-2 h-4 w-4 opacity-70" /> {{ $t('crud.viewBtn') }}
+                      <Eye class="mr-2 h-4 w-4 opacity-70" />{{
+                        $t("crud.viewBtn")
+                      }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      @click="
-                        router.push(`/admin/categories/${category.id}/edit`)
-                      "
+                      @click="router.push(`/admin/categories/${category.id}/edit`)"
                       class="cursor-pointer"
                     >
-                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{ $t('crud.editBtn') }}</DropdownMenuItem>
+                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{
+                        $t("crud.editBtn")
+                      }}</DropdownMenuItem
+                    >
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       class="text-destructive focus:text-destructive cursor-pointer font-medium"
                       @click="openDeleteDialog(category.id)"
                     >
-                      <Trash2 class="mr-2 h-4 w-4" />{{ $t('crud.delete') }}</DropdownMenuItem>
+                      <Trash2 class="mr-2 h-4 w-4" />{{
+                        $t("crud.delete")
+                      }}</DropdownMenuItem
+                    >
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
@@ -371,15 +379,19 @@ onMounted(() => {
               class="h-32 text-center text-muted-foreground"
             >
               <div class="flex flex-col items-center justify-center gap-3">
-                <Tag class="h-10 w-10 opacity-10" />
-                <p class="font-medium">{{ $t('crud.noRecords', { module: $t('modules.categories') }) }}</p>
+                <LayoutGrid class="h-10 w-10 opacity-10" />
+                <p class="font-medium">
+                  {{
+                    $t("crud.noRecords", { module: $t("modules.categories") })
+                  }}
+                </p>
                 <Button
-                  v-if="searchQuery || (statusFilter && statusFilter !== 'all')"
+                  v-if="searchQuery || statusFilter"
                   variant="outline"
                   size="sm"
                   @click="
                     searchQuery = '';
-                    statusFilter = undefined;
+                    statusFilter = null;
                   "
                   class="h-8"
                 >

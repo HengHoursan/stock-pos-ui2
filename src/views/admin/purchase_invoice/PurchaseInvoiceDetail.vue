@@ -3,7 +3,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { formatDateTime } from "@/utils/format";
+import { formatDateTime, formatCurrency } from "@/utils/format";
 import {
   Card,
   CardContent,
@@ -71,9 +71,7 @@ async function fetchDetail() {
   }
 }
 
-function formatCurrency(val: number) {
-  return (Number(val) || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+
 
 onMounted(() => {
   fetchDetail();
@@ -153,16 +151,16 @@ onMounted(() => {
           <CardContent class="pt-4 space-y-4 text-sm">
             <div class="flex justify-between">
               <span class="text-muted-foreground">{{ $t('fields.totalPrice') }}:</span>
-              <span class="font-mono font-medium">${{ formatCurrency(record.totalPrice) }}</span>
+              <span class="font-mono font-medium">{{ formatCurrency(record.totalPrice) }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">{{ $t('fields.paidAmount') }}:</span>
-              <span class="font-mono font-medium text-success">${{ formatCurrency(record.paidAmount) }}</span>
+              <span class="font-mono font-medium text-success">{{ formatCurrency(record.paidAmount) }}</span>
             </div>
             <div class="py-2 border-t flex justify-between">
               <span class="text-muted-foreground">{{ $t('fields.balanceDue') }}:</span>
               <span class="font-mono font-bold" :class="(record.totalPrice - record.paidAmount) > 0 ? 'text-destructive' : 'text-success'">
-                ${{ formatCurrency(Math.max(0, record.totalPrice - record.paidAmount)) }}
+                {{ formatCurrency(Math.max(0, record.totalPrice - record.paidAmount)) }}
               </span>
             </div>
             <div class="pt-2 border-t">
@@ -220,7 +218,7 @@ onMounted(() => {
               <div class="w-full max-w-sm space-y-3">
                 <div class="flex justify-between items-center text-lg font-bold">
                   <span>{{ $t('fields.grandTotal') }}:</span>
-                  <span class="text-primary font-mono">${{ formatCurrency(record.totalPrice) }}</span>
+                  <span class="text-primary font-mono">{{ formatCurrency(record.totalPrice) }}</span>
                 </div>
               </div>
             </div>

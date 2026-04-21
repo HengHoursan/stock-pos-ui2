@@ -4,7 +4,7 @@ const { t } = useI18n();
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { toLocalISOString } from "@/utils/format";
-
+import SearchableSelect from "@/components/SearchableSelect.vue";
 import { useForm, useFieldArray } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import * as z from "zod";
@@ -57,6 +57,9 @@ const productService = new ProductService();
 const loading = ref(true);
 const submitting = ref(false);
 const products = ref<Product[]>([]);
+const productOptions = computed(() =>
+  products.value.map(p => ({ label: `[${p.code}] ${p.name}`, value: p.id }))
+);
 
 const formSchema = toTypedSchema(
   z.object({
@@ -301,27 +304,20 @@ const onSubmit = form.handleSubmit(async (values) => {
                   <TableCell>
                     <FormField v-slot="{ value, handleChange }" :name="`details[${index}].productId`">
                       <FormItem class="mb-0">
-                        <Select 
-                          :model-value="value ? String(value) : undefined" 
+                        <SearchableSelect
+                          :model-value="value"
                           @update:model-value="(v) => {
-                            handleChange(Number(v));
+                            handleChange(v ? Number(v) : 0);
                             const price = getProductPrice(Number(v));
                             const qty = form.values.details?.[index]?.quantity || 0;
                             form.setFieldValue(`details[${index}].unitPrice` as any, price);
                             form.setFieldValue(`details[${index}].totalPrice` as any, Number((price * qty).toFixed(2)));
                           }"
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue :placeholder="$t('fields.selectOption')" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem v-for="p in products" :key="p.id" :value="String(p.id)">
-                              [{{ p.code }}] {{ p.name }}
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                          :options="productOptions"
+                          :placeholder="$t('fields.selectOption')"
+                          :empty-message="$t('crud.noResults')"
+                          class="w-full"
+                        />
                         <FormMessage />
                       </FormItem>
                     </FormField>

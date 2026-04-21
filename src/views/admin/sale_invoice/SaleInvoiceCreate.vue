@@ -4,6 +4,7 @@ const { t } = useI18n();
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { toLocalISOString } from "@/utils/format";
+import SearchableSelect from "@/components/SearchableSelect.vue";
 
 import { useForm, useFieldArray } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
@@ -41,7 +42,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ChevronLeft, Loader2, FileText, Plus, Trash2, Users, CreditCard } from "lucide-vue-next";
+import { ChevronLeft, Loader2, FileText, Plus, Trash2, CreditCard } from "lucide-vue-next";
 
 import { SaleInvoiceService } from "@/services/sale_invoice/sale_invoice.service";
 import { SaleOrderService } from "@/services/sale_order/sale_order.service";
@@ -61,6 +62,14 @@ const productService = new ProductService();
 const submitting = ref(false);
 const products = ref<Product[]>([]);
 const customers = ref<Customer[]>([]);
+
+const customerOptions = computed(() => 
+  customers.value.map(c => ({ label: `${c.name} (${c.code})`, value: c.id }))
+);
+
+const productOptions = computed(() => 
+  products.value.map(p => ({ label: `[${p.code}] ${p.name}`, value: p.id, disabled: !p.forSelling }))
+);
 
 onMounted(async () => {
   try {
@@ -234,22 +243,15 @@ const onSubmit = form.handleSubmit(async (values) => {
             <FormField v-slot="{ value, handleChange }" name="customerId">
               <FormItem class="md:col-span-2">
                 <FormLabel>{{ $t('fields.customerId') }}</FormLabel>
-                <Select
-                  :model-value="value ? String(value) : undefined"
-                  @update:model-value="(v) => handleChange(Number(v))"
-                >
-                  <FormControl>
-                    <SelectTrigger class="w-full relative">
-                      <div class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"><Users class="w-4 h-4"/></div>
-                      <SelectValue class="pl-8" :placeholder="$t('crud.selectValue', { module: $t('modules.customer') })" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem v-for="s in customers" :key="s.id" :value="String(s.id)">
-                      {{ s.name }} ({{ s.code }})
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <SearchableSelect
+                    :model-value="value"
+                    @update:model-value="(v) => handleChange(v ? Number(v) : null)"
+                    :options="customerOptions"
+                    :placeholder="$t('crud.selectValue', { module: $t('modules.customer') })"
+                    :empty-message="$t('crud.noResults')"
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             </FormField>
@@ -359,25 +361,19 @@ const onSubmit = form.handleSubmit(async (values) => {
                   <TableCell>
                     <FormField v-slot="{ value, handleChange }" :name="`details[${index}].productId`">
                       <FormItem class="mb-0">
-                        <Select 
-                          :model-value="value ? String(value) : undefined" 
-                          @update:model-value="(v) => {
-                            handleChange(Number(v));
-                            form.setFieldValue(`details[${index}].price` as any, getProductPrice(Number(v)));
-                          }"
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue :placeholder="$t('fields.selectOption')" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem v-for="p in products" :key="p.id" :value="String(p.id)" :disabled="!p.forSelling">
-                              [{{ p.code }}] {{ p.name }}
-                              {{ !p.forSelling ? `(${$t('fields.notForSale')})` : '' }}
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <SearchableSelect
+                            :model-value="value"
+                            @update:model-value="(v) => {
+                              const id = v ? Number(v) : null;
+                              handleChange(id);
+                              if (id) form.setFieldValue(`details[${index}].price` as any, getProductPrice(id));
+                            }"
+                            :options="productOptions"
+                            :placeholder="$t('fields.selectOption')"
+                            :empty-message="$t('crud.noResults')"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     </FormField>

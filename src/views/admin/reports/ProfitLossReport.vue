@@ -262,7 +262,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
                   : 'bg-red-100 text-red-700'
               "
             >
-              {{ reportData.netProfit >= 0 ? "Profitable" : "Deficit" }}
+            {{ reportData.netProfit >= 0 ? $t("reports.profitable") : $t("reports.deficit") }}
             </span>
           </div>
         </CardContent>

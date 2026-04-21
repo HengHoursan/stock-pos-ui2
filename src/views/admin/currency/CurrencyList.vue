@@ -63,6 +63,7 @@ import {
 } from "lucide-vue-next";
 import { CurrencyService } from "@/services/currency/currency.service";
 import type { Currency, PaginationMeta } from "@/types";
+import { formatRate } from "@/utils/format";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
 
@@ -72,7 +73,7 @@ const currencyService = new CurrencyService();
 const currencies = ref<Currency[]>([]);
 const loading = ref(true);
 const searchQuery = ref("");
-const statusFilter = ref<string | undefined>(undefined);
+const statusFilter = ref<string | null>(null);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -261,6 +262,8 @@ onMounted(() => {
             </TableHead>
             <TableHead>{{ $t('fields.country') }}</TableHead>
             <TableHead>{{ $t('fields.symbol') }}</TableHead>
+            <TableHead>{{ $t('fields.exchangeRate') }}</TableHead>
+            <TableHead class="text-center">{{ $t('fields.isDefault') }}</TableHead>
             <TableHead>{{ $t('fields.status') }}</TableHead>
             <TableHead class="text-right">{{ $t('crud.actions') }}</TableHead>
           </TableRow>
@@ -298,7 +301,25 @@ onMounted(() => {
                 {{ currency.country }}
               </TableCell>
               <TableCell>
-                <Badge variant="outline" class="font-mono bg-muted/50 text-sm">{{ currency.symbol }}</Badge>
+                <Badge variant="secondary" class="bg-primary/5 text-primary border-primary/20 h-9 w-9 flex items-center justify-center p-0">
+                  <span 
+                    class="font-bold leading-none"
+                    :class="currency.symbol === '៛' ? 'text-2xl pt-0.5' : 'text-xl'"
+                  >
+                    {{ currency.symbol }}
+                  </span>
+                </Badge>
+              </TableCell>
+              <TableCell class="text-sm font-semibold">
+                {{ formatRate(currency.exchangeRate) }}
+              </TableCell>
+              <TableCell class="text-center">
+                <div v-if="currency.isDefault" class="flex justify-center">
+                  <Badge variant="success" class="font-semibold">
+                    {{ $t('fields.isDefault') }}
+                  </Badge>
+                </div>
+                <span v-else class="text-muted-foreground/30 px-3">-</span>
               </TableCell>
               <TableCell class="w-[100px]">
                 <Badge
@@ -364,7 +385,7 @@ onMounted(() => {
                   size="sm"
                   @click="
                     searchQuery = '';
-                    statusFilter = undefined;
+                    statusFilter = null;
                   "
                   class="h-8"
                 >

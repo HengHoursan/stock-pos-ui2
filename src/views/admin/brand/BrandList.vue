@@ -74,7 +74,7 @@ const brandService = new BrandService();
 const brands = ref<Brand[]>([]);
 const loading = ref(true);
 const searchQuery = ref("");
-const statusFilter = ref<string | undefined>(undefined);
+const statusFilter = ref<string | null>(null);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -388,12 +388,12 @@ onMounted(() => {
                   {{ $t("crud.noRecords", { module: $t("modules.brands") }) }}
                 </p>
                 <Button
-                  v-if="searchQuery || (statusFilter && statusFilter !== 'all')"
+                  v-if="searchQuery || statusFilter"
                   variant="outline"
                   size="sm"
                   @click="
                     searchQuery = '';
-                    statusFilter = undefined;
+                    statusFilter = null;
                   "
                   class="h-8"
                 >

@@ -72,8 +72,8 @@ const customerService = new CustomerService();
 const customers = ref<Customer[]>([]);
 const loading = ref(true);
 const searchQuery = ref("");
-const statusFilter = ref<string | undefined>(undefined);
-const customerTypeFilter = ref<string | undefined>(undefined);
+const statusFilter = ref<string | null>(null);
+const customerTypeFilter = ref<string | null>(null);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -335,7 +335,7 @@ onMounted(() => {
                 customer.email || "-"
               }}</TableCell>
               <TableCell
-                class="text-muted-foreground text-sm font-mono italic"
+                class="text-muted-foreground text-sm"
                 >{{ customer.phoneNumber || "-" }}</TableCell
               >
               <TableCell>
@@ -443,8 +443,8 @@ onMounted(() => {
                   size="sm"
                   @click="
                     searchQuery = '';
-                    statusFilter = undefined;
-                    customerTypeFilter = undefined;
+                    statusFilter = null;
+                    customerTypeFilter = null;
                   "
                   class="h-8"
                 >

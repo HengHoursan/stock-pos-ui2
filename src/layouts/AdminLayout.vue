@@ -2,6 +2,7 @@
 import { computed, onMounted } from "vue";
 import { RouterView, RouterLink, useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
+import { useDark, useToggle } from "@vueuse/core";
 import { setLanguage, availableLocales } from "@/i18n";
 import {
   Sidebar,
@@ -35,6 +36,11 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuGroup,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -69,6 +75,10 @@ import {
   BarChart3,
   TrendingUp,
   PieChart,
+  Sun,
+  Moon,
+  Settings,
+  Star,
 } from "lucide-vue-next";
 import {
   Collapsible,
@@ -76,12 +86,15 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useAuthStore } from "@/stores/auth";
-import ModeToggle from "@/components/ModeToggle.vue";
+import { useCurrencyStore } from "@/stores/currency";
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const currencyStore = useCurrencyStore();
 const { locale, t } = useI18n();
+const isDark = useDark();
+const toggleDark = useToggle(isDark);
 
 interface NavItem {
   titleKey: string;
@@ -250,12 +263,13 @@ const formattedUsername = computed(() => {
 
 async function handleLogout() {
   await authStore.logout();
-  toast.success("Logout successfully");
+  toast.success(t("common.logoutSuccess"));
   router.push("/login");
 }
 
 onMounted(() => {
   authStore.fetchUser();
+  currencyStore.fetchCurrencies();
 });
 </script>
 
@@ -356,26 +370,105 @@ onMounted(() => {
                   <ChevronsUpDown class="ml-auto size-4" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent side="top" class="w-56" align="start">
-                <div class="flex items-center gap-2 p-2">
-                  <Avatar class="h-8 w-8 rounded-lg">
-                    <AvatarFallback class="rounded-lg">{{
-                      userInitials
-                    }}</AvatarFallback>
-                  </Avatar>
-                  <div class="grid flex-1 text-sm leading-tight">
-                    <span class="truncate font-semibold">{{
-                      formattedUsername
-                    }}</span>
+              <DropdownMenuContent side="top" class="w-64 p-2 shadow-2xl border-primary/10" align="start" :side-offset="10">
+                <!-- User Profile Header -->
+                <DropdownMenuLabel class="font-normal border-b pb-2 mb-1">
+                  <div class="flex items-center gap-3 px-1 py-1.5">
+                    <Avatar class="h-9 w-9 rounded-full border-2 border-primary/20 shadow-sm">
+                      <AvatarFallback class="rounded-full bg-primary/10 text-primary font-bold">{{
+                        userInitials
+                      }}</AvatarFallback>
+                    </Avatar>
+                    <div class="flex flex-col gap-0.5 min-w-0">
+                      <span class="truncate font-bold text-sm leading-none text-foreground">{{
+                        formattedUsername
+                      }}</span>
+                      <span class="truncate text-[10px] text-muted-foreground">{{ authStore.user?.email || 'Administrator' }}</span>
+                    </div>
                   </div>
-                </div>
-                <DropdownMenuSeparator />
+                </DropdownMenuLabel>
+
+                <DropdownMenuGroup class="mt-1">
+                  <DropdownMenuItem 
+                    @click="toggleDark()" 
+                    class="cursor-pointer flex items-center justify-between py-2 px-2.5 rounded-md transition-colors hover:bg-accent group"
+                  >
+                    <div class="flex items-center">
+                      <Sun v-if="!isDark" class="mr-3 h-4 w-4 text-amber-500 opacity-80" />
+                      <Moon v-else class="mr-3 h-4 w-4 text-indigo-400 opacity-80" />
+                      <span class="text-sm font-medium text-foreground/80">{{ isDark ? $t('layout.darkMode') : $t('layout.lightMode') }}</span>
+                    </div>
+                    <div 
+                      class="h-4 w-7 rounded-full bg-muted border p-0.5 flex items-center transition-all duration-300" 
+                      :class="{ 'bg-primary/50 border-primary/30': isDark }"
+                    >
+                       <div 
+                        class="h-2.5 w-2.5 rounded-full bg-background shadow-sm transform transition-transform duration-300" 
+                        :class="{ 'translate-x-3': isDark }"
+                       ></div>
+                    </div>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator class="my-1" />
+
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger class="cursor-pointer py-2 px-2.5 transition-colors focus:bg-accent">
+                      <Globe class="mr-3 h-4 w-4 text-muted-foreground opacity-70" />
+                      <span class="text-sm font-medium text-foreground/80">{{ $t('layout.language') }}</span>
+                      <div class="ml-auto flex items-center gap-1.5 opacity-60">
+                        <img
+                          :src="currentLocaleItem.flag"
+                          class="h-3 w-4 rounded-sm object-cover opacity-80"
+                        />
+                        <span class="text-[10px] font-bold uppercase tracking-tight">{{ currentLocaleItem.code }}</span>
+                      </div>
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent class="w-48 p-1">
+                      <DropdownMenuItem
+                        v-for="lang in availableLocales"
+                        :key="lang.code"
+                        class="cursor-pointer flex items-center gap-3 p-2 rounded-sm"
+                        @click="changeLanguage(lang.code as 'en' | 'kh')"
+                      >
+                        <img
+                          :src="lang.flag"
+                          class="h-3.5 w-5 rounded-sm object-cover shadow-sm"
+                        />
+                        <span class="flex-1 text-sm font-medium">{{ lang.name }}</span>
+                        <div v-if="locale === lang.code" class="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]"></div>
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger class="cursor-pointer py-2 px-2.5 transition-colors focus:bg-accent">
+                      <Coins class="mr-3 h-4 w-4 text-muted-foreground opacity-70" />
+                      <span class="text-sm font-medium text-foreground/80">{{ $t('layout.currency') }}</span>
+                      <span class="ml-auto text-[10px] font-bold text-muted-foreground opacity-60 uppercase tracking-tight">{{ currencyStore.activeCurrency?.code }}</span>
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent class="w-48 p-1">
+                      <DropdownMenuItem
+                        v-for="curr in currencyStore.availableCurrencies"
+                        :key="curr.id"
+                        class="cursor-pointer flex items-center gap-2.5 p-2 rounded-sm"
+                        @click="currencyStore.setCurrency(curr)"
+                      >
+                        <span class="font-mono text-xs font-bold text-muted-foreground w-4">{{ curr.symbol }}</span>
+                        <span class="flex-1 text-sm">{{ curr.code }}</span>
+                        <div v-if="currencyStore.activeCurrency?.id === curr.id" class="h-1.5 w-1.5 rounded-full bg-primary"></div>
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                </DropdownMenuGroup>
+
+                <DropdownMenuSeparator class="my-1" />
+                
                 <DropdownMenuItem
                   @click="handleLogout"
-                  class="text-destructive focus:text-destructive cursor-pointer"
+                  class="text-destructive focus:text-destructive cursor-pointer py-2 px-2.5 flex items-center font-medium"
                 >
-                  <LogOut class="mr-2 h-4 w-4" />
-                  {{ $t('common.logout') }}
+                  <LogOut class="mr-3 h-4 w-4" />
+                  <span class="text-sm">{{ $t('common.logout') }}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -409,39 +502,7 @@ onMounted(() => {
         </div>
 
         <div class="flex items-center gap-3">
-          <!-- Theme Toggle -->
-          <ModeToggle />
-
-          <!-- Language Switcher: Dropdown -->
-          <DropdownMenu>
-            <DropdownMenuTrigger as-child>
-              <Button variant="outline" size="sm" class="h-8 gap-2 px-3 text-sm font-medium border-muted-foreground/20 hover:border-primary/50 transition-colors">
-                <img
-                  :src="currentLocaleItem.flag"
-                  :alt="currentLocaleItem.name"
-                  class="h-3.5 w-5 rounded-sm object-cover shadow-[0_0_0_1px_rgba(0,0,0,0.10)]"
-                />
-                <span class="hidden sm:inline">{{ currentLocaleItem.nativeName }}</span>
-                <ChevronsUpDown class="h-3.5 w-3.5 opacity-50" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" class="w-44">
-              <DropdownMenuItem
-                v-for="lang in availableLocales"
-                :key="lang.code"
-                class="cursor-pointer gap-2"
-                @click="changeLanguage(lang.code as 'en' | 'kh')"
-              >
-                <img
-                  :src="lang.flag"
-                  :alt="lang.name"
-                  class="h-3.5 w-5 rounded-sm object-cover shadow-[0_0_0_1px_rgba(0,0,0,0.10)]"
-                />
-                <span class="flex-1">{{ lang.name }}</span>
-                <span v-if="locale === lang.code" class="text-primary text-xs font-bold">✓</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <!-- Removed Toggles (Moved to Sidebar Footer Dropdown) -->
         </div>
       </header>
 

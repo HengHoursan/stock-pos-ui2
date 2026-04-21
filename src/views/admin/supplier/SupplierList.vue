@@ -73,7 +73,7 @@ const supplierService = new SupplierService();
 const suppliers = ref<Supplier[]>([]);
 const loading = ref(true);
 const searchQuery = ref("");
-const statusFilter = ref<string | undefined>(undefined);
+const statusFilter = ref<string | null>(null);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -387,7 +387,7 @@ onMounted(() => {
                   size="sm"
                   @click="
                     searchQuery = '';
-                    statusFilter = undefined;
+                    statusFilter = null;
                   "
                   class="h-8"
                 >

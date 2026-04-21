@@ -5,7 +5,8 @@
     "logout": "Logout",
     "home": "Home",
     "noData": "No data available",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "logoutSuccess": "Logout successfully"
   },
   "layout": {
     "adminPanel": "Admin Panel",
@@ -14,7 +15,11 @@
     "stockDomain": "Stock",
     "inventoryDomain": "Inventory",
     "settingsDomain": "Settings",
-    "reportsDomain": "Reports & Analytics"
+    "reportsDomain": "Reports & Analytics",
+    "language": "Language",
+    "currency": "Currency",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode"
   },
   "menu": {
     "dashboard": "Dashboard",
@@ -139,6 +144,10 @@
     "confirmDelete": "Are you absolutely sure?",
     "confirmDeleteDesc": "This action cannot be undone. This will permanently delete the {module} and remove its data from our servers.",
     "noRecords": "No {module} found",
+    "noResults": "No results found.",
+    "selectAll": "All {module}",
+    "selectOption": "Select {module}",
+    "selectValue": "Select {module}",
     "generalInfo": "General Information",
     "systemInfo": "System Information",
     "image": "Image",
@@ -154,6 +163,7 @@
     "rowsPerPage": "Rows per page",
     "filterByStatus": "Filter by Status",
     "resetFilters": "Reset Filters",
+    "filterByDate": "Filter by Date",
     "filterByCategory": "Filter by Category",
     "filterByBrand": "Filter by Brand",
     "filterByUnit": "Filter by Unit",
@@ -198,6 +208,9 @@
     "currency": "Currency",
     "thousandSeparator": "Thousand Separator",
     "decimalSeparator": "Decimal Separator",
+    "exchangeRate": "Exchange Rate",
+    "isDefault": "Base",
+    "defaultCurrency": "System Default",
     "discountType": "Discount Type",
     "discountAmount": "Discount Amount",
     "startDate": "Start Date",
@@ -409,8 +422,11 @@
     "noDataToExport": "No data to export",
     "failedToLoad": "Failed to load {module} report",
     "totalRevenue": "Total Revenue",
+    "totalRevenueDesc": "Gross income from all sales sources.",
     "netSales": "Net Sales",
+    "netSalesDesc": "Revenue after deducting returns and discounts.",
     "totalReturns": "Total Returns",
+    "totalReturnsDesc": "Total value of items returned by customers.",
     "salesByCustomer": "Sales By Customer",
     "salesByCustomerDesc": "Detailed aggregate breakdown of customer purchases.",
     "invoicesCount": "Invoices Count",
@@ -418,6 +434,7 @@
     "totalCustomers": "Total {count} customer(s)",
     "totalExpenses": "Total Purchase Expenses",
     "totalExpensesDesc": "Total amount spent on confirmed purchase invoices.",
+    "totalExpensesPurchaseDesc": "Aggregated expenditure for all purchase transactions.",
     "purchasesBySupplier": "Purchases By Supplier",
     "purchasesBySupplierDesc": "Detailed aggregate breakdown of supplier purchases.",
     "totalSuppliers": "Total {count} supplier(s)",
@@ -451,6 +468,8 @@
     "customer": "Customer",
     "supplier": "Supplier",
     "alertQty": "Alert Qty",
-    "status": "Status"
+    "status": "Status",
+    "profitable": "Profitable",
+    "deficit": "Deficit"
   }
 }

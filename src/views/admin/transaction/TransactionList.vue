@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
-import { ref, onMounted, reactive, watch } from "vue";
+import { ref, onMounted, reactive, watch,computed } from "vue";
 import { useRouter } from "vue-router";
 
 import {
@@ -69,6 +69,7 @@ import type { Transaction, PaginationMeta } from "@/types";
 import { TransactionType } from "@/types";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
+import SearchableSelect from "@/components/SearchableSelect.vue";
 import { formatDateTime } from "@/utils/format";
 
 const router = useRouter();
@@ -80,8 +81,12 @@ const products = ref<any[]>([]); // Using any for simplicity as we only need id/
 
 const loading = ref(true);
 const searchQuery = ref("");
-const typeFilter = ref<string | undefined>(undefined);
-const productIdFilter = ref<string | undefined>(undefined);
+const typeFilter = ref<string | null>(null);
+const productIdFilter = ref<string | number | null>(null);
+
+const productOptions = computed(() =>
+  products.value.map((p) => ({ label: p.name, value: p.id })),
+);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -109,7 +114,7 @@ async function fetchTransactions() {
       payload.search = searchQuery.value.trim();
     }
 
-    const filters: Record<string, string> = {};
+    const filters: Record<string, any> = {};
     if (typeFilter.value && typeFilter.value !== "all") {
       filters.transactionType = typeFilter.value;
     }
@@ -301,17 +306,13 @@ onMounted(() => {
         </SelectContent>
       </Select>
 
-      <Select v-model="productIdFilter">
-        <SelectTrigger class="w-full sm:w-[220px]">
-          <SelectValue :placeholder="$t('crud.filterByProduct')" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{{ $t("modules.products") }}</SelectItem>
-          <SelectItem v-for="product in products" :key="product.id" :value="String(product.id)">
-            {{ product.name }}
-          </SelectItem>
-        </SelectContent>
-      </Select>
+      <SearchableSelect
+        v-model="productIdFilter"
+        :options="productOptions"
+        :placeholder="$t('crud.selectOption', { module: $t('modules.product') })"
+        :empty-message="$t('crud.noResults')"
+        class="w-full sm:w-[250px]"
+      />
     </div>
 
     <div class="rounded-md border bg-card overflow-hidden shadow-sm">
@@ -466,8 +467,8 @@ onMounted(() => {
                   size="sm"
                   @click="
                     searchQuery = '';
-                    typeFilter = undefined;
-                    productIdFilter = undefined;
+                    typeFilter = null;
+                    productIdFilter = null;
                   "
                   class="h-8"
                 >

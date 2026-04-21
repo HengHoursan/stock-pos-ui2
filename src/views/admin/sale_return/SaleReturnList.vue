@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
-import { ref, onMounted, reactive, watch } from "vue";
+import { ref, onMounted, reactive, watch, computed } from "vue";
 import { useRouter } from "vue-router";
-import { formatDateTime } from "@/utils/format";
+import { formatDateTime, formatCurrency } from "@/utils/format";
+import SearchableSelect from "@/components/SearchableSelect.vue";
 
 import {
   Table,
@@ -76,8 +77,11 @@ const records = ref<SaleReturn[]>([]);
 const customers = ref<Customer[]>([]);
 const loading = ref(true);
 const searchQuery = ref("");
-const statusFilter = ref<string | undefined>(undefined);
-const customerFilter = ref<string | undefined>(undefined);
+const statusFilter = ref<string | null>(null);
+const customerFilter = ref<string | number | null>(null);
+const customerOptions = computed(() => 
+  customers.value.map(c => ({ label: c.name, value: c.id }))
+);
 const dateRange = ref<{ start: string | null; end: string | null } | null>(null);
 
 const pagination = reactive<PaginationMeta>({
@@ -109,7 +113,7 @@ async function fetchData() {
     if (statusFilter.value && statusFilter.value !== "all") {
       payload.filter.status = statusFilter.value;
     }
-    if (customerFilter.value && customerFilter.value !== "all") {
+    if (customerFilter.value !== null && customerFilter.value !== "all") {
       payload.filter.customerId = customerFilter.value;
     }
     if (dateRange.value?.start) {
@@ -190,9 +194,7 @@ function handleSort(column: string) {
   fetchData();
 }
 
-function formatCurrency(val: number) {
-  return (val || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+
 
 function getStatusBadge(record: SaleReturn) {
   switch (Number(record.status)) {
@@ -239,20 +241,16 @@ onMounted(() => {
       <DateRangePicker 
         v-model="dateRange"
         class="w-full sm:w-[260px] shadow-sm"
-        placeholder="Filter by Date"
+        :placeholder="$t('crud.filterByDate')"
       />
 
-      <Select v-model="customerFilter">
-        <SelectTrigger class="w-full sm:w-[200px] bg-background/50 border-border/60 shadow-sm">
-          <SelectValue :placeholder="$t('fields.customerId')" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{{ $t("crud.all") }} {{ $t("fields.customerId") }}</SelectItem>
-          <SelectItem v-for="c in customers" :key="c.id" :value="String(c.id)">
-            {{ c.name }}
-          </SelectItem>
-        </SelectContent>
-      </Select>
+      <SearchableSelect
+        v-model="customerFilter"
+        :options="customerOptions"
+        :placeholder="$t('fields.customerId')"
+        :empty-message="$t('crud.noResults')"
+        class="w-full sm:w-[200px]"
+      />
 
       <Select v-model="statusFilter">
         <SelectTrigger class="w-full sm:w-[180px] bg-background/50 border-border/60 shadow-sm">
@@ -267,10 +265,10 @@ onMounted(() => {
       </Select>
 
       <Button 
-        v-if="searchQuery || (statusFilter && statusFilter !== 'all') || (customerFilter && customerFilter !== 'all') || dateRange"
+        v-if="searchQuery || statusFilter || customerFilter || dateRange"
         variant="ghost" 
         size="sm"
-        @click="searchQuery = ''; statusFilter = undefined; customerFilter = undefined; dateRange = null;"
+        @click="searchQuery = ''; statusFilter = null; customerFilter = null; dateRange = null;"
         class="h-9 px-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
       >
         <RefreshCw class="mr-2 h-4 w-4" />
@@ -365,7 +363,7 @@ onMounted(() => {
                   v-if="searchQuery || (statusFilter && statusFilter !== 'all') || (customerFilter && customerFilter !== 'all') || dateRange"
                   variant="outline"
                   size="sm"
-                  @click="searchQuery = ''; statusFilter = undefined; customerFilter = undefined; dateRange = null;"
+                  @click="searchQuery = ''; statusFilter = null; customerFilter = null; dateRange = null;"
                   class="h-8"
                 >
                   {{ $t('crud.resetFilters') }}

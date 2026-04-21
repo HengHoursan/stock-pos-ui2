@@ -6,6 +6,8 @@ export interface Currency {
   symbol: string;
   thousandSeparator: string;
   decimalSeparator: string;
+  exchangeRate: number;
+  isDefault: boolean;
   status: boolean;
   createdAt: string;
   updatedAt: string;
@@ -18,6 +20,8 @@ export interface CreateCurrencyRequest {
   symbol?: string;
   thousandSeparator?: string;
   decimalSeparator?: string;
+  exchangeRate?: number;
+  isDefault?: boolean;
   status?: boolean;
 }
 
