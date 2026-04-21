@@ -132,7 +132,7 @@ onMounted(() => {
             <div class="flex gap-4">
               <div>
                 <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Package class="h-3.5 w-3.5" />{{ $t('fields.totalLine') }}</p>
-                <p class="font-medium text-foreground">{{ record.totalLine }}</p>
+                <p class="font-medium text-foreground">{{ Math.trunc(record.totalLine || 0) }}</p>
               </div>
             </div>
             <div>
@@ -206,7 +206,7 @@ onMounted(() => {
                       </div>
                     </TableCell>
                     <TableCell class="text-right font-mono">{{ formatCurrency(item.totalPrice / item.quantity) }}</TableCell>
-                    <TableCell class="text-center font-medium">{{ item.quantity }}</TableCell>
+                    <TableCell class="text-center font-medium">{{ Math.trunc(item.quantity || 0) }}</TableCell>
                     <TableCell class="text-right font-mono font-semibold">{{ formatCurrency(item.totalPrice) }}</TableCell>
                   </TableRow>
                 </template>

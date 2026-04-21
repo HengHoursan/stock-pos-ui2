@@ -348,10 +348,10 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
                 <TableCell class="font-medium">{{ item.name }}</TableCell>
                 <TableCell>{{ item.code }}</TableCell>
                 <TableCell class="text-center font-bold text-destructive">
-                  {{ item.currentStock }}
+                  {{ Math.trunc(item.currentStock || 0) }}
                 </TableCell>
                 <TableCell class="text-center">{{
-                  item.alertQuantity
+                  Math.trunc(item.alertQuantity || 0)
                 }}</TableCell>
                 <TableCell class="text-right">
                   <span

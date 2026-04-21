@@ -256,7 +256,7 @@ onMounted(() => {
                 {{ formatDateTime(record.quotationDate) }}
               </TableCell>
               <TableCell class="text-center">
-                {{ record.totalLine }}
+                {{ Math.trunc(record.totalLine || 0) }}
               </TableCell>
               <TableCell class="text-right font-mono text-primary font-semibold">
                 {{ formatCurrency(record.totalPrice) }}

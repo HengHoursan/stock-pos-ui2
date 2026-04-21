@@ -172,7 +172,7 @@ onMounted(() => {
                       <div v-if="item.product?.code" class="text-xs text-muted-foreground mt-0.5">{{ item.product.code }}</div>
                     </TableCell>
                     <TableCell class="text-right font-mono">{{ formatCurrency(item.totalPrice / item.quantity) }}</TableCell>
-                    <TableCell class="text-center font-medium">{{ item.quantity }}</TableCell>
+                    <TableCell class="text-center font-medium">{{ Math.trunc(item.quantity || 0) }}</TableCell>
                     <TableCell class="text-right font-mono font-semibold">{{ formatCurrency(item.totalPrice) }}</TableCell>
                   </TableRow>
                 </template>

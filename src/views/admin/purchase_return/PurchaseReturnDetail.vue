@@ -173,7 +173,7 @@ onMounted(() => {
                       {{ item.product?.name || `Product ID ${item.productId}` }}
                       <div v-if="item.product?.code" class="text-xs text-muted-foreground mt-0.5">{{ item.product.code }}</div>
                     </TableCell>
-                    <TableCell class="text-right font-medium">{{ item.quantity }}</TableCell>
+                    <TableCell class="text-right font-medium">{{ Math.trunc(item.quantity || 0) }}</TableCell>
                     <TableCell class="text-right font-mono">{{ formatCurrency(item.unitPrice) }}</TableCell>
                     <TableCell class="text-right font-mono font-semibold">{{ formatCurrency(item.totalPrice) }}</TableCell>
                   </TableRow>

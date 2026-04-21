@@ -320,7 +320,7 @@ onMounted(() => {
                 {{ formatDateTime(record.returnDate) }}
               </TableCell>
               <TableCell class="text-center">
-                {{ record.totalLine }} {{ $t('fields.items') }}
+                {{ Math.trunc(record.totalLine || 0) }} {{ $t('fields.items') }}
               </TableCell>
               <TableCell class="text-right font-mono text-primary font-semibold">
                 {{ formatCurrency(record.totalPrice) }}

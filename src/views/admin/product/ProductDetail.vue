@@ -228,7 +228,7 @@ onMounted(() => {
                 <div class="flex items-center text-sm text-muted-foreground">
                   <AlertTriangle class="mr-2 h-4 w-4" />Alert Quantity
                 </div>
-                <p class="font-medium text-base">{{ product.alertQuantity }}</p>
+                <p class="font-medium text-base">{{ Math.trunc(product.alertQuantity || 0) }}</p>
               </div>
 
               <div class="space-y-1">

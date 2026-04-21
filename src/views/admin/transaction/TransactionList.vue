@@ -386,7 +386,7 @@ onMounted(() => {
                 {{ transaction.product?.name || "-" }}
               </TableCell>
               <TableCell class="text-right text-muted-foreground font-mono text-base">
-                {{ Number(transaction.beginningStock) }}
+                {{ Math.trunc(transaction.beginningStock || 0) }}
               </TableCell>
               <TableCell
                 class="text-right font-bold font-mono text-base"
@@ -402,10 +402,10 @@ onMounted(() => {
                   transaction.transactionType === TransactionType.OUT
                     ? "-"
                     : "+"
-                }}{{ Number(transaction.quantity) }}
+                }}{{ Math.trunc(transaction.quantity || 0) }}
               </TableCell>
               <TableCell class="text-right font-bold text-foreground font-mono text-base">
-                {{ Number(transaction.afterStock) }}
+                {{ Math.trunc(transaction.afterStock || 0) }}
               </TableCell>
               <TableCell class="text-right">
                 <DropdownMenu>

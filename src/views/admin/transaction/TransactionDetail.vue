@@ -99,11 +99,11 @@ onMounted(() => {
                     <div class="grid grid-cols-1 gap-3 mt-4">
                         <div class="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-muted-foreground/5 text-center">
                             <span class="text-xs font-bold text-muted-foreground uppercase tracking-wider">{{ $t('fields.beginningStock') }}</span>
-                            <span class="font-mono font-bold text-lg leading-none mt-1">{{ Number(transaction.beginningStock) }}</span>
+                            <span class="font-mono font-bold text-lg leading-none mt-1">{{ Math.trunc(transaction.beginningStock || 0) }}</span>
                         </div>
                         <div class="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/20 text-center">
                             <span class="text-xs font-bold text-primary uppercase tracking-wider">{{ $t('fields.afterStock') }}</span>
-                            <span class="font-mono font-bold text-lg text-primary leading-none mt-1">{{ Number(transaction.afterStock) }}</span>
+                            <span class="font-mono font-bold text-lg text-primary leading-none mt-1">{{ Math.trunc(transaction.afterStock || 0) }}</span>
                         </div>
                     </div>
                 </div>
@@ -154,7 +154,7 @@ onMounted(() => {
                     <div class="flex items-baseline gap-2">
                         <component :is="getTypeInfo(transaction.transactionType).icon" class="h-5 w-5" :class="transaction.transactionType === TransactionType.IN ? 'text-green-600' : 'text-red-600'" />
                         <span class="text-4xl font-mono font-black" :class="transaction.transactionType === TransactionType.IN ? 'text-green-600' : 'text-red-600'">
-                            {{ transaction.transactionType === TransactionType.OUT ? '-' : '+' }}{{ Number(transaction.quantity) }}
+                            {{ transaction.transactionType === TransactionType.OUT ? '-' : '+' }}{{ Math.trunc(transaction.quantity || 0) }}
                         </span>
                     </div>
                  </div>
