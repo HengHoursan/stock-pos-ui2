@@ -84,8 +84,8 @@ onMounted(async () => {
         
         const mappedDetails = (oRes.data.details || []).map(d => ({
           productId: d.productId,
-          quantity: d.quantity,
-          price: d.totalPrice / d.quantity,
+          quantity: Number(d.quantity),
+          price: Number(d.totalPrice) / Number(d.quantity),
           saleOrderId: oRes.data.id, // Explicitly use parent order ID
           saleOrderDetailId: d.id
         }));
@@ -104,13 +104,13 @@ const formSchema = toTypedSchema(
     code: z.string().max(50).optional().nullable(),
     customerId: z.number().min(1, t('validation.required', { field: t('fields.customerId') })),
     invoiceDate: z.string().min(1, t('validation.required', { field: t('fields.invoiceDate') })),
-    paidAmount: z.number().min(0, t('validation.paidAmountNegative')).optional(),
+    paidAmount: z.coerce.number().min(0, t('validation.paidAmountNegative')).optional(),
     description: z.string().optional().nullable(),
     details: z.array(
       z.object({
         productId: z.number().min(1, t('validation.required', { field: t('modules.product') })),
-        quantity: z.number().min(0.01, t('validation.min', { field: t('fields.quantity'), min: '0.01' })),
-        price: z.number().min(0, t('validation.min', { field: t('fields.price'), min: '0' })),
+        quantity: z.coerce.number().min(0.01, t('validation.min', { field: t('fields.quantity'), min: '0.01' })),
+        price: z.coerce.number().min(0, t('validation.min', { field: t('fields.price'), min: '0' })),
         saleOrderId: z.number().optional().nullable(),
         saleOrderDetailId: z.number().optional().nullable(),
       })
@@ -193,7 +193,7 @@ const onSubmit = form.handleSubmit(async (values) => {
       details: values.details.map((d: any) => ({
         productId: d.productId,
         quantity: Number(d.quantity),
-        totalPrice: Number(d.quantity) * Number(d.price),
+        totalPrice: Math.round(Number(d.quantity) * Number(d.price) * 100) / 100,
         saleOrderId: d.saleOrderId,
         saleOrderDetailId: d.saleOrderDetailId
       }))
@@ -320,7 +320,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{{ currencySymbol }}</span>
                     <Input 
                       type="number" 
-                      step="0.01" 
+                      step="any" 
                       min="0" 
                       :name="componentField.name"
                       @blur="componentField.onBlur"
@@ -398,7 +398,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                     <FormField v-slot="{ componentField }" :name="`details[${index}].price`">
                       <FormItem class="mb-0">
                         <FormControl>
-                          <Input type="number" step="0.01" min="0" class="text-right" v-bind="componentField" />
+                          <Input type="number" step="any" min="0" class="text-right" v-bind="componentField" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -408,7 +408,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                     <FormField v-slot="{ componentField }" :name="`details[${index}].quantity`">
                       <FormItem class="mb-0">
                         <FormControl>
-                          <Input type="number" step="0.01" min="0.01" class="text-right" v-bind="componentField" />
+                          <Input type="number" step="any" min="0.01" class="text-right" v-bind="componentField" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -439,3 +439,4 @@ const onSubmit = form.handleSubmit(async (values) => {
     </form>
   </div>
 </template>
+
