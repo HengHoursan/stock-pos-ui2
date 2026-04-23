@@ -58,9 +58,11 @@ import {
   ArrowUpDown,
   RefreshCw,
   Loader2,
-  FileText
+  FileText,
+  ArrowRightCircle
 } from "lucide-vue-next";
 import DateRangePicker from "@/components/DateRangePicker.vue";
+import CurrencyToggle from "@/components/CurrencyToggle.vue";
 import { SaleOrderService } from "@/services/sale_order/sale_order.service";
 import { CustomerService } from "@/services/customer/customer.service";
 import type { SaleOrder, PaginationMeta, Customer } from "@/types";
@@ -219,6 +221,7 @@ onMounted(() => {
         {{ $t("menu.saleOrders") }}
       </h2>
       <div class="flex items-center gap-2">
+        <CurrencyToggle />
         <Button variant="outline" size="icon" @click="fetchData" :disabled="loading">
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
@@ -346,6 +349,13 @@ onMounted(() => {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem @click="router.push(`/admin/sale-orders/${record.id}`)" class="cursor-pointer">
                       <Eye class="mr-2 h-4 w-4 opacity-70" />{{ $t("crud.viewBtn") }}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      v-if="record.status !== OrderStatus.COMPLETED" 
+                      @click="router.push(`/admin/sale-invoices/create?orderId=${record.id}`)" 
+                      class="cursor-pointer text-primary"
+                    >
+                      <ArrowRightCircle class="mr-2 h-4 w-4 opacity-70" />{{ $t("actions.generateInvoice") }}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem class="text-destructive focus:text-destructive cursor-pointer font-medium" @click="openDeleteDialog(record.id)">

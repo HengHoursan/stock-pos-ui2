@@ -59,7 +59,8 @@ import {
   ArrowUpDown,
   RefreshCw,
   Loader2,
-  FileText
+  FileText,
+  ArrowRightCircle
 } from "lucide-vue-next";
 import DateRangePicker from "@/components/DateRangePicker.vue";
 import { SaleQuotationService } from "@/services/sale_quotation/sale_quotation.service";
@@ -343,6 +344,13 @@ onMounted(() => {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem @click="router.push(`/admin/sale-quotations/${record.id}`)" class="cursor-pointer">
                       <Eye class="mr-2 h-4 w-4 opacity-70" />{{ $t("crud.viewBtn") }}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      v-if="record.status === QuotationStatus.ACCEPTED" 
+                      @click="router.push(`/admin/sale-orders/create?quotationId=${record.id}`)" 
+                      class="cursor-pointer text-primary"
+                    >
+                      <ArrowRightCircle class="mr-2 h-4 w-4 opacity-70" />{{ $t("actions.generateOrder") }}
                     </DropdownMenuItem>
                     <DropdownMenuItem v-if="record.status === QuotationStatus.DRAFT" @click="router.push(`/admin/sale-quotations/${record.id}/edit`)" class="cursor-pointer">
                       {{ $t("crud.editBtn") }}

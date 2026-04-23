@@ -4,6 +4,7 @@ const { t } = useI18n();
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
+import CurrencyToggle from "@/components/CurrencyToggle.vue";
 import {
   Card,
   CardContent,
@@ -23,7 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, FileText, Loader2, Package, Calendar, Users, CreditCard, Ban } from "lucide-vue-next";
 import { SaleInvoiceService } from "@/services/sale_invoice/sale_invoice.service";
 import type { SaleInvoice } from "@/types";
-import { InvoiceStatus, PaymentMethod } from "@/types/enums";
+import { InvoiceStatus } from "@/types/enums";
 import { toast } from "vue-sonner";
 
 const route = useRoute();
@@ -42,14 +43,6 @@ function getStatusBadge(rec: SaleInvoice) {
   }
 }
 
-function getPaymentMethod(pm: PaymentMethod) {
-  switch (Number(pm)) {
-    case PaymentMethod.CASH: return t('fields.paymentMethodLabels.cash');
-    case PaymentMethod.TRANSFER: return t('fields.paymentMethodLabels.transfer');
-    case PaymentMethod.OTHER: return t('fields.paymentMethodLabels.other');
-    default: return 'N/A';
-  }
-}
 
 async function fetchDetail() {
   const id = Number(route.params.id);
@@ -96,7 +89,8 @@ onMounted(() => {
           </Badge>
         </div>
       </div>
-      <div>
+      <div class="flex items-center gap-2">
+        <CurrencyToggle />
         <Button v-if="record && !record.isCancel" variant="outline" class="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/20">
           <Ban class="h-4 w-4 mr-2" /> {{ $t('actions.cancelInvoice') }}
         </Button>
@@ -162,10 +156,6 @@ onMounted(() => {
               <span class="font-mono font-bold" :class="(record.totalPrice - record.paidAmount) > 0 ? 'text-destructive' : 'text-success'">
                 {{ formatCurrency(Math.max(0, record.totalPrice - record.paidAmount)) }}
               </span>
-            </div>
-            <div class="pt-2 border-t">
-              <span class="text-muted-foreground block mb-1">{{ $t('fields.paymentMethod') }}:</span>
-              <Badge variant="outline">{{ getPaymentMethod(record.paymentMethod) }}</Badge>
             </div>
           </CardContent>
         </Card>

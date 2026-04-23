@@ -4,6 +4,7 @@ const { t } = useI18n();
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
+import CurrencyToggle from "@/components/CurrencyToggle.vue";
 import {
   Card,
   CardContent,
@@ -87,6 +88,7 @@ onMounted(() => {
         </div>
       </div>
       <div class="flex items-center gap-2">
+        <CurrencyToggle />
         <Button v-if="record && record.status !== OrderStatus.COMPLETED" @click="router.push(`/admin/sale-invoices/create?orderId=${record.id}`)" class="text-primary-foreground">
           {{ $t('actions.generateInvoice') }} <ArrowRightCircle class="ml-2 h-4 w-4" />
         </Button>

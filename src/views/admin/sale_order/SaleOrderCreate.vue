@@ -2,9 +2,10 @@
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { ref, onMounted, computed } from "vue";
-import { useRouter } from "vue-router";
-import { toLocalISOString } from "@/utils/format";
+import { useRoute, useRouter } from "vue-router";
+import { toLocalISOString, formatCurrency } from "@/utils/format";
 import SearchableSelect from "@/components/SearchableSelect.vue";
+import CurrencyToggle from "@/components/CurrencyToggle.vue";
 
 import { useForm, useFieldArray } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
@@ -35,23 +36,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { ChevronLeft, Loader2, FileText, Plus, Trash2, Users } from "lucide-vue-next";
+import { ChevronLeft, Loader2, FileText, Plus, Trash2} from "lucide-vue-next";
 
 import { SaleOrderService } from "@/services/sale_order/sale_order.service";
+import { SaleQuotationService } from "@/services/sale_quotation/sale_quotation.service";
 import { CustomerService } from "@/services/customer/customer.service";
 import { ProductService } from "@/services/product/product.service";
 import type { Product, Customer } from "@/types";
 import { toast } from "vue-sonner";
 
+
+const route = useRoute();
 const router = useRouter();
 const soService = new SaleOrderService();
+const sqService = new SaleQuotationService();
 const customerService = new CustomerService();
 const productService = new ProductService();
 
@@ -75,6 +73,21 @@ onMounted(async () => {
     ]);
     if (prodRes.success && prodRes.data) products.value = prodRes.data;
     if (custRes.success && custRes.data) customers.value = custRes.data;
+    // Load from Quotation
+    const quotationId = Number(route.query.quotationId);
+    if (quotationId) {
+      const qRes = await sqService.getDetail(quotationId);
+      if (qRes.success && qRes.data) {
+        form.setFieldValue("customerId", qRes.data.customerId);
+        const mappedDetails = (qRes.data.details || []).map(d => ({
+          productId: d.productId,
+          quantity: d.quantity,
+          price: d.totalPrice / d.quantity
+        }));
+        form.setFieldValue("details", mappedDetails as any);
+        toast.info(t('validation.loadedFromSource', { source: t('modules.saleQuotation') }));
+      }
+    }
   } catch (error) {
     console.error("Failed to fetch dependencies", error);
   }
@@ -160,14 +173,17 @@ const onSubmit = form.handleSubmit(async (values) => {
 
 <template>
   <div class="space-y-4">
-    <div class="flex items-center gap-4">
-      <Button variant="outline" size="icon" @click="router.back()">
-        <ChevronLeft class="h-4 w-4" />
-      </Button>
-      <div>
-        <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.createBtn') }} {{ $t('modules.saleOrder') }}</h2>
-        <p class="text-muted-foreground text-sm">{{ $t('fields.saleOrderInfo') }}</p>
+    <div class="flex items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <Button variant="outline" size="icon" @click="router.back()">
+          <ChevronLeft class="h-4 w-4" />
+        </Button>
+        <div>
+          <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.createBtn') }} {{ $t('modules.saleOrder') }}</h2>
+          <p class="text-muted-foreground text-sm">{{ $t('fields.saleOrderInfo') }}</p>
+        </div>
       </div>
+      <CurrencyToggle />
     </div>
 
     <form @submit="onSubmit" class="space-y-6">
@@ -302,7 +318,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                   </FormField>
                 </TableCell>
                 <TableCell class="text-right font-mono font-medium">
-                  {{ (((form.values.details || [])[index]?.quantity || 0) * ((form.values.details || [])[index]?.price || 0)).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}
+                  {{ formatCurrency(((form.values.details || [])[index]?.quantity || 0) * ((form.values.details || [])[index]?.price || 0)) }}
                 </TableCell>
                 <TableCell>
                   <Button type="button" variant="ghost" size="icon" class="text-destructive hover:bg-destructive/10" @click="remove(index)">
@@ -317,7 +333,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             <div class="w-full max-w-sm space-y-3">
               <div class="flex justify-between items-center text-lg font-bold">
                 <span>{{ $t('fields.grandTotal') }}:</span>
-                <span class="text-primary font-mono">${{ grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2}) }}</span>
+                <span class="text-primary font-mono">{{ formatCurrency(grandTotal) }}</span>
               </div>
             </div>
           </div>

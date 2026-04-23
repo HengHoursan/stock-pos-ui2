@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, FileText, Loader2, Package, Calendar, Users } from "lucide-vue-next";
+import { ChevronLeft, FileText, Loader2, Package, Calendar, Users, ArrowRightCircle } from "lucide-vue-next";
 import { SaleQuotationService } from "@/services/sale_quotation/sale_quotation.service";
 import type { SaleQuotation } from "@/types";
 import { QuotationStatus } from "@/types/enums";
@@ -88,7 +88,10 @@ onMounted(() => {
           </Badge>
         </div>
       </div>
-      <div>
+      <div class="flex items-center gap-2">
+        <Button v-if="record && record.status === QuotationStatus.ACCEPTED" @click="router.push(`/admin/sale-orders/create?quotationId=${record.id}`)" class="text-primary-foreground">
+          {{ $t('actions.generateOrder') }} <ArrowRightCircle class="ml-2 h-4 w-4" />
+        </Button>
         <Button v-if="record && record.status === QuotationStatus.DRAFT" @click="router.push(`/admin/sale-quotations/${record.id}/edit`)" variant="outline">
           {{ $t('crud.editBtn') }}
         </Button>

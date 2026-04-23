@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed,watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { toLocalISOString } from "@/utils/format";
+import { toLocalISOString, formatCurrency } from "@/utils/format";
 import SearchableSelect from "@/components/SearchableSelect.vue";
+import CurrencyToggle from "@/components/CurrencyToggle.vue";
+import { useCurrencyStore } from "@/stores/currency";
 
 import { useForm, useFieldArray } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
@@ -35,13 +37,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ChevronLeft, Loader2, FileText, Plus, Trash2, CreditCard } from "lucide-vue-next";
 
 import { SaleInvoiceService } from "@/services/sale_invoice/sale_invoice.service";
@@ -49,7 +44,6 @@ import { SaleOrderService } from "@/services/sale_order/sale_order.service";
 import { CustomerService } from "@/services/customer/customer.service";
 import { ProductService } from "@/services/product/product.service";
 import type { Product, Customer } from "@/types";
-import { PaymentMethod } from "@/types/enums";
 import { toast } from "vue-sonner";
 
 const route = useRoute();
@@ -58,6 +52,7 @@ const siService = new SaleInvoiceService();
 const soService = new SaleOrderService();
 const customerService = new CustomerService();
 const productService = new ProductService();
+const currencyStore = useCurrencyStore();
 
 const submitting = ref(false);
 const products = ref<Product[]>([]);
@@ -91,11 +86,11 @@ onMounted(async () => {
           productId: d.productId,
           quantity: d.quantity,
           price: d.totalPrice / d.quantity,
-          saleOrderId: d.saleOrderId, // or d.id if saleOrderId is the parent entity ID
+          saleOrderId: oRes.data.id, // Explicitly use parent order ID
           saleOrderDetailId: d.id
         }));
         
-        form.setFieldValue("details" as any, mappedDetails);
+        form.setFieldValue("details", mappedDetails as any);
         toast.info(t('validation.loadedFromSource', { source: t('modules.saleOrder') }));
       }
     }
@@ -110,7 +105,6 @@ const formSchema = toTypedSchema(
     customerId: z.number().min(1, t('validation.required', { field: t('fields.customerId') })),
     invoiceDate: z.string().min(1, t('validation.required', { field: t('fields.invoiceDate') })),
     paidAmount: z.number().min(0, t('validation.paidAmountNegative')).optional(),
-    paymentMethod: z.number().optional(),
     description: z.string().optional().nullable(),
     details: z.array(
       z.object({
@@ -131,7 +125,6 @@ const form = useForm({
     customerId: 0,
     invoiceDate: toLocalISOString(new Date()),
     paidAmount: 0,
-    paymentMethod: PaymentMethod.CASH,
     description: "",
     details: [],
   },
@@ -158,6 +151,36 @@ const grandTotal = computed(() => {
   }, 0) || 0;
 });
 
+const currencySymbol = computed(() => currencyStore.activeCurrency?.symbol ?? '$');
+const localPaidAmount = ref(0);
+
+// Watch for manual local amount changes
+watch(localPaidAmount, (val) => {
+  const rate = currencyStore.activeCurrency?.exchangeRate || 1;
+  const inUsd = val === 0 ? 0 : (val / rate);
+  
+  if (Math.abs((form.values.paidAmount || 0) - inUsd) > 0.001) {
+    form.setFieldValue('paidAmount', inUsd);
+  }
+});
+
+// Watch for base currency changes (e.g. from loading from source)
+watch(() => form.values.paidAmount, (newVal) => {
+  const rate = currencyStore.activeCurrency?.exchangeRate || 1;
+  const expectedLocal = Number(((newVal || 0) * rate).toFixed(2));
+  if (Math.abs(localPaidAmount.value - expectedLocal) > 0.01) {
+    localPaidAmount.value = expectedLocal;
+  }
+});
+
+// Watch for active currency toggle
+watch(() => currencyStore.activeCurrency, (newCurrency) => {
+  if (newCurrency) {
+    const baseAmount = form.values.paidAmount || 0;
+    localPaidAmount.value = Number((baseAmount * newCurrency.exchangeRate).toFixed(2));
+  }
+});
+
 const onSubmit = form.handleSubmit(async (values) => {
   submitting.value = true;
   try {
@@ -166,7 +189,6 @@ const onSubmit = form.handleSubmit(async (values) => {
       customerId: values.customerId,
       invoiceDate: new Date(values.invoiceDate).toISOString(),
       paidAmount: values.paidAmount,
-      paymentMethod: values.paymentMethod,
       description: values.description,
       details: values.details.map((d: any) => ({
         productId: d.productId,
@@ -194,17 +216,20 @@ const onSubmit = form.handleSubmit(async (values) => {
 
 <template>
   <div class="space-y-4">
-    <div class="flex items-center gap-4">
-      <Button variant="outline" size="icon" @click="router.back()">
-        <ChevronLeft class="h-4 w-4" />
-      </Button>
-      <div>
-        <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.createBtn') }} {{ $t('modules.saleInvoice') }}</h2>
-        <p class="text-muted-foreground text-sm flex items-center mt-1">
-          <CreditCard class="w-4 h-4 mr-1.5 opacity-50"/> 
-          {{ $t('fields.saleInvoiceStockDeductInfo') }}
-        </p>
+    <div class="flex items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <Button variant="outline" size="icon" @click="router.back()">
+          <ChevronLeft class="h-4 w-4" />
+        </Button>
+        <div>
+          <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.createBtn') }} {{ $t('modules.saleInvoice') }}</h2>
+          <p class="text-muted-foreground text-sm flex items-center mt-1">
+            <CreditCard class="w-4 h-4 mr-1.5 opacity-50"/> 
+            {{ $t('fields.saleInvoiceStockDeductInfo') }}
+          </p>
+        </div>
       </div>
+      <CurrencyToggle />
     </div>
 
     <form @submit="onSubmit">
@@ -282,7 +307,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               <div class="flex justify-between items-center mb-1">
                 <span class="text-muted-foreground">{{ $t('fields.totalPrice') }}:</span>
                 <span class="font-mono font-bold text-foreground">
-                  ${{ grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2}) }}
+                  {{ formatCurrency(grandTotal) }}
                 </span>
               </div>
             </div>
@@ -291,38 +316,29 @@ const onSubmit = form.handleSubmit(async (values) => {
               <FormItem>
                 <FormLabel>{{ $t('fields.paidAmount') }}</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.01" min="0" v-bind="componentField" />
+                  <div class="relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{{ currencySymbol }}</span>
+                    <Input 
+                      type="number" 
+                      step="0.01" 
+                      min="0" 
+                      :name="componentField.name"
+                      @blur="componentField.onBlur"
+                      :model-value="localPaidAmount"
+                      @update:model-value="(val) => localPaidAmount = Number(val)"
+                      class="pl-9 font-mono font-bold text-lg text-success" 
+                    />
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             </FormField>
 
-            <FormField v-slot="{ value, handleChange }" name="paymentMethod">
-              <FormItem>
-                <FormLabel>{{ $t('fields.paymentMethod') }}</FormLabel>
-                <Select
-                  :model-value="value ? String(value) : undefined"
-                  @update:model-value="(v) => handleChange(Number(v))"
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue :placeholder="$t('fields.selectOption')" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem :value="String(PaymentMethod.CASH)">{{ $t('fields.paymentMethodLabels.cash') }}</SelectItem>
-                    <SelectItem :value="String(PaymentMethod.TRANSFER)">{{ $t('fields.paymentMethodLabels.transfer') }}</SelectItem>
-                    <SelectItem :value="String(PaymentMethod.OTHER)">{{ $t('fields.paymentMethodLabels.other') }}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            </FormField>
 
             <div class="flex justify-between items-center pt-2 text-sm text-muted-foreground border-t mt-4">
               <span>{{ $t('fields.balanceDue') }}:</span>
               <span class="font-mono" :class="(grandTotal - (form.values.paidAmount || 0)) > 0 ? 'text-destructive font-bold' : 'text-success'">
-                ${{ Math.max(0, grandTotal - (form.values.paidAmount || 0)).toLocaleString(undefined, {minimumFractionDigits: 2}) }}
+                {{ formatCurrency(Math.max(0, grandTotal - (form.values.paidAmount || 0))) }}
               </span>
             </div>
 
@@ -399,7 +415,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                     </FormField>
                   </TableCell>
                   <TableCell class="text-right font-mono font-medium">
-                    {{ (((form.values.details || [])[index]?.quantity || 0) * ((form.values.details || [])[index]?.price || 0)).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}
+                    {{ formatCurrency(((form.values.details || [])[index]?.quantity || 0) * ((form.values.details || [])[index]?.price || 0)) }}
                   </TableCell>
                   <TableCell>
                     <Button type="button" variant="ghost" size="icon" class="text-destructive hover:bg-destructive/10" @click="remove(index)">

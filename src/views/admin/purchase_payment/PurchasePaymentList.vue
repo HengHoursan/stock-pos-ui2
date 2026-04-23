@@ -60,6 +60,7 @@ import {
   RefreshCw,
   Loader2,
   CreditCard,
+  Pencil,
 } from "lucide-vue-next";
 import DateRangePicker from "@/components/DateRangePicker.vue";
 import { PurchasePaymentService } from "@/services/purchase_payment/purchase_payment.service";
@@ -289,25 +290,7 @@ onMounted(() => {
         class="w-full sm:w-[200px]"
       />
 
-      <Select v-model="methodFilter">
-        <SelectTrigger
-          class="w-full sm:w-[180px] bg-background/50 border-border/60 shadow-sm"
-        >
-          <SelectValue :placeholder="$t('fields.paymentMethod')" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{{ $t("crud.all") }}</SelectItem>
-          <SelectItem :value="String(PaymentMethod.CASH)">{{
-            $t("fields.paymentMethodLabels.cash")
-          }}</SelectItem>
-          <SelectItem :value="String(PaymentMethod.TRANSFER)">{{
-            $t("fields.paymentMethodLabels.transfer")
-          }}</SelectItem>
-          <SelectItem :value="String(PaymentMethod.OTHER)">{{
-            $t("fields.paymentMethodLabels.other")
-          }}</SelectItem>
-        </SelectContent>
-      </Select>
+
 
       <Button
         v-if="
@@ -349,9 +332,6 @@ onMounted(() => {
               </Button>
             </TableHead>
             <TableHead class="text-right">{{
-              $t("fields.paymentMethod")
-            }}</TableHead>
-            <TableHead class="text-right">{{
               $t("fields.paidAmount")
             }}</TableHead>
             <TableHead class="text-right">{{ $t("crud.actions") }}</TableHead>
@@ -381,23 +361,22 @@ onMounted(() => {
                 </code>
               </TableCell>
               <TableCell class="font-medium">
-                {{
-                  record.purchaseInvoice?.code ||
-                  `Invoice ID ${record.purchaseInvoiceId}`
-                }}
+                <template v-if="record.details && record.details.length > 0">
+                  <div class="flex flex-wrap gap-1">
+                    <Badge v-for="d in record.details" :key="d.id" variant="secondary" class="text-xs font-mono font-bold">
+                      {{ d.purchaseInvoice?.code || `INV-${d.purchaseInvoiceId}` }}
+                    </Badge>
+                  </div>
+                </template>
+                <span v-else class="text-muted-foreground italic text-xs italic">N/A</span>
               </TableCell>
               <TableCell class="text-foreground/90">
                 {{ formatDateTime(record.paymentDate) }}
               </TableCell>
-              <TableCell class="text-right">
-                <Badge variant="outline" class="font-medium">
-                  {{ getPaymentMethodLabel(record.paymentMethod) }}
-                </Badge>
-              </TableCell>
               <TableCell
                 class="text-right font-mono text-success font-semibold"
               >
-                + {{ formatCurrency(record.amount) }}
+                + {{ formatCurrency(record.paidAmount) }}
               </TableCell>
               <TableCell class="text-right">
                 <DropdownMenu>
@@ -435,7 +414,7 @@ onMounted(() => {
                       "
                       class="cursor-pointer"
                     >
-                      {{ $t("crud.editBtn") }}
+                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{ $t("crud.editBtn") }}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem

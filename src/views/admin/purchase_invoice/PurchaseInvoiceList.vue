@@ -202,6 +202,7 @@ function getStatusBadge(record: PurchaseInvoice) {
   if (record.isCancel) return { variant: 'destructive', label: t('fields.statusLabels.cancelled') };
   switch(Number(record.status)) {
     case InvoiceStatus.DRAFT: return { variant: 'secondary', label: t('fields.statusLabels.draft') };
+    case 2: return { variant: 'primary', label: t('fields.statusLabels.confirmed') }; // CONFIRMED
     case InvoiceStatus.COMPLETED: return { variant: 'success', label: t('fields.statusLabels.completed') };
     default: return { variant: 'outline', label: t('crud.all') };
   }
@@ -261,6 +262,7 @@ onMounted(() => {
         <SelectContent>
           <SelectItem value="all">{{ $t("crud.allStatus") }}</SelectItem>
           <SelectItem :value="String(InvoiceStatus.DRAFT)">{{ $t("fields.statusLabels.draft") }}</SelectItem>
+          <SelectItem value="2">{{ $t("fields.statusLabels.confirmed") }}</SelectItem>
           <SelectItem :value="String(InvoiceStatus.COMPLETED)">{{ $t("fields.statusLabels.completed") }}</SelectItem>
         </SelectContent>
       </Select>

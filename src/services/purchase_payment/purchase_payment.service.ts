@@ -13,19 +13,27 @@ export class PurchasePaymentService extends BaseService {
     return this.post<ApiResponse<PaginationResponse<PurchasePayment>>>("/purchase-payments/list", pagination);
   }
 
+  async getAll(): Promise<ApiResponse<PurchasePayment[]>> {
+    return this.post<ApiResponse<PurchasePayment[]>>("/purchase-payments/all", {});
+  }
+
   async getDetail(id: number): Promise<ApiResponse<PurchasePayment>> {
     return this.post<ApiResponse<PurchasePayment>>("/purchase-payments/detail", { id });
   }
 
-  async create(payload: CreatePurchasePaymentRequest): Promise<ApiResponse<null>> {
-    return this.post<ApiResponse<null>>("/purchase-payments/create", payload);
+  async create(payload: CreatePurchasePaymentRequest): Promise<ApiResponse<PurchasePayment>> {
+    return this.post<ApiResponse<PurchasePayment>>("/purchase-payments/create", payload);
   }
 
-  async update(payload: UpdatePurchasePaymentRequest): Promise<ApiResponse<null>> {
-    return this.post<ApiResponse<null>>("/purchase-payments/update", payload);
+  async update(payload: UpdatePurchasePaymentRequest): Promise<ApiResponse<PurchasePayment>> {
+    return this.post<ApiResponse<PurchasePayment>>("/purchase-payments/update", payload);
   }
 
-  async softDelete(id: number): Promise<ApiResponse<null>> {
-    return this.post<ApiResponse<null>>("/purchase-payments/soft-delete", { id });
+  async cancel(id: number): Promise<ApiResponse<PurchasePayment>> {
+    return this.post<ApiResponse<PurchasePayment>>("/purchase-payments/cancel", { id });
+  }
+
+  async forceDelete(id: number): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/purchase-payments/force-delete", { id });
   }
 }

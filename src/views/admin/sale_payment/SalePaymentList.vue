@@ -59,9 +59,11 @@ import {
   ArrowUpDown,
   RefreshCw,
   Loader2,
-  CreditCard
+  CreditCard,
+  Pencil
 } from "lucide-vue-next";
 import DateRangePicker from "@/components/DateRangePicker.vue";
+import CurrencyToggle from "@/components/CurrencyToggle.vue";
 import { SalePaymentService } from "@/services/sale_payment/sale_payment.service";
 import { CustomerService } from "@/services/customer/customer.service";
 import type { SalePayment, PaginationMeta, Customer } from "@/types";
@@ -218,6 +220,7 @@ onMounted(() => {
         {{ $t("menu.salePayments") }}
       </h2>
       <div class="flex items-center gap-2">
+        <CurrencyToggle />
         <Button variant="outline" size="icon" @click="fetchData" :disabled="loading">
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
@@ -252,17 +255,7 @@ onMounted(() => {
         class="w-full sm:w-[200px]"
       />
 
-      <Select v-model="methodFilter">
-        <SelectTrigger class="w-full sm:w-[180px] bg-background/50 border-border/60 shadow-sm">
-          <SelectValue :placeholder="$t('fields.paymentMethod')" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">{{ $t("crud.all") }}</SelectItem>
-          <SelectItem :value="String(PaymentMethod.CASH)">{{ $t("fields.paymentMethodLabels.cash") }}</SelectItem>
-          <SelectItem :value="String(PaymentMethod.TRANSFER)">{{ $t("fields.paymentMethodLabels.transfer") }}</SelectItem>
-          <SelectItem :value="String(PaymentMethod.OTHER)">{{ $t("fields.paymentMethodLabels.other") }}</SelectItem>
-        </SelectContent>
-      </Select>
+
 
       <Button 
         v-if="searchQuery || (methodFilter && methodFilter !== 'all') || (customerFilter && customerFilter !== 'all') || dateRange"
@@ -288,7 +281,6 @@ onMounted(() => {
                 {{ $t("fields.transactionDate") }}<ArrowUpDown class="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
-            <TableHead class="text-right">{{ $t("fields.paymentMethod") }}</TableHead>
             <TableHead class="text-right">{{ $t("fields.paidAmount") }}</TableHead>
             <TableHead class="text-right">{{ $t("crud.actions") }}</TableHead>
           </TableRow>
@@ -313,18 +305,20 @@ onMounted(() => {
                 </code>
               </TableCell>
               <TableCell class="font-medium">
-                {{ record.saleInvoice?.code || `Invoice ID ${record.saleInvoiceId}` }}
+                <template v-if="record.details && record.details.length > 0">
+                  <div class="flex flex-wrap gap-1">
+                    <Badge v-for="d in record.details" :key="d.id" variant="secondary" class="text-xs font-mono font-bold">
+                      {{ d.saleInvoice?.code || `INV-${d.saleInvoiceId}` }}
+                    </Badge>
+                  </div>
+                </template>
+                <span v-else class="text-muted-foreground italic text-xs italic">N/A</span>
               </TableCell>
               <TableCell class="text-foreground/90">
                 {{ formatDateTime(record.paymentDate) }}
               </TableCell>
-              <TableCell class="text-right">
-                <Badge variant="outline" class="font-medium">
-                  {{ getPaymentMethodLabel(record.paymentMethod) }}
-                </Badge>
-              </TableCell>
               <TableCell class="text-right font-mono text-success font-semibold">
-                + {{ formatCurrency(record.amount) }}
+                + {{ formatCurrency(record.paidAmount) }}
               </TableCell>
               <TableCell class="text-right">
                 <DropdownMenu align="end">
@@ -343,7 +337,7 @@ onMounted(() => {
                       <Eye class="mr-2 h-4 w-4 opacity-70" />{{ $t("crud.viewBtn") }}
                     </DropdownMenuItem>
                     <DropdownMenuItem @click="router.push(`/admin/sale-payments/${record.id}/edit`)" class="cursor-pointer">
-                      {{ $t("crud.editBtn") }}
+                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{ $t("crud.editBtn") }}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem class="text-destructive focus:text-destructive cursor-pointer font-medium" @click="openDeleteDialog(record.id)">

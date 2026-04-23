@@ -102,18 +102,16 @@ onMounted(() => {
           </CardHeader>
           <CardContent class="pt-4 space-y-4 text-sm">
             <div>
-              <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Receipt class="h-3.5 w-3.5" />{{ $t('modules.purchaseInvoice') }}</p>
-              <p class="font-medium text-primary hover:underline cursor-pointer" @click="router.push(`/admin/purchase-invoices/${record.purchaseInvoiceId}`)">
-                {{ record.purchaseInvoice?.code || `ID: ${record.purchaseInvoiceId}` }}
-              </p>
+              <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Receipt class="h-3.5 w-3.5" />{{ $t('modules.purchaseInvoices') }}</p>
+              <div class="flex flex-wrap gap-1">
+                <Badge v-for="d in record.details" :key="d.id" variant="secondary" class="font-mono text-[10px] cursor-pointer hover:bg-muted transition-colors" @click="router.push(`/admin/purchase-invoices/${d.purchaseInvoiceId}`)">
+                  {{ d.purchaseInvoice?.code || `ID: ${d.purchaseInvoiceId}` }}
+                </Badge>
+              </div>
             </div>
             <div>
               <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Calendar class="h-3.5 w-3.5" />{{ $t('fields.transactionDate') }}</p>
               <p class="font-medium text-foreground">{{ formatDateTime(record.paymentDate) }}</p>
-            </div>
-            <div>
-              <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><CreditCard class="h-3.5 w-3.5" />{{ $t('fields.paymentMethod') }}</p>
-              <Badge variant="outline">{{ getPaymentMethodLabel(record.paymentMethod) }}</Badge>
             </div>
           </CardContent>
         </Card>
@@ -128,7 +126,7 @@ onMounted(() => {
           </CardHeader>
           <CardContent class="pt-6">
             <div class="text-center">
-               <span class="text-3xl font-mono font-black text-success">{{ formatCurrency(record.amount) }}</span>
+               <span class="text-3xl font-mono font-black text-success">{{ formatCurrency(record.paidAmount) }}</span>
             </div>
           </CardContent>
         </Card>
@@ -144,11 +142,7 @@ onMounted(() => {
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6 space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h4 class="text-xs font-bold uppercase text-muted-foreground mb-2">{{ $t('fields.refNumber') }}</h4>
-                <p class="text-lg font-medium">{{ record.referenceNumber || '---' }}</p>
-              </div>
+            <div class="grid grid-cols-1 gap-6">
               <div>
                 <h4 class="text-xs font-bold uppercase text-muted-foreground mb-2">{{ $t('fields.description') }}</h4>
                 <p class="text-muted-foreground whitespace-pre-wrap">{{ record.description || '---' }}</p>
@@ -156,28 +150,30 @@ onMounted(() => {
             </div>
 
             <!-- Invoice Context -->
-            <div v-if="record.purchaseInvoice" class="mt-8 p-4 rounded-lg bg-muted/30 border border-muted-foreground/10">
+            <div v-if="record.details && record.details.length > 0" class="mt-8">
               <h4 class="text-sm font-bold flex items-center gap-2 mb-4">
                 <Receipt class="h-4 w-4 text-primary" />
-                {{ $t('fields.invoiceContext') }}
+                {{ $t('fields.associatedInvoices') }}
               </h4>
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div>
-                  <p class="text-xs text-muted-foreground">{{ $t('fields.totalPrice') }}</p>
-                   <p class="font-mono font-bold">{{ formatCurrency(record.purchaseInvoice?.totalPrice) }}</p>
-                </div>
-                <div>
-                  <p class="text-xs text-muted-foreground">{{ $t('fields.paidBeforeThis') }}</p>
-                   <p class="font-mono text-muted-foreground">{{ formatCurrency((record.purchaseInvoice?.paidAmount || 0) - record.amount) }}</p>
-                </div>
-                <div>
-                  <p class="text-xs text-muted-foreground">{{ $t('fields.paidTotal') }}</p>
-                   <p class="font-mono text-success font-bold">{{ formatCurrency(record.purchaseInvoice?.paidAmount) }}</p>
-                </div>
-                <div>
-                  <p class="text-xs text-muted-foreground">{{ $t('fields.remainingBalance') }}</p>
-                   <p class="font-mono text-destructive font-black">{{ formatCurrency(Math.max(0, (record.purchaseInvoice?.totalPrice || 0) - (record.purchaseInvoice?.paidAmount || 0))) }}</p>
-                </div>
+              <div class="rounded-md border overflow-hidden">
+                <table class="w-full text-xs">
+                  <thead class="bg-muted text-muted-foreground">
+                    <tr>
+                      <th class="px-4 py-2 text-left font-medium">{{ $t('fields.code') }}</th>
+                      <th class="px-4 py-2 text-right font-medium">{{ $t('fields.totalPrice') }}</th>
+                      <th class="px-4 py-2 text-right font-medium">{{ $t('fields.paidAmount') }}</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y">
+                    <tr v-for="d in record.details" :key="d.id" class="hover:bg-muted/50 transition-colors">
+                      <td class="px-4 py-2 font-mono text-primary cursor-pointer hover:underline" @click="router.push(`/admin/purchase-invoices/${d.purchaseInvoiceId}`)">
+                        {{ d.purchaseInvoice?.code || `ID: ${d.purchaseInvoiceId}` }}
+                      </td>
+                      <td class="px-4 py-2 text-right font-mono">{{ formatCurrency(d.purchaseInvoice?.totalPrice) }}</td>
+                      <td class="px-4 py-2 text-right font-mono text-success font-bold">{{ formatCurrency(d.paidAmount) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </CardContent>

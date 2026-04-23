@@ -3,7 +3,9 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { toLocalISOString } from "@/utils/format";
+import { toLocalISOString, formatCurrency } from "@/utils/format";
+import CurrencyToggle from "@/components/CurrencyToggle.vue";
+import { useCurrencyStore } from "@/stores/currency";
 
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
@@ -38,13 +40,14 @@ import { ChevronLeft, Loader2, FileText, CreditCard, Banknote, History } from "l
 import { SalePaymentService } from "@/services/sale_payment/sale_payment.service";
 import { SaleInvoiceService } from "@/services/sale_invoice/sale_invoice.service";
 import type { SaleInvoice } from "@/types";
-import { PaymentMethod, InvoiceStatus } from "@/types/enums";
 import { toast } from "vue-sonner";
 
 const route = useRoute();
 const router = useRouter();
 const spService = new SalePaymentService();
 const siService = new SaleInvoiceService();
+const currencyStore = useCurrencyStore();
+const currencySymbol = computed(() => currencyStore.activeCurrency?.symbol ?? '$');
 
 const submitting = ref(false);
 const loadingInvoices = ref(false);
@@ -58,8 +61,7 @@ async function fetchInvoices() {
       page: 1,
       limit: 100,
       sortBy: "createdAt",
-      sortOrder: "DESC",
-      filter: { status: String(InvoiceStatus.COMPLETED) } 
+      sortOrder: "DESC"
     });
     if (response.success && response.data) {
       invoices.value = response.data.data.filter(i => (i.totalPrice - i.paidAmount) > 0);
@@ -95,8 +97,6 @@ const formSchema = toTypedSchema(
     saleInvoiceId: z.number().min(1, t('validation.required', { field: t('modules.saleInvoice') })),
     paymentDate: z.string().min(1, t('validation.required', { field: t('fields.invoiceDate') })),
     amount: z.number().min(0.01, t('validation.min', { field: t('fields.paidAmount'), min: '0.01' })),
-    paymentMethod: z.number(),
-    referenceNumber: z.string().optional().nullable(),
     description: z.string().optional().nullable(),
   })
 );
@@ -107,8 +107,6 @@ const form = useForm({
     saleInvoiceId: 0,
     paymentDate: toLocalISOString(new Date()),
     amount: 0,
-    paymentMethod: PaymentMethod.CASH,
-    referenceNumber: "",
     description: "",
   },
 });
@@ -118,11 +116,15 @@ watch(() => form.values.saleInvoiceId, (newId) => {
     const inv = invoices.value.find(i => i.id === newId);
     if (inv) {
       selectedInvoice.value = inv;
-      form.setFieldValue("amount", Number((inv.totalPrice - inv.paidAmount).toFixed(2)));
+      const baseAmt = Number((inv.totalPrice - inv.paidAmount).toFixed(2));
+      form.setFieldValue("amount", baseAmt);
+      const rate = currencyStore.activeCurrency?.exchangeRate || 1;
+      localAmount.value = Number((baseAmt * rate).toFixed(2));
     }
   } else {
     selectedInvoice.value = null;
     form.setFieldValue("amount", 0);
+    localAmount.value = 0;
   }
 });
 
@@ -131,12 +133,32 @@ const remainingBalance = computed(() => {
   return selectedInvoice.value.totalPrice - selectedInvoice.value.paidAmount;
 });
 
+const localAmount = ref(0);
+
+watch(localAmount, (val) => {
+  const rate = currencyStore.activeCurrency?.exchangeRate || 1;
+  const inUsd = val === 0 ? 0 : (val / rate);
+  
+  // Update the hidden USD amount that will be sent to the API
+  if (form.values.amount !== inUsd) {
+    form.setFieldValue('amount', inUsd);
+  }
+});
+
 const onSubmit = form.handleSubmit(async (values) => {
+  if (!selectedInvoice.value) return;
   submitting.value = true;
   try {
     const payload = {
-      ...values,
+      customerId: selectedInvoice.value.customerId,
       paymentDate: new Date(values.paymentDate).toISOString(),
+      description: values.description,
+      details: [
+        {
+          saleInvoiceId: values.saleInvoiceId,
+          paidAmount: values.amount,
+        },
+      ],
     };
 
     const response = await spService.create(payload as any);
@@ -156,17 +178,20 @@ const onSubmit = form.handleSubmit(async (values) => {
 
 <template>
   <div class="space-y-4">
-    <div class="flex items-center gap-4">
-      <Button variant="outline" size="icon" @click="router.back()">
-        <ChevronLeft class="h-4 w-4" />
-      </Button>
-      <div>
-        <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.createBtn') }} {{ $t('modules.salePayment') }}</h2>
-        <p class="text-muted-foreground text-sm flex items-center mt-1">
-          <Banknote class="w-4 h-4 mr-1.5 opacity-50"/> 
-          {{ $t('fields.paymentStockUpdateInfo') }}
-        </p>
+    <div class="flex items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <Button variant="outline" size="icon" @click="router.back()">
+          <ChevronLeft class="h-4 w-4" />
+        </Button>
+        <div>
+          <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.createBtn') }} {{ $t('modules.salePayment') }}</h2>
+          <p class="text-muted-foreground text-sm flex items-center mt-1">
+            <Banknote class="w-4 h-4 mr-1.5 opacity-50"/> 
+            {{ $t('fields.paymentStockUpdateInfo') }}
+          </p>
+        </div>
       </div>
+      <CurrencyToggle />
     </div>
 
     <form @submit="onSubmit">
@@ -197,7 +222,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                     </FormControl>
                     <SelectContent>
                       <SelectItem v-for="i in invoices" :key="i.id" :value="String(i.id)">
-                        {{ i.code }} - {{ i.customer?.name }} (${{ (i.totalPrice - i.paidAmount).toLocaleString() }} balance)
+                        {{ i.code }} - {{ i.customer?.name }} ({{ formatCurrency(i.totalPrice - i.paidAmount) }} balance)
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -206,7 +231,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               </FormField>
 
               <FormField v-slot="{ componentField }" name="paymentDate">
-                <FormItem>
+                <FormItem class="md:col-span-2">
                   <FormLabel>{{ $t('fields.transactionDate') }}</FormLabel>
                   <FormControl>
                     <Input type="datetime-local" v-bind="componentField" />
@@ -214,49 +239,26 @@ const onSubmit = form.handleSubmit(async (values) => {
                   <FormMessage />
                 </FormItem>
               </FormField>
-
-              <FormField v-slot="{ value, handleChange }" name="paymentMethod">
-                <FormItem>
-                  <FormLabel>{{ $t('fields.paymentMethod') }}</FormLabel>
-                  <Select
-                    :model-value="value ? String(value) : undefined"
-                    @update:model-value="(v) => handleChange(Number(v))"
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem :value="String(PaymentMethod.CASH)">{{ $t('fields.paymentMethodLabels.cash') }}</SelectItem>
-                      <SelectItem :value="String(PaymentMethod.TRANSFER)">{{ $t('fields.paymentMethodLabels.transfer') }}</SelectItem>
-                      <SelectItem :value="String(PaymentMethod.OTHER)">{{ $t('fields.paymentMethodLabels.other') }}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+            <div class="grid grid-cols-1 gap-4 pt-4 border-t">
               <FormField v-slot="{ componentField }" name="amount">
                 <FormItem>
                   <FormLabel>{{ $t('fields.paidAmount') }}</FormLabel>
                   <FormControl>
                     <div class="relative">
-                      <span class="absolute left-3 top-2.5 text-muted-foreground">$</span>
-                      <Input type="number" step="0.01" min="0.01" v-bind="componentField" class="pl-7 font-mono font-bold text-lg text-success" />
+                      <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{{ currencySymbol }}</span>
+                      <Input 
+                        type="number" 
+                        step="0.01" 
+                        min="0" 
+                        :name="componentField.name"
+                        @blur="componentField.onBlur"
+                        :model-value="localAmount"
+                        @update:model-value="(val) => localAmount = Number(val)"
+                        class="pl-9 font-mono font-bold text-lg text-success" 
+                      />
                     </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-
-              <FormField v-slot="{ componentField }" name="referenceNumber">
-                <FormItem>
-                  <FormLabel>{{ $t('fields.refNumber') }}</FormLabel>
-                  <FormControl>
-                    <Input :placeholder="$t('fields.enterRefNumber')" v-bind="componentField" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -294,15 +296,15 @@ const onSubmit = form.handleSubmit(async (values) => {
             <CardContent class="pt-6 space-y-4 text-sm">
               <div class="flex justify-between">
                 <span class="text-muted-foreground">{{ $t('fields.totalPrice') }}:</span>
-                <span class="font-mono font-bold">${{ selectedInvoice.totalPrice.toLocaleString() }}</span>
+                <span class="font-mono font-bold">{{ formatCurrency(selectedInvoice.totalPrice) }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-muted-foreground">{{ $t('fields.totalPaid') }}:</span>
-                <span class="font-mono text-success font-bold">${{ selectedInvoice.paidAmount.toLocaleString() }}</span>
+                <span class="font-mono text-success font-bold">{{ formatCurrency(selectedInvoice.paidAmount) }}</span>
               </div>
               <div class="pt-4 border-t border-primary/10 flex justify-between text-lg">
                 <span class="font-bold">{{ $t('fields.balanceDue') }}:</span>
-                <span class="font-mono font-black text-destructive">${{ remainingBalance.toLocaleString() }}</span>
+                <span class="font-mono font-black text-destructive">{{ formatCurrency(remainingBalance) }}</span>
               </div>
             </CardContent>
           </Card>
@@ -317,9 +319,14 @@ const onSubmit = form.handleSubmit(async (values) => {
             <CardContent class="pt-6">
               <div class="text-center p-6 bg-muted/20 border rounded-lg">
                 <p class="text-xs uppercase text-muted-foreground font-bold mb-2">{{ $t('fields.paymentAmount') }}</p>
-                <span class="text-4xl font-mono font-black text-success">
-                  ${{ (form.values.amount || 0).toLocaleString(undefined, {minimumFractionDigits: 2}) }}
-                </span>
+                <div class="flex flex-col items-center">
+                  <span class="text-4xl font-mono font-black text-success">
+                    {{ currencySymbol }}{{ localAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                  </span>
+                  <span v-if="currencySymbol !== '$'" class="text-xs text-muted-foreground mt-1 font-mono uppercase">
+                    ≈ {{ formatCurrency(form.values.amount) }}
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>

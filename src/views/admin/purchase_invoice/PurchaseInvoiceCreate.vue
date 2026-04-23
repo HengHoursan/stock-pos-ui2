@@ -91,11 +91,11 @@ onMounted(async () => {
           productId: d.productId,
           quantity: d.quantity,
           price: d.totalPrice / d.quantity,
-          purchaseOrderId: d.purchaseOrderId,
+          purchaseOrderId: oRes.data.id, // Explicitly use parent order ID
           purchaseOrderDetailId: d.id
         }));
         
-        form.setFieldValue("details" as any, mappedDetails);
+        form.setFieldValue("details", mappedDetails as any);
         toast.info(t('validation.loadedFromSource', { source: t('modules.purchaseOrder') }));
       }
     }

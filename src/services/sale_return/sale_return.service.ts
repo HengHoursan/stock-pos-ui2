@@ -11,26 +11,30 @@ import type {
 
 export class SaleReturnService extends BaseService {
   async getList(pagination: PaginationRequest): Promise<ApiResponse<PaginationResponse<SaleReturn>>> {
-    return this.post<ApiResponse<PaginationResponse<SaleReturn>>>("/sale-returns/list", pagination);
+    return this.post<ApiResponse<PaginationResponse<SaleReturn>>>("sale-returns/list", pagination);
   }
 
   async getDetail(id: number): Promise<ApiResponse<SaleReturn>> {
-    return this.post<ApiResponse<SaleReturn>>("/sale-returns/detail", { id });
+    return this.post<ApiResponse<SaleReturn>>("sale-returns/detail", { id });
   }
 
   async create(payload: CreateSaleReturnRequest): Promise<ApiResponse<null>> {
-    return this.post<ApiResponse<null>>("/sale-returns/create", payload);
+    return this.post<ApiResponse<null>>("sale-returns/create", payload);
   }
 
   async update(payload: UpdateSaleReturnRequest): Promise<ApiResponse<null>> {
-    return this.post<ApiResponse<null>>("/sale-returns/update", payload);
+    return this.post<ApiResponse<null>>("sale-returns/update", payload);
   }
 
   async updateStatus(payload: UpdateSaleReturnStatusRequest): Promise<ApiResponse<null>> {
-    return this.post<ApiResponse<null>>("/sale-returns/status-update", payload);
+    return this.post<ApiResponse<null>>("sale-returns/status-update", payload);
   }
 
-  async softDelete(id: number): Promise<ApiResponse<null>> {
-    return this.post<ApiResponse<null>>("/sale-returns/soft-delete", { id });
+  async forceDelete(id: number): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("sale-returns/force-delete", { id });
+  }
+
+  async delete(id: number): Promise<ApiResponse<null>> {
+    return this.forceDelete(id);
   }
 }

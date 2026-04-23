@@ -62,6 +62,7 @@ import {
   Ban
 } from "lucide-vue-next";
 import DateRangePicker from "@/components/DateRangePicker.vue";
+import CurrencyToggle from "@/components/CurrencyToggle.vue";
 import { SaleInvoiceService } from "@/services/sale_invoice/sale_invoice.service";
 import { CustomerService } from "@/services/customer/customer.service";
 import type { SaleInvoice, PaginationMeta, Customer } from "@/types";
@@ -202,6 +203,7 @@ function getStatusBadge(record: SaleInvoice) {
   if (record.isCancel) return { variant: 'destructive', label: t('fields.statusLabels.cancelled') };
   switch(Number(record.status)) {
     case InvoiceStatus.DRAFT: return { variant: 'secondary', label: t('fields.statusLabels.draft') };
+    case 2: return { variant: 'primary', label: t('fields.statusLabels.confirmed') }; // CONFIRMED
     case InvoiceStatus.COMPLETED: return { variant: 'success', label: t('fields.statusLabels.completed') };
     default: return { variant: 'outline', label: t('crud.all') };
   }
@@ -220,6 +222,7 @@ onMounted(() => {
         {{ $t("menu.saleInvoices") }}
       </h2>
       <div class="flex items-center gap-2">
+        <CurrencyToggle />
         <Button variant="outline" size="icon" @click="fetchData" :disabled="loading">
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
@@ -261,6 +264,7 @@ onMounted(() => {
         <SelectContent>
           <SelectItem value="all">{{ $t("crud.allStatus") }}</SelectItem>
           <SelectItem :value="String(InvoiceStatus.DRAFT)">{{ $t("fields.statusLabels.draft") }}</SelectItem>
+          <SelectItem value="2">{{ $t("fields.statusLabels.confirmed") }}</SelectItem>
           <SelectItem :value="String(InvoiceStatus.COMPLETED)">{{ $t("fields.statusLabels.completed") }}</SelectItem>
         </SelectContent>
       </Select>
