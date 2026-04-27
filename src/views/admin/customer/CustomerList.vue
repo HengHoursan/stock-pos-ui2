@@ -279,8 +279,8 @@ onMounted(() => {
       </Select>
     </div>
 
-    <div class="rounded-md border bg-card overflow-hidden shadow-sm">
-      <Table>
+    <div class="rounded-md border bg-card overflow-auto shadow-sm max-h-[700px] scrollbar-thin scrollbar-thumb-muted-foreground/20">
+      <Table class="min-w-[1200px]">
         <TableHeader>
           <TableRow>
             <TableHead class="w-[20px]">#</TableHead>
@@ -319,7 +319,7 @@ onMounted(() => {
               </TableCell>
               <TableCell>
                 <code
-                  class="bg-muted px-2 py-0.5 rounded text-xs font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
+                  class="bg-muted px-2 py-0.5 rounded text-xs font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
                   >{{ customer.code }}</code
                 >
               </TableCell>

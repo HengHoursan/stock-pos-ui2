@@ -289,7 +289,7 @@ onMounted(() => {
               </TableCell>
               <TableCell>
                 <code
-                  class="bg-muted px-2 py-0.5 rounded text-[10px] font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
+                  class="bg-muted px-2 py-0.5 rounded text-[10px] font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
                   >{{ unit.code }}</code
                 >
               </TableCell>

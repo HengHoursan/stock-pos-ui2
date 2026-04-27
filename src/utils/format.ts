@@ -93,3 +93,16 @@ export function formatRate(rate: number | string | null | undefined): string {
     maximumFractionDigits: 4,
   }).format(value);
 }
+
+/**
+ * Formats a raw number or string input into a comma-separated string (e.g., "1,000.50").
+ * Preserves trailing decimals while typing to prevent cursor issues.
+ */
+export function formatNumberInput(value: string | number | null | undefined): string {
+  if (!value && value !== 0) return '';
+  let str = String(value).replace(/,/g, '').replace(/[^\d.]/g, '');
+  const parts = str.split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  if (parts.length > 2) parts.length = 2; // Keep max 1 decimal point
+  return parts.join('.');
+}

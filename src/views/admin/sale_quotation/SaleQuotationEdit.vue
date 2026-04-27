@@ -3,7 +3,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { toLocalISOString } from "@/utils/format";
+import { toLocalISOString, formatNumberInput } from "@/utils/format";
 import SearchableSelect from "@/components/SearchableSelect.vue";
 
 import { useForm, useFieldArray } from "vee-validate";
@@ -158,6 +158,9 @@ const grandTotal = computed(() => {
   }, 0) || 0;
 });
 
+const localPrices = ref<Record<string, string>>({});
+const localQuantities = ref<Record<string, string>>({});
+
 const onSubmit = form.handleSubmit(async (values) => {
   submitting.value = true;
   try {
@@ -279,7 +282,7 @@ const onSubmit = form.handleSubmit(async (values) => {
           </CardHeader>
           <CardContent class="pt-6">
             <div class="text-center p-4 bg-muted/20 border rounded-lg">
-              <span class="text-3xl font-mono font-bold text-primary">
+              <span class="text-3xl font-bold text-primary">
                 ${{ grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2}) }}
               </span>
             </div>
@@ -348,7 +351,18 @@ const onSubmit = form.handleSubmit(async (values) => {
                     <FormField v-slot="{ componentField }" :name="`details[${index}].price`">
                       <FormItem class="mb-0">
                         <FormControl>
-                          <Input type="number" step="0.01" min="0" class="text-right" v-bind="componentField" />
+                          <Input 
+                            type="text" 
+                            class="text-right" 
+                            :name="componentField.name"
+                            @blur="componentField.onBlur"
+                            :model-value="localPrices[field.key] ?? formatNumberInput(componentField.modelValue)"
+                            @update:model-value="(val) => {
+                              localPrices[field.key] = formatNumberInput(String(val));
+                              const clean = Number(localPrices[field.key].replace(/,/g, ''));
+                              form.setFieldValue(`details[${index}].price` as any, clean);
+                            }"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -358,13 +372,24 @@ const onSubmit = form.handleSubmit(async (values) => {
                     <FormField v-slot="{ componentField }" :name="`details[${index}].quantity`">
                       <FormItem class="mb-0">
                         <FormControl>
-                          <Input type="number" step="0.01" min="0.01" class="text-right" v-bind="componentField" />
+                          <Input 
+                            type="text" 
+                            class="text-right" 
+                            :name="componentField.name"
+                            @blur="componentField.onBlur"
+                            :model-value="localQuantities[field.key] ?? formatNumberInput(componentField.modelValue)"
+                            @update:model-value="(val) => {
+                              localQuantities[field.key] = formatNumberInput(String(val));
+                              const clean = Number(localQuantities[field.key].replace(/,/g, ''));
+                              form.setFieldValue(`details[${index}].quantity` as any, clean);
+                            }"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     </FormField>
                   </TableCell>
-                  <TableCell class="text-right font-mono font-medium">
+                  <TableCell class="text-right font-medium">
                     {{ (((form.values.details || [])[index]?.quantity || 0) * ((form.values.details || [])[index]?.price || 0)).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}
                   </TableCell>
                   <TableCell>

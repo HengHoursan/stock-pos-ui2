@@ -28,7 +28,7 @@ function formatRate(rate: number) {
       >
         <div class="flex items-center gap-1.5">
           <Coins class="h-4 w-4 text-primary" />
-          <span class="font-mono">{{ currencyStore.activeCurrency?.symbol }}</span>
+          <span class="">{{ currencyStore.activeCurrency?.symbol }}</span>
           <span class="hidden sm:inline font-semibold opacity-70">{{ currencyStore.activeCurrency?.code }}</span>
         </div>
         <ChevronsUpDown class="h-3.5 w-3.5 opacity-50" />
@@ -41,13 +41,13 @@ function formatRate(rate: number) {
         class="cursor-pointer gap-3 p-2 focus:bg-primary/5"
         @click="currencyStore.setCurrency(currency)"
       >
-        <div class="flex h-6 w-6 items-center justify-center rounded-sm bg-muted font-mono text-xs font-bold ring-1 ring-border">
+        <div class="flex h-6 w-6 items-center justify-center rounded-sm bg-muted text-xs font-bold ring-1 ring-border">
           {{ currency.symbol }}
         </div>
         <div class="flex flex-1 flex-col">
           <div class="flex items-center gap-2">
             <span class="text-sm font-semibold leading-none">{{ currency.code }}</span>
-            <span v-if="currency.exchangeRate !== 1" class="text-[10px] bg-primary/10 text-primary px-1 rounded font-mono">
+            <span v-if="currency.exchangeRate !== 1" class="text-[10px] bg-primary/10 text-primary px-1 rounded">
               ×{{ formatRate(currency.exchangeRate) }}
             </span>
           </div>

@@ -74,8 +74,8 @@ const filteredCountries = computed(() => {
   );
 });
 
-function selectCountry(country: string, setFieldValue: any) {
-  setFieldValue("country", country);
+function selectCountry(country: string) {
+  form.setFieldValue("country", country);
   searchTerm.value = country;
   isDropdownOpen.value = false;
 }
@@ -88,7 +88,7 @@ const formSchema = toTypedSchema(
     symbol: zod.string().max(10).optional().default(""),
     thousandSeparator: zod.string().max(5).optional().default(","),
     decimalSeparator: zod.string().max(5).optional().default("."),
-    exchangeRate: zod.number().min(0).default(1),
+    exchangeRate: zod.coerce.number().min(0).default(1),
     isDefault: zod.boolean().default(false),
     status: zod.boolean().default(true),
   }),
@@ -155,17 +155,6 @@ async function onSubmit(values: any) {
         </div>
       </div>
 
-      <!-- Simple Minimalism Preview -->
-      <div
-        class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-muted/30 rounded-md border text-sm"
-      >
-        <span class="text-muted-foreground font-medium"
-          >{{ $t("fields.preview") }}:</span
-        >
-        <span class="text-foreground font-mono">
-          {{ formattedPreview }}
-        </span>
-      </div>
     </div>
 
     <!-- Mobile Preview -->
@@ -175,15 +164,10 @@ async function onSubmit(values: any) {
       <span class="text-muted-foreground font-medium"
         >{{ $t("fields.formatPreview") }}:</span
       >
-      <span class="text-foreground font-mono">{{ formattedPreview }}</span>
+      <span class="text-foreground">{{ formattedPreview }}</span>
     </div>
 
-    <Form
-      v-slot="{ handleSubmit, setFieldValue }"
-      :validation-schema="formSchema"
-      as="div"
-    >
-      <form @submit="handleSubmit($event, onSubmit)" id="currencyForm">
+    <form @submit="onSubmit" id="currencyForm">
         <Card>
           <CardHeader>
             <CardTitle class="flex items-center gap-2">
@@ -246,7 +230,7 @@ async function onSubmit(values: any) {
                         <div
                           v-for="country in filteredCountries"
                           :key="country"
-                          @click="selectCountry(country, setFieldValue)"
+                          @click="selectCountry(country)"
                           class="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-disabled:pointer-events-none data-disabled:opacity-50"
                         >
                           <Check
@@ -273,7 +257,7 @@ async function onSubmit(values: any) {
                           variant="ghost"
                           size="sm"
                           class="w-full justify-start text-xs italic"
-                          @click="selectCountry(searchTerm, setFieldValue)"
+                          @click="selectCountry(searchTerm)"
                         >
                           {{ $t("crud.useCustom") }}: "{{ searchTerm }}"
                         </Button>
@@ -330,22 +314,21 @@ async function onSubmit(values: any) {
 
             <FormField v-slot="{ componentField }" name="exchangeRate">
               <FormItem>
-                <FormLabel class="text-primary font-bold italic underline decoration-primary/30">
+                <FormLabel class="text-primary font-bold underline decoration-primary/30">
                   {{ $t("fields.exchangeRate") }} (Base: USD)
                 </FormLabel>
                 <FormControl>
-                  <div class="relative">
+                  <div class="relative group">
+                    <div class="absolute left-0 top-0 bottom-0 flex items-center px-3 bg-muted border-r rounded-l-md text-xs font-bold text-muted-foreground pointer-events-none group-focus-within:border-primary/50 transition-colors">
+                      1 USD =
+                    </div>
                     <Input 
                       type="number" 
                       step="0.0001" 
                       v-bind="componentField" 
-                      :model-value="componentField.modelValue"
-                      @update:model-value="(v) => componentField['onUpdate:modelValue']?.(parseFloat(v as string))"
-                      class="pl-12 font-mono font-bold text-primary border-primary/30 focus:border-primary" 
+                      @input="form.setFieldValue('exchangeRate', Number($event.target.value))"
+                      class="pl-20 font-bold text-primary border-primary/20 focus:border-primary transition-all h-11" 
                     />
-                    <div class="absolute left-3 top-2.5 text-xs font-bold text-muted-foreground bg-muted px-1.5 rounded border">
-                      1 USD =
-                    </div>
                   </div>
                 </FormControl>
                 <FormDescription class="text-[10px] italic">
@@ -393,19 +376,22 @@ async function onSubmit(values: any) {
               </FormField>
             </div>
           </CardContent>
-          <CardFooter class="flex justify-end gap-2 border-t pt-6 pb-6">
+          <CardFooter class="flex justify-end gap-3 border-t pt-6 pb-6 bg-muted/5">
             <Button
               type="button"
               variant="outline"
+              size="lg"
               @click="router.push('/admin/currencies')"
               :disabled="isSubmitting"
+              class="px-8"
             >
               {{ $t("crud.cancel") }}
             </Button>
             <Button
               type="submit"
               form="currencyForm"
-              class="min-w-[100px]"
+              size="lg"
+              class="min-w-[140px] px-8 shadow-md"
               :disabled="isSubmitting"
             >
               <Loader2 v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
@@ -414,6 +400,5 @@ async function onSubmit(values: any) {
           </CardFooter>
         </Card>
       </form>
-    </Form>
   </div>
 </template>

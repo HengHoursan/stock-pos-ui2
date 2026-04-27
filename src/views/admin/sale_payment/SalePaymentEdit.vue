@@ -3,7 +3,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { toLocalISOString, formatCurrency } from "@/utils/format";
+import { toLocalISOString, formatCurrency, formatNumberInput } from "@/utils/format";
 import CurrencyToggle from "@/components/CurrencyToggle.vue";
 import { useCurrencyStore } from "@/stores/currency";
 
@@ -99,7 +99,7 @@ onMounted(async () => {
       });
       
       const rate = currencyStore.activeCurrency?.exchangeRate || 1;
-      localAmount.value = Number((d.paidAmount * rate).toFixed(2));
+      localAmount.value = formatNumberInput((d.paidAmount * rate).toFixed(2));
       selectedInvoice.value = firstDetail?.saleInvoice || null;
     } else {
       toast.error(t('crud.notFound', { module: t('modules.salePayment') }));
@@ -126,11 +126,12 @@ const remainingBalanceExcludingThis = computed(() => {
   return totalPrice - (paidAmount - initialAmount.value);
 });
 
-const localAmount = ref(0);
+const localAmount = ref("");
 
 watch(localAmount, (val) => {
+  const cleanVal = Number(String(val).replace(/,/g, ''));
   const rate = currencyStore.activeCurrency?.exchangeRate || 1;
-  const inUsd = val === 0 ? 0 : (val / rate);
+  const inUsd = cleanVal === 0 ? 0 : (cleanVal / rate);
   
   if (form.values.amount !== inUsd) {
     form.setFieldValue('amount', inUsd);
@@ -246,14 +247,12 @@ const onSubmit = form.handleSubmit(async (values) => {
                     <div class="relative">
                       <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{{ currencySymbol }}</span>
                       <Input 
-                        type="number" 
-                        step="0.01" 
-                        min="0" 
+                        type="text" 
                         :name="componentField.name"
                         @blur="componentField.onBlur"
                         :model-value="localAmount"
-                        @update:model-value="(val) => localAmount = Number(val)"
-                        class="pl-9 font-mono font-bold text-lg text-success" 
+                        @update:model-value="(val) => localAmount = formatNumberInput(String(val))"
+                        class="pl-9 font-bold text-lg text-success" 
                       />
                     </div>
                   </FormControl>
@@ -293,15 +292,15 @@ const onSubmit = form.handleSubmit(async (values) => {
             <CardContent class="pt-6 space-y-4 text-sm">
               <div class="flex justify-between">
                 <span class="text-muted-foreground">{{ $t('fields.totalPrice') }}:</span>
-                <span class="font-mono font-bold">{{ formatCurrency(selectedInvoice.totalPrice) }}</span>
+                <span class="font-bold">{{ formatCurrency(selectedInvoice.totalPrice) }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-muted-foreground">{{ $t('fields.totalPaid') }}:</span>
-                <span class="font-mono text-success font-bold">{{ formatCurrency(selectedInvoice.paidAmount) }}</span>
+                <span class="text-success font-bold">{{ formatCurrency(selectedInvoice.paidAmount) }}</span>
               </div>
               <div class="pt-4 border-t border-primary/10 flex justify-between text-lg">
                 <span class="font-bold">{{ $t('fields.adjBalance') }}:</span>
-                <span class="font-mono font-black text-destructive">{{ formatCurrency(remainingBalanceExcludingThis) }}</span>
+                <span class="font-black text-destructive">{{ formatCurrency(remainingBalanceExcludingThis) }}</span>
               </div>
             </CardContent>
           </Card>
@@ -317,10 +316,10 @@ const onSubmit = form.handleSubmit(async (values) => {
               <div class="text-center p-6 bg-muted/20 border rounded-lg">
                 <p class="text-xs uppercase text-muted-foreground font-bold mb-2">{{ $t('fields.paymentAmount') }}</p>
                 <div class="flex flex-col items-center">
-                  <span class="text-4xl font-mono font-black text-success">
-                    {{ currencySymbol }}{{ localAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                  <span class="text-4xl font-black text-success">
+                    {{ currencySymbol }}{{ localAmount || '0.00' }}
                   </span>
-                  <span v-if="currencySymbol !== '$'" class="text-xs text-muted-foreground mt-1 font-mono uppercase">
+                  <span v-if="currencySymbol !== '$'" class="text-xs text-muted-foreground mt-1 uppercase">
                     ≈ {{ formatCurrency(form.values.amount) }}
                   </span>
                 </div>

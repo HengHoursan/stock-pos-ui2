@@ -3,7 +3,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { useForm } from "vee-validate";
+import { toLocalISOString, formatNumberInput } from "@/utils/format";
 import { toTypedSchema } from "@vee-validate/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -99,6 +99,11 @@ const form = useForm({
   },
 });
 
+const localPurchasePrice = ref("");
+const localSalePrice = ref("");
+const localCurrentStock = ref("");
+const localAlertQuantity = ref("");
+
 async function fetchData() {
   loading.value = true;
   try {
@@ -137,6 +142,11 @@ async function fetchData() {
         expiryDate: prod.detail?.expiryDate ? prod.detail.expiryDate.split('T')[0] : "",
         expiryType: prod.detail?.expiryType || "None",
       });
+
+      localPurchasePrice.value = formatNumberInput(prod.detail?.purchasePrice || 0);
+      localSalePrice.value = formatNumberInput(prod.detail?.salePrice || 0);
+      localCurrentStock.value = formatNumberInput(prod.detail?.currentStock || 0);
+      localAlertQuantity.value = formatNumberInput(prod.alertQuantity || 0);
     } else {
       toast.error(t('crud.notFound', { module: t('modules.product') }));
       router.push("/admin/products");
@@ -343,7 +353,21 @@ onMounted(() => {
                   <FormItem>
                     <FormLabel>{{ $t('fields.purchasePrice') }}</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.01" v-bind="componentField" @input="form.setFieldValue('purchasePrice', Number($event.target.value))" />
+                      <Input
+                        type="text"
+                        :name="componentField.name"
+                        @blur="componentField.onBlur"
+                        :model-value="localPurchasePrice || formatNumberInput(componentField.modelValue)"
+                        @input="
+                          (e: any) => {
+                            localPurchasePrice = formatNumberInput(e.target.value);
+                            form.setFieldValue(
+                              'purchasePrice',
+                              Number(localPurchasePrice.replace(/,/g, '')),
+                            );
+                          }
+                        "
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -353,7 +377,21 @@ onMounted(() => {
                   <FormItem>
                     <FormLabel>{{ $t('fields.salePrice') }}</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.01" v-bind="componentField" @input="form.setFieldValue('salePrice', Number($event.target.value))" />
+                      <Input
+                        type="text"
+                        :name="componentField.name"
+                        @blur="componentField.onBlur"
+                        :model-value="localSalePrice || formatNumberInput(componentField.modelValue)"
+                        @input="
+                          (e: any) => {
+                            localSalePrice = formatNumberInput(e.target.value);
+                            form.setFieldValue(
+                              'salePrice',
+                              Number(localSalePrice.replace(/,/g, '')),
+                            );
+                          }
+                        "
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -363,7 +401,21 @@ onMounted(() => {
                   <FormItem>
                     <FormLabel>{{ $t('fields.currentStock') }}</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.01" v-bind="componentField" @input="form.setFieldValue('currentStock', Number($event.target.value))" />
+                      <Input
+                        type="text"
+                        :name="componentField.name"
+                        @blur="componentField.onBlur"
+                        :model-value="localCurrentStock || formatNumberInput(componentField.modelValue)"
+                        @input="
+                          (e: any) => {
+                            localCurrentStock = formatNumberInput(e.target.value);
+                            form.setFieldValue(
+                              'currentStock',
+                              Number(localCurrentStock.replace(/,/g, '')),
+                            );
+                          }
+                        "
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -373,7 +425,21 @@ onMounted(() => {
                   <FormItem>
                     <FormLabel>{{ $t('fields.alertQuantity') }}</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.01" v-bind="componentField" @input="form.setFieldValue('alertQuantity', Number($event.target.value))" />
+                      <Input
+                        type="text"
+                        :name="componentField.name"
+                        @blur="componentField.onBlur"
+                        :model-value="localAlertQuantity || formatNumberInput(componentField.modelValue)"
+                        @input="
+                          (e: any) => {
+                            localAlertQuantity = formatNumberInput(e.target.value);
+                            form.setFieldValue(
+                              'alertQuantity',
+                              Number(localAlertQuantity.replace(/,/g, '')),
+                            );
+                          }
+                        "
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

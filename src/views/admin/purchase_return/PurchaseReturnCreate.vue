@@ -3,7 +3,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { toLocalISOString } from "@/utils/format";
+import { toLocalISOString, formatNumberInput } from "@/utils/format";
 
 import { useForm, useFieldArray } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
@@ -223,6 +223,10 @@ const grandTotal = computed(() => {
   );
 });
 
+const localUnitPrices = ref<Record<string, string>>({});
+const localQuantities = ref<Record<string, string>>({});
+const localTotalPrices = ref<Record<string, string>>({});
+
 const onSubmit = form.handleSubmit(async (values) => {
   submitting.value = true;
   try {
@@ -390,7 +394,7 @@ const onSubmit = form.handleSubmit(async (values) => {
           </CardHeader>
           <CardContent class="pt-6">
             <div class="text-center p-4 bg-muted/20 border rounded-lg">
-              <span class="text-3xl font-mono font-bold text-primary">
+              <span class="text-3xl font-bold text-primary">
                 ${{
                   grandTotal.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
@@ -515,7 +519,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                       </FormItem>
                     </FormField>
                   </TableCell>
-                  <TableCell class="text-right font-mono">
+                  <TableCell class="text-right">
                     <FormField
                       v-slot="{ componentField }"
                       :name="`details[${index}].unitPrice`"
@@ -523,20 +527,22 @@ const onSubmit = form.handleSubmit(async (values) => {
                       <FormItem class="mb-0">
                         <FormControl>
                           <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
+                            type="text"
                             class="text-right"
-                            v-bind="componentField"
+                            :name="componentField.name"
+                            @blur="componentField.onBlur"
+                            :model-value="localUnitPrices[field.key] ?? formatNumberInput(componentField.modelValue)"
                             @input="
                               (e: any) => {
-                                const price = Number(e.target.value);
-                                const qty =
-                                  form.values.details?.[index]?.quantity || 0;
-                                form.setFieldValue(
-                                  `details[${index}].totalPrice` as any,
-                                  Number((price * qty).toFixed(2)),
-                                );
+                                const val = e.target.value;
+                                localUnitPrices[field.key] = formatNumberInput(String(val));
+                                const price = Number(localUnitPrices[field.key].replace(/,/g, ''));
+                                form.setFieldValue(`details[${index}].unitPrice` as any, price);
+                                
+                                const qty = form.values.details?.[index]?.quantity || 0;
+                                const totalPrice = Number((price * qty).toFixed(2));
+                                form.setFieldValue(`details[${index}].totalPrice` as any, totalPrice);
+                                localTotalPrices[field.key] = formatNumberInput(totalPrice);
                               }
                             "
                           />
@@ -553,20 +559,22 @@ const onSubmit = form.handleSubmit(async (values) => {
                       <FormItem class="mb-0">
                         <FormControl>
                           <Input
-                            type="number"
-                            step="0.01"
-                            min="0.01"
+                            type="text"
                             class="text-right"
-                            v-bind="componentField"
+                            :name="componentField.name"
+                            @blur="componentField.onBlur"
+                            :model-value="localQuantities[field.key] ?? formatNumberInput(componentField.modelValue)"
                             @input="
                               (e: any) => {
-                                const qty = Number(e.target.value);
-                                const price =
-                                  form.values.details?.[index]?.unitPrice || 0;
-                                form.setFieldValue(
-                                  `details[${index}].totalPrice` as any,
-                                  Number((price * qty).toFixed(2)),
-                                );
+                                const val = e.target.value;
+                                localQuantities[field.key] = formatNumberInput(String(val));
+                                const qty = Number(localQuantities[field.key].replace(/,/g, ''));
+                                form.setFieldValue(`details[${index}].quantity` as any, qty);
+                                
+                                const price = form.values.details?.[index]?.unitPrice || 0;
+                                const totalPrice = Number((price * qty).toFixed(2));
+                                form.setFieldValue(`details[${index}].totalPrice` as any, totalPrice);
+                                localTotalPrices[field.key] = formatNumberInput(totalPrice);
                               }
                             "
                           />
@@ -583,10 +591,16 @@ const onSubmit = form.handleSubmit(async (values) => {
                       <FormItem class="mb-0">
                         <FormControl>
                           <Input
-                            type="number"
-                            step="0.01"
-                            class="text-right font-mono font-bold"
-                            v-bind="componentField"
+                            type="text"
+                            class="text-right font-bold"
+                            :name="componentField.name"
+                            @blur="componentField.onBlur"
+                            :model-value="localTotalPrices[field.key] ?? formatNumberInput(componentField.modelValue)"
+                            @update:model-value="(val) => {
+                              localTotalPrices[field.key] = formatNumberInput(String(val));
+                              const clean = Number(localTotalPrices[field.key].replace(/,/g, ''));
+                              form.setFieldValue(`details[${index}].totalPrice` as any, clean);
+                            }"
                           />
                         </FormControl>
                         <FormMessage />

@@ -96,7 +96,7 @@ onMounted(() => {
               {{ product.status ? "Active" : "Inactive" }}
             </Badge>
           </div>
-          <p class="text-muted-foreground text-sm font-mono uppercase">{{ product?.code }}</p>
+          <p class="text-muted-foreground text-sm uppercase">{{ product?.code }}</p>
         </div>
       </div>
       <div class="flex items-center gap-2">

@@ -3,7 +3,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { toLocalISOString, formatCurrency } from "@/utils/format";
+import { toLocalISOString, formatCurrency, formatNumberInput } from "@/utils/format";
 import SearchableSelect from "@/components/SearchableSelect.vue";
 import CurrencyToggle from "@/components/CurrencyToggle.vue";
 
@@ -140,6 +140,9 @@ const grandTotal = computed(() => {
     return acc + (curr.quantity * curr.price);
   }, 0) || 0;
 });
+
+const localPrices = ref<Record<string, string>>({});
+const localQuantities = ref<Record<string, string>>({});
 
 const onSubmit = form.handleSubmit(async (values) => {
   submitting.value = true;
@@ -301,7 +304,18 @@ const onSubmit = form.handleSubmit(async (values) => {
                   <FormField v-slot="{ componentField }" :name="`details[${index}].price`">
                     <FormItem class="mb-0">
                       <FormControl>
-                        <Input type="number" step="0.01" min="0" class="text-right" v-bind="componentField" />
+                        <Input 
+                          type="text" 
+                          class="text-right" 
+                          :name="componentField.name"
+                          @blur="componentField.onBlur"
+                          :model-value="localPrices[field.key] ?? formatNumberInput(componentField.modelValue)"
+                          @update:model-value="(val) => {
+                            localPrices[field.key] = formatNumberInput(String(val));
+                            const clean = Number(localPrices[field.key].replace(/,/g, ''));
+                            form.setFieldValue(`details[${index}].price` as any, clean);
+                          }"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -311,13 +325,24 @@ const onSubmit = form.handleSubmit(async (values) => {
                   <FormField v-slot="{ componentField }" :name="`details[${index}].quantity`">
                     <FormItem class="mb-0">
                       <FormControl>
-                        <Input type="number" step="0.01" min="0.01" class="text-right" v-bind="componentField" />
+                        <Input 
+                          type="text" 
+                          class="text-right" 
+                          :name="componentField.name"
+                          @blur="componentField.onBlur"
+                          :model-value="localQuantities[field.key] ?? formatNumberInput(componentField.modelValue)"
+                          @update:model-value="(val) => {
+                            localQuantities[field.key] = formatNumberInput(String(val));
+                            const clean = Number(localQuantities[field.key].replace(/,/g, ''));
+                            form.setFieldValue(`details[${index}].quantity` as any, clean);
+                          }"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   </FormField>
                 </TableCell>
-                <TableCell class="text-right font-mono font-medium">
+                <TableCell class="text-right font-medium">
                   {{ formatCurrency(((form.values.details || [])[index]?.quantity || 0) * ((form.values.details || [])[index]?.price || 0)) }}
                 </TableCell>
                 <TableCell>
@@ -333,7 +358,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             <div class="w-full max-w-sm space-y-3">
               <div class="flex justify-between items-center text-lg font-bold">
                 <span>{{ $t('fields.grandTotal') }}:</span>
-                <span class="text-primary font-mono">{{ formatCurrency(grandTotal) }}</span>
+                <span class="text-primary">{{ formatCurrency(grandTotal) }}</span>
               </div>
             </div>
           </div>

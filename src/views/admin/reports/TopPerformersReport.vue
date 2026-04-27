@@ -262,7 +262,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf", target: "products" | 
                       <span class="font-bold text-sm">{{
                         item.productName
                       }}</span>
-                      <span class="text-[10px] text-muted-foreground font-mono uppercase tracking-tighter">{{
+                      <span class="text-[10px] text-muted-foreground uppercase tracking-tighter">{{
                         item.productCode
                       }}</span>
                     </div>

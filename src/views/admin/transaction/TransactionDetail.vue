@@ -99,11 +99,11 @@ onMounted(() => {
                     <div class="grid grid-cols-1 gap-3 mt-4">
                         <div class="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-muted-foreground/5 text-center">
                             <span class="text-xs font-bold text-muted-foreground uppercase tracking-wider">{{ $t('fields.beginningStock') }}</span>
-                            <span class="font-mono font-bold text-lg leading-none mt-1">{{ Math.trunc(transaction.beginningStock || 0) }}</span>
+                            <span class="font-bold text-lg leading-none mt-1">{{ Math.trunc(transaction.beginningStock || 0) }}</span>
                         </div>
                         <div class="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/20 text-center">
                             <span class="text-xs font-bold text-primary uppercase tracking-wider">{{ $t('fields.afterStock') }}</span>
-                            <span class="font-mono font-bold text-lg text-primary leading-none mt-1">{{ Math.trunc(transaction.afterStock || 0) }}</span>
+                            <span class="font-bold text-lg text-primary leading-none mt-1">{{ Math.trunc(transaction.afterStock || 0) }}</span>
                         </div>
                     </div>
                 </div>
@@ -134,7 +134,7 @@ onMounted(() => {
                 <div class="p-2 bg-muted rounded-lg"><Hash class="h-4 w-4 text-muted-foreground" /></div>
                 <div>
                   <p class="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">{{ $t('fields.transactionCode') }}</p>
-                  <code class="text-lg font-mono font-bold text-foreground tracking-tighter">{{ transaction.transactionCode }}</code>
+                  <code class="text-lg font-bold text-foreground tracking-tighter">{{ transaction.transactionCode }}</code>
                 </div>
               </div>
 
@@ -153,7 +153,7 @@ onMounted(() => {
                     <p class="text-[10px] font-black uppercase text-muted-foreground mb-3 tracking-[0.2em]">{{ $t('fields.quantity') }}</p>
                     <div class="flex items-baseline gap-2">
                         <component :is="getTypeInfo(transaction.transactionType).icon" class="h-5 w-5" :class="transaction.transactionType === TransactionType.IN ? 'text-green-600' : 'text-red-600'" />
-                        <span class="text-4xl font-mono font-black" :class="transaction.transactionType === TransactionType.IN ? 'text-green-600' : 'text-red-600'">
+                        <span class="text-4xl font-black" :class="transaction.transactionType === TransactionType.IN ? 'text-green-600' : 'text-red-600'">
                             {{ transaction.transactionType === TransactionType.OUT ? '-' : '+' }}{{ Math.trunc(transaction.quantity || 0) }}
                         </span>
                     </div>

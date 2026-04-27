@@ -97,7 +97,7 @@ onMounted(() => {
             <div>
               <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Receipt class="h-3.5 w-3.5" />{{ $t('modules.saleInvoices') }}</p>
               <div class="flex flex-wrap gap-1">
-                <Badge v-for="d in record.details" :key="d.id" variant="secondary" class="font-mono text-[10px] cursor-pointer hover:bg-muted transition-colors" @click="router.push(`/admin/sale-invoices/${d.saleInvoiceId}`)">
+                <Badge v-for="d in record.details" :key="d.id" variant="secondary" class="text-[10px] cursor-pointer hover:bg-muted transition-colors" @click="router.push(`/admin/sale-invoices/${d.saleInvoiceId}`)">
                   {{ d.saleInvoice?.code || `ID: ${d.saleInvoiceId}` }}
                 </Badge>
               </div>
@@ -119,7 +119,7 @@ onMounted(() => {
           </CardHeader>
           <CardContent class="pt-6">
             <div class="text-center">
-               <span class="text-3xl font-mono font-black text-success">{{ formatCurrency(record.paidAmount) }}</span>
+               <span class="text-3xl font-black text-success">{{ formatCurrency(record.paidAmount) }}</span>
             </div>
           </CardContent>
         </Card>
@@ -153,17 +153,27 @@ onMounted(() => {
                   <thead class="bg-muted text-muted-foreground">
                     <tr>
                       <th class="px-4 py-2 text-left font-medium">{{ $t('fields.code') }}</th>
+                      <th class="px-4 py-2 text-left font-medium">{{ $t('modules.product') }}</th>
                       <th class="px-4 py-2 text-right font-medium">{{ $t('fields.totalPrice') }}</th>
                       <th class="px-4 py-2 text-right font-medium">{{ $t('fields.paidAmount') }}</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y">
                     <tr v-for="d in record.details" :key="d.id" class="hover:bg-muted/50 transition-colors">
-                      <td class="px-4 py-2 font-mono text-primary cursor-pointer hover:underline" @click="router.push(`/admin/sale-invoices/${d.saleInvoiceId}`)">
+                      <td class="px-4 py-2 text-primary cursor-pointer hover:underline" @click="router.push(`/admin/sale-invoices/${d.saleInvoiceId}`)">
                         {{ d.saleInvoice?.code || `ID: ${d.saleInvoiceId}` }}
                       </td>
-                      <td class="px-4 py-2 text-right font-mono">{{ formatCurrency(d.saleInvoice?.totalPrice) }}</td>
-                      <td class="px-4 py-2 text-right font-mono text-success font-bold">{{ formatCurrency(d.paidAmount) }}</td>
+                      <td class="px-4 py-2">
+                        <div class="flex flex-wrap gap-1.5" v-if="d.saleInvoice?.details?.length">
+                          <Badge v-for="invDetail in d.saleInvoice.details" :key="invDetail.id" variant="secondary" class="font-medium text-xs py-0.5 px-2 border border-border/50 shadow-sm">
+                            {{ invDetail.product?.name || 'Unknown' }} 
+                            <span class="text-muted-foreground ml-1.5 border-l pl-1.5 border-muted-foreground/30">x{{ invDetail.quantity }}</span>
+                          </Badge>
+                        </div>
+                        <span v-else class="text-muted-foreground text-xs">---</span>
+                      </td>
+                      <td class="px-4 py-2 text-right">{{ formatCurrency(d.saleInvoice?.totalPrice) }}</td>
+                      <td class="px-4 py-2 text-right text-success font-bold">{{ formatCurrency(d.paidAmount) }}</td>
                     </tr>
                   </tbody>
                 </table>

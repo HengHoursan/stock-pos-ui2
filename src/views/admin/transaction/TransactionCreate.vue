@@ -262,11 +262,11 @@ onMounted(() => {
                     <div class="grid grid-cols-2 gap-4">
                         <div class="bg-muted/30 p-3 rounded-lg border border-muted-foreground/5 text-center">
                             <p class="text-[10px] uppercase text-muted-foreground font-bold mb-1">{{ $t('fields.currentStock') }}</p>
-                            <p class="text-xl font-mono font-bold">{{ selectedProduct.detail?.currentStock || 0 }}</p>
+                            <p class="text-xl font-bold">{{ selectedProduct.detail?.currentStock || 0 }}</p>
                         </div>
                         <div class="bg-primary/5 p-3 rounded-lg border border-primary/10 text-center">
                             <p class="text-[10px] uppercase text-primary font-bold mb-1">{{ $t('fields.afterStock') }}</p>
-                            <p class="text-xl font-mono font-bold text-primary">
+                            <p class="text-xl font-bold text-primary">
                                 {{ 
                                     form.values.transactionType === TransactionType.IN 
                                     ? (Number(selectedProduct.detail?.currentStock || 0) + Number(form.values.quantity || 0))

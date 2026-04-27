@@ -137,7 +137,7 @@ onMounted(() => {
           </CardHeader>
           <CardContent class="pt-6">
             <div class="text-center">
-              <span class="text-3xl font-mono font-black text-primary"></span>
+              <span class="text-3xl font-black text-primary"></span>
             </div>
           </CardContent>
         </Card>
@@ -172,8 +172,8 @@ onMounted(() => {
                       <div v-if="item.product?.code" class="text-xs text-muted-foreground mt-0.5">{{ item.product.code }}</div>
                     </TableCell>
                     <TableCell class="text-right font-medium">{{ Math.trunc(item.quantity || 0) }}</TableCell>
-                    <TableCell class="text-right font-mono">{{ formatCurrency(item.unitPrice) }}</TableCell>
-                    <TableCell class="text-right font-mono font-semibold">{{ formatCurrency(item.totalPrice) }}</TableCell>
+                    <TableCell class="text-right">{{ formatCurrency(item.unitPrice) }}</TableCell>
+                    <TableCell class="text-right font-semibold">{{ formatCurrency(item.totalPrice) }}</TableCell>
                   </TableRow>
                 </template>
                 <TableRow v-else>
@@ -189,7 +189,7 @@ onMounted(() => {
               <div class="w-full max-w-sm space-y-3">
                 <div class="flex justify-between items-center text-lg font-black pt-2 border-t border-primary/10">
                   <span class="text-foreground">{{ $t('fields.totalPrice') }}:</span>
-                  <span class="text-primary font-mono"></span>
+                  <span class="text-primary"></span>
                 </div>
               </div>
             </div>

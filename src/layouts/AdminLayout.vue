@@ -453,7 +453,7 @@ onMounted(() => {
                         class="cursor-pointer flex items-center gap-2.5 p-2 rounded-sm"
                         @click="currencyStore.setCurrency(curr)"
                       >
-                        <span class="font-mono text-xs font-bold text-muted-foreground w-4">{{ curr.symbol }}</span>
+                        <span class="text-xs font-bold text-muted-foreground w-4">{{ curr.symbol }}</span>
                         <span class="flex-1 text-sm">{{ curr.code }}</span>
                         <div v-if="currencyStore.activeCurrency?.id === curr.id" class="h-1.5 w-1.5 rounded-full bg-primary"></div>
                       </DropdownMenuItem>

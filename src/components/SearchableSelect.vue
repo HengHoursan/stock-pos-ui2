@@ -28,6 +28,7 @@ const props = defineProps<{
   options: Option[]
   placeholder?: string
   emptyMessage?: string
+  showAllOption?: boolean
   class?: string
 }>()
 
@@ -82,6 +83,7 @@ function clearSelection(e: Event) {
           <CommandGroup>
             <!-- Fixed "All" Option for Filters -->
             <CommandItem
+              v-if="props.showAllOption !== false"
               value="all"
               @select="handleSelect(null)"
               class="cursor-pointer"

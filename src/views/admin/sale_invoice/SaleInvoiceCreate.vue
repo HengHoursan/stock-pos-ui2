@@ -3,7 +3,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { ref, onMounted, computed,watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { toLocalISOString, formatCurrency } from "@/utils/format";
+import { toLocalISOString, formatCurrency, formatNumberInput } from "@/utils/format";
 import SearchableSelect from "@/components/SearchableSelect.vue";
 import CurrencyToggle from "@/components/CurrencyToggle.vue";
 import { useCurrencyStore } from "@/stores/currency";
@@ -82,13 +82,16 @@ onMounted(async () => {
       if (oRes.success && oRes.data) {
         form.setFieldValue("customerId", oRes.data.customerId);
         
-        const mappedDetails = (oRes.data.details || []).map(d => ({
-          productId: d.productId,
-          quantity: Number(d.quantity),
-          price: Number(d.totalPrice) / Number(d.quantity),
-          saleOrderId: oRes.data.id, // Explicitly use parent order ID
-          saleOrderDetailId: d.id
-        }));
+        const mappedDetails = (oRes.data.details || [])
+          .filter((d: any) => !d.isInvoiced)
+          .map((d: any) => ({
+            productId: d.productId,
+            quantity: Number(d.quantity),
+            price: Number(d.totalPrice) / Number(d.quantity),
+            isSelected: true,
+            saleOrderId: oRes.data.id, // Explicitly use parent order ID
+            saleOrderDetailId: d.id
+          }));
         
         form.setFieldValue("details", mappedDetails as any);
         toast.info(t('validation.loadedFromSource', { source: t('modules.saleOrder') }));
@@ -111,6 +114,7 @@ const formSchema = toTypedSchema(
         productId: z.number().min(1, t('validation.required', { field: t('modules.product') })),
         quantity: z.coerce.number().min(0.01, t('validation.min', { field: t('fields.quantity'), min: '0.01' })),
         price: z.coerce.number().min(0, t('validation.min', { field: t('fields.price'), min: '0' })),
+        isSelected: z.boolean().default(true),
         saleOrderId: z.number().optional().nullable(),
         saleOrderDetailId: z.number().optional().nullable(),
       })
@@ -137,6 +141,7 @@ function addProduct() {
     productId: 0,
     quantity: 1,
     price: 0,
+    isSelected: true,
   });
 }
 
@@ -147,17 +152,21 @@ function getProductPrice(productId: number): number {
 
 const grandTotal = computed(() => {
   return form.values.details?.reduce((acc, curr) => {
+    if (!curr.isSelected) return acc;
     return acc + (curr.quantity * curr.price);
   }, 0) || 0;
 });
 
 const currencySymbol = computed(() => currencyStore.activeCurrency?.symbol ?? '$');
-const localPaidAmount = ref(0);
+const localPaidAmount = ref("");
+const localPrices = ref<Record<string, string>>({});
+const localQuantities = ref<Record<string, string>>({});
 
 // Watch for manual local amount changes
 watch(localPaidAmount, (val) => {
+  const cleanVal = Number(String(val).replace(/,/g, ''));
   const rate = currencyStore.activeCurrency?.exchangeRate || 1;
-  const inUsd = val === 0 ? 0 : (val / rate);
+  const inUsd = cleanVal === 0 ? 0 : (cleanVal / rate);
   
   if (Math.abs((form.values.paidAmount || 0) - inUsd) > 0.001) {
     form.setFieldValue('paidAmount', inUsd);
@@ -168,8 +177,9 @@ watch(localPaidAmount, (val) => {
 watch(() => form.values.paidAmount, (newVal) => {
   const rate = currencyStore.activeCurrency?.exchangeRate || 1;
   const expectedLocal = Number(((newVal || 0) * rate).toFixed(2));
-  if (Math.abs(localPaidAmount.value - expectedLocal) > 0.01) {
-    localPaidAmount.value = expectedLocal;
+  const currentClean = Number(localPaidAmount.value.replace(/,/g, ''));
+  if (Math.abs(currentClean - expectedLocal) > 0.01) {
+    localPaidAmount.value = formatNumberInput(expectedLocal);
   }
 });
 
@@ -190,7 +200,7 @@ const onSubmit = form.handleSubmit(async (values) => {
       invoiceDate: new Date(values.invoiceDate).toISOString(),
       paidAmount: values.paidAmount,
       description: values.description,
-      details: values.details.map((d: any) => ({
+      details: (values.details as any[]).filter(d => d.isSelected).map((d: any) => ({
         productId: d.productId,
         quantity: Number(d.quantity),
         totalPrice: Math.round(Number(d.quantity) * Number(d.price) * 100) / 100,
@@ -306,7 +316,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             <div class="p-3 bg-muted/20 border rounded text-sm mb-4">
               <div class="flex justify-between items-center mb-1">
                 <span class="text-muted-foreground">{{ $t('fields.totalPrice') }}:</span>
-                <span class="font-mono font-bold text-foreground">
+                <span class="font-bold text-foreground">
                   {{ formatCurrency(grandTotal) }}
                 </span>
               </div>
@@ -318,16 +328,14 @@ const onSubmit = form.handleSubmit(async (values) => {
                 <FormControl>
                   <div class="relative">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{{ currencySymbol }}</span>
-                    <Input 
-                      type="number" 
-                      step="any" 
-                      min="0" 
-                      :name="componentField.name"
-                      @blur="componentField.onBlur"
-                      :model-value="localPaidAmount"
-                      @update:model-value="(val) => localPaidAmount = Number(val)"
-                      class="pl-9 font-mono font-bold text-lg text-success" 
-                    />
+                      <Input 
+                        type="text" 
+                        :name="componentField.name"
+                        @blur="componentField.onBlur"
+                        :model-value="localPaidAmount"
+                        @update:model-value="(val) => localPaidAmount = formatNumberInput(String(val))"
+                        class="pl-9 font-bold text-lg text-success" 
+                      />
                   </div>
                 </FormControl>
                 <FormMessage />
@@ -337,7 +345,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <div class="flex justify-between items-center pt-2 text-sm text-muted-foreground border-t mt-4">
               <span>{{ $t('fields.balanceDue') }}:</span>
-              <span class="font-mono" :class="(grandTotal - (form.values.paidAmount || 0)) > 0 ? 'text-destructive font-bold' : 'text-success'">
+              <span class="" :class="(grandTotal - (form.values.paidAmount || 0)) > 0 ? 'text-destructive font-bold' : 'text-success'">
                 {{ formatCurrency(Math.max(0, grandTotal - (form.values.paidAmount || 0))) }}
               </span>
             </div>
@@ -360,20 +368,35 @@ const onSubmit = form.handleSubmit(async (values) => {
             <Table>
               <TableHeader class="bg-muted/30">
                 <TableRow>
+                  <TableHead class="w-[5%]"></TableHead>
                   <TableHead class="w-[40%]">{{ $t('modules.product') }}</TableHead>
                   <TableHead class="w-[20%] text-right">{{ $t('fields.sellingPrice') }}</TableHead>
                   <TableHead class="w-[15%] text-right">{{ $t('fields.quantity') }}</TableHead>
-                  <TableHead class="w-[20%] text-right">{{ $t('fields.rowTotal') }}</TableHead>
+                  <TableHead class="w-[15%] text-right">{{ $t('fields.rowTotal') }}</TableHead>
                   <TableHead class="w-[5%]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 <TableRow v-if="fields.length === 0">
-                  <TableCell colspan="5" class="text-center py-8 text-muted-foreground italic">
+                  <TableCell colspan="6" class="text-center py-8 text-muted-foreground italic">
                     {{ $t('common.noData') }}
                   </TableCell>
                 </TableRow>
-                <TableRow v-for="(field, index) in fields" :key="field.key">
+                <TableRow v-for="(field, index) in fields" :key="field.key" :class="!((form.values.details || [])[index] as any).isSelected ? 'opacity-50 grayscale' : ''">
+                  <TableCell>
+                    <FormField v-slot="{ value, handleChange }" :name="`details[${index}].isSelected`">
+                      <FormItem class="mb-0">
+                        <FormControl>
+                          <input 
+                            type="checkbox" 
+                            :checked="value" 
+                            @change="handleChange(!value)"
+                            class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    </FormField>
+                  </TableCell>
                   <TableCell>
                     <FormField v-slot="{ value, handleChange }" :name="`details[${index}].productId`">
                       <FormItem class="mb-0">
@@ -388,6 +411,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                             :options="productOptions"
                             :placeholder="$t('fields.selectOption')"
                             :empty-message="$t('crud.noResults')"
+                            :disabled="!((form.values.details || [])[index] as any).isSelected"
                           />
                         </FormControl>
                         <FormMessage />
@@ -398,7 +422,19 @@ const onSubmit = form.handleSubmit(async (values) => {
                     <FormField v-slot="{ componentField }" :name="`details[${index}].price`">
                       <FormItem class="mb-0">
                         <FormControl>
-                          <Input type="number" step="any" min="0" class="text-right" v-bind="componentField" />
+                          <Input 
+                            type="text" 
+                            class="text-right" 
+                            :name="componentField.name"
+                            @blur="componentField.onBlur"
+                            :disabled="!((form.values.details || [])[index] as any).isSelected" 
+                            :model-value="localPrices[field.key] ?? formatNumberInput(componentField.modelValue)"
+                            @update:model-value="(val) => {
+                              localPrices[field.key] = formatNumberInput(String(val));
+                              const clean = Number(localPrices[field.key].replace(/,/g, ''));
+                              form.setFieldValue(`details[${index}].price`, clean);
+                            }"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -408,13 +444,25 @@ const onSubmit = form.handleSubmit(async (values) => {
                     <FormField v-slot="{ componentField }" :name="`details[${index}].quantity`">
                       <FormItem class="mb-0">
                         <FormControl>
-                          <Input type="number" step="any" min="0.01" class="text-right" v-bind="componentField" />
+                          <Input 
+                            type="text" 
+                            class="text-right" 
+                            :name="componentField.name"
+                            @blur="componentField.onBlur"
+                            :disabled="!((form.values.details || [])[index] as any).isSelected" 
+                            :model-value="localQuantities[field.key] ?? formatNumberInput(componentField.modelValue)"
+                            @update:model-value="(val) => {
+                              localQuantities[field.key] = formatNumberInput(String(val));
+                              const clean = Number(localQuantities[field.key].replace(/,/g, ''));
+                              form.setFieldValue(`details[${index}].quantity`, clean);
+                            }"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     </FormField>
                   </TableCell>
-                  <TableCell class="text-right font-mono font-medium">
+                  <TableCell class="text-right font-medium">
                     {{ formatCurrency(((form.values.details || [])[index]?.quantity || 0) * ((form.values.details || [])[index]?.price || 0)) }}
                   </TableCell>
                   <TableCell>
@@ -428,7 +476,7 @@ const onSubmit = form.handleSubmit(async (values) => {
           </CardContent>
           <CardFooter class="flex justify-end gap-2 border-t px-6 py-4 bg-muted/5 mt-4">
             <Button variant="outline" type="button" @click="router.back()" :disabled="submitting">{{ $t('crud.cancel') }}</Button>
-            <Button type="submit" :disabled="submitting || fields.length === 0">
+            <Button type="submit" :disabled="submitting || fields.length === 0 || !form.values.details?.some((d: any) => d.isSelected)">
               <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
               {{ $t('crud.save') }}
             </Button>

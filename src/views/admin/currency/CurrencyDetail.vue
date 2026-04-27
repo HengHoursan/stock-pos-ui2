@@ -143,7 +143,7 @@ onMounted(() => {
                 <div class="flex items-center text-sm text-muted-foreground">
                   <BadgeCent class="mr-2 h-4 w-4" />{{ $t("fields.code") }}
                 </div>
-                <p class="font-medium text-base font-mono">{{ currency.code }}</p>
+                <p class="font-medium text-base">{{ currency.code }}</p>
               </div>
 
               <div class="space-y-1">

@@ -315,8 +315,8 @@ onMounted(() => {
       />
     </div>
 
-    <div class="rounded-md border bg-card overflow-hidden shadow-sm">
-      <Table>
+    <div class="rounded-md border bg-card overflow-auto shadow-sm max-h-[700px] scrollbar-thin scrollbar-thumb-muted-foreground/20">
+      <Table class="min-w-[1200px]">
         <TableHeader>
           <TableRow>
             <TableHead class="w-[20px]">#</TableHead>
@@ -368,7 +368,7 @@ onMounted(() => {
               </TableCell>
               <TableCell>
                 <code
-                  class="bg-muted px-2 py-0.5 rounded text-xs font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
+                  class="bg-muted px-2 py-0.5 rounded text-xs font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
                   >{{ transaction.transactionCode }}</code
                 >
               </TableCell>
@@ -386,11 +386,11 @@ onMounted(() => {
               <TableCell class="font-bold text-base text-foreground/90">
                 {{ transaction.product?.name || "-" }}
               </TableCell>
-              <TableCell class="text-right text-muted-foreground font-mono text-base">
+              <TableCell class="text-right text-muted-foreground text-base">
                 {{ Math.trunc(transaction.beginningStock || 0) }}
               </TableCell>
               <TableCell
-                class="text-right font-bold font-mono text-base"
+                class="text-right font-bold text-base"
                 :class="
                   transaction.transactionType === TransactionType.IN
                     ? 'text-green-600'
@@ -405,7 +405,7 @@ onMounted(() => {
                     : "+"
                 }}{{ Math.trunc(transaction.quantity || 0) }}
               </TableCell>
-              <TableCell class="text-right font-bold text-foreground font-mono text-base">
+              <TableCell class="text-right font-bold text-foreground text-base">
                 {{ Math.trunc(transaction.afterStock || 0) }}
               </TableCell>
               <TableCell class="text-right">

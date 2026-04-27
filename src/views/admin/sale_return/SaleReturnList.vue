@@ -308,7 +308,7 @@ onMounted(() => {
                 {{ (pagination.page - 1) * pagination.limit + index + 1 }}
               </TableCell>
               <TableCell>
-                <code class="bg-muted px-2 py-0.5 rounded text-xs font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase">
+                <code class="bg-muted px-2 py-0.5 rounded text-xs font-bold text-foreground/70 border border-muted-foreground/10 uppercase">
                   {{ record.code }}
                 </code>
               </TableCell>
@@ -318,7 +318,7 @@ onMounted(() => {
               <TableCell class="text-foreground/90">
                 {{ formatDateTime(record.returnDate) }}
               </TableCell>
-              <TableCell class="text-right font-mono text-primary font-semibold">
+              <TableCell class="text-right text-primary font-semibold">
                 {{ formatCurrency(record.totalPrice) }}
               </TableCell>
               <TableCell class="text-center">

@@ -166,9 +166,9 @@ onMounted(() => {
                         {{ $t('fields.fromQuotation') }} #{{ item.purchaseQuotationId }}
                       </div>
                     </TableCell>
-                    <TableCell class="text-right font-mono">{{ formatCurrency(item.totalPrice / item.quantity) }}</TableCell>
+                    <TableCell class="text-right">{{ formatCurrency(item.totalPrice / item.quantity) }}</TableCell>
                     <TableCell class="text-center font-medium">{{ Math.trunc(item.quantity || 0) }}</TableCell>
-                    <TableCell class="text-right font-mono font-semibold">{{ formatCurrency(item.totalPrice) }}</TableCell>
+                    <TableCell class="text-right font-semibold">{{ formatCurrency(item.totalPrice) }}</TableCell>
                   </TableRow>
                 </template>
                 <TableRow v-else>
@@ -181,7 +181,7 @@ onMounted(() => {
               <div class="w-full max-w-sm space-y-3">
                 <div class="flex justify-between items-center text-lg font-bold">
                   <span>{{ $t('fields.grandTotal') }}:</span>
-                  <span class="text-primary font-mono">{{ formatCurrency(record.totalPrice) }}</span>
+                  <span class="text-primary">{{ formatCurrency(record.totalPrice) }}</span>
                 </div>
               </div>
             </div>

@@ -3,7 +3,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { toLocalISOString } from "@/utils/format";
+import { toLocalISOString, formatNumberInput } from "@/utils/format";
 import SearchableSelect from "@/components/SearchableSelect.vue";
 import { useForm, useFieldArray } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
@@ -175,6 +175,9 @@ const grandTotal = computed(() => {
     }, 0) || 0
   );
 });
+
+const localPrices = ref<Record<string, string>>({});
+const localQuantities = ref<Record<string, string>>({});
 
 const onSubmit = form.handleSubmit(async (values) => {
   submitting.value = true;
@@ -371,11 +374,16 @@ const onSubmit = form.handleSubmit(async (values) => {
                       <FormItem class="mb-0">
                         <FormControl>
                           <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
+                            type="text"
                             class="text-right"
-                            v-bind="componentField"
+                            :name="componentField.name"
+                            @blur="componentField.onBlur"
+                            :model-value="localPrices[field.key] ?? formatNumberInput(componentField.modelValue)"
+                            @update:model-value="(val) => {
+                              localPrices[field.key] = formatNumberInput(String(val));
+                              const clean = Number(localPrices[field.key].replace(/,/g, ''));
+                              form.setFieldValue(`details[${index}].price` as any, clean);
+                            }"
                           />
                         </FormControl>
                         <FormMessage />
@@ -390,18 +398,23 @@ const onSubmit = form.handleSubmit(async (values) => {
                       <FormItem class="mb-0">
                         <FormControl>
                           <Input
-                            type="number"
-                            step="0.01"
-                            min="0.01"
+                            type="text"
                             class="text-right"
-                            v-bind="componentField"
+                            :name="componentField.name"
+                            @blur="componentField.onBlur"
+                            :model-value="localQuantities[field.key] ?? formatNumberInput(componentField.modelValue)"
+                            @update:model-value="(val) => {
+                              localQuantities[field.key] = formatNumberInput(String(val));
+                              const clean = Number(localQuantities[field.key].replace(/,/g, ''));
+                              form.setFieldValue(`details[${index}].quantity` as any, clean);
+                            }"
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     </FormField>
                   </TableCell>
-                  <TableCell class="text-right font-mono font-medium">
+                  <TableCell class="text-right font-medium">
                     {{
                       (
                         ((form.values.details || [])[index]?.quantity || 0) *
@@ -434,7 +447,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                   class="flex justify-between items-center text-lg font-bold"
                 >
                   <span>{{ $t("fields.grandTotal") }}:</span>
-                  <span class="text-primary font-mono"
+                  <span class="text-primary"
                     >${{
                       grandTotal.toLocaleString(undefined, {
                         minimumFractionDigits: 2,

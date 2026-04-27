@@ -59,7 +59,8 @@ import {
   RefreshCw,
   Loader2,
   FileText,
-  Ban
+  Ban,
+  CreditCard,
 } from "lucide-vue-next";
 import DateRangePicker from "@/components/DateRangePicker.vue";
 import { PurchaseInvoiceService } from "@/services/purchase_invoice/purchase_invoice.service";
@@ -279,8 +280,8 @@ onMounted(() => {
       </Button>
     </div>
 
-    <div class="rounded-md border bg-card overflow-hidden shadow-sm">
-      <Table>
+    <div class="rounded-md border bg-card overflow-auto shadow-sm max-h-[700px] scrollbar-thin scrollbar-thumb-muted-foreground/20">
+      <Table class="min-w-[1200px]">
         <TableHeader>
           <TableRow>
             <TableHead class="w-[50px]">#</TableHead>
@@ -293,6 +294,8 @@ onMounted(() => {
             </TableHead>
             <TableHead class="text-center">{{ $t("fields.totalLine") }}</TableHead>
             <TableHead class="text-right">{{ $t("fields.totalPrice") }}</TableHead>
+            <TableHead class="text-right">{{ $t("fields.paidAmount") }}</TableHead>
+            <TableHead class="text-right">{{ $t("fields.balanceDue") }}</TableHead>
             <TableHead class="text-center">{{ $t("fields.status") }}</TableHead>
             <TableHead class="text-right">{{ $t("crud.actions") }}</TableHead>
           </TableRow>
@@ -312,7 +315,7 @@ onMounted(() => {
                 {{ (pagination.page - 1) * pagination.limit + index + 1 }}
               </TableCell>
               <TableCell>
-                <code class="bg-muted px-2 py-0.5 rounded text-xs font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase">
+                <code class="bg-muted px-2 py-0.5 rounded text-xs font-bold text-foreground/70 border border-muted-foreground/10 uppercase">
                   {{ record.code }}
                 </code>
               </TableCell>
@@ -323,10 +326,26 @@ onMounted(() => {
                 {{ formatDateTime(record.invoiceDate) }}
               </TableCell>
               <TableCell class="text-center">
-                {{ Math.trunc(record.totalLine || 0) }} {{ $t('fields.items') }}
+                <div class="flex flex-col items-center">
+                  <span class="font-bold">{{ Math.trunc(record.totalLine || 0) }} {{ $t('fields.items') }}</span>
+                  <template v-if="record.details?.[0]?.purchaseOrder">
+                    <span class="text-xs text-muted-foreground mt-1" v-if="(record.details[0].purchaseOrder.totalLine - record.details[0].purchaseOrder.totalCloseLine) > 0">
+                      {{ Math.trunc(record.details[0].purchaseOrder.totalLine - record.details[0].purchaseOrder.totalCloseLine) }} {{ $t('fields.remaining') }}
+                    </span>
+                    <span v-else class="text-xs text-emerald-600/70 mt-1 font-medium italic">
+                      {{ $t('fields.fullyFulfilled') }}
+                    </span>
+                  </template>
+                </div>
               </TableCell>
-              <TableCell class="text-right font-mono text-primary font-semibold">
+              <TableCell class="text-right text-primary font-semibold">
                 {{ formatCurrency(record.totalPrice) }}
+              </TableCell>
+              <TableCell class="text-right text-success font-medium">
+                {{ formatCurrency(record.paidAmount) }}
+              </TableCell>
+              <TableCell class="text-right font-bold" :class="(record.totalPrice - record.paidAmount) > 0 ? 'text-destructive' : 'text-muted-foreground/50'">
+                {{ (record.totalPrice - record.paidAmount) > 0 ? formatCurrency(Math.max(0, record.totalPrice - record.paidAmount)) : '0.00' }}
               </TableCell>
               <TableCell class="text-center">
                 <Badge :variant="getStatusBadge(record).variant as any" class="font-medium text-xs px-2 py-0">
@@ -349,6 +368,9 @@ onMounted(() => {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem @click="router.push(`/admin/purchase-invoices/${record.id}`)" class="cursor-pointer">
                       <Eye class="mr-2 h-4 w-4 opacity-70" />{{ $t("crud.viewBtn") }}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem v-if="!record.isCancel && (record.totalPrice - record.paidAmount) > 0" @click="router.push(`/admin/purchase-payments/create?invoiceId=${record.id}`)" class="cursor-pointer">
+                      <CreditCard class="mr-2 h-4 w-4 opacity-70" />{{ $t("actions.createPayment") }}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem class="text-destructive focus:text-destructive cursor-pointer font-medium" @click="openDeleteDialog(record.id)">

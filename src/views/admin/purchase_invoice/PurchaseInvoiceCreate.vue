@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useI18n } from "vue-i18n";
 const { t } = useI18n();
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { toLocalISOString } from "@/utils/format";
+import { toLocalISOString, formatCurrency, formatNumberInput } from "@/utils/format";
 import SearchableSelect from "@/components/SearchableSelect.vue";
 
 import { useForm, useFieldArray } from "vee-validate";
@@ -56,6 +56,7 @@ import { PurchaseInvoiceService } from "@/services/purchase_invoice/purchase_inv
 import { PurchaseOrderService } from "@/services/purchase_order/purchase_order.service";
 import { SupplierService } from "@/services/supplier/supplier.service";
 import { ProductService } from "@/services/product/product.service";
+import { useCurrencyStore } from "@/stores/currency";
 import type { Product, Supplier } from "@/types";
 import { PaymentMethod } from "@/types/enums";
 import { toast } from "vue-sonner";
@@ -66,6 +67,7 @@ const piService = new PurchaseInvoiceService();
 const poService = new PurchaseOrderService();
 const supplierService = new SupplierService();
 const productService = new ProductService();
+const currencyStore = useCurrencyStore();
 
 const submitting = ref(false);
 const products = ref<Product[]>([]);
@@ -78,6 +80,32 @@ const supplierOptions = computed(() =>
 const productOptions = computed(() =>
   products.value.map((p) => ({ label: `[${p.code}] ${p.name}`, value: p.id })),
 );
+
+const currencySymbol = computed(() => currencyStore.activeCurrency?.symbol ?? '$');
+const localPaidAmount = ref("");
+const localPrices = ref<Record<string, string>>({});
+const localQuantities = ref<Record<string, string>>({});
+
+// Watch for manual local amount changes
+watch(localPaidAmount, (val) => {
+  const cleanVal = Number(String(val).replace(/,/g, ''));
+  const rate = currencyStore.activeCurrency?.exchangeRate || 1;
+  const inUsd = cleanVal === 0 ? 0 : (cleanVal / rate);
+  
+  if (Math.abs((form.values.paidAmount || 0) - inUsd) > 0.001) {
+    form.setFieldValue('paidAmount', inUsd);
+  }
+});
+
+// Watch for base currency changes (e.g. from loading from source)
+watch(() => form.values.paidAmount, (newVal) => {
+  const rate = currencyStore.activeCurrency?.exchangeRate || 1;
+  const expectedLocal = Number(((newVal || 0) * rate).toFixed(2));
+  const currentClean = Number(localPaidAmount.value.replace(/,/g, ''));
+  if (Math.abs(currentClean - expectedLocal) > 0.01) {
+    localPaidAmount.value = formatNumberInput(String(expectedLocal));
+  }
+});
 
 onMounted(async () => {
   try {
@@ -95,13 +123,15 @@ onMounted(async () => {
       if (oRes.success && oRes.data) {
         form.setFieldValue("supplierId", oRes.data.supplierId);
 
-        const mappedDetails = (oRes.data.details || []).map((d) => ({
-          productId: d.productId,
-          quantity: Number(d.quantity),
-          price: Number(d.totalPrice) / Number(d.quantity),
-          purchaseOrderId: oRes.data.id, // Explicitly use parent order ID
-          purchaseOrderDetailId: d.id,
-        }));
+        const mappedDetails = (oRes.data.details || [])
+          .filter((d: any) => !d.isInvoiced)
+          .map((d: any) => ({
+            productId: d.productId,
+            quantity: Number(d.quantity),
+            price: Number(d.totalPrice) / Number(d.quantity),
+            purchaseOrderId: oRes.data.id, // Explicitly use parent order ID
+            purchaseOrderDetailId: d.id,
+          }));
 
         form.setFieldValue("details", mappedDetails as any);
         toast.info(
@@ -332,9 +362,9 @@ const onSubmit = form.handleSubmit(async (values) => {
                 <span class="text-muted-foreground"
                   >{{ $t("fields.totalPrice") }}:</span
                 >
-                <span class="font-mono font-bold text-foreground">
-                  ${{
-                    grandTotal.toLocaleString(undefined, {
+                <span class="font-bold text-foreground">
+                  {{ currencySymbol }}{{
+                    (grandTotal * (currencyStore.activeCurrency?.exchangeRate || 1)).toLocaleString(undefined, {
                       minimumFractionDigits: 2,
                     })
                   }}
@@ -342,16 +372,19 @@ const onSubmit = form.handleSubmit(async (values) => {
               </div>
             </div>
 
-            <FormField v-slot="{ componentField }" name="paidAmount">
+            <FormField name="paidAmount">
               <FormItem>
                 <FormLabel>{{ $t("fields.paidAmount") }}</FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    v-bind="componentField"
-                  />
+                  <div class="relative">
+                    <span class="absolute left-3 top-2.5 text-sm text-muted-foreground">{{ currencySymbol }}</span>
+                    <Input
+                      type="text"
+                      class="pl-7"
+                      :value="localPaidAmount"
+                      @input="(e: any) => localPaidAmount = formatNumberInput(String(e.target.value))"
+                    />
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -390,17 +423,17 @@ const onSubmit = form.handleSubmit(async (values) => {
             >
               <span>{{ $t("fields.balanceDue") }}:</span>
               <span
-                class="font-mono"
+                class=""
                 :class="
                   grandTotal - (form.values.paidAmount || 0) > 0
                     ? 'text-destructive font-bold'
                     : 'text-success'
                 "
               >
-                ${{
+                {{ currencySymbol }}{{
                   Math.max(
                     0,
-                    grandTotal - (form.values.paidAmount || 0),
+                    (grandTotal - (form.values.paidAmount || 0)) * (currencyStore.activeCurrency?.exchangeRate || 1),
                   ).toLocaleString(undefined, { minimumFractionDigits: 2 })
                 }}
               </span>
@@ -492,11 +525,16 @@ const onSubmit = form.handleSubmit(async (values) => {
                       <FormItem class="mb-0">
                         <FormControl>
                           <Input
-                            type="number"
-                            step="any"
-                            min="0"
+                            type="text"
                             class="text-right"
-                            v-bind="componentField"
+                            :name="componentField.name"
+                            @blur="componentField.onBlur"
+                            :model-value="localPrices[field.key] ?? formatNumberInput(componentField.modelValue)"
+                            @update:model-value="(val) => {
+                              localPrices[field.key] = formatNumberInput(String(val));
+                              const clean = Number(localPrices[field.key].replace(/,/g, ''));
+                              form.setFieldValue(`details[${index}].price` as any, clean);
+                            }"
                           />
                         </FormControl>
                         <FormMessage />
@@ -511,18 +549,23 @@ const onSubmit = form.handleSubmit(async (values) => {
                       <FormItem class="mb-0">
                         <FormControl>
                           <Input
-                            type="number"
-                            step="any"
-                            min="0.01"
+                            type="text"
                             class="text-right"
-                            v-bind="componentField"
+                            :name="componentField.name"
+                            @blur="componentField.onBlur"
+                            :model-value="localQuantities[field.key] ?? formatNumberInput(componentField.modelValue)"
+                            @update:model-value="(val) => {
+                              localQuantities[field.key] = formatNumberInput(String(val));
+                              const clean = Number(localQuantities[field.key].replace(/,/g, ''));
+                              form.setFieldValue(`details[${index}].quantity` as any, clean);
+                            }"
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     </FormField>
                   </TableCell>
-                  <TableCell class="text-right font-mono font-medium">
+                  <TableCell class="text-right font-medium">
                     {{
                       (
                         ((form.values.details || [])[index]?.quantity || 0) *

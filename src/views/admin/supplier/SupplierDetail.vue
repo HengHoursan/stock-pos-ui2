@@ -170,7 +170,7 @@ onMounted(() => {
                 <div class="flex items-center text-sm text-muted-foreground">
                   <Phone class="mr-2 h-4 w-4" />{{ $t("fields.phoneNumber") }}
                 </div>
-                <p class="font-medium text-base font-mono">{{ supplier.phoneNumber || "-" }}</p>
+                <p class="font-medium text-base">{{ supplier.phoneNumber || "-" }}</p>
               </div>
 
               <div class="sm:col-span-2 space-y-1">

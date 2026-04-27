@@ -3,7 +3,8 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { toLocalISOString, formatCurrency } from "@/utils/format";
+import { toLocalISOString, formatCurrency, formatNumberInput } from "@/utils/format";
+import CurrencyToggle from "@/components/CurrencyToggle.vue";
 import { useCurrencyStore } from "@/stores/currency";
 
 import { useForm } from "vee-validate";
@@ -122,12 +123,12 @@ watch(() => form.values.purchaseInvoiceId, (newId) => {
       const baseAmt = Number((inv.totalPrice - inv.paidAmount).toFixed(2));
       form.setFieldValue("amount", baseAmt);
       const rate = currencyStore.activeCurrency?.exchangeRate || 1;
-      localAmount.value = Number((baseAmt * rate).toFixed(2));
+      localAmount.value = formatNumberInput((baseAmt * rate).toFixed(2));
     }
   } else {
     selectedInvoice.value = null;
     form.setFieldValue("amount", 0);
-    localAmount.value = 0;
+    localAmount.value = "";
   }
 });
 
@@ -136,11 +137,12 @@ const remainingBalance = computed(() => {
   return selectedInvoice.value.totalPrice - selectedInvoice.value.paidAmount;
 });
 
-const localAmount = ref(0);
+const localAmount = ref("");
 
 watch(localAmount, (val) => {
+  const cleanVal = Number(String(val).replace(/,/g, ''));
   const rate = currencyStore.activeCurrency?.exchangeRate || 1;
-  const inUsd = val === 0 ? 0 : (val / rate);
+  const inUsd = cleanVal === 0 ? 0 : (cleanVal / rate);
   
   if (form.values.amount !== inUsd) {
     form.setFieldValue('amount', inUsd);
@@ -180,24 +182,26 @@ const onSubmit = form.handleSubmit(async (values) => {
 
 <template>
   <div class="space-y-4">
-    <div class="flex items-center gap-4">
-      <Button variant="outline" size="icon" @click="router.back()">
-        <ChevronLeft class="h-4 w-4" />
-      </Button>
-      <div>
-        <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.createBtn') }} {{ $t('modules.purchasePayment') }}</h2>
-        <p class="text-muted-foreground text-sm flex items-center mt-1">
-          <Banknote class="w-4 h-4 mr-1.5 opacity-50"/> 
-          {{ $t('fields.paymentStockUpdateInfo') }}
-        </p>
+    <div class="flex items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <Button variant="outline" size="icon" @click="router.back()">
+          <ChevronLeft class="h-4 w-4" />
+        </Button>
+        <div>
+          <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.createBtn') }} {{ $t('modules.purchasePayment') }}</h2>
+          <p class="text-muted-foreground text-sm flex items-center mt-1">
+            <Banknote class="w-4 h-4 mr-1.5 opacity-50"/> 
+            {{ $t('fields.paymentStockUpdateInfo') }}
+          </p>
+        </div>
       </div>
+      <CurrencyToggle />
     </div>
 
-    <form @submit="onSubmit">
-      <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+    <form @submit="onSubmit" class="w-full">
         
         <!-- Transaction Info -->
-        <Card class="md:col-span-8 shadow-sm border-muted-foreground/10">
+        <Card class="shadow-sm border-muted-foreground/10">
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2">
               <FileText class="h-5 w-5 text-primary" />
@@ -220,8 +224,23 @@ const onSubmit = form.handleSubmit(async (values) => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem v-for="i in invoices" :key="i.id" :value="String(i.id)">
-                        {{ i.code }} - {{ i.supplier?.name }} ({{ formatCurrency(i.totalPrice - i.paidAmount) }} balance)
+                      <SelectItem
+                        v-for="i in invoices"
+                        :key="i.id"
+                        :value="String(i.id)"
+                      >
+                        <div class="flex justify-between w-full">
+                          <div class="flex flex-col text-left">
+                            <span class="font-bold">{{ i.code }} - {{ i.supplier?.name }}</span>
+                            <span v-if="i.details?.[0]?.purchaseOrder?.code" class="text-[10px] text-muted-foreground mt-0.5">
+                              #{{ i.details[0].purchaseOrder.code }}
+                            </span>
+                          </div>
+                          <span class="text-muted-foreground ml-4">
+                            {{ formatCurrency(i.totalPrice - i.paidAmount) }} 
+                            {{ $t('fields.balance') }}
+                          </span>
+                        </div>
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -248,14 +267,12 @@ const onSubmit = form.handleSubmit(async (values) => {
                     <div class="relative">
                       <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{{ currencySymbol }}</span>
                       <Input 
-                        type="number" 
-                        step="0.01" 
-                        min="0" 
+                        type="text" 
                         :name="componentField.name"
                         @blur="componentField.onBlur"
                         :model-value="localAmount"
-                        @update:model-value="(val) => localAmount = Number(val)"
-                        class="pl-9 font-mono font-bold text-lg text-success" 
+                        @update:model-value="(val) => localAmount = formatNumberInput(String(val))"
+                        class="pl-9 font-bold text-lg text-success" 
                       />
                     </div>
                   </FormControl>
@@ -273,6 +290,55 @@ const onSubmit = form.handleSubmit(async (values) => {
                 <FormMessage />
               </FormItem>
             </FormField>
+
+            <!-- Integrated Summary Section -->
+            <div v-if="selectedInvoice" class="mt-8 pt-8 border-t space-y-6">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <!-- Left: Balance Info -->
+                <div class="space-y-3">
+                  <h3 class="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                    <History class="h-4 w-4" /> {{ $t('fields.balanceInfo') }}
+                  </h3>
+                  <div class="space-y-2 text-sm">
+                    <div class="flex justify-between">
+                      <span class="text-muted-foreground">{{ $t('fields.totalPrice') }}:</span>
+                      <span class="font-semibold">{{ formatCurrency(selectedInvoice.totalPrice) }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="text-muted-foreground">{{ $t('fields.totalPaid') }}:</span>
+                      <span class="font-semibold text-success">{{ formatCurrency(selectedInvoice.paidAmount) }}</span>
+                    </div>
+                    <div class="flex justify-between pt-2 border-t font-bold">
+                      <span>{{ $t('fields.balanceDue') }}:</span>
+                      <span class="font-bold text-destructive">{{ formatCurrency(remainingBalance) }}</span>
+                    </div>
+                    <!-- Remaining items note -->
+                    <div v-if="selectedInvoice.details?.[0]?.purchaseOrder" class="pt-2">
+                       <p class="text-xs text-orange-600 font-medium">
+                        * {{ $t('modules.purchaseOrder') }} #{{ selectedInvoice.details[0].purchaseOrder.code }} 
+                        <span v-if="(selectedInvoice.details[0].purchaseOrder.totalLine - selectedInvoice.details[0].purchaseOrder.totalCloseLine) > 0">
+                           {{ $t('fields.has') }} {{ Math.trunc(selectedInvoice.details[0].purchaseOrder.totalLine - selectedInvoice.details[0].purchaseOrder.totalCloseLine) }} {{ $t('fields.remaining') }}
+                        </span>
+                        <span v-else>
+                           {{ $t('fields.fullyFulfilled') }}
+                        </span>
+                       </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right: Final Payment Preview -->
+                <div class="bg-muted/30 p-6 rounded-xl border border-muted-foreground/10 flex flex-col justify-center items-center text-center">
+                  <p class="text-xs uppercase font-bold text-muted-foreground mb-2">{{ $t('fields.paymentAmount') }}</p>
+                  <div class="text-4xl font-bold text-primary tracking-tight">
+                    {{ currencySymbol }}{{ localAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                  </div>
+                  <p v-if="currencySymbol !== '$'" class="text-xs text-muted-foreground mt-1 uppercase font-bold">
+                    ${{ form.values.amount.toFixed(2) }}
+                  </p>
+                </div>
+              </div>
+            </div>
           </CardContent>
           <CardFooter class="flex justify-end gap-2 border-t pt-4">
             <Button variant="outline" type="button" @click="router.back()" :disabled="submitting">{{ $t('crud.cancel') }}</Button>
@@ -283,55 +349,6 @@ const onSubmit = form.handleSubmit(async (values) => {
           </CardFooter>
         </Card>
 
-        <!-- Summary sidebar -->
-        <div class="md:col-span-4 space-y-6">
-          <Card v-if="selectedInvoice" class="shadow-sm border-primary/20 bg-primary/5">
-            <CardHeader class="pb-3 border-b border-primary/10">
-              <CardTitle class="text-lg flex items-center gap-2 text-primary">
-                <History class="h-5 w-5" />
-                {{ $t('fields.balanceInfo') }}
-              </CardTitle>
-            </CardHeader>
-            <CardContent class="pt-6 space-y-4 text-sm">
-              <div class="flex justify-between">
-                <span class="text-muted-foreground">{{ $t('fields.totalPrice') }}:</span>
-                <span class="font-mono font-bold">{{ formatCurrency(selectedInvoice.totalPrice) }}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-muted-foreground">{{ $t('fields.totalPaid') }}:</span>
-                <span class="font-mono text-success font-bold">{{ formatCurrency(selectedInvoice.paidAmount) }}</span>
-              </div>
-              <div class="pt-4 border-t border-primary/10 flex justify-between text-lg">
-                <span class="font-bold">{{ $t('fields.balanceDue') }}:</span>
-                <span class="font-mono font-black text-destructive">{{ formatCurrency(remainingBalance) }}</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card class="shadow-sm border-muted-foreground/10">
-            <CardHeader class="pb-3 border-b bg-muted/5">
-              <CardTitle class="text-lg flex items-center gap-2">
-                <CreditCard class="h-5 w-5 text-primary" />
-                {{ $t('fields.newPayment') }}
-              </CardTitle>
-            </CardHeader>
-            <CardContent class="pt-6">
-              <div class="text-center p-6 bg-muted/20 border rounded-lg">
-                <p class="text-xs uppercase text-muted-foreground font-bold mb-2">{{ $t('fields.paymentAmount') }}</p>
-                <div class="flex flex-col items-center">
-                  <span class="text-4xl font-mono font-black text-success">
-                    {{ currencySymbol }}{{ localAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
-                  </span>
-                  <span v-if="currencySymbol !== '$'" class="text-xs text-muted-foreground mt-1 font-mono uppercase">
-                    ≈ {{ formatCurrency(form.values.amount) }}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-      </div>
-    </form>
-  </div>
+      </form>
+    </div>
 </template>

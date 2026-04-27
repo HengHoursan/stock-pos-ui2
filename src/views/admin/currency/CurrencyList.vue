@@ -289,28 +289,23 @@ onMounted(() => {
               </TableCell>
               <TableCell>
                 <code
-                  class="bg-muted px-2 py-0.5 rounded text-xs font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
+                  class="bg-muted px-2 py-0.5 rounded text-xs font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
                   >
                   {{ currency.code }}
                 </code>
               </TableCell>
-              <TableCell class="font-bold text-base text-foreground/90 tracking-tight">
+              <TableCell class="font-bold text-base text-foreground/90">
                 {{ currency.currency }}
               </TableCell>
-              <TableCell class="text-muted-foreground text-sm">
+              <TableCell class="text-sm text-muted-foreground">
                 {{ currency.country }}
               </TableCell>
               <TableCell>
-                <Badge variant="secondary" class="bg-primary/5 text-primary border-primary/20 h-9 w-9 flex items-center justify-center p-0">
-                  <span 
-                    class="font-bold leading-none"
-                    :class="currency.symbol === '៛' ? 'text-2xl pt-0.5' : 'text-xl'"
-                  >
-                    {{ currency.symbol }}
-                  </span>
+                <Badge variant="secondary" class="bg-primary/10 text-primary border-primary/20 font-bold text-base px-2.5 rounded-lg shadow-sm">
+                  {{ currency.symbol }}
                 </Badge>
               </TableCell>
-              <TableCell class="text-sm font-semibold">
+              <TableCell class="text-sm font-bold">
                 {{ formatRate(currency.exchangeRate) }}
               </TableCell>
               <TableCell class="text-center">

@@ -104,7 +104,7 @@ onMounted(() => {
             <div>
               <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Receipt class="h-3.5 w-3.5" />{{ $t('modules.purchaseInvoices') }}</p>
               <div class="flex flex-wrap gap-1">
-                <Badge v-for="d in record.details" :key="d.id" variant="secondary" class="font-mono text-[10px] cursor-pointer hover:bg-muted transition-colors" @click="router.push(`/admin/purchase-invoices/${d.purchaseInvoiceId}`)">
+                <Badge v-for="d in record.details" :key="d.id" variant="secondary" class="text-[10px] cursor-pointer hover:bg-muted transition-colors" @click="router.push(`/admin/purchase-invoices/${d.purchaseInvoiceId}`)">
                   {{ d.purchaseInvoice?.code || `ID: ${d.purchaseInvoiceId}` }}
                 </Badge>
               </div>
@@ -126,7 +126,7 @@ onMounted(() => {
           </CardHeader>
           <CardContent class="pt-6">
             <div class="text-center">
-               <span class="text-3xl font-mono font-black text-success">{{ formatCurrency(record.paidAmount) }}</span>
+               <span class="text-3xl font-black text-success">{{ formatCurrency(record.paidAmount) }}</span>
             </div>
           </CardContent>
         </Card>
@@ -166,11 +166,11 @@ onMounted(() => {
                   </thead>
                   <tbody class="divide-y">
                     <tr v-for="d in record.details" :key="d.id" class="hover:bg-muted/50 transition-colors">
-                      <td class="px-4 py-2 font-mono text-primary cursor-pointer hover:underline" @click="router.push(`/admin/purchase-invoices/${d.purchaseInvoiceId}`)">
+                      <td class="px-4 py-2 text-primary cursor-pointer hover:underline" @click="router.push(`/admin/purchase-invoices/${d.purchaseInvoiceId}`)">
                         {{ d.purchaseInvoice?.code || `ID: ${d.purchaseInvoiceId}` }}
                       </td>
-                      <td class="px-4 py-2 text-right font-mono">{{ formatCurrency(d.purchaseInvoice?.totalPrice) }}</td>
-                      <td class="px-4 py-2 text-right font-mono text-success font-bold">{{ formatCurrency(d.paidAmount) }}</td>
+                      <td class="px-4 py-2 text-right">{{ formatCurrency(d.purchaseInvoice?.totalPrice) }}</td>
+                      <td class="px-4 py-2 text-right text-success font-bold">{{ formatCurrency(d.paidAmount) }}</td>
                     </tr>
                   </tbody>
                 </table>

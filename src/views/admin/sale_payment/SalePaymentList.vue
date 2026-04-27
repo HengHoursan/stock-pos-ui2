@@ -269,8 +269,8 @@ onMounted(() => {
       </Button>
     </div>
 
-    <div class="rounded-md border bg-card overflow-hidden shadow-sm">
-      <Table>
+    <div class="rounded-md border bg-card overflow-auto shadow-sm max-h-[700px] scrollbar-thin scrollbar-thumb-muted-foreground/20">
+      <Table class="min-w-[1000px]">
         <TableHeader>
           <TableRow>
             <TableHead class="w-[50px]">#</TableHead>
@@ -300,14 +300,14 @@ onMounted(() => {
                 {{ (pagination.page - 1) * pagination.limit + index + 1 }}
               </TableCell>
               <TableCell>
-                <code class="bg-muted px-2 py-0.5 rounded text-xs font-mono font-bold text-foreground/70 border border-muted-foreground/10 uppercase">
+                <code class="bg-muted px-2 py-0.5 rounded text-xs font-bold text-foreground/70 border border-muted-foreground/10 uppercase">
                   {{ record.code }}
                 </code>
               </TableCell>
               <TableCell class="font-medium">
                 <template v-if="record.details && record.details.length > 0">
                   <div class="flex flex-wrap gap-1">
-                    <Badge v-for="d in record.details" :key="d.id" variant="secondary" class="text-xs font-mono font-bold">
+                    <Badge v-for="d in record.details" :key="d.id" variant="secondary" class="text-xs font-bold">
                       {{ d.saleInvoice?.code || `INV-${d.saleInvoiceId}` }}
                     </Badge>
                   </div>
@@ -317,8 +317,8 @@ onMounted(() => {
               <TableCell class="text-foreground/90">
                 {{ formatDateTime(record.paymentDate) }}
               </TableCell>
-              <TableCell class="text-right font-mono text-success font-semibold">
-                + {{ formatCurrency(record.paidAmount) }}
+              <TableCell class="text-right text-success font-semibold">
+                 {{ formatCurrency(record.paidAmount) }}
               </TableCell>
               <TableCell class="text-right">
                 <DropdownMenu align="end">

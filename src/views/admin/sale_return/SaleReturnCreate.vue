@@ -3,7 +3,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { toLocalISOString } from "@/utils/format";
+import { toLocalISOString, formatNumberInput } from "@/utils/format";
 
 import { useForm, useFieldArray } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
@@ -209,6 +209,9 @@ const grandTotal = computed(() => {
   );
 });
 
+const localQuantities = ref<Record<string, string>>({});
+const localTotalPrices = ref<Record<string, string>>({});
+
 const onSubmit = form.handleSubmit(async (values) => {
   submitting.value = true;
   try {
@@ -352,7 +355,7 @@ const onSubmit = form.handleSubmit(async (values) => {
           </CardHeader>
           <CardContent class="pt-6">
             <div class="text-center p-4 bg-muted/20 border rounded-lg">
-              <span class="text-3xl font-mono font-bold text-primary">
+              <span class="text-3xl font-bold text-primary">
                 ${{
                   grandTotal.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
@@ -373,7 +376,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                 <span class="text-muted-foreground"
                   >{{ $t("fields.totalPrice") }}:</span
                 >
-                <span class="font-mono font-bold"
+                <span class="font-bold"
                   >${{ selectedInvoice.totalPrice.toLocaleString() }}</span
                 >
               </div>
@@ -381,7 +384,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                 <span class="text-muted-foreground"
                   >{{ $t("fields.totalPaid") }}:</span
                 >
-                <span class="font-mono text-success font-bold"
+                <span class="text-success font-bold"
                   >${{ selectedInvoice.paidAmount.toLocaleString() }}</span
                 >
               </div>
@@ -497,7 +500,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                       </FormItem>
                     </FormField>
                   </TableCell>
-                  <TableCell class="text-right font-mono">
+                  <TableCell class="text-right">
                     {{
                       getProductPrice(
                         (form.values.details || [])[index]?.productId,
@@ -512,21 +515,28 @@ const onSubmit = form.handleSubmit(async (values) => {
                       <FormItem class="mb-0">
                         <FormControl>
                           <Input
-                            type="number"
-                            step="0.01"
-                            min="0.01"
+                            type="text"
                             class="text-right"
-                            v-bind="componentField"
+                            :name="componentField.name"
+                            @blur="componentField.onBlur"
+                            :model-value="localQuantities[field.key] ?? formatNumberInput(componentField.modelValue)"
                             @input="
                               (e: any) => {
-                                const qty = Number(e.target.value);
+                                const val = e.target.value;
+                                localQuantities[field.key] = formatNumberInput(String(val));
+                                const qty = Number(localQuantities[field.key].replace(/,/g, ''));
+                                form.setFieldValue(`details[${index}].quantity` as any, qty);
+                                
                                 const price = getProductPrice(
                                   (form.values.details || [])[index]?.productId,
                                 );
+                                const totalPrice = Number((price * qty).toFixed(2));
                                 form.setFieldValue(
                                   `details[${index}].totalPrice` as any,
-                                  Number((price * qty).toFixed(2)),
+                                  totalPrice,
                                 );
+                                // Sync localTotalPrice too
+                                localTotalPrices[field.key] = formatNumberInput(totalPrice);
                               }
                             "
                           />
@@ -543,10 +553,16 @@ const onSubmit = form.handleSubmit(async (values) => {
                       <FormItem class="mb-0">
                         <FormControl>
                           <Input
-                            type="number"
-                            step="0.01"
-                            class="text-right font-mono font-bold"
-                            v-bind="componentField"
+                            type="text"
+                            class="text-right font-bold"
+                            :name="componentField.name"
+                            @blur="componentField.onBlur"
+                            :model-value="localTotalPrices[field.key] ?? formatNumberInput(componentField.modelValue)"
+                            @update:model-value="(val) => {
+                              localTotalPrices[field.key] = formatNumberInput(String(val));
+                              const clean = Number(localTotalPrices[field.key].replace(/,/g, ''));
+                              form.setFieldValue(`details[${index}].totalPrice` as any, clean);
+                            }"
                           />
                         </FormControl>
                         <FormMessage />
