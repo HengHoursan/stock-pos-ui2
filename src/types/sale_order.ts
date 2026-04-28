@@ -14,6 +14,7 @@ export interface SaleOrderDetail {
   product?: Product;
   purchaseQuotation?: PurchaseQuotation;
   purchaseQuotationDetail?: PurchaseQuotationDetail;
+  saleInvoiceDetails?: any[];
 }
 
 export interface SaleOrder {

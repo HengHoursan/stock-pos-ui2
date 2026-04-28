@@ -3,6 +3,15 @@ import type { Product } from './product';
 import type { InvoiceStatus, PaymentMethod } from './enums';
 import type { SaleOrder, SaleOrderDetail } from './sale_order';
 
+export interface LowStockWarning {
+  productId: number;
+  productCode: string;
+  productName: string;
+  afterStock: number;
+  alertQuantity: number;
+}
+
+
 export interface SaleInvoiceDetail {
   id: number;
   saleInvoiceId: number;

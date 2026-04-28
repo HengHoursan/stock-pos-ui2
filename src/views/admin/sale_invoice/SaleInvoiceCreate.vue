@@ -212,6 +212,19 @@ const onSubmit = form.handleSubmit(async (values) => {
     const response = await siService.create(payload as any);
     if (response.success) {
       toast.success(t('crud.successCreate', { module: t('modules.saleInvoice') }));
+
+      // Fire a warning toast for each product that fell below its alert threshold
+      const warnings = response.data?.lowStockWarnings ?? [];
+      for (const w of warnings) {
+        toast.warning(
+          `${t('stock.lowStockAlert')}: ${w.productName} (${w.productCode})`,
+          {
+            description: `${t('stock.currentStock')}: ${w.afterStock} — ${t('stock.alertThreshold')}: ${w.alertQuantity}`,
+            duration: 8000,
+          }
+        );
+      }
+
       router.push("/admin/sale-invoices");
     } else {
       toast.error(response.message || t('crud.errorCreate', { module: t('modules.saleInvoice') }));

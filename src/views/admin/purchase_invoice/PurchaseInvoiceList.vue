@@ -63,6 +63,7 @@ import {
   CreditCard,
 } from "lucide-vue-next";
 import DateRangePicker from "@/components/DateRangePicker.vue";
+import CurrencyToggle from "@/components/CurrencyToggle.vue";
 import { PurchaseInvoiceService } from "@/services/purchase_invoice/purchase_invoice.service";
 import { SupplierService } from "@/services/supplier/supplier.service";
 import type { PurchaseInvoice, PaginationMeta, Supplier } from "@/types";
@@ -222,6 +223,7 @@ onMounted(() => {
         {{ $t("menu.purchaseInvoices") }}
       </h2>
       <div class="flex items-center gap-2">
+        <CurrencyToggle />
         <Button variant="outline" size="icon" @click="fetchData" :disabled="loading">
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
@@ -281,13 +283,14 @@ onMounted(() => {
     </div>
 
     <div class="rounded-md border bg-card overflow-auto shadow-sm max-h-[700px] scrollbar-thin scrollbar-thumb-muted-foreground/20">
-      <Table class="min-w-[1200px]">
+      <Table class="min-w-[1500px]">
         <TableHeader>
           <TableRow>
             <TableHead class="w-[50px]">#</TableHead>
-            <TableHead class="w-[120px]">{{ $t("fields.code") }}</TableHead>
-            <TableHead>{{ $t("fields.supplierId") }}</TableHead>
-            <TableHead>
+            <TableHead class="w-[150px]">{{ $t("fields.code") }}</TableHead>
+            <TableHead class="w-[200px]">{{ $t("modules.purchaseOrder") }}</TableHead>
+            <TableHead class="w-[250px]">{{ $t("fields.supplierId") }}</TableHead>
+            <TableHead class="w-[200px]">
               <Button variant="ghost" @click="handleSort('invoiceDate')" class="-ml-4 h-8 font-medium">
                 {{ $t("fields.invoiceDate") }}<ArrowUpDown class="ml-1 h-3 w-3" />
               </Button>
@@ -302,7 +305,7 @@ onMounted(() => {
         </TableHeader>
         <TableBody>
           <TableRow v-if="loading && records.length === 0">
-            <TableCell colspan="8" class="h-24 text-center">
+            <TableCell colspan="11" class="h-24 text-center">
               <div class="flex items-center justify-center text-muted-foreground italic text-sm">
                 <Loader2 class="h-4 w-4 animate-spin mr-2" />
                 <span>{{ $t('crud.fetchingData') }}</span>
@@ -318,6 +321,18 @@ onMounted(() => {
                 <code class="bg-muted px-2 py-0.5 rounded text-xs font-bold text-foreground/70 border border-muted-foreground/10 uppercase">
                   {{ record.code }}
                 </code>
+              </TableCell>
+              <TableCell>
+                <div class="flex flex-wrap gap-1">
+                  <div 
+                    v-for="orderCode in Array.from(new Set((record.details || []).filter(d => d.purchaseOrder).map(d => d.purchaseOrder?.code)))" 
+                    :key="orderCode"
+                    class="bg-indigo-50 px-2 py-0.5 rounded text-[10px] font-bold text-indigo-700 border border-indigo-200/50 uppercase cursor-pointer hover:bg-indigo-100 transition-colors shadow-sm"
+                  >
+                    {{ orderCode }}
+                  </div>
+                  <span v-if="!(record.details || []).some(d => d.purchaseOrder)" class="text-xs text-muted-foreground italic">---</span>
+                </div>
               </TableCell>
               <TableCell class="font-medium">
                 {{ record.supplier?.name || `Supplier ID ${record.supplierId}` }}
@@ -382,7 +397,7 @@ onMounted(() => {
             </TableRow>
           </template>
           <TableRow v-else>
-            <TableCell colspan="8" class="h-32 text-center text-muted-foreground">
+            <TableCell colspan="11" class="h-32 text-center text-muted-foreground">
               <div class="flex flex-col items-center justify-center gap-3">
                 <FileText class="h-10 w-10 opacity-10" />
                 <p class="font-medium">{{ $t("crud.noRecords", { module: $t("modules.purchaseInvoices") }) }}</p>

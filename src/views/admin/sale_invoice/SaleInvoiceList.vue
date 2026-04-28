@@ -305,7 +305,7 @@ onMounted(() => {
         </TableHeader>
         <TableBody>
           <TableRow v-if="loading && records.length === 0">
-            <TableCell colspan="8" class="h-24 text-center">
+            <TableCell colspan="11" class="h-24 text-center">
               <div class="flex items-center justify-center text-muted-foreground italic text-sm">
                 <Loader2 class="h-4 w-4 animate-spin mr-2" />
                 <span>{{ $t('crud.fetchingData') }}</span>
@@ -325,13 +325,13 @@ onMounted(() => {
               <TableCell>
                 <div class="flex flex-wrap gap-1">
                   <div 
-                    v-for="orderCode in Array.from(new Set(record.details?.filter(d => d.saleOrder).map(d => d.saleOrder?.code)))" 
+                    v-for="orderCode in Array.from(new Set((record.details || []).filter(d => d.saleOrder).map(d => d.saleOrder?.code)))" 
                     :key="orderCode"
                     class="bg-indigo-50 px-2 py-0.5 rounded text-[10px] font-bold text-indigo-700 border border-indigo-200/50 uppercase cursor-pointer hover:bg-indigo-100 transition-colors shadow-sm"
                   >
                     {{ orderCode }}
                   </div>
-                  <span v-if="!record.details?.some(d => d.saleOrder)" class="text-xs text-muted-foreground italic">---</span>
+                  <span v-if="!(record.details || []).some(d => d.saleOrder)" class="text-xs text-muted-foreground italic">---</span>
                 </div>
               </TableCell>
               <TableCell class="font-medium">
@@ -397,7 +397,7 @@ onMounted(() => {
             </TableRow>
           </template>
           <TableRow v-else>
-            <TableCell colspan="8" class="h-32 text-center text-muted-foreground">
+            <TableCell colspan="11" class="h-32 text-center text-muted-foreground">
               <div class="flex flex-col items-center justify-center gap-3">
                 <FileText class="h-10 w-10 opacity-10" />
                 <p class="font-medium">{{ $t("crud.noRecords", { module: $t("modules.saleInvoices") }) }}</p>

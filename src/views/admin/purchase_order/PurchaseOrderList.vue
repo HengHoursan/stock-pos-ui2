@@ -61,6 +61,7 @@ import {
   FileText
 } from "lucide-vue-next";
 import DateRangePicker from "@/components/DateRangePicker.vue";
+import CurrencyToggle from "@/components/CurrencyToggle.vue";
 import { PurchaseOrderService } from "@/services/purchase_order/purchase_order.service";
 import { SupplierService } from "@/services/supplier/supplier.service";
 import type { PurchaseOrder, PaginationMeta, Supplier } from "@/types";
@@ -217,6 +218,7 @@ onMounted(() => {
         {{ $t("menu.purchaseOrders") }}
       </h2>
       <div class="flex items-center gap-2">
+        <CurrencyToggle />
         <Button variant="outline" size="icon" @click="fetchData" :disabled="loading">
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>

@@ -1,6 +1,7 @@
 import { BaseService } from "../base/base.service";
 import type { 
-  SaleInvoice, 
+  SaleInvoice,
+  LowStockWarning,
   CreateSaleInvoiceRequest, 
   UpdateSaleInvoiceRequest,
   UpdateSaleInvoiceStatusRequest,
@@ -8,6 +9,10 @@ import type {
   PaginationRequest, 
   PaginationResponse 
 } from "@/types";
+
+export interface SaleInvoiceWithWarnings extends SaleInvoice {
+  lowStockWarnings: LowStockWarning[];
+}
 
 export class SaleInvoiceService extends BaseService {
   async getList(pagination: PaginationRequest): Promise<ApiResponse<PaginationResponse<SaleInvoice>>> {
@@ -18,12 +23,12 @@ export class SaleInvoiceService extends BaseService {
     return this.post<ApiResponse<SaleInvoice>>("/sale-invoices/detail", { id });
   }
 
-  async create(payload: CreateSaleInvoiceRequest): Promise<ApiResponse<null>> {
-    return this.post<ApiResponse<null>>("/sale-invoices/create", payload);
+  async create(payload: CreateSaleInvoiceRequest): Promise<ApiResponse<SaleInvoiceWithWarnings>> {
+    return this.post<ApiResponse<SaleInvoiceWithWarnings>>("/sale-invoices/create", payload);
   }
 
-  async update(payload: UpdateSaleInvoiceRequest): Promise<ApiResponse<null>> {
-    return this.post<ApiResponse<null>>("/sale-invoices/update", payload);
+  async update(payload: UpdateSaleInvoiceRequest): Promise<ApiResponse<SaleInvoiceWithWarnings>> {
+    return this.post<ApiResponse<SaleInvoiceWithWarnings>>("/sale-invoices/update", payload);
   }
 
   async updateStatus(payload: UpdateSaleInvoiceStatusRequest): Promise<ApiResponse<null>> {

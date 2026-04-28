@@ -3,7 +3,7 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { ref, onMounted, reactive, watch, computed } from "vue";
 import { useRouter } from "vue-router";
-import { formatDateTime } from "@/utils/format";
+import { formatDateTime, formatCurrency } from "@/utils/format";
 import SearchableSelect from "@/components/SearchableSelect.vue";
 
 import {
@@ -63,6 +63,7 @@ import {
   Pencil,
 } from "lucide-vue-next";
 import DateRangePicker from "@/components/DateRangePicker.vue";
+import CurrencyToggle from "@/components/CurrencyToggle.vue";
 import { PurchasePaymentService } from "@/services/purchase_payment/purchase_payment.service";
 import { SupplierService } from "@/services/supplier/supplier.service";
 import type { PurchasePayment, PaginationMeta, Supplier } from "@/types";
@@ -247,6 +248,7 @@ onMounted(() => {
         {{ $t("menu.purchasePayments") }}
       </h2>
       <div class="flex items-center gap-2">
+        <CurrencyToggle />
         <Button
           variant="outline"
           size="icon"
@@ -339,7 +341,7 @@ onMounted(() => {
         </TableHeader>
         <TableBody>
           <TableRow v-if="loading && records.length === 0">
-            <TableCell colspan="7" class="h-24 text-center">
+            <TableCell colspan="6" class="h-24 text-center">
               <div
                 class="flex items-center justify-center text-muted-foreground italic text-sm"
               >
@@ -430,7 +432,7 @@ onMounted(() => {
           </template>
           <TableRow v-else>
             <TableCell
-              colspan="7"
+              colspan="6"
               class="h-32 text-center text-muted-foreground"
             >
               <div class="flex flex-col items-center justify-center gap-3">

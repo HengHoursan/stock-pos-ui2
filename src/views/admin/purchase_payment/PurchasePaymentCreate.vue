@@ -160,7 +160,7 @@ const onSubmit = form.handleSubmit(async (values) => {
       details: [
         {
           purchaseInvoiceId: values.purchaseInvoiceId,
-          paidAmount: values.amount,
+          totalPrice: values.amount,
         },
       ],
     };
@@ -191,7 +191,7 @@ const onSubmit = form.handleSubmit(async (values) => {
           <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.createBtn') }} {{ $t('modules.purchasePayment') }}</h2>
           <p class="text-muted-foreground text-sm flex items-center mt-1">
             <Banknote class="w-4 h-4 mr-1.5 opacity-50"/> 
-            {{ $t('fields.paymentStockUpdateInfo') }}
+            {{ $t('fields.paymentDetailsInfo') }}
           </p>
         </div>
       </div>
@@ -331,11 +331,8 @@ const onSubmit = form.handleSubmit(async (values) => {
                 <div class="bg-muted/30 p-6 rounded-xl border border-muted-foreground/10 flex flex-col justify-center items-center text-center">
                   <p class="text-xs uppercase font-bold text-muted-foreground mb-2">{{ $t('fields.paymentAmount') }}</p>
                   <div class="text-4xl font-bold text-primary tracking-tight">
-                    {{ currencySymbol }}{{ localAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}
+                    {{ formatCurrency(form.values.amount) }}
                   </div>
-                  <p v-if="currencySymbol !== '$'" class="text-xs text-muted-foreground mt-1 uppercase font-bold">
-                    ${{ form.values.amount.toFixed(2) }}
-                  </p>
                 </div>
               </div>
             </div>

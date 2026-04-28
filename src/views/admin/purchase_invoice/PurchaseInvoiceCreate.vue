@@ -3,8 +3,13 @@ import { useI18n } from "vue-i18n";
 const { t } = useI18n();
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { toLocalISOString, formatCurrency, formatNumberInput } from "@/utils/format";
+import {
+  toLocalISOString,
+  formatCurrency,
+  formatNumberInput,
+} from "@/utils/format";
 import SearchableSelect from "@/components/SearchableSelect.vue";
+import CurrencyToggle from "@/components/CurrencyToggle.vue";
 
 import { useForm, useFieldArray } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
@@ -81,31 +86,36 @@ const productOptions = computed(() =>
   products.value.map((p) => ({ label: `[${p.code}] ${p.name}`, value: p.id })),
 );
 
-const currencySymbol = computed(() => currencyStore.activeCurrency?.symbol ?? '$');
+const currencySymbol = computed(
+  () => currencyStore.activeCurrency?.symbol ?? "$",
+);
 const localPaidAmount = ref("");
 const localPrices = ref<Record<string, string>>({});
 const localQuantities = ref<Record<string, string>>({});
 
 // Watch for manual local amount changes
 watch(localPaidAmount, (val) => {
-  const cleanVal = Number(String(val).replace(/,/g, ''));
+  const cleanVal = Number(String(val).replace(/,/g, ""));
   const rate = currencyStore.activeCurrency?.exchangeRate || 1;
-  const inUsd = cleanVal === 0 ? 0 : (cleanVal / rate);
-  
+  const inUsd = cleanVal === 0 ? 0 : cleanVal / rate;
+
   if (Math.abs((form.values.paidAmount || 0) - inUsd) > 0.001) {
-    form.setFieldValue('paidAmount', inUsd);
+    form.setFieldValue("paidAmount", inUsd);
   }
 });
 
 // Watch for base currency changes (e.g. from loading from source)
-watch(() => form.values.paidAmount, (newVal) => {
-  const rate = currencyStore.activeCurrency?.exchangeRate || 1;
-  const expectedLocal = Number(((newVal || 0) * rate).toFixed(2));
-  const currentClean = Number(localPaidAmount.value.replace(/,/g, ''));
-  if (Math.abs(currentClean - expectedLocal) > 0.01) {
-    localPaidAmount.value = formatNumberInput(String(expectedLocal));
-  }
-});
+watch(
+  () => form.values.paidAmount,
+  (newVal) => {
+    const rate = currencyStore.activeCurrency?.exchangeRate || 1;
+    const expectedLocal = Number(((newVal || 0) * rate).toFixed(2));
+    const currentClean = Number(localPaidAmount.value.replace(/,/g, ""));
+    if (Math.abs(currentClean - expectedLocal) > 0.01) {
+      localPaidAmount.value = formatNumberInput(String(expectedLocal));
+    }
+  },
+);
 
 onMounted(async () => {
   try {
@@ -236,7 +246,8 @@ const onSubmit = form.handleSubmit(async (values) => {
       details: values.details.map((d: any) => ({
         productId: d.productId,
         quantity: Number(d.quantity),
-        totalPrice: Math.round(Number(d.quantity) * Number(d.price) * 100) / 100,
+        totalPrice:
+          Math.round(Number(d.quantity) * Number(d.price) * 100) / 100,
         purchaseOrderId: d.purchaseOrderId,
         purchaseOrderDetailId: d.purchaseOrderDetailId,
       })),
@@ -265,19 +276,22 @@ const onSubmit = form.handleSubmit(async (values) => {
 
 <template>
   <div class="space-y-4">
-    <div class="flex items-center gap-4">
-      <Button variant="outline" size="icon" @click="router.back()">
-        <ChevronLeft class="h-4 w-4" />
-      </Button>
-      <div>
-        <h2 class="text-3xl font-bold tracking-tight">
-          {{ $t("crud.createBtn") }} {{ $t("modules.purchaseInvoice") }}
-        </h2>
-        <p class="text-muted-foreground text-sm flex items-center mt-1">
-          <Truck class="w-4 h-4 mr-1.5 opacity-50" />
-          {{ $t("fields.invoiceStockUpdateInfo") }}
-        </p>
+    <div class="flex items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <Button variant="outline" size="icon" @click="router.back()">
+          <ChevronLeft class="h-4 w-4" />
+        </Button>
+        <div>
+          <h2 class="text-3xl font-bold tracking-tight">
+            {{ $t("crud.createBtn") }} {{ $t("modules.purchaseInvoice") }}
+          </h2>
+          <p class="text-muted-foreground text-sm flex items-center mt-1">
+            <Truck class="w-4 h-4 mr-1.5 opacity-50" />
+            {{ $t("fields.invoiceStockUpdateInfo") }}
+          </p>
+        </div>
       </div>
+      <CurrencyToggle />
     </div>
 
     <form @submit="onSubmit">
@@ -363,11 +377,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                   >{{ $t("fields.totalPrice") }}:</span
                 >
                 <span class="font-bold text-foreground">
-                  {{ currencySymbol }}{{
-                    (grandTotal * (currencyStore.activeCurrency?.exchangeRate || 1)).toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                    })
-                  }}
+                  {{ formatCurrency(grandTotal) }}
                 </span>
               </div>
             </div>
@@ -377,12 +387,20 @@ const onSubmit = form.handleSubmit(async (values) => {
                 <FormLabel>{{ $t("fields.paidAmount") }}</FormLabel>
                 <FormControl>
                   <div class="relative">
-                    <span class="absolute left-3 top-2.5 text-sm text-muted-foreground">{{ currencySymbol }}</span>
+                    <span
+                      class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                      >{{ currencySymbol }}</span
+                    >
                     <Input
                       type="text"
-                      class="pl-7"
-                      :value="localPaidAmount"
-                      @input="(e: any) => localPaidAmount = formatNumberInput(String(e.target.value))"
+                      :name="componentField.name"
+                      @blur="componentField.onBlur"
+                      :model-value="localPaidAmount"
+                      @update:model-value="
+                        (val) =>
+                          (localPaidAmount = formatNumberInput(String(val)))
+                      "
+                      class="pl-9 font-bold text-lg text-success"
                     />
                   </div>
                 </FormControl>
@@ -430,11 +448,10 @@ const onSubmit = form.handleSubmit(async (values) => {
                     : 'text-success'
                 "
               >
-                {{ currencySymbol }}{{
-                  Math.max(
-                    0,
-                    (grandTotal - (form.values.paidAmount || 0)) * (currencyStore.activeCurrency?.exchangeRate || 1),
-                  ).toLocaleString(undefined, { minimumFractionDigits: 2 })
+                {{
+                  formatCurrency(
+                    Math.max(0, grandTotal - (form.values.paidAmount || 0)),
+                  )
                 }}
               </span>
             </div>
@@ -529,12 +546,24 @@ const onSubmit = form.handleSubmit(async (values) => {
                             class="text-right"
                             :name="componentField.name"
                             @blur="componentField.onBlur"
-                            :model-value="localPrices[field.key] ?? formatNumberInput(componentField.modelValue)"
-                            @update:model-value="(val) => {
-                              localPrices[field.key] = formatNumberInput(String(val));
-                              const clean = Number(localPrices[field.key].replace(/,/g, ''));
-                              form.setFieldValue(`details[${index}].price` as any, clean);
-                            }"
+                            :model-value="
+                              localPrices[field.key] ??
+                              formatNumberInput(componentField.modelValue)
+                            "
+                            @update:model-value="
+                              (val) => {
+                                localPrices[field.key] = formatNumberInput(
+                                  String(val),
+                                );
+                                const clean = Number(
+                                  localPrices[field.key].replace(/,/g, ''),
+                                );
+                                form.setFieldValue(
+                                  `details[${index}].price` as any,
+                                  clean,
+                                );
+                              }
+                            "
                           />
                         </FormControl>
                         <FormMessage />
@@ -553,12 +582,24 @@ const onSubmit = form.handleSubmit(async (values) => {
                             class="text-right"
                             :name="componentField.name"
                             @blur="componentField.onBlur"
-                            :model-value="localQuantities[field.key] ?? formatNumberInput(componentField.modelValue)"
-                            @update:model-value="(val) => {
-                              localQuantities[field.key] = formatNumberInput(String(val));
-                              const clean = Number(localQuantities[field.key].replace(/,/g, ''));
-                              form.setFieldValue(`details[${index}].quantity` as any, clean);
-                            }"
+                            :model-value="
+                              localQuantities[field.key] ??
+                              formatNumberInput(componentField.modelValue)
+                            "
+                            @update:model-value="
+                              (val) => {
+                                localQuantities[field.key] = formatNumberInput(
+                                  String(val),
+                                );
+                                const clean = Number(
+                                  localQuantities[field.key].replace(/,/g, ''),
+                                );
+                                form.setFieldValue(
+                                  `details[${index}].quantity` as any,
+                                  clean,
+                                );
+                              }
+                            "
                           />
                         </FormControl>
                         <FormMessage />
@@ -567,13 +608,10 @@ const onSubmit = form.handleSubmit(async (values) => {
                   </TableCell>
                   <TableCell class="text-right font-medium">
                     {{
-                      (
+                      formatCurrency(
                         ((form.values.details || [])[index]?.quantity || 0) *
-                        ((form.values.details || [])[index]?.price || 0)
-                      ).toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })
+                          ((form.values.details || [])[index]?.price || 0),
+                      )
                     }}
                   </TableCell>
                   <TableCell>

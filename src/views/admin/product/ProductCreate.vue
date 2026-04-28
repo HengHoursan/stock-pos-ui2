@@ -33,6 +33,7 @@ import DatePicker from "@/components/DatePicker.vue";
 import ImageUpload from "@/components/upload/ImageUpload.vue";
 import type { Category, Brand, Unit } from "@/types";
 import { toast } from "vue-sonner";
+import { useForm } from "vee-validate";
 
 const router = useRouter();
 const productService = new ProductService();
@@ -186,9 +187,12 @@ onMounted(() => {
 
               <FormField v-slot="{ componentField }" name="skuCode">
                 <FormItem>
-                  <FormLabel>{{ $t('fields.sku') }}</FormLabel>
+                  <FormLabel>{{ $t("fields.sku") }}</FormLabel>
                   <FormControl>
-                    <Input :placeholder="$t('fields.autoGenerate')" v-bind="componentField" />
+                    <Input
+                      :placeholder="$t('fields.autoGenerate')"
+                      v-bind="componentField"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -196,9 +200,12 @@ onMounted(() => {
 
               <FormField v-slot="{ componentField }" name="code">
                 <FormItem>
-                  <FormLabel>{{ $t('fields.code') }}</FormLabel>
+                  <FormLabel>{{ $t("fields.code") }}</FormLabel>
                   <FormControl>
-                    <Input :placeholder="$t('fields.autoGenerate')" v-bind="componentField" />
+                    <Input
+                      :placeholder="$t('fields.autoGenerate')"
+                      v-bind="componentField"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -223,8 +230,13 @@ onMounted(() => {
                           {{ cat.name }}
                         </SelectItem>
                       </template>
-                      <SelectItem v-else disabled value="none" class="text-muted-foreground italic text-xs py-3 text-center">
-                        {{ $t('common.noData') }}
+                      <SelectItem
+                        v-else
+                        disabled
+                        value="none"
+                        class="text-muted-foreground italic text-xs py-3 text-center"
+                      >
+                        {{ $t("common.noData") }}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -252,8 +264,13 @@ onMounted(() => {
                           {{ brand.name }}
                         </SelectItem>
                       </template>
-                      <SelectItem v-else disabled value="none" class="text-muted-foreground italic text-xs py-3 text-center">
-                        {{ $t('common.noData') }}
+                      <SelectItem
+                        v-else
+                        disabled
+                        value="none"
+                        class="text-muted-foreground italic text-xs py-3 text-center"
+                      >
+                        {{ $t("common.noData") }}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -280,8 +297,13 @@ onMounted(() => {
                           {{ u.name }}
                         </SelectItem>
                       </template>
-                      <SelectItem v-else disabled value="none" class="text-muted-foreground italic text-xs py-3 text-center">
-                        {{ $t('common.noData') }}
+                      <SelectItem
+                        v-else
+                        disabled
+                        value="none"
+                        class="text-muted-foreground italic text-xs py-3 text-center"
+                      >
+                        {{ $t("common.noData") }}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -295,7 +317,9 @@ onMounted(() => {
                   <Select v-bind="field">
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue :placeholder="$t('fields.selectBarcodeType')" />
+                        <SelectValue
+                          :placeholder="$t('fields.selectBarcodeType')"
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -328,10 +352,15 @@ onMounted(() => {
                       type="text"
                       :name="componentField.name"
                       @blur="componentField.onBlur"
-                      :model-value="localPurchasePrice || formatNumberInput(componentField.modelValue)"
+                      :model-value="
+                        localPurchasePrice ||
+                        formatNumberInput(componentField.modelValue)
+                      "
                       @input="
                         (e: any) => {
-                          localPurchasePrice = formatNumberInput(e.target.value);
+                          localPurchasePrice = formatNumberInput(
+                            e.target.value,
+                          );
                           form.setFieldValue(
                             'purchasePrice',
                             Number(localPurchasePrice.replace(/,/g, '')),
@@ -352,7 +381,10 @@ onMounted(() => {
                       type="text"
                       :name="componentField.name"
                       @blur="componentField.onBlur"
-                      :model-value="localSalePrice || formatNumberInput(componentField.modelValue)"
+                      :model-value="
+                        localSalePrice ||
+                        formatNumberInput(componentField.modelValue)
+                      "
                       @input="
                         (e: any) => {
                           localSalePrice = formatNumberInput(e.target.value);
@@ -376,7 +408,10 @@ onMounted(() => {
                       type="text"
                       :name="componentField.name"
                       @blur="componentField.onBlur"
-                      :model-value="localCurrentStock || formatNumberInput(componentField.modelValue)"
+                      :model-value="
+                        localCurrentStock ||
+                        formatNumberInput(componentField.modelValue)
+                      "
                       @input="
                         (e: any) => {
                           localCurrentStock = formatNumberInput(e.target.value);
@@ -400,10 +435,15 @@ onMounted(() => {
                       type="text"
                       :name="componentField.name"
                       @blur="componentField.onBlur"
-                      :model-value="localAlertQuantity || formatNumberInput(componentField.modelValue)"
+                      :model-value="
+                        localAlertQuantity ||
+                        formatNumberInput(componentField.modelValue)
+                      "
                       @input="
                         (e: any) => {
-                          localAlertQuantity = formatNumberInput(e.target.value);
+                          localAlertQuantity = formatNumberInput(
+                            e.target.value,
+                          );
                           form.setFieldValue(
                             'alertQuantity',
                             Number(localAlertQuantity.replace(/,/g, '')),
@@ -458,8 +498,11 @@ onMounted(() => {
                   <FormLabel class="text-sm font-medium">{{
                     $t("fields.activeStatus")
                   }}</FormLabel>
-                   <FormControl>
-                    <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
+                  <FormControl>
+                    <Switch
+                      :model-value="!!value"
+                      @update:model-value="(v: boolean) => handleChange(v)"
+                    />
                   </FormControl>
                 </FormItem>
               </FormField>
@@ -471,8 +514,11 @@ onMounted(() => {
                   <FormLabel class="text-sm font-medium">{{
                     $t("fields.manageStock")
                   }}</FormLabel>
-                   <FormControl>
-                    <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
+                  <FormControl>
+                    <Switch
+                      :model-value="!!value"
+                      @update:model-value="(v: boolean) => handleChange(v)"
+                    />
                   </FormControl>
                 </FormItem>
               </FormField>
@@ -484,8 +530,11 @@ onMounted(() => {
                   <FormLabel class="text-sm font-medium">{{
                     $t("fields.forSelling")
                   }}</FormLabel>
-                   <FormControl>
-                    <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
+                  <FormControl>
+                    <Switch
+                      :model-value="!!value"
+                      @update:model-value="(v: boolean) => handleChange(v)"
+                    />
                   </FormControl>
                 </FormItem>
               </FormField>
@@ -497,8 +546,11 @@ onMounted(() => {
                   <FormLabel class="text-sm font-medium">{{
                     $t("fields.isManufacture")
                   }}</FormLabel>
-                   <FormControl>
-                    <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
+                  <FormControl>
+                    <Switch
+                      :model-value="!!value"
+                      @update:model-value="(v: boolean) => handleChange(v)"
+                    />
                   </FormControl>
                 </FormItem>
               </FormField>
@@ -510,11 +562,14 @@ onMounted(() => {
               <CardTitle>{{ $t("fields.expiryDate") }}</CardTitle>
             </CardHeader>
             <CardContent class="space-y-4">
-               <FormField v-slot="{ field }" name="expiryDate">
+              <FormField v-slot="{ field }" name="expiryDate">
                 <FormItem>
-                  <FormLabel>{{ $t('fields.expiryDate') }}</FormLabel>
+                  <FormLabel>{{ $t("fields.expiryDate") }}</FormLabel>
                   <FormControl>
-                    <DatePicker v-bind="field" :placeholder="$t('fields.selectDate')" />
+                    <DatePicker
+                      v-bind="field"
+                      :placeholder="$t('fields.selectDate')"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -530,9 +585,15 @@ onMounted(() => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="None">{{ $t('fields.expiryTypes.none') }}</SelectItem>
-                      <SelectItem value="Best Before">{{ $t('fields.expiryTypes.bestBefore') }}</SelectItem>
-                      <SelectItem value="Expiry">{{ $t('fields.expiryTypes.expiry') }}</SelectItem>
+                      <SelectItem value="None">{{
+                        $t("fields.expiryTypes.none")
+                      }}</SelectItem>
+                      <SelectItem value="Best Before">{{
+                        $t("fields.expiryTypes.bestBefore")
+                      }}</SelectItem>
+                      <SelectItem value="Expiry">{{
+                        $t("fields.expiryTypes.expiry")
+                      }}</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

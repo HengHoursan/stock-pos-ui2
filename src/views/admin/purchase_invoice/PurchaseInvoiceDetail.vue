@@ -214,6 +214,27 @@ onMounted(() => {
                 </template>
               </div>
             </div>
+            <div v-if="record.details?.some(d => d.purchaseOrder)">
+              <p class="text-muted-foreground mb-1 flex items-center gap-1.5">
+                <ArrowRightCircle class="h-3.5 w-3.5" />{{ $t("modules.purchaseOrder") }}
+              </p>
+              <div class="flex flex-wrap gap-1 mt-1">
+                <div
+                  v-for="order in Array.from(
+                    new Map(
+                      record.details
+                        .filter((d) => d.purchaseOrder)
+                        .map((d) => [d.purchaseOrder.id, d.purchaseOrder]),
+                    ).values(),
+                  )"
+                  :key="order.id"
+                  class="bg-indigo-50 px-2 py-0.5 rounded text-xs font-bold text-indigo-700 border border-indigo-200/50 uppercase cursor-pointer hover:bg-indigo-100 transition-colors shadow-sm"
+                  @click="router.push(`/admin/purchase-orders/${order.id}`)"
+                >
+                  {{ order.code }}
+                </div>
+              </div>
+            </div>
             <div>
               <p class="text-muted-foreground mb-1">
                 {{ $t("fields.description") }}
@@ -325,11 +346,15 @@ onMounted(() => {
                         {{ item.product.code }}
                       </div>
                       <div
-                        v-if="item.purchaseOrderId"
-                        class="text-xs text-primary/70 mt-0.5"
-                        title="Source Order"
+                        v-if="item.purchaseOrder"
+                        class="mt-1"
                       >
-                        {{ $t("fields.fromOrder") }} #{{ item.purchaseOrderId }}
+                        <span 
+                          class="bg-indigo-50 px-1.5 py-0.5 rounded-[4px] text-[10px] font-bold text-indigo-600 border border-indigo-200/50 uppercase cursor-pointer hover:bg-indigo-100 transition-colors"
+                          @click="router.push(`/admin/purchase-orders/${item.purchaseOrder.id}`)"
+                        >
+                          {{ item.purchaseOrder.code }}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell class="text-right">{{

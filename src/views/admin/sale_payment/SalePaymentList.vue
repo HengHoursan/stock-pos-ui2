@@ -287,7 +287,7 @@ onMounted(() => {
         </TableHeader>
         <TableBody>
           <TableRow v-if="loading && records.length === 0">
-            <TableCell colspan="7" class="h-24 text-center">
+            <TableCell colspan="6" class="h-24 text-center">
               <div class="flex items-center justify-center text-muted-foreground italic text-sm">
                 <Loader2 class="h-4 w-4 animate-spin mr-2" />
                 <span>{{ $t('crud.fetchingData') }}</span>
@@ -349,7 +349,7 @@ onMounted(() => {
             </TableRow>
           </template>
           <TableRow v-else>
-            <TableCell colspan="7" class="h-32 text-center text-muted-foreground">
+            <TableCell colspan="6" class="h-32 text-center text-muted-foreground">
               <div class="flex flex-col items-center justify-center gap-3">
                 <CreditCard class="h-10 w-10 opacity-10" />
                 <p class="font-medium">{{ $t("crud.noRecords", { module: $t("modules.salePayments") }) }}</p>

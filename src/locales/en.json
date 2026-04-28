@@ -6,7 +6,8 @@
     "home": "Home",
     "noData": "No data available",
     "unknown": "Unknown",
-    "logoutSuccess": "Logout successfully"
+    "logoutSuccess": "Logout successfully",
+    "loading": "Loading..."
   },
   "layout": {
     "adminPanel": "Admin Panel",
@@ -317,6 +318,7 @@
     "fullyFulfilled": "Fully Fulfilled",
     "has": "has",
     "paymentDetails": "Payment Details",
+    "paymentDetailsInfo": "Recording a payment will update the financial balance of the invoice. It does not affect item stock directly.",
     "details": "Details",
     "fromQuotation": "from Quotation",
     "fromOrder": "from Order",
@@ -502,5 +504,10 @@
     "status": "Status",
     "profitable": "Profitable",
     "deficit": "Deficit"
+  },
+  "stock": {
+    "lowStockAlert": "Low Stock Alert",
+    "currentStock": "Current Stock",
+    "alertThreshold": "Alert Threshold"
   }
 }
