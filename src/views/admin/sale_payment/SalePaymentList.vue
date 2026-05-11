@@ -78,13 +78,16 @@ const customerService = new CustomerService();
 const records = ref<SalePayment[]>([]);
 const customers = ref<Customer[]>([]);
 const loading = ref(true);
-const searchQuery = ref("");
-const methodFilter = ref<string | null>(null);
-const customerFilter = ref<string | number | null>(null);
+const filters = reactive({
+  search: "",
+  paymentMethod: "",
+  customerId: "",
+  startDate: "",
+  endDate: "",
+});
 const customerOptions = computed(() =>
   customers.value.map(c => ({ label: c.name, value: c.id }))
 );
-const dateRange = ref<{ start: string | null; end: string | null } | null>(null);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -107,22 +110,22 @@ async function fetchData() {
       sortBy: pagination.sortBy,
       sortOrder: pagination.sortOrder,
     };
-    if (searchQuery.value.trim()) {
-      payload.search = searchQuery.value.trim();
+    if (filters.search.trim()) {
+      payload.search = filters.search.trim();
     }
     
     payload.filter = {};
-    if (methodFilter.value && methodFilter.value !== "all") {
-      payload.filter.paymentMethod = methodFilter.value;
+    if (filters.paymentMethod) {
+      payload.filter.paymentMethod = filters.paymentMethod;
     }
-    if (customerFilter.value && customerFilter.value !== "all") {
-      payload.filter.customerId = customerFilter.value;
+    if (filters.customerId) {
+      payload.filter.customerId = filters.customerId;
     }
-    if (dateRange.value?.start) {
-      payload.filter.startDate = dateRange.value.start;
+    if (filters.startDate) {
+      payload.filter.startDate = filters.startDate;
     }
-    if (dateRange.value?.end) {
-      payload.filter.endDate = dateRange.value.end;
+    if (filters.endDate) {
+      payload.filter.endDate = filters.endDate;
     }
 
     const response = await spService.getList(payload);
@@ -154,10 +157,11 @@ const debouncedFetch = useDebounceFn(() => {
   fetchData();
 }, 500);
 
-watch(searchQuery, () => debouncedFetch());
-watch(methodFilter, () => { pagination.page = 1; fetchData(); });
-watch(customerFilter, () => { pagination.page = 1; fetchData(); });
-watch(dateRange, () => { pagination.page = 1; fetchData(); });
+watch(() => filters.search, () => debouncedFetch());
+watch(
+  () => [filters.paymentMethod, filters.customerId, filters.startDate, filters.endDate],
+  () => { pagination.page = 1; fetchData(); }
+);
 watch(() => pagination.limit, () => { pagination.page = 1; fetchData(); });
 
 function handlePageChange(page: number) {
@@ -237,18 +241,19 @@ onMounted(() => {
           type="search"
           :placeholder="$t('crud.search', { module: $t('modules.salePayment') })"
           class="pl-8 bg-background/50 border-border/60 shadow-sm transition-all focus:ring-2 focus:ring-primary/20"
-          v-model="searchQuery"
+          v-model="filters.search"
         />
       </div>
 
       <DateRangePicker 
-        v-model="dateRange"
+        :model-value="{ start: filters.startDate, end: filters.endDate }"
+        @update:model-value="(val) => { filters.startDate = val?.start || ''; filters.endDate = val?.end || ''; }"
         class="w-full sm:w-[260px] shadow-sm"
         :placeholder="$t('crud.filterByDate')"
       />
 
       <SearchableSelect
-        v-model="customerFilter"
+        v-model="filters.customerId"
         :options="customerOptions"
         :placeholder="$t('fields.customerId')"
         :empty-message="$t('crud.noResults')"
@@ -258,10 +263,10 @@ onMounted(() => {
 
 
       <Button 
-        v-if="searchQuery || (methodFilter && methodFilter !== 'all') || (customerFilter && customerFilter !== 'all') || dateRange"
+        v-if="filters.search || filters.paymentMethod || filters.customerId || filters.startDate || filters.endDate"
         variant="ghost" 
         size="sm"
-        @click="searchQuery = ''; methodFilter = null; customerFilter = null; dateRange = null;"
+        @click="Object.assign(filters, { search: '', paymentMethod: '', customerId: '', startDate: '', endDate: '' })"
         class="h-9 px-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
       >
         <RefreshCw class="mr-2 h-4 w-4" />
@@ -354,10 +359,10 @@ onMounted(() => {
                 <CreditCard class="h-10 w-10 opacity-10" />
                 <p class="font-medium">{{ $t("crud.noRecords", { module: $t("modules.salePayments") }) }}</p>
                 <Button
-                  v-if="searchQuery || (methodFilter && methodFilter !== 'all') || (customerFilter && customerFilter !== 'all') || dateRange"
+                  v-if="filters.search || filters.paymentMethod || filters.customerId || filters.startDate || filters.endDate"
                   variant="outline"
                   size="sm"
-                  @click="searchQuery = ''; methodFilter = null; customerFilter = null; dateRange = null;"
+                  @click="Object.assign(filters, { search: '', paymentMethod: '', customerId: '', startDate: '', endDate: '' })"
                   class="h-8"
                 >
                   {{ $t('crud.resetFilters') }}

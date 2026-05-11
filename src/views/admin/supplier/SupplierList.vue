@@ -72,8 +72,10 @@ const supplierService = new SupplierService();
 
 const suppliers = ref<Supplier[]>([]);
 const loading = ref(true);
-const searchQuery = ref("");
-const statusFilter = ref<string | null>(null);
+const filters = reactive({
+  search: "",
+  status: "",
+});
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -100,12 +102,12 @@ async function fetchSuppliers() {
       sortOrder: pagination.sortOrder,
     };
 
-    if (searchQuery.value.trim()) {
-      payload.search = searchQuery.value.trim();
+    if (filters.search.trim()) {
+      payload.search = filters.search.trim();
     }
 
-    if (statusFilter.value && statusFilter.value !== "all") {
-      payload.filter = { status: statusFilter.value };
+    if (filters.status) {
+      payload.filter = { status: filters.status };
     }
 
     const response = await supplierService.getList(payload);
@@ -126,14 +128,20 @@ const debouncedFetch = useDebounceFn(() => {
   fetchSuppliers();
 }, 500);
 
-watch(searchQuery, () => {
-  debouncedFetch();
-});
+watch(
+  () => filters.search,
+  () => {
+    debouncedFetch();
+  }
+);
 
-watch(statusFilter, () => {
-  pagination.page = 1;
-  fetchSuppliers();
-});
+watch(
+  () => filters.status,
+  () => {
+    pagination.page = 1;
+    fetchSuppliers();
+  }
+);
 
 watch(
   () => pagination.limit,
@@ -238,16 +246,15 @@ onMounted(() => {
           type="search"
           :placeholder="$t('crud.search', { module: $t('modules.supplier') })"
           class="pl-8"
-          v-model="searchQuery"
+          v-model="filters.search"
         />
       </div>
 
-      <Select v-model="statusFilter">
+      <Select v-model="filters.status">
         <SelectTrigger class="w-full sm:w-[180px]">
           <SelectValue :placeholder="$t('crud.filterByStatus')" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">{{ $t("crud.allStatus") }}</SelectItem>
           <SelectItem value="active">{{ $t("crud.active") }}</SelectItem>
           <SelectItem value="inactive">{{ $t("crud.inactive") }}</SelectItem>
         </SelectContent>
@@ -382,13 +389,10 @@ onMounted(() => {
                   {{ $t("crud.noRecords", { module: $t("modules.suppliers") }) }}
                 </p>
                 <Button
-                  v-if="searchQuery || (statusFilter && statusFilter !== 'all')"
+                  v-if="filters.search || filters.status"
                   variant="outline"
                   size="sm"
-                  @click="
-                    searchQuery = '';
-                    statusFilter = null;
-                  "
+                  @click="Object.assign(filters, { search: '', status: '' })"
                   class="h-8"
                 >
                   {{ $t('crud.resetFilters') }}

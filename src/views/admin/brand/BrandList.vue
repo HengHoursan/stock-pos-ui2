@@ -73,8 +73,10 @@ const brandService = new BrandService();
 
 const brands = ref<Brand[]>([]);
 const loading = ref(true);
-const searchQuery = ref("");
-const statusFilter = ref<string | null>(null);
+const filters = reactive({
+  search: "",
+  status: "",
+});
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -101,12 +103,12 @@ async function fetchBrands() {
       sortOrder: pagination.sortOrder,
     };
 
-    if (searchQuery.value.trim()) {
-      payload.search = searchQuery.value.trim();
+    if (filters.search.trim()) {
+      payload.search = filters.search.trim();
     }
 
-    if (statusFilter.value && statusFilter.value !== "all") {
-      payload.filter = { status: statusFilter.value };
+    if (filters.status) {
+      payload.filter = { status: filters.status };
     }
 
     const response = await brandService.getList(payload);
@@ -127,14 +129,20 @@ const debouncedFetch = useDebounceFn(() => {
   fetchBrands();
 }, 500);
 
-watch(searchQuery, () => {
-  debouncedFetch();
-});
+watch(
+  () => filters.search,
+  () => {
+    debouncedFetch();
+  }
+);
 
-watch(statusFilter, () => {
-  pagination.page = 1;
-  fetchBrands();
-});
+watch(
+  () => filters.status,
+  () => {
+    pagination.page = 1;
+    fetchBrands();
+  }
+);
 
 watch(
   () => pagination.limit,
@@ -235,16 +243,15 @@ onMounted(() => {
           type="search"
           :placeholder="$t('crud.search', { module: $t('modules.brand') })"
           class="pl-8"
-          v-model="searchQuery"
+          v-model="filters.search"
         />
       </div>
 
-      <Select v-model="statusFilter">
+      <Select v-model="filters.status">
         <SelectTrigger class="w-full sm:w-[180px]">
           <SelectValue :placeholder="$t('crud.filterByStatus')" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">{{ $t("crud.allStatus") }}</SelectItem>
           <SelectItem value="active">{{ $t("crud.active") }}</SelectItem>
           <SelectItem value="inactive">{{ $t("crud.inactive") }}</SelectItem>
         </SelectContent>
@@ -388,13 +395,10 @@ onMounted(() => {
                   {{ $t("crud.noRecords", { module: $t("modules.brands") }) }}
                 </p>
                 <Button
-                  v-if="searchQuery || statusFilter"
+                  v-if="filters.search || filters.status"
                   variant="outline"
                   size="sm"
-                  @click="
-                    searchQuery = '';
-                    statusFilter = null;
-                  "
+                  @click="Object.assign(filters, { search: '', status: '' })"
                   class="h-8"
                 >
                   {{ $t('crud.resetFilters') }}

@@ -69,8 +69,11 @@ const pqService = new PurchaseQuotationService();
 
 const records = ref<PurchaseQuotation[]>([]);
 const loading = ref(true);
-const searchQuery = ref("");
-const dateRange = ref<{ start: string | null; end: string | null } | null>(null);
+const filters = reactive({
+  search: "",
+  startDate: "",
+  endDate: "",
+});
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -93,16 +96,16 @@ async function fetchData() {
       sortBy: pagination.sortBy,
       sortOrder: pagination.sortOrder,
     };
-    if (searchQuery.value.trim()) {
-      payload.search = searchQuery.value.trim();
+    if (filters.search.trim()) {
+      payload.search = filters.search.trim();
     }
     
     payload.filter = {};
-    if (dateRange.value?.start) {
-      payload.filter.startDate = dateRange.value.start;
+    if (filters.startDate) {
+      payload.filter.startDate = filters.startDate;
     }
-    if (dateRange.value?.end) {
-      payload.filter.endDate = dateRange.value.end;
+    if (filters.endDate) {
+      payload.filter.endDate = filters.endDate;
     }
 
     const response = await pqService.getList(payload);
@@ -123,8 +126,11 @@ const debouncedFetch = useDebounceFn(() => {
   fetchData();
 }, 500);
 
-watch(searchQuery, () => debouncedFetch());
-watch(dateRange, () => { pagination.page = 1; fetchData(); });
+watch(() => filters.search, () => debouncedFetch());
+watch(
+  () => [filters.startDate, filters.endDate],
+  () => { pagination.page = 1; fetchData(); }
+);
 watch(() => pagination.limit, () => { pagination.page = 1; fetchData(); });
 
 function handlePageChange(page: number) {
@@ -193,21 +199,22 @@ onMounted(() => {
           type="search"
           :placeholder="$t('crud.search', { module: $t('modules.purchaseQuotation') })"
           class="pl-8 bg-background/50 border-border/60 shadow-sm transition-all focus:ring-2 focus:ring-primary/20"
-          v-model="searchQuery"
+          v-model="filters.search"
         />
       </div>
 
       <DateRangePicker 
-        v-model="dateRange"
+        :model-value="{ start: filters.startDate, end: filters.endDate }"
+        @update:model-value="(val) => { filters.startDate = val?.start || ''; filters.endDate = val?.end || ''; }"
         class="w-full sm:w-[260px] shadow-sm"
         :placeholder="$t('crud.filterByDate')"
       />
 
       <Button 
-        v-if="searchQuery || dateRange"
+        v-if="filters.search || filters.startDate || filters.endDate"
         variant="ghost" 
         size="sm"
-        @click="searchQuery = ''; dateRange = null;"
+        @click="Object.assign(filters, { search: '', startDate: '', endDate: '' })"
         class="h-9 px-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
       >
         <RefreshCw class="mr-2 h-4 w-4" />
@@ -290,10 +297,10 @@ onMounted(() => {
                 <FileText class="h-10 w-10 opacity-10" />
                 <p class="font-medium">{{ $t("crud.noRecords", { module: $t("modules.purchaseQuotations") }) }}</p>
                 <Button
-                  v-if="searchQuery || dateRange"
+                  v-if="filters.search || filters.startDate || filters.endDate"
                   variant="outline"
                   size="sm"
-                  @click="searchQuery = ''; dateRange = null;"
+                  @click="Object.assign(filters, { search: '', startDate: '', endDate: '' })"
                   class="h-8"
                 >
                   {{ $t('crud.resetFilters') }}

@@ -87,11 +87,13 @@ const brands = ref<Brand[]>([]);
 const units = ref<Unit[]>([]);
 
 const loading = ref(true);
-const searchQuery = ref("");
-const statusFilter = ref<string | null>(null);
-const categoryIdFilter = ref<string | number | null>(null);
-const brandIdFilter = ref<string | number | null>(null);
-const unitIdFilter = ref<string | number | null>(null);
+const filters = reactive({
+  search: "",
+  status: "",
+  categoryId: "",
+  brandId: "",
+  unitId: "",
+});
 
 const categoryOptions = computed(() =>
   categories.value.map((c) => ({ label: c.name, value: c.id })),
@@ -128,27 +130,27 @@ async function fetchProducts() {
       sortOrder: pagination.sortOrder,
     };
 
-    if (searchQuery.value.trim()) {
-      payload.search = searchQuery.value.trim();
+    if (filters.search.trim()) {
+      payload.search = filters.search.trim();
     }
 
     // Build the filter object
-    const filters: Record<string, any> = {};
-    if (statusFilter.value && statusFilter.value !== "all") {
-      filters.status = statusFilter.value;
+    const filterObj: Record<string, any> = {};
+    if (filters.status) {
+      filterObj.status = filters.status;
     }
-    if (categoryIdFilter.value && categoryIdFilter.value !== "all") {
-      filters.categoryId = categoryIdFilter.value;
+    if (filters.categoryId) {
+      filterObj.categoryId = filters.categoryId;
     }
-    if (brandIdFilter.value && brandIdFilter.value !== "all") {
-      filters.brandId = brandIdFilter.value;
+    if (filters.brandId) {
+      filterObj.brandId = filters.brandId;
     }
-    if (unitIdFilter.value && unitIdFilter.value !== "all") {
-      filters.unitId = unitIdFilter.value;
+    if (filters.unitId) {
+      filterObj.unitId = filters.unitId;
     }
 
-    if (Object.keys(filters).length > 0) {
-      payload.filter = filters;
+    if (Object.keys(filterObj).length > 0) {
+      payload.filter = filterObj;
     }
 
     const response = await productService.getList(payload);
@@ -169,14 +171,25 @@ const debouncedFetch = useDebounceFn(() => {
   fetchProducts();
 }, 500);
 
-watch(searchQuery, () => {
-  debouncedFetch();
-});
+watch(
+  () => filters.search,
+  () => {
+    debouncedFetch();
+  }
+);
 
-watch([statusFilter, categoryIdFilter, brandIdFilter, unitIdFilter], () => {
-  pagination.page = 1;
-  fetchProducts();
-});
+watch(
+  [
+    () => filters.status,
+    () => filters.categoryId,
+    () => filters.brandId,
+    () => filters.unitId,
+  ],
+  () => {
+    pagination.page = 1;
+    fetchProducts();
+  }
+);
 
 watch(
   () => pagination.limit,
@@ -293,23 +306,22 @@ onMounted(() => {
           type="search"
           :placeholder="$t('crud.search', { module: $t('modules.product') })"
           class="pl-8"
-          v-model="searchQuery"
+          v-model="filters.search"
         />
       </div>
 
-      <Select v-model="statusFilter">
+      <Select v-model="filters.status">
         <SelectTrigger class="w-full sm:w-[180px]">
           <SelectValue :placeholder="$t('crud.filterByStatus')" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">{{ $t('crud.allStatus') }}</SelectItem>
           <SelectItem value="active">{{ $t('crud.active') }}</SelectItem>
           <SelectItem value="inactive">{{ $t('crud.inactive') }}</SelectItem>
         </SelectContent>
       </Select>
 
       <SearchableSelect
-        v-model="categoryIdFilter"
+        v-model="filters.categoryId"
         :options="categoryOptions"
         :placeholder="$t('crud.selectOption', { module: $t('modules.category') })"
         :empty-message="$t('crud.noResults')"
@@ -317,7 +329,7 @@ onMounted(() => {
       />
 
       <SearchableSelect
-        v-model="brandIdFilter"
+        v-model="filters.brandId"
         :options="brandOptions"
         :placeholder="$t('crud.selectOption', { module: $t('modules.brand') })"
         :empty-message="$t('crud.noResults')"
@@ -325,7 +337,7 @@ onMounted(() => {
       />
 
       <SearchableSelect
-        v-model="unitIdFilter"
+        v-model="filters.unitId"
         :options="unitOptions"
         :placeholder="$t('crud.selectOption', { module: $t('modules.unit') })"
         :empty-message="$t('crud.noResults')"
@@ -333,10 +345,10 @@ onMounted(() => {
       />
 
       <Button 
-        v-if="searchQuery || statusFilter || categoryIdFilter || brandIdFilter || unitIdFilter" 
+        v-if="filters.search || filters.status || filters.categoryId || filters.brandId || filters.unitId" 
         variant="ghost" 
         size="sm"
-        @click="searchQuery = ''; statusFilter = null; categoryIdFilter = null; brandIdFilter = null; unitIdFilter = null;"
+        @click="Object.assign(filters, { search: '', status: '', categoryId: '', brandId: '', unitId: '' })"
         class="h-9 px-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
       >
         <RefreshCw class="mr-2 h-4 w-4" />
@@ -499,16 +511,10 @@ onMounted(() => {
                 <Package class="h-10 w-10 opacity-10" />
                 <p class="font-medium">{{ $t('crud.noRecords', { module: $t('modules.products') }) }}</p>
                 <Button
-                  v-if="searchQuery || (statusFilter && statusFilter !== 'all') || (categoryIdFilter && categoryIdFilter !== 'all') || (brandIdFilter && brandIdFilter !== 'all') || (unitIdFilter && unitIdFilter !== 'all')"
+                  v-if="filters.search || filters.status || filters.categoryId || filters.brandId || filters.unitId"
                   variant="outline"
                   size="sm"
-                  @click="
-                    searchQuery = '';
-                    statusFilter = null;
-                    categoryIdFilter = null;
-                    brandIdFilter = null;
-                    unitIdFilter = null;
-                  "
+                  @click="Object.assign(filters, { search: '', status: '', categoryId: '', brandId: '', unitId: '' })"
                   class="h-8"
                 >
                   {{ $t('crud.resetFilters') }}

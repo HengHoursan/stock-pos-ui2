@@ -300,6 +300,7 @@
     "orderDate": "Order Date",
     "invoiceDate": "Invoice Date",
     "returnDate": "Return Date",
+    "date": "Date",
     "paymentId": "Payment ID",
     "paymentHistory": "Payment History",
     "paymentDate": "Payment Date",

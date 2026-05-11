@@ -80,9 +80,11 @@ const transactions = ref<Transaction[]>([]);
 const products = ref<any[]>([]); // Using any for simplicity as we only need id/name
 
 const loading = ref(true);
-const searchQuery = ref("");
-const typeFilter = ref<string | null>(null);
-const productIdFilter = ref<string | number | null>(null);
+const filters = reactive({
+  search: "",
+  transactionType: "",
+  productId: "",
+});
 
 const productOptions = computed(() =>
   products.value.map((p) => ({ label: p.name, value: p.id })),
@@ -110,20 +112,20 @@ async function fetchTransactions() {
       sortOrder: pagination.sortOrder,
     };
 
-    if (searchQuery.value.trim()) {
-      payload.search = searchQuery.value.trim();
+    if (filters.search.trim()) {
+      payload.search = filters.search.trim();
     }
 
-    const filters: Record<string, any> = {};
-    if (typeFilter.value && typeFilter.value !== "all") {
-      filters.transactionType = typeFilter.value;
+    const payloadFilters: Record<string, any> = {};
+    if (filters.transactionType) {
+      payloadFilters.transactionType = filters.transactionType;
     }
-    if (productIdFilter.value && productIdFilter.value !== "all") {
-      filters.productId = productIdFilter.value;
+    if (filters.productId) {
+      payloadFilters.productId = filters.productId;
     }
 
-    if (Object.keys(filters).length > 0) {
-      payload.filter = filters;
+    if (Object.keys(payloadFilters).length > 0) {
+      payload.filter = payloadFilters;
     }
 
     const response = await transactionService.getList(payload);
@@ -144,14 +146,20 @@ const debouncedFetch = useDebounceFn(() => {
   fetchTransactions();
 }, 500);
 
-watch(searchQuery, () => {
-  debouncedFetch();
-});
+watch(
+  () => filters.search,
+  () => {
+    debouncedFetch();
+  }
+);
 
-watch([typeFilter, productIdFilter], () => {
-  pagination.page = 1;
-  fetchTransactions();
-});
+watch(
+  () => [filters.transactionType, filters.productId],
+  () => {
+    pagination.page = 1;
+    fetchTransactions();
+  }
+);
 
 watch(
   () => pagination.limit,
@@ -284,16 +292,15 @@ onMounted(() => {
             $t('crud.search', { module: $t('modules.transaction') })
           "
           class="pl-8"
-          v-model="searchQuery"
+          v-model="filters.search"
         />
       </div>
 
-      <Select v-model="typeFilter">
+      <Select v-model="filters.transactionType">
         <SelectTrigger class="w-full sm:w-[180px]">
           <SelectValue :placeholder="$t('crud.filterByType')" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">{{ $t("crud.allTypes") }}</SelectItem>
           <SelectItem :value="String(TransactionType.IN)">{{
             $t("fields.stockIn")
           }}</SelectItem>
@@ -307,7 +314,7 @@ onMounted(() => {
       </Select>
 
       <SearchableSelect
-        v-model="productIdFilter"
+        v-model="filters.productId"
         :options="productOptions"
         :placeholder="$t('crud.selectOption', { module: $t('modules.product') })"
         :empty-message="$t('crud.noResults')"
@@ -462,14 +469,10 @@ onMounted(() => {
                   }}
                 </p>
                 <Button
-                  v-if="searchQuery || (typeFilter && typeFilter !== 'all') || (productIdFilter && productIdFilter !== 'all')"
+                  v-if="filters.search || filters.transactionType || filters.productId"
                   variant="outline"
                   size="sm"
-                  @click="
-                    searchQuery = '';
-                    typeFilter = null;
-                    productIdFilter = null;
-                  "
+                  @click="Object.assign(filters, { search: '', transactionType: '', productId: '' })"
                   class="h-8"
                 >
                   {{ $t("crud.resetFilters") }}

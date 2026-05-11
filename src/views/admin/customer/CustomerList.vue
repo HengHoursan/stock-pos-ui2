@@ -71,9 +71,11 @@ const customerService = new CustomerService();
 
 const customers = ref<Customer[]>([]);
 const loading = ref(true);
-const searchQuery = ref("");
-const statusFilter = ref<string | null>(null);
-const customerTypeFilter = ref<string | null>(null);
+const filters = reactive({
+  search: "",
+  status: "",
+  customerType: "",
+});
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -100,20 +102,20 @@ async function fetchCustomers() {
       sortOrder: pagination.sortOrder,
     };
 
-    if (searchQuery.value.trim()) {
-      payload.search = searchQuery.value.trim();
+    if (filters.search.trim()) {
+      payload.search = filters.search.trim();
     }
 
-    const filters: Record<string, string> = {};
-    if (statusFilter.value && statusFilter.value !== "all") {
-      filters.status = statusFilter.value;
+    const filterObj: Record<string, string> = {};
+    if (filters.status) {
+      filterObj.status = filters.status;
     }
-    if (customerTypeFilter.value && customerTypeFilter.value !== "all") {
-      filters.customerType = customerTypeFilter.value;
+    if (filters.customerType) {
+      filterObj.customerType = filters.customerType;
     }
 
-    if (Object.keys(filters).length > 0) {
-      payload.filter = filters;
+    if (Object.keys(filterObj).length > 0) {
+      payload.filter = filterObj;
     }
 
     const response = await customerService.getList(payload);
@@ -134,14 +136,20 @@ const debouncedFetch = useDebounceFn(() => {
   fetchCustomers();
 }, 500);
 
-watch(searchQuery, () => {
-  debouncedFetch();
-});
+watch(
+  () => filters.search,
+  () => {
+    debouncedFetch();
+  }
+);
 
-watch([statusFilter, customerTypeFilter], () => {
-  pagination.page = 1;
-  fetchCustomers();
-});
+watch(
+  [() => filters.status, () => filters.customerType],
+  () => {
+    pagination.page = 1;
+    fetchCustomers();
+  }
+);
 
 watch(
   () => pagination.limit,
@@ -248,27 +256,25 @@ onMounted(() => {
           type="search"
           :placeholder="$t('crud.search', { module: $t('modules.customer') })"
           class="pl-8"
-          v-model="searchQuery"
+          v-model="filters.search"
         />
       </div>
 
-      <Select v-model="statusFilter">
+      <Select v-model="filters.status">
         <SelectTrigger class="w-full sm:w-[180px]">
           <SelectValue :placeholder="$t('crud.filterByStatus')" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">{{ $t("crud.allStatus") }}</SelectItem>
           <SelectItem value="active">{{ $t("crud.active") }}</SelectItem>
           <SelectItem value="inactive">{{ $t("crud.inactive") }}</SelectItem>
         </SelectContent>
       </Select>
 
-      <Select v-model="customerTypeFilter">
+      <Select v-model="filters.customerType">
         <SelectTrigger class="w-full sm:w-[180px]">
           <SelectValue :placeholder="$t('crud.filterByType')" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">{{ $t("crud.allTypes") }}</SelectItem>
           <SelectItem :value="String(CustomerType.DINE_IN)">{{
             $t("fields.dineIn")
           }}</SelectItem>
@@ -435,17 +441,13 @@ onMounted(() => {
                 </p>
                 <Button
                   v-if="
-                    searchQuery ||
-                    (statusFilter && statusFilter !== 'all') ||
-                    (customerTypeFilter && customerTypeFilter !== 'all')
+                    filters.search ||
+                    filters.status ||
+                    filters.customerType
                   "
                   variant="outline"
                   size="sm"
-                  @click="
-                    searchQuery = '';
-                    statusFilter = null;
-                    customerTypeFilter = null;
-                  "
+                  @click="Object.assign(filters, { search: '', status: '', customerType: '' })"
                   class="h-8"
                 >
                   {{ $t("crud.resetFilters") }}

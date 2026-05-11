@@ -78,14 +78,15 @@ const supplierService = new SupplierService();
 const records = ref<PurchasePayment[]>([]);
 const suppliers = ref<Supplier[]>([]);
 const loading = ref(true);
-const searchQuery = ref("");
-const methodFilter = ref<string | null>(null);
-const supplierFilter = ref<string | number | null>(null);
+const filters = reactive({
+  search: "",
+  paymentMethod: "",
+  supplierId: "",
+  startDate: "",
+  endDate: "",
+});
 const supplierOptions = computed(() =>
   suppliers.value.map(s => ({ label: s.name, value: s.id }))
-);
-const dateRange = ref<{ start: string | null; end: string | null } | null>(
-  null,
 );
 
 const pagination = reactive<PaginationMeta>({
@@ -109,22 +110,22 @@ async function fetchData() {
       sortBy: pagination.sortBy,
       sortOrder: pagination.sortOrder,
     };
-    if (searchQuery.value.trim()) {
-      payload.search = searchQuery.value.trim();
+    if (filters.search.trim()) {
+      payload.search = filters.search.trim();
     }
 
     payload.filter = {};
-    if (methodFilter.value && methodFilter.value !== "all") {
-      payload.filter.paymentMethod = methodFilter.value;
+    if (filters.paymentMethod) {
+      payload.filter.paymentMethod = filters.paymentMethod;
     }
-    if (supplierFilter.value && supplierFilter.value !== "all") {
-      payload.filter.supplierId = supplierFilter.value;
+    if (filters.supplierId) {
+      payload.filter.supplierId = filters.supplierId;
     }
-    if (dateRange.value?.start) {
-      payload.filter.startDate = dateRange.value.start;
+    if (filters.startDate) {
+      payload.filter.startDate = filters.startDate;
     }
-    if (dateRange.value?.end) {
-      payload.filter.endDate = dateRange.value.end;
+    if (filters.endDate) {
+      payload.filter.endDate = filters.endDate;
     }
 
     const response = await ppService.getList(payload);
@@ -156,19 +157,14 @@ const debouncedFetch = useDebounceFn(() => {
   fetchData();
 }, 500);
 
-watch(searchQuery, () => debouncedFetch());
-watch(methodFilter, () => {
-  pagination.page = 1;
-  fetchData();
-});
-watch(supplierFilter, () => {
-  pagination.page = 1;
-  fetchData();
-});
-watch(dateRange, () => {
-  pagination.page = 1;
-  fetchData();
-});
+watch(() => filters.search, () => debouncedFetch());
+watch(
+  () => [filters.paymentMethod, filters.supplierId, filters.startDate, filters.endDate],
+  () => {
+    pagination.page = 1;
+    fetchData();
+  }
+);
 watch(
   () => pagination.limit,
   () => {
@@ -274,18 +270,19 @@ onMounted(() => {
             $t('crud.search', { module: $t('modules.purchasePayment') })
           "
           class="pl-8 bg-background/50 border-border/60 shadow-sm transition-all focus:ring-2 focus:ring-primary/20"
-          v-model="searchQuery"
+          v-model="filters.search"
         />
       </div>
 
       <DateRangePicker
-        v-model="dateRange"
+        :model-value="{ start: filters.startDate, end: filters.endDate }"
+        @update:model-value="(val) => { filters.startDate = val?.start || ''; filters.endDate = val?.end || ''; }"
         class="w-full sm:w-[260px] shadow-sm"
         :placeholder="$t('crud.filterByDate')"
       />
 
       <SearchableSelect
-        v-model="supplierFilter"
+        v-model="filters.supplierId"
         :options="supplierOptions"
         :placeholder="$t('fields.supplierId')"
         :empty-message="$t('crud.noResults')"
@@ -295,20 +292,10 @@ onMounted(() => {
 
 
       <Button
-        v-if="
-          searchQuery ||
-          (methodFilter && methodFilter !== 'all') ||
-          (supplierFilter && supplierFilter !== 'all') ||
-          dateRange
-        "
+        v-if="filters.search || filters.paymentMethod || filters.supplierId || filters.startDate || filters.endDate"
         variant="ghost"
         size="sm"
-        @click="
-          searchQuery = '';
-          methodFilter = null;
-          supplierFilter = null;
-          dateRange = null;
-        "
+        @click="Object.assign(filters, { search: '', paymentMethod: '', supplierId: '', startDate: '', endDate: '' })"
         class="h-9 px-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
       >
         <RefreshCw class="mr-2 h-4 w-4" />
@@ -445,20 +432,10 @@ onMounted(() => {
                   }}
                 </p>
                 <Button
-                  v-if="
-                    searchQuery ||
-                    (methodFilter && methodFilter !== 'all') ||
-                    (supplierFilter && supplierFilter !== 'all') ||
-                    dateRange
-                  "
+                  v-if="filters.search || filters.paymentMethod || filters.supplierId || filters.startDate || filters.endDate"
                   variant="outline"
                   size="sm"
-                  @click="
-                    searchQuery = '';
-                    methodFilter = null;
-                    supplierFilter = null;
-                    dateRange = null;
-                  "
+                  @click="Object.assign(filters, { search: '', paymentMethod: '', supplierId: '', startDate: '', endDate: '' })"
                   class="h-8"
                 >
                   {{ $t("crud.resetFilters") }}

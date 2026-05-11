@@ -79,14 +79,17 @@ const customerService = new CustomerService();
 const records = ref<SaleInvoice[]>([]);
 const customers = ref<Customer[]>([]);
 const loading = ref(true);
-const searchQuery = ref("");
-const statusFilter = ref<string | null>(null);
-const customerFilter = ref<string | number | null>(null);
+const filters = reactive({
+  search: "",
+  status: "",
+  customerId: "",
+  startDate: "",
+  endDate: "",
+});
 
 const customerOptions = computed(() => 
   customers.value.map(c => ({ label: c.name, value: c.id }))
 );
-const dateRange = ref<{ start: string | null; end: string | null } | null>(null);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -109,22 +112,22 @@ async function fetchData() {
       sortBy: pagination.sortBy,
       sortOrder: pagination.sortOrder,
     };
-    if (searchQuery.value.trim()) {
-      payload.search = searchQuery.value.trim();
+    if (filters.search.trim()) {
+      payload.search = filters.search.trim();
     }
     
     payload.filter = {};
-    if (statusFilter.value && statusFilter.value !== "all") {
-      payload.filter.status = statusFilter.value;
+    if (filters.status) {
+      payload.filter.status = filters.status;
     }
-    if (customerFilter.value && customerFilter.value !== "all") {
-      payload.filter.customerId = customerFilter.value;
+    if (filters.customerId) {
+      payload.filter.customerId = filters.customerId;
     }
-    if (dateRange.value?.start) {
-      payload.filter.startDate = dateRange.value.start;
+    if (filters.startDate) {
+      payload.filter.startDate = filters.startDate;
     }
-    if (dateRange.value?.end) {
-      payload.filter.endDate = dateRange.value.end;
+    if (filters.endDate) {
+      payload.filter.endDate = filters.endDate;
     }
 
     const response = await siService.getList(payload);
@@ -156,10 +159,14 @@ const debouncedFetch = useDebounceFn(() => {
   fetchData();
 }, 500);
 
-watch(searchQuery, () => debouncedFetch());
-watch(statusFilter, () => { pagination.page = 1; fetchData(); });
-watch(customerFilter, () => { pagination.page = 1; fetchData(); });
-watch(dateRange, () => { pagination.page = 1; fetchData(); });
+watch(
+  () => filters.search,
+  () => debouncedFetch()
+);
+watch(
+  () => [filters.status, filters.customerId, filters.startDate, filters.endDate],
+  () => { pagination.page = 1; fetchData(); }
+);
 watch(() => pagination.limit, () => { pagination.page = 1; fetchData(); });
 
 function handlePageChange(page: number) {
@@ -240,30 +247,30 @@ onMounted(() => {
           type="search"
           :placeholder="$t('crud.search', { module: $t('modules.saleInvoice') })"
           class="pl-8 bg-background/50 border-border/60 shadow-sm transition-all focus:ring-2 focus:ring-primary/20"
-          v-model="searchQuery"
+          v-model="filters.search"
         />
       </div>
 
       <DateRangePicker 
-        v-model="dateRange"
+        :model-value="{ start: filters.startDate, end: filters.endDate }"
+        @update:model-value="(val) => { filters.startDate = val?.start || ''; filters.endDate = val?.end || ''; }"
         class="w-full sm:w-[260px] shadow-sm"
         :placeholder="$t('crud.filterByDate')"
       />
 
       <SearchableSelect
-        v-model="customerFilter"
+        v-model="filters.customerId"
         :options="customerOptions"
         :placeholder="$t('crud.selectOption', { module: $t('modules.customer') })"
         :empty-message="$t('crud.noResults')"
         class="w-full sm:w-[220px]"
       />
 
-      <Select v-model="statusFilter">
+      <Select v-model="filters.status">
         <SelectTrigger class="w-full sm:w-[180px] bg-background/50 border-border/60 shadow-sm">
           <SelectValue :placeholder="$t('crud.filterByStatus')" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">{{ $t("crud.allStatus") }}</SelectItem>
           <SelectItem :value="String(InvoiceStatus.DRAFT)">{{ $t("fields.statusLabels.draft") }}</SelectItem>
           <SelectItem value="2">{{ $t("fields.statusLabels.confirmed") }}</SelectItem>
           <SelectItem :value="String(InvoiceStatus.COMPLETED)">{{ $t("fields.statusLabels.completed") }}</SelectItem>
@@ -271,10 +278,10 @@ onMounted(() => {
       </Select>
 
       <Button 
-        v-if="searchQuery || (statusFilter && statusFilter !== 'all') || customerFilter || dateRange"
+        v-if="filters.search || filters.status || filters.customerId || filters.startDate || filters.endDate"
         variant="ghost" 
         size="sm"
-        @click="searchQuery = ''; statusFilter = null; customerFilter = null; dateRange = null;"
+        @click="Object.assign(filters, { search: '', status: '', customerId: '', startDate: '', endDate: '' })"
         class="h-9 px-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
       >
         <RefreshCw class="mr-2 h-4 w-4" />
@@ -402,10 +409,10 @@ onMounted(() => {
                 <FileText class="h-10 w-10 opacity-10" />
                 <p class="font-medium">{{ $t("crud.noRecords", { module: $t("modules.saleInvoices") }) }}</p>
                 <Button
-                  v-if="searchQuery || (statusFilter && statusFilter !== 'all') || (customerFilter && customerFilter !== 'all') || dateRange"
+                  v-if="filters.search || filters.status || filters.customerId || filters.startDate || filters.endDate"
                   variant="outline"
                   size="sm"
-                  @click="searchQuery = ''; statusFilter = null; customerFilter = null; dateRange = null;"
+                  @click="Object.assign(filters, { search: '', status: '', customerId: '', startDate: '', endDate: '' })"
                   class="h-8"
                 >
                   {{ $t('crud.resetFilters') }}
