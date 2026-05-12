@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("purchaseReturn");
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
@@ -36,13 +36,13 @@ const loading = ref(true);
 function getStatusBadge(rec: PurchaseReturn) {
   switch (Number(rec.status)) {
     case InvoiceStatus.DRAFT:
-      return { variant: "secondary", label: t("fields.statusLabels.draft") };
+      return { variant: "secondary", label: fields.statusLabels.draft };
     case InvoiceStatus.COMPLETED:
-      return { variant: "success", label: t("fields.statusLabels.completed") };
+      return { variant: "success", label: fields.statusLabels.completed };
     case InvoiceStatus.CANCELLED:
-      return { variant: "destructive", label: t("fields.statusLabels.cancelled") };
+      return { variant: "destructive", label: fields.statusLabels.cancelled };
     default:
-      return { variant: "outline", label: t("crud.all") };
+      return { variant: "outline", label: crud.all };
   }
 }
 
@@ -56,7 +56,7 @@ async function fetchDetail() {
     if (response.success && response.data) {
       record.value = response.data;
     } else {
-      toast.error(t('crud.notFound', { module: t('modules.purchaseReturn') }));
+      toast.error(t('crud.notFound', { module: labels.name }));
       router.back();
     }
   } catch (error) {
@@ -92,7 +92,7 @@ onMounted(() => {
       </div>
       <div>
         <Button v-if="record && record.status === InvoiceStatus.DRAFT" @click="router.push(`/admin/purchase-returns/${record.id}/edit`)" variant="outline">
-          {{ $t('crud.editBtn') }}
+          {{ crud.editBtn }}
         </Button>
       </div>
     </div>
@@ -109,20 +109,20 @@ onMounted(() => {
           <CardHeader class="pb-3 border-b">
             <CardTitle class="text-lg flex items-center gap-2">
               <FileText class="h-5 w-5 text-primary" />
-              {{ $t('crud.generalInfo') }}
+              {{ crud.generalInfo }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-4 space-y-4 text-sm">
             <div>
-              <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Users class="h-3.5 w-3.5" />{{ $t('fields.supplierId') }}</p>
+              <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Users class="h-3.5 w-3.5" />{{ fields.supplierId }}</p>
               <p class="font-medium">{{ record.supplier?.name || `ID: ${record.supplierId}` }}</p>
             </div>
             <div>
-              <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Calendar class="h-3.5 w-3.5" />{{ $t('fields.date') }}</p>
+              <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Calendar class="h-3.5 w-3.5" />{{ fields.date }}</p>
               <p class="font-medium">{{ formatDateTime(record.returnDate) }}</p>
             </div>
             <div>
-              <p class="text-muted-foreground mb-1">{{ $t('fields.remarks') }}</p>
+              <p class="text-muted-foreground mb-1">{{ fields.remarks }}</p>
               <p class="font-medium text-sm italic">{{ record.description || '---' }}</p>
             </div>
           </CardContent>
@@ -132,7 +132,7 @@ onMounted(() => {
           <CardHeader class="pb-3 border-b border-primary/10">
             <CardTitle class="text-lg flex items-center gap-2 text-primary">
               <History class="h-5 w-5" />
-              {{ $t('fields.totalPrice') }}
+              {{ fields.totalPrice }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6">
@@ -149,7 +149,7 @@ onMounted(() => {
           <CardHeader class="pb-3 border-b">
             <CardTitle class="text-lg flex items-center gap-2">
               <Package class="h-5 w-5 text-primary" />
-              {{ $t('fields.details') }}
+              {{ fields.details }}
             </CardTitle>
           </CardHeader>
           <CardContent class="p-0">
@@ -157,10 +157,10 @@ onMounted(() => {
               <TableHeader class="bg-muted/30">
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>{{ $t('modules.product') }}</TableHead>
-                  <TableHead class="text-right">{{ $t('fields.quantity') }}</TableHead>
-                  <TableHead class="text-right">{{ $t('fields.unitPrice') }}</TableHead>
-                  <TableHead class="text-right">{{ $t('fields.rowTotal') }}</TableHead>
+                  <TableHead>{{ t('modules.product') }}</TableHead>
+                  <TableHead class="text-right">{{ fields.quantity }}</TableHead>
+                  <TableHead class="text-right">{{ fields.unitPrice }}</TableHead>
+                  <TableHead class="text-right">{{ fields.rowTotal }}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -178,7 +178,7 @@ onMounted(() => {
                 </template>
                 <TableRow v-else>
                   <TableCell colspan="5" class="py-12 text-center text-muted-foreground italic">
-                    {{ $t('common.noData') }}
+                    {{ t('common.noData') }}
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -188,7 +188,7 @@ onMounted(() => {
             <div class="flex justify-end p-6 border-t bg-muted/10">
               <div class="w-full max-w-sm space-y-3">
                 <div class="flex justify-between items-center text-lg font-black pt-2 border-t border-primary/10">
-                  <span class="text-foreground">{{ $t('fields.totalPrice') }}:</span>
+                  <span class="text-foreground">{{ fields.totalPrice }}:</span>
                   <span class="text-primary"></span>
                 </div>
               </div>

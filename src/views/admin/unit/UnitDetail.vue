@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("unit");
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { formatDateTime } from "@/utils/format";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,11 +36,11 @@ async function fetchUnit() {
         }
       }
     } else {
-      toast.error(t('crud.notFound', { module: t('modules.unit') }));
+      toast.error(t('crud.notFound', { module: labels.name }));
       router.push("/admin/units");
     }
   } catch (error) {
-    toast.error(t('crud.errorFetch', { module: t('modules.unit') }));
+    toast.error(t('crud.errorFetch', { module: labels.name }));
   } finally {
     loading.value = false;
   }
@@ -50,11 +51,11 @@ async function deleteUnit() {
   try {
     const response = await unitService.softDelete(unitId);
     if (response.success) {
-      toast.success(t('crud.successDelete', { module: t('modules.unit') }));
+      toast.success(t('crud.successDelete', { module: labels.name }));
       router.push("/admin/units");
     }
   } catch (error) {
-    toast.error(t('crud.errorDelete', { module: t('modules.unit') }));
+    toast.error(t('crud.errorDelete', { module: labels.name }));
   }
 }
 
@@ -80,9 +81,9 @@ onMounted(() => {
       </div>
       <div class="flex items-center gap-2">
         <Button variant="outline" @click="router.push(`/admin/units/${unitId}/edit`)" class="flex-1 md:flex-none">
-          <Pencil class="mr-2 h-4 w-4" />{{ $t('crud.editBtn') }}</Button>
+          <Pencil class="mr-2 h-4 w-4" />{{ crud.editBtn }}</Button>
         <Button variant="destructive" @click="deleteUnit" class="flex-1 md:flex-none">
-          <Trash2 class="mr-2 h-4 w-4" />{{ $t('crud.delete') }}</Button>
+          <Trash2 class="mr-2 h-4 w-4" />{{ crud.delete }}</Button>
       </div>
     </div>
 
@@ -186,13 +187,13 @@ onMounted(() => {
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
                   <Calendar class="mr-2 h-4 w-4" />{{ $t('fields.createdAt') }}</div>
-                <p class="font-medium text-base">{{ new Date(unit.createdAt).toLocaleString() }}</p>
+                <p class="font-medium text-base">{{ formatDateTime(unit.createdAt) }}</p>
               </div>
               
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
                   <Calendar class="mr-2 h-4 w-4" />{{ $t('fields.updatedAt') }}</div>
-                <p class="font-medium text-base">{{ new Date(unit.updatedAt).toLocaleString() }}</p>
+                <p class="font-medium text-base">{{ formatDateTime(unit.updatedAt) }}</p>
               </div>
             </div>
           </CardContent>

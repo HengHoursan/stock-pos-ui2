@@ -23,11 +23,11 @@ import {
 import { RouterLink } from "vue-router";
 import { ref } from "vue";
 import { toast } from "vue-sonner";
-import { useI18n } from "vue-i18n";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 const router = useRouter();
 const authStore = useAuthStore();
-const { t } = useI18n();
+const { t, auth, fields } = useAppI18n("auth");
 const isLoading = ref(false);
 
 const formSchema = toTypedSchema(
@@ -68,19 +68,19 @@ const onSubmit = form.handleSubmit(async (values) => {
     <div class="w-full max-w-sm">
       <Card>
         <CardHeader class="text-center">
-          <CardTitle class="text-xl">{{ $t('auth.createAccount') }}</CardTitle>
+          <CardTitle class="text-xl">{{ auth.createAccount }}</CardTitle>
           <CardDescription>
-            {{ $t('auth.registerDescription') }}
+            {{ auth.registerDescription }}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form @submit="onSubmit" class="grid gap-6">
             <FormField v-slot="{ componentField }" name="username">
               <FormItem>
-                <FormLabel>{{ $t('auth.username') }}</FormLabel>
+                <FormLabel>{{ auth.username }}</FormLabel>
                 <FormControl>
                   <Input
-                    :placeholder="$t('fields.namePlaceholder')"
+                    :placeholder="fields.namePlaceholder"
                     v-bind="componentField"
                     :disabled="isLoading"
                   />
@@ -91,11 +91,11 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="email">
               <FormItem>
-                <FormLabel>{{ $t('auth.email') }}</FormLabel>
+                <FormLabel>{{ auth.email }}</FormLabel>
                 <FormControl>
                   <Input
                     type="email"
-                    :placeholder="$t('fields.emailPlaceholder')"
+                    :placeholder="fields.emailPlaceholder"
                     v-bind="componentField"
                     :disabled="isLoading"
                   />
@@ -106,7 +106,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="password">
               <FormItem>
-                <FormLabel>{{ $t('auth.password') }}</FormLabel>
+                <FormLabel>{{ auth.password }}</FormLabel>
                 <FormControl>
                   <Input
                     type="password"
@@ -119,13 +119,13 @@ const onSubmit = form.handleSubmit(async (values) => {
             </FormField>
 
             <Button type="submit" class="w-full" :disabled="isLoading">
-              {{ isLoading ? $t('auth.creatingAccount') : $t('auth.signUpButton') }}
+              {{ isLoading ? auth.creatingAccount : auth.signUpButton }}
             </Button>
 
             <div class="text-center text-sm">
-              {{ $t('auth.hasAccount') }}
+              {{ auth.hasAccount }}
               <RouterLink to="/login" class="underline underline-offset-4">
-                {{ $t('auth.login') }}
+                {{ auth.login }}
               </RouterLink>
             </div>
           </form>

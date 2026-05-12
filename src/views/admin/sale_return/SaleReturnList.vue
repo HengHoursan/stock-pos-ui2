@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("saleReturn");
 import { ref, onMounted, reactive, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
 import SearchableSelect from "@/components/SearchableSelect.vue";
+import ClearableSelect from "@/components/ClearableSelect.vue";
 
 import {
   Table,
@@ -96,6 +97,12 @@ const pagination = reactive<PaginationMeta>({
   sortOrder: "DESC",
 });
 
+const statusOptions = computed(() => [
+  { label: fields.statusLabels.draft, value: String(InvoiceStatus.DRAFT) },
+  { label: fields.statusLabels.completed, value: String(InvoiceStatus.COMPLETED) },
+  { label: fields.statusLabels.cancelled, value: String(InvoiceStatus.CANCELLED) },
+]);
+
 const isDeleteDialogOpen = ref(false);
 const recordToDelete = ref<number | null>(null);
 
@@ -133,7 +140,7 @@ async function fetchData() {
     }
   } catch (error) {
     console.error("Fetch error:", error);
-    toast.error(t('crud.errorFetch', { module: t('modules.saleReturn') }));
+    toast.error(t('crud.errorFetch', { module: labels.name }));
   } finally {
     loading.value = false;
   }
@@ -177,11 +184,11 @@ async function confirmDelete() {
   try {
     const response = await srService.softDelete(recordToDelete.value);
     if (response.success) {
-      toast.success(t('crud.successDelete', { module: t('modules.saleReturn') }));
+      toast.success(t('crud.successDelete', { module: labels.name }));
       fetchData();
     }
   } catch (error) {
-    toast.error(t('crud.errorDelete', { module: t('modules.saleReturn') }));
+    toast.error(t('crud.errorDelete', { module: labels.name }));
   } finally {
     isDeleteDialogOpen.value = false;
     recordToDelete.value = null;
@@ -202,10 +209,10 @@ function handleSort(column: string) {
 
 function getStatusBadge(record: SaleReturn) {
   switch (Number(record.status)) {
-    case InvoiceStatus.DRAFT: return { variant: 'secondary', label: t('fields.statusLabels.draft') };
-    case InvoiceStatus.COMPLETED: return { variant: 'success', label: t('fields.statusLabels.completed') };
-    case InvoiceStatus.CANCELLED: return { variant: 'destructive', label: t('fields.statusLabels.cancelled') };
-    default: return { variant: 'outline', label: t('crud.all') };
+    case InvoiceStatus.DRAFT: return { variant: 'secondary', label: fields.statusLabels.draft };
+    case InvoiceStatus.COMPLETED: return { variant: 'success', label: fields.statusLabels.completed };
+    case InvoiceStatus.CANCELLED: return { variant: 'destructive', label: fields.statusLabels.cancelled };
+    default: return { variant: 'outline', label: crud.all };
   }
 }
 
@@ -218,15 +225,13 @@ onMounted(() => {
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <h2 class="text-3xl font-bold tracking-tight text-foreground">
-        {{ $t("menu.saleReturns") }}
-      </h2>
+      <h2 class="text-3xl font-bold tracking-tight text-foreground">{{ labels.title }}</h2>
       <div class="flex items-center gap-2">
         <Button variant="outline" size="icon" @click="fetchData" :disabled="loading">
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button @click="router.push('/admin/sale-returns/create')">
-          <Plus class="mr-2 h-4 w-4" />{{ $t("crud.createBtn") }}
+        <Button @click="router.push('/admin/sale_returns/create')">
+          <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.name }}
         </Button>
       </div>
     </div>
@@ -236,7 +241,7 @@ onMounted(() => {
         <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
-          :placeholder="$t('crud.search', { module: $t('modules.saleReturn') })"
+          :placeholder="t('crud.search', { module: labels.title })"
           class="pl-8 bg-background/50 border-border/60 shadow-sm transition-all focus:ring-2 focus:ring-primary/20"
           v-model="filters.search"
         />
@@ -246,27 +251,23 @@ onMounted(() => {
         :model-value="{ start: filters.startDate, end: filters.endDate }"
         @update:model-value="(val) => { filters.startDate = val?.start || ''; filters.endDate = val?.end || ''; }"
         class="w-full sm:w-[260px] shadow-sm"
-        :placeholder="$t('crud.filterByDate')"
+        :placeholder="crud.filterByDate"
       />
 
       <SearchableSelect
         v-model="filters.customerId"
         :options="customerOptions"
-        :placeholder="$t('fields.customerId')"
-        :empty-message="$t('crud.noResults')"
-        class="w-full sm:w-[200px]"
+        :placeholder="crud.filterByCustomer"
+        :empty-message="crud.noResults"
+        class="w-full sm:w-[250px]"
       />
 
-      <Select v-model="filters.status">
-        <SelectTrigger class="w-full sm:w-[180px] bg-background/50 border-border/60 shadow-sm">
-          <SelectValue :placeholder="$t('crud.filterByStatus')" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem :value="String(InvoiceStatus.DRAFT)">{{ $t("fields.statusLabels.draft") }}</SelectItem>
-          <SelectItem :value="String(InvoiceStatus.COMPLETED)">{{ $t("fields.statusLabels.completed") }}</SelectItem>
-          <SelectItem :value="String(InvoiceStatus.CANCELLED)">{{ $t("fields.statusLabels.cancelled") }}</SelectItem>
-        </SelectContent>
-      </Select>
+      <ClearableSelect
+        v-model="filters.status"
+        :options="statusOptions"
+        :placeholder="crud.filterByStatus"
+        class="w-full sm:w-[250px]"
+      />
 
       <Button 
         v-if="filters.search || filters.status || filters.customerId || filters.startDate || filters.endDate"
@@ -276,7 +277,7 @@ onMounted(() => {
         class="h-9 px-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
       >
         <RefreshCw class="mr-2 h-4 w-4" />
-        {{ $t('crud.resetFilters') }}
+        {{ crud.resetFilters }}
       </Button>
     </div>
 
@@ -285,24 +286,25 @@ onMounted(() => {
         <TableHeader>
           <TableRow>
             <TableHead class="w-[50px]">#</TableHead>
-            <TableHead class="w-[150px]">{{ $t("fields.code") }}</TableHead>
-            <TableHead>{{ $t("fields.customerId") }}</TableHead>
+            <TableHead class="w-[150px]">{{ fields.code }}</TableHead>
+            <TableHead>{{ fields.customerId }}</TableHead>
             <TableHead>
               <Button variant="ghost" @click="handleSort('returnDate')" class="-ml-4 h-8 font-medium">
-                {{ $t("fields.date") }}<ArrowUpDown class="ml-1 h-3 w-3" />
+                {{ fields.date }}<ArrowUpDown class="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
-            <TableHead class="text-right">{{ $t("fields.totalPrice") }}</TableHead>
-            <TableHead class="text-center">{{ $t("fields.status") }}</TableHead>
-            <TableHead class="text-right">{{ $t("crud.actions") }}</TableHead>
+            <TableHead class="text-center">{{ fields.totalLine }}</TableHead>
+            <TableHead class="text-right">{{ fields.totalPrice }}</TableHead>
+            <TableHead class="text-center">{{ fields.status }}</TableHead>
+            <TableHead class="text-right">{{ crud.actions }}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           <TableRow v-if="loading && records.length === 0">
-            <TableCell colspan="7" class="h-24 text-center">
+            <TableCell colspan="8" class="h-24 text-center">
               <div class="flex items-center justify-center text-muted-foreground italic text-sm">
                 <Loader2 class="h-4 w-4 animate-spin mr-2" />
-                <span>{{ $t('crud.fetchingData') }}</span>
+                <span>{{ crud.fetchingData }}</span>
               </div>
             </TableCell>
           </TableRow>
@@ -322,6 +324,9 @@ onMounted(() => {
               <TableCell class="text-foreground/90">
                 {{ formatDateTime(record.returnDate) }}
               </TableCell>
+              <TableCell class="text-center">
+                {{ Math.trunc(record.totalLine || 0) }} {{ fields.items }}
+              </TableCell>
               <TableCell class="text-right text-primary font-semibold">
                 {{ formatCurrency(record.totalPrice) }}
               </TableCell>
@@ -340,18 +345,18 @@ onMounted(() => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" class="w-[180px]">
                     <DropdownMenuLabel class="text-xs uppercase text-muted-foreground font-bold">
-                      {{ $t("crud.actions") }}
+                      {{ crud.actions }}
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem @click="router.push(`/admin/sale-returns/${record.id}`)" class="cursor-pointer">
-                      <Eye class="mr-2 h-4 w-4 opacity-70" />{{ $t("crud.viewBtn") }}
+                      <Eye class="mr-2 h-4 w-4 opacity-70" />{{ crud.viewBtn }}
                     </DropdownMenuItem>
                     <DropdownMenuItem v-if="record.status === InvoiceStatus.DRAFT" @click="router.push(`/admin/sale-returns/${record.id}/edit`)" class="cursor-pointer">
-                      {{ $t("crud.editBtn") }}
+                      {{ crud.editBtn }}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem class="text-destructive focus:text-destructive cursor-pointer font-medium" @click="openDeleteDialog(record.id)">
-                      <Trash2 class="mr-2 h-4 w-4" />{{ $t("crud.delete") }}
+                      <Trash2 class="mr-2 h-4 w-4" />{{ crud.delete }}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -359,10 +364,10 @@ onMounted(() => {
             </TableRow>
           </template>
           <TableRow v-else>
-            <TableCell colspan="7" class="h-32 text-center text-muted-foreground">
+            <TableCell colspan="8" class="h-32 text-center text-muted-foreground">
               <div class="flex flex-col items-center justify-center gap-3">
                 <RotateCcw class="h-10 w-10 opacity-10" />
-                <p class="font-medium">{{ $t("crud.noRecords", { module: $t("modules.saleReturns") }) }}</p>
+                <p class="font-medium">{{ t('crud.noRecords', { module: labels.title }) }}</p>
                 <Button
                   v-if="filters.search || filters.status || filters.customerId || filters.startDate || filters.endDate"
                   variant="outline"
@@ -370,7 +375,7 @@ onMounted(() => {
                   @click="Object.assign(filters, { search: '', status: '', customerId: '', startDate: '', endDate: '' })"
                   class="h-8"
                 >
-                  {{ $t('crud.resetFilters') }}
+                  {{ crud.resetFilters }}
                 </Button>
               </div>
             </TableCell>
@@ -383,7 +388,7 @@ onMounted(() => {
     <div class="flex items-center justify-end px-4 py-4 border-t bg-muted/5 rounded-b-lg">
       <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">
-          <span class="text-sm font-medium text-muted-foreground whitespace-nowrap">{{ $t('crud.rowsPerPage') }}</span>
+          <span class="text-sm font-medium text-muted-foreground whitespace-nowrap">{{ crud.rowsPerPage }}</span>
           <Select :model-value="pagination.limit.toString()" @update:model-value="(v) => (pagination.limit = parseInt(v as string))">
             <SelectTrigger class="h-8 w-[70px] bg-transparent">
               <SelectValue />
@@ -415,15 +420,15 @@ onMounted(() => {
     <AlertDialog v-model:open="isDeleteDialogOpen">
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{{ $t('crud.confirmDelete') }}</AlertDialogTitle>
+          <AlertDialogTitle>{{ crud.confirmDelete }}</AlertDialogTitle>
           <AlertDialogDescription>
-            {{ $t('crud.confirmDeleteDesc', { module: $t('modules.saleReturn') }) }}
+            {{ t("crud.confirmDeleteDesc", { module: labels.name }) }}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel @click="isDeleteDialogOpen = false">{{ $t("crud.cancel") }}</AlertDialogCancel>
+          <AlertDialogCancel @click="isDeleteDialogOpen = false">{{ crud.cancel }}</AlertDialogCancel>
           <AlertDialogAction @click="confirmDelete" class="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-            {{ $t("crud.delete") }}
+            {{ crud.delete }}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("category");
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useForm } from "vee-validate";
@@ -91,7 +91,7 @@ async function fetchData() {
         status: cat.status,
       });
     } else {
-      toast.error(t("crud.notFound", { module: t("modules.category") }));
+      toast.error(t("crud.notFound", { module: labels.name }));
       router.push("/admin/categories");
     }
 
@@ -101,7 +101,7 @@ async function fetchData() {
       );
     }
   } catch (error) {
-    toast.error(t("crud.errorFetch", { module: t("modules.category") }));
+    toast.error(t("crud.errorFetch", { module: labels.name }));
   } finally {
     loading.value = false;
   }
@@ -120,12 +120,12 @@ const onSubmit = form.handleSubmit(async (values) => {
     };
     const response = await categoryService.update(payload);
     if (response.success) {
-      toast.success(t("crud.successUpdate", { module: t("modules.category") }));
+      toast.success(t("crud.successUpdate", { module: labels.name }));
       router.push("/admin/categories");
     } else {
       toast.error(
         response.message ||
-          t("crud.errorUpdate", { module: t("modules.category") }),
+          t("crud.errorUpdate", { module: labels.name }),
       );
     }
   } catch (error) {
@@ -147,7 +147,7 @@ onMounted(() => {
         <ChevronLeft class="h-4 w-4" />
       </Button>
       <h2 class="text-3xl font-bold tracking-tight">
-        {{ $t("crud.edit", { module: $t("modules.category") }) }}
+        {{ crud.editBtn }} {{ labels.name }}
       </h2>
     </div>
 
@@ -158,7 +158,7 @@ onMounted(() => {
     <Card v-else>
       <CardHeader>
         <CardTitle>{{
-          $t("crud.info", { module: $t("modules.category") })
+          t("crud.info", { module: labels.name })
         }}</CardTitle>
       </CardHeader>
       <CardContent>
@@ -236,7 +236,7 @@ onMounted(() => {
                 <FormField v-slot="{ field }" name="parentId">
                   <FormItem>
                     <FormLabel>{{
-                      $t("fields.parentOf", { module: $t("modules.category") })
+                      t("fields.parentOf", { module: labels.name })
                     }}</FormLabel>
                     <Select v-bind="field">
                       <FormControl>
@@ -290,13 +290,11 @@ onMounted(() => {
                         <FormLabel class="text-base font-semibold">{{
                           $t("fields.activeStatus")
                         }}</FormLabel>
-                        <FormDescription>
                           {{
-                            $t("fields.statusDescription", {
-                              module: $t("modules.category"),
+                            t("fields.statusDescription", {
+                              module: labels.name,
                             })
                           }}
-                        </FormDescription>
                       </div>
                       <FormControl>
                         <Switch
@@ -321,7 +319,7 @@ onMounted(() => {
         >
         <Button type="submit" form="categoryForm" :disabled="submitting">
           <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-          {{ $t("crud.updateBtn", { module: $t("modules.category") }) }}
+          {{ crud.updateBtn }} {{ labels.name }}
         </Button>
       </CardFooter>
     </Card>

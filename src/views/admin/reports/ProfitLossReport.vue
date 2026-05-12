@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from "vue";
-import { useI18n } from "vue-i18n";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import { ReportService } from "@/services/report/report.service";
 import DateRangePicker from "@/components/DateRangePicker.vue";
 import type { ProfitLossReport, PaginationRequest } from "@/types";
@@ -33,7 +33,7 @@ import {
   type ExportColumn,
 } from "@/utils/export";
 
-const { t } = useI18n();
+const { t, labels, menu, crud } = useAppI18n("reports");
 const reportService = new ReportService();
 
 const loading = ref(true);
@@ -69,7 +69,7 @@ async function fetchData() {
       reportData.value = res.data;
     }
   } catch (error: any) {
-    toast.error(t("reports.failedToLoad", { module: t("menu.plReport") }));
+    toast.error(t("reports.failedToLoad", { module: menu.plReport }));
   } finally {
     loading.value = false;
   }
@@ -88,22 +88,21 @@ function handleDateRangeFilter(
 
 /* EXPORT LOGIC */
 const customExportCols: ExportColumn[] = [
-  { header: t("reports.revenue"), dataKey: "netSales" },
-  { header: t("reports.cogs"), dataKey: "costOfGoodsSold" },
-  { header: t("reports.grossProfit"), dataKey: "grossProfit" },
-  { header: t("reports.otherExpenses"), dataKey: "expenses" },
-  { header: t("reports.netProfit"), dataKey: "netProfit" },
+  { header: labels.revenue, dataKey: "netSales" },
+  { header: labels.cogs, dataKey: "costOfGoodsSold" },
+  { header: labels.grossProfit, dataKey: "grossProfit" },
+  { header: labels.otherExpenses, dataKey: "expenses" },
+  { header: labels.netProfit, dataKey: "netProfit" },
 ];
 
 function handleExport(formatType: "excel" | "csv" | "pdf") {
   const ds = [reportData.value];
   const timestamp = formatDateForFilename(new Date());
-  const filename = `${t("menu.plReport")}_${timestamp}`;
+  const filename = `${menu.plReport}_${timestamp}`;
 
   if (formatType === "excel") exportToExcel(filename, customExportCols, ds);
   if (formatType === "csv") exportToCSV(filename, customExportCols, ds);
-  if (formatType === "pdf")
-    exportToPDF(filename, customExportCols, ds, t("menu.plReport"));
+    exportToPDF(filename, customExportCols, ds, menu.plReport);
 }
 </script>
 
@@ -112,7 +111,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="flex items-center gap-2">
         <h2 class="text-3xl font-bold tracking-tight">
-          {{ $t("menu.plReport") }}
+          {{ menu.plReport }}
         </h2>
       </div>
     </div>
@@ -122,7 +121,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
       <CardContent class="p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div class="flex flex-col md:flex-row items-center gap-4 w-full lg:w-auto">
           <div class="flex-1 lg:min-w-[320px]">
-             <p class="text-sm text-muted-foreground">{{ $t('reports.plSummary') }}</p>
+             <p class="text-sm text-muted-foreground">{{ labels.plSummary }}</p>
           </div>
           <DateRangePicker
             :modelValue="dateRange"
@@ -136,21 +135,21 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
               size="sm"
               class="gap-2 bg-green-600 hover:bg-green-700 text-white transition-colors cursor-pointer"
             >
-              <FileSpreadsheet class="h-4 w-4" /> {{ $t("reports.excel") }}
+              <FileSpreadsheet class="h-4 w-4" /> {{ labels.excel }}
             </Button>
             <Button
               @click="handleExport('csv')"
               size="sm"
               class="gap-2 bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer"
             >
-              <FileText class="h-4 w-4" /> {{ $t("reports.csv") }}
+              <FileText class="h-4 w-4" /> {{ labels.csv }}
             </Button>
             <Button
               @click="handleExport('pdf')"
               size="sm"
               class="gap-2 bg-red-600 hover:bg-red-700 text-white transition-colors cursor-pointer"
             >
-              <FileText class="h-4 w-4" /> {{ $t("reports.pdf") }}
+              <FileText class="h-4 w-4" /> {{ labels.pdf }}
             </Button>
         </div>
       </CardContent>
@@ -159,7 +158,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
     <div v-if="loading" class="flex-1 flex items-center justify-center">
       <div class="flex flex-col items-center gap-2">
         <Loader2 class="h-8 w-8 animate-spin text-primary" />
-        <span class="text-muted-foreground">{{ $t("crud.loading") }}</span>
+        <span class="text-muted-foreground">{{ crud.loading }}</span>
       </div>
     </div>
 
@@ -167,8 +166,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
       <!-- Revenue & Sales -->
       <Card class="border-l-4 border-l-green-600">
         <CardHeader class="flex flex-row items-center justify-between pb-2">
-          <CardTitle class="text-sm font-medium">{{
-            $t("reports.revenue")
+            labels.revenue
           }}</CardTitle>
           <TrendingUp class="h-4 w-4 text-green-600" />
         </CardHeader>
@@ -177,7 +175,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
             {{ formatCurrency(reportData.netSales) }}
           </div>
           <p class="text-xs text-muted-foreground mt-1">
-            {{ $t("reports.revenueDesc") }}
+            {{ labels.revenueDesc }}
           </p>
         </CardContent>
       </Card>
@@ -185,8 +183,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
       <!-- COGS -->
       <Card class="border-l-4 border-l-orange-600">
         <CardHeader class="flex flex-row items-center justify-between pb-2">
-          <CardTitle class="text-sm font-medium">{{
-            $t("reports.cogs")
+            labels.cogs
           }}</CardTitle>
           <TrendingDown class="h-4 w-4 text-orange-600" />
         </CardHeader>
@@ -195,7 +192,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
             {{ formatCurrency(reportData.costOfGoodsSold) }}
           </div>
           <p class="text-xs text-muted-foreground mt-1">
-            {{ $t("reports.cogsDesc") }}
+            {{ labels.cogsDesc }}
           </p>
         </CardContent>
       </Card>
@@ -203,8 +200,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
       <!-- Gross Profit -->
       <Card class="border-l-4 border-l-blue-600">
         <CardHeader class="flex flex-row items-center justify-between pb-2">
-          <CardTitle class="text-sm font-medium">{{
-            $t("reports.grossProfit")
+            labels.grossProfit
           }}</CardTitle>
           <PieChart class="h-4 w-4 text-blue-600" />
         </CardHeader>
@@ -213,7 +209,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
             {{ formatCurrency(reportData.grossProfit) }}
           </div>
           <p class="text-xs text-muted-foreground mt-1">
-            {{ $t("reports.grossProfitDesc") }}
+            {{ labels.grossProfitDesc }}
           </p>
         </CardContent>
       </Card>
@@ -221,8 +217,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
       <!-- Operating Expenses (Purchases) -->
       <Card class="border-l-4 border-l-destructive">
         <CardHeader class="flex flex-row items-center justify-between pb-2">
-          <CardTitle class="text-sm font-medium">{{
-            $t("reports.otherExpenses")
+            labels.otherExpenses
           }}</CardTitle>
           <TrendingDown class="h-4 w-4 text-destructive" />
         </CardHeader>
@@ -231,7 +226,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
             {{ formatCurrency(reportData.expenses) }}
           </div>
           <p class="text-xs text-muted-foreground mt-1">
-            {{ $t("reports.otherExpensesDesc") }}
+            {{ labels.otherExpensesDesc }}
           </p>
         </CardContent>
       </Card>
@@ -241,8 +236,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
         class="border-l-4 border-l-primary bg-primary/5 md:col-span-2 lg:col-span-1 shadow-lg"
       >
         <CardHeader class="flex flex-row items-center justify-between pb-2">
-          <CardTitle class="text-sm font-medium">{{
-            $t("reports.netProfit")
+            labels.netProfit
           }}</CardTitle>
           <DollarSign class="h-4 w-4 text-primary" />
         </CardHeader>
@@ -251,7 +245,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
             {{ formatCurrency(reportData.netProfit) }}
           </div>
           <p class="text-xs text-muted-foreground mt-1">
-            {{ $t("reports.netProfitDesc") }}
+            {{ labels.netProfitDesc }}
           </p>
           <div class="mt-4 flex items-center gap-2">
             <span
@@ -262,7 +256,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
                   : 'bg-red-100 text-red-700'
               "
             >
-            {{ reportData.netProfit >= 0 ? $t("reports.profitable") : $t("reports.deficit") }}
+            {{ reportData.netProfit >= 0 ? labels.profitable : labels.deficit }}
             </span>
           </div>
         </CardContent>

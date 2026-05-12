@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { formatDateTime } from "@/utils/format";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ import { CategoryService } from "@/services/category/category.service";
 import type { Category } from "@/types";
 import { toast } from "vue-sonner";
 
+const { t, labels, fields, crud } = useAppI18n("category");
 const router = useRouter();
 const route = useRoute();
 const categoryService = new CategoryService();
@@ -34,11 +35,11 @@ async function fetchCategory() {
         }
       }
     } else {
-      toast.error(t('crud.notFound', { module: t('modules.category') }));
+      toast.error(t('crud.notFound', { module: labels.name }));
       router.push("/admin/categories");
     }
   } catch (error) {
-    toast.error(t('crud.errorFetch', { module: t('modules.category') }));
+    toast.error(t('crud.errorFetch', { module: labels.name }));
   } finally {
     loading.value = false;
   }
@@ -49,11 +50,11 @@ async function deleteCategory() {
   try {
     const response = await categoryService.softDelete(categoryId);
     if (response.success) {
-      toast.success(t('crud.successDelete', { module: t('modules.category') }));
+      toast.success(t('crud.successDelete', { module: labels.name }));
       router.push("/admin/categories");
     }
   } catch (error) {
-    toast.error(t('crud.errorDelete', { module: t('modules.category') }));
+    toast.error(t('crud.errorDelete', { module: labels.name }));
   }
 }
 
@@ -79,9 +80,9 @@ onMounted(() => {
       </div>
       <div class="flex items-center gap-2">
         <Button variant="outline" @click="router.push(`/admin/categories/${categoryId}/edit`)" class="flex-1 md:flex-none">
-          <Pencil class="mr-2 h-4 w-4" />{{ $t('crud.editBtn') }}</Button>
+          <Pencil class="mr-2 h-4 w-4" />{{ crud.editBtn }}</Button>
         <Button variant="destructive" @click="deleteCategory" class="flex-1 md:flex-none">
-          <Trash2 class="mr-2 h-4 w-4" />{{ $t('crud.delete') }}</Button>
+          <Trash2 class="mr-2 h-4 w-4" />{{ crud.delete }}</Button>
       </div>
     </div>
 
@@ -93,7 +94,7 @@ onMounted(() => {
       <!-- Image Section -->
       <Card class="lg:col-span-1 overflow-hidden h-fit">
         <CardHeader class="pb-3">
-          <CardTitle class="text-lg">{{ $t('crud.image') }}</CardTitle>
+          <CardTitle class="text-lg">{{ crud.image }}</CardTitle>
         </CardHeader>
         <CardContent>
           <div class="aspect-square relative rounded-lg border bg-muted/50 flex items-center justify-center overflow-hidden">
@@ -110,45 +111,45 @@ onMounted(() => {
       <div class="lg:col-span-2 space-y-6">
         <Card>
           <CardHeader class="pb-3">
-            <CardTitle class="text-lg">{{ $t('crud.generalInfo') }}</CardTitle>
+            <CardTitle class="text-lg">{{ crud.generalInfo }}</CardTitle>
           </CardHeader>
           <CardContent>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Tag class="mr-2 h-4 w-4" />{{ $t('fields.name') }}</div>
+                  <Tag class="mr-2 h-4 w-4" />{{ fields.name }}</div>
                 <p class="font-medium text-base">{{ category.name }}</p>
               </div>
               
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Barcode class="mr-2 h-4 w-4" />{{ $t('fields.code') }}</div>
+                  <Barcode class="mr-2 h-4 w-4" />{{ fields.code }}</div>
                 <p class="font-medium text-base">{{ category.code || 'N/A' }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Globe class="mr-2 h-4 w-4" />{{ $t('fields.slug') }}</div>
+                  <Globe class="mr-2 h-4 w-4" />{{ fields.slug }}</div>
                 <p class="font-medium text-base">{{ category.slug }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Folder class="mr-2 h-4 w-4" />{{ $t('fields.parentOf', { module: $t('modules.category') }) }}</div>
+                  <Folder class="mr-2 h-4 w-4" />{{ t('fields.parentOf', { module: labels.name }) }}</div>
                 <p class="font-medium text-base">
                   <template v-if="parentCategory">
                     <router-link :to="`/admin/categories/${parentCategory.id}`" class="text-primary hover:underline inline-flex items-center">
                       {{ parentCategory.name }}
                     </router-link>
                   </template>
-                  <template v-else>{{ $t('crud.none') }}</template>
+                  <template v-else>{{ crud.none }}</template>
                 </p>
               </div>
             </div>
 
             <div class="mt-6 pt-6 border-t space-y-2">
               <div class="flex items-center text-sm text-muted-foreground">
-                <AlignLeft class="mr-2 h-4 w-4" />{{ $t('fields.description') }}</div>
+                <AlignLeft class="mr-2 h-4 w-4" />{{ fields.description }}</div>
               <p class="text-sm leading-relaxed text-foreground/80 bg-muted/30 p-4 rounded-md">
                 {{ category.description || 'No description provided for this category.' }}
               </p>
@@ -158,20 +159,20 @@ onMounted(() => {
 
         <Card>
           <CardHeader class="pb-3">
-            <CardTitle class="text-lg">{{ $t('crud.systemInfo') }}</CardTitle>
+            <CardTitle class="text-lg">{{ crud.systemInfo }}</CardTitle>
           </CardHeader>
           <CardContent>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Calendar class="mr-2 h-4 w-4" />{{ $t('fields.createdAt') }}</div>
-                <p class="font-medium text-base">{{ new Date(category.createdAt).toLocaleString() }}</p>
+                  <Calendar class="mr-2 h-4 w-4" />{{ fields.createdAt }}</div>
+                <p class="font-medium text-base">{{ formatDateTime(category.createdAt) }}</p>
               </div>
               
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Calendar class="mr-2 h-4 w-4" />{{ $t('fields.updatedAt') }}</div>
-                <p class="font-medium text-base">{{ new Date(category.updatedAt).toLocaleString() }}</p>
+                  <Calendar class="mr-2 h-4 w-4" />{{ fields.updatedAt }}</div>
+                <p class="font-medium text-base">{{ formatDateTime(category.updatedAt) }}</p>
               </div>
             </div>
           </CardContent>

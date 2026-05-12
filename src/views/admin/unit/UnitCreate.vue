@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("unit");
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useForm } from "vee-validate";
@@ -97,10 +97,10 @@ const onSubmit = form.handleSubmit(async (values) => {
     };
     const response = await unitService.create(payload);
     if (response.success) {
-      toast.success(t('crud.successCreate', { module: t('modules.unit') }));
+      toast.success(t('crud.successCreate', { module: labels.name }));
       router.push("/admin/units");
     } else {
-      toast.error(response.message || t('crud.errorCreate', { module: t('modules.unit') }));
+      toast.error(response.message || t('crud.errorCreate', { module: labels.name }));
     }
   } catch (error) {
     toast.error(t('crud.errorGeneral'));
@@ -120,12 +120,12 @@ onMounted(() => {
       <Button variant="outline" size="icon" @click="router.back()">
         <ChevronLeft class="h-4 w-4" />
       </Button>
-      <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.create', { module: $t('modules.unit') }) }}</h2>
+      <h2 class="text-3xl font-bold tracking-tight">{{ crud.createBtn }} {{ labels.name }}</h2>
     </div>
 
     <Card>
       <CardHeader>
-        <CardTitle>{{ $t('crud.info', { module: $t('modules.unit') }) }}</CardTitle>
+        <CardTitle>{{ t('crud.info', { module: labels.name }) }}</CardTitle>
       </CardHeader>
       <CardContent>
         <form @submit="onSubmit" id="unitForm" class="space-y-6">
@@ -145,7 +145,7 @@ onMounted(() => {
 
             <FormField v-slot="{ field }" name="parentId">
               <FormItem>
-                <FormLabel>{{ $t('fields.parentOf', { module: $t('modules.unit') }) }}</FormLabel>
+                <FormLabel>{{ t('fields.parentOf', { module: labels.name }) }}</FormLabel>
                 <Select v-bind="field">
                   <FormControl>
                     <SelectTrigger>
@@ -196,7 +196,7 @@ onMounted(() => {
                     v-bind="componentField"
                   />
                 </FormControl>
-                <FormDescription>{{ $t('fields.relativeToBase', { module: $t('modules.unit') }) }}</FormDescription>
+                <FormDescription>{{ t('fields.relativeToBase', { module: labels.name }) }}</FormDescription>
                 <FormMessage />
               </FormItem>
             </FormField>
@@ -225,7 +225,7 @@ onMounted(() => {
                     >{{ $t('fields.isCalculateDetail') }}</FormLabel
                   >
                   <FormDescription>
-                    {{ $t('fields.calculateDetailInfo', { module: $t('modules.unit') }) }}
+                    {{ t('fields.calculateDetailInfo', { module: labels.name }) }}
                   </FormDescription>
                 </div>
                 <FormControl>
@@ -238,7 +238,7 @@ onMounted(() => {
               <FormItem class="flex flex-row items-center justify-between rounded-lg border p-4">
                 <div class="space-y-0.5">
                   <FormLabel class="text-base font-semibold">{{ $t('fields.activeStatus') }}</FormLabel>
-                  <FormDescription>{{ $t('fields.statusDescription', { module: $t('modules.unit') }) }}</FormDescription>
+                  <FormDescription>{{ t('fields.statusDescription', { module: labels.name }) }}</FormDescription>
                 </div>
                 <FormControl>
                   <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
@@ -251,7 +251,7 @@ onMounted(() => {
       <CardFooter class="flex justify-end gap-2 border-t px-6 py-4">
         <Button variant="outline" @click="router.back()" :disabled="submitting">{{ $t('crud.cancel') }}</Button>
         <Button type="submit" form="unitForm" :disabled="submitting">
-          <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />{{ $t('crud.create', { module: $t('modules.unit') }) }}</Button>
+          <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />{{ crud.createBtn }} {{ labels.name }}</Button>
       </CardFooter>
     </Card>
   </div>

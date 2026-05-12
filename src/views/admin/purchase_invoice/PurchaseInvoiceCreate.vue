@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("purchaseInvoice");
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import {
@@ -161,10 +161,10 @@ const formSchema = toTypedSchema(
     code: z.string().max(50).optional().nullable(),
     supplierId: z.coerce
       .number()
-      .min(1, t("validation.required", { field: t("fields.supplierId") })),
+      .min(1, t("validation.required", { field: fields.supplierId })),
     invoiceDate: z
       .string()
-      .min(1, t("validation.required", { field: t("fields.invoiceDate") })),
+      .min(1, t("validation.required", { field: fields.invoiceDate })),
     paidAmount: z.coerce
       .number()
       .min(0, t("validation.paidAmountNegative"))
@@ -181,13 +181,13 @@ const formSchema = toTypedSchema(
             .number()
             .min(
               0.01,
-              t("validation.min", { field: t("fields.quantity"), min: "0.01" }),
+              t("validation.min", { field: fields.quantity, min: "0.01" }),
             ),
           price: z.coerce
             .number()
             .min(
               0,
-              t("validation.min", { field: t("fields.price"), min: "0" }),
+              t("validation.min", { field: fields.price, min: "0" }),
             ),
           purchaseOrderId: z.coerce.number().optional().nullable(),
           purchaseOrderDetailId: z.coerce.number().optional().nullable(),
@@ -257,13 +257,13 @@ const onSubmit = form.handleSubmit(async (values) => {
     const response = await piService.create(payload as any);
     if (response.success) {
       toast.success(
-        t("crud.successCreate", { module: t("modules.purchaseInvoice") }),
+        t("crud.successCreate", { module: labels.name }),
       );
       router.push("/admin/purchase-invoices");
     } else {
       toast.error(
         response.message ||
-          t("crud.errorCreate", { module: t("modules.purchaseInvoice") }),
+          t("crud.errorCreate", { module: labels.name }),
       );
     }
   } catch (error) {
@@ -283,11 +283,11 @@ const onSubmit = form.handleSubmit(async (values) => {
         </Button>
         <div>
           <h2 class="text-3xl font-bold tracking-tight">
-            {{ $t("crud.createBtn") }} {{ $t("modules.purchaseInvoice") }}
+            {{ crud.createBtn }} {{ labels.name }}
           </h2>
           <p class="text-muted-foreground text-sm flex items-center mt-1">
             <Truck class="w-4 h-4 mr-1.5 opacity-50" />
-            {{ $t("fields.invoiceStockUpdateInfo") }}
+            {{ fields.invoiceStockUpdateInfo }}
           </p>
         </div>
       </div>
@@ -301,16 +301,16 @@ const onSubmit = form.handleSubmit(async (values) => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2">
               <FileText class="h-5 w-5 text-primary" />
-              {{ $t("crud.generalInfo") }}
+              {{ crud.generalInfo }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField v-slot="{ componentField }" name="code">
               <FormItem>
-                <FormLabel>{{ $t("fields.code") }}</FormLabel>
+                <FormLabel>{{ fields.code }}</FormLabel>
                 <FormControl>
                   <Input
-                    :placeholder="$t('fields.autoGenerate')"
+                    :placeholder="fields.autoGenerate"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -320,7 +320,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="invoiceDate">
               <FormItem>
-                <FormLabel>{{ $t("fields.invoiceDate") }}</FormLabel>
+                <FormLabel>{{ fields.invoiceDate }}</FormLabel>
                 <FormControl>
                   <Input type="datetime-local" v-bind="componentField" />
                 </FormControl>
@@ -330,7 +330,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ value, handleChange }" name="supplierId">
               <FormItem class="md:col-span-2">
-                <FormLabel>{{ $t("fields.supplierId") }}</FormLabel>
+                <FormLabel>{{ fields.supplierId }}</FormLabel>
                 <FormControl>
                   <SearchableSelect
                     :model-value="value"
@@ -338,8 +338,8 @@ const onSubmit = form.handleSubmit(async (values) => {
                       (v) => handleChange(v ? Number(v) : null)
                     "
                     :options="supplierOptions"
-                    :placeholder="$t('fields.selectOption')"
-                    :empty-message="$t('crud.noResults')"
+                    :placeholder="fields.selectOption"
+                    :empty-message="crud.noResults"
                   />
                 </FormControl>
                 <FormMessage />
@@ -348,10 +348,10 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="description">
               <FormItem class="md:col-span-2">
-                <FormLabel>{{ $t("fields.description") }}</FormLabel>
+                <FormLabel>{{ fields.description }}</FormLabel>
                 <FormControl>
                   <Textarea
-                    :placeholder="$t('fields.enterDescription')"
+                    :placeholder="fields.enterDescription"
                     v-bind="componentField"
                     rows="3"
                   />
@@ -367,14 +367,14 @@ const onSubmit = form.handleSubmit(async (values) => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2">
               <CreditCard class="h-5 w-5 text-primary" />
-              {{ $t("fields.paymentDetails") }}
+              {{ fields.paymentDetails }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6 space-y-4">
             <div class="p-3 bg-muted/20 border rounded text-sm mb-4">
               <div class="flex justify-between items-center mb-1">
                 <span class="text-muted-foreground"
-                  >{{ $t("fields.totalPrice") }}:</span
+                  >{{ fields.totalPrice }}:</span
                 >
                 <span class="font-bold text-foreground">
                   {{ formatCurrency(grandTotal) }}
@@ -384,7 +384,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField name="paidAmount">
               <FormItem>
-                <FormLabel>{{ $t("fields.paidAmount") }}</FormLabel>
+                <FormLabel>{{ fields.paidAmount }}</FormLabel>
                 <FormControl>
                   <div class="relative">
                     <span
@@ -410,25 +410,25 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ value, handleChange }" name="paymentMethod">
               <FormItem>
-                <FormLabel>{{ $t("fields.paymentMethod") }}</FormLabel>
+                <FormLabel>{{ fields.paymentMethod }}</FormLabel>
                 <Select
                   :model-value="value ? String(value) : undefined"
                   @update:model-value="(v) => handleChange(Number(v))"
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue :placeholder="$t('fields.selectOption')" />
+                      <SelectValue :placeholder="fields.selectOption" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     <SelectItem :value="String(PaymentMethod.CASH)">{{
-                      $t("fields.paymentMethodLabels.cash")
+                      fields.paymentMethodLabels.cash
                     }}</SelectItem>
                     <SelectItem :value="String(PaymentMethod.TRANSFER)">{{
-                      $t("fields.paymentMethodLabels.transfer")
+                      fields.paymentMethodLabels.transfer
                     }}</SelectItem>
                     <SelectItem :value="String(PaymentMethod.OTHER)">{{
-                      $t("fields.paymentMethodLabels.other")
+                      fields.paymentMethodLabels.other
                     }}</SelectItem>
                   </SelectContent>
                 </Select>
@@ -439,7 +439,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             <div
               class="flex justify-between items-center pt-2 text-sm text-muted-foreground border-t mt-4"
             >
-              <span>{{ $t("fields.balanceDue") }}:</span>
+              <span>{{ fields.balanceDue }}:</span>
               <span
                 class=""
                 :class="
@@ -465,7 +465,7 @@ const onSubmit = form.handleSubmit(async (values) => {
           >
             <CardTitle class="text-lg flex items-center gap-2">
               <FileText class="h-5 w-5 text-primary" />
-              {{ $t("fields.details") }}
+              {{ fields.details }}
             </CardTitle>
             <Button
               type="button"
@@ -473,7 +473,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               @click="addProduct"
               variant="default"
             >
-              <Plus class="h-4 w-4 mr-2" /> {{ $t("actions.addProduct") }}
+              <Plus class="h-4 w-4 mr-2" /> {{ t("actions.addProduct") }}
             </Button>
           </CardHeader>
           <CardContent class="p-0">
@@ -481,16 +481,16 @@ const onSubmit = form.handleSubmit(async (values) => {
               <TableHeader class="bg-muted/30">
                 <TableRow>
                   <TableHead class="w-[40%]">{{
-                    $t("modules.product")
+                    t("modules.product")
                   }}</TableHead>
                   <TableHead class="w-[20%] text-right">{{
-                    $t("fields.unitPrice")
+                    fields.unitPrice
                   }}</TableHead>
                   <TableHead class="w-[15%] text-right">{{
-                    $t("fields.quantity")
+                    fields.quantity
                   }}</TableHead>
                   <TableHead class="w-[20%] text-right">{{
-                    $t("fields.rowTotal")
+                    fields.rowTotal
                   }}</TableHead>
                   <TableHead class="w-[5%]"></TableHead>
                 </TableRow>
@@ -501,7 +501,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                     colspan="5"
                     class="text-center py-8 text-muted-foreground italic"
                   >
-                    {{ $t("common.noData") }}
+                    {{ t("common.noData") }}
                   </TableCell>
                 </TableRow>
                 <TableRow v-for="(field, index) in fields" :key="field.key">
@@ -526,8 +526,8 @@ const onSubmit = form.handleSubmit(async (values) => {
                               }
                             "
                             :options="productOptions"
-                            :placeholder="$t('fields.selectOption')"
-                            :empty-message="$t('crud.noResults')"
+                            :placeholder="fields.selectOption"
+                            :empty-message="crud.noResults"
                           />
                         </FormControl>
                         <FormMessage />
@@ -637,11 +637,11 @@ const onSubmit = form.handleSubmit(async (values) => {
               type="button"
               @click="router.back()"
               :disabled="submitting"
-              >{{ $t("crud.cancel") }}</Button
+              >{{ crud.cancel }}</Button
             >
             <Button type="submit" :disabled="submitting || fields.length === 0">
               <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-              {{ $t("crud.save") }}
+              {{ crud.save }}
             </Button>
           </CardFooter>
         </Card>

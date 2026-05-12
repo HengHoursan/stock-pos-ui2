@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("product");
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { toLocalISOString, formatNumberInput } from "@/utils/format";
@@ -128,12 +128,12 @@ const onSubmit = form.handleSubmit(async (values) => {
     };
     const response = await productService.create(payload as any);
     if (response.success) {
-      toast.success(t("crud.successCreate", { module: t("modules.product") }));
+      toast.success(t("crud.successCreate", { module: labels.name }));
       router.push("/admin/products");
     } else {
       toast.error(
         response.message ||
-          t("crud.errorCreate", { module: t("modules.product") }),
+          t("crud.errorCreate", { module: labels.name }),
       );
     }
   } catch (error) {
@@ -156,7 +156,7 @@ onMounted(() => {
         <ChevronLeft class="h-4 w-4" />
       </Button>
       <h2 class="text-3xl font-bold tracking-tight">
-        {{ $t("crud.create", { module: $t("modules.product") }) }}
+        {{ crud.createBtn }} {{ labels.name }}
       </h2>
     </div>
 
@@ -213,7 +213,7 @@ onMounted(() => {
 
               <FormField v-slot="{ field }" name="categoryId">
                 <FormItem>
-                  <FormLabel>{{ $t("modules.category") }}</FormLabel>
+                  <FormLabel>{{ labels.category }}</FormLabel>
                   <Select v-bind="field">
                     <FormControl>
                       <SelectTrigger>
@@ -246,7 +246,7 @@ onMounted(() => {
 
               <FormField v-slot="{ field }" name="brandId">
                 <FormItem>
-                  <FormLabel>{{ $t("modules.brand") }}</FormLabel>
+                  <FormLabel>{{ labels.brand }}</FormLabel>
                   <Select v-bind="field">
                     <FormControl>
                       <SelectTrigger>
@@ -280,7 +280,7 @@ onMounted(() => {
 
               <FormField v-slot="{ field }" name="unitId">
                 <FormItem>
-                  <FormLabel>{{ $t("modules.unit") }}</FormLabel>
+                  <FormLabel>{{ labels.unit }}</FormLabel>
                   <Select v-bind="field">
                     <FormControl>
                       <SelectTrigger>
@@ -623,7 +623,7 @@ onMounted(() => {
         class="px-8 shadow-lg"
       >
         <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-        {{ $t("crud.createBtn") }} {{ $t("modules.product") }}
+        {{ crud.createBtn }} {{ labels.name }}
       </Button>
     </div>
   </div>

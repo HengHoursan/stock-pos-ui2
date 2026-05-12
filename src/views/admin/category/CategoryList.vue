@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("category");
 import { ref, onMounted, reactive, watch } from "vue";
 import { useRouter } from "vue-router";
 import {
@@ -63,6 +63,8 @@ import { CategoryService } from "@/services/category/category.service";
 import type { Category, PaginationMeta } from "@/types";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
+import ClearableSelect from "@/components/ClearableSelect.vue";
+import { computed } from "vue";
 
 const router = useRouter();
 const categoryService = new CategoryService();
@@ -82,6 +84,11 @@ const pagination = reactive<PaginationMeta>({
   sortBy: "createdAt",
   sortOrder: "DESC",
 });
+
+const statusOptions = computed(() => [
+  { label: crud.active, value: "active" },
+  { label: crud.inactive, value: "inactive" },
+]);
 
 const isDeleteDialogOpen = ref(false);
 const categoryToDelete = ref<number | null>(null);
@@ -114,7 +121,7 @@ async function fetchCategories() {
     }
   } catch (error) {
     console.error("Fetch categories error:", error);
-    toast.error(t('crud.errorFetch', { module: t('modules.categories') }));
+    toast.error(t("crud.errorFetch", { module: t("modules.categories") }));
   } finally {
     loading.value = false;
   }
@@ -129,7 +136,7 @@ watch(
   () => filters.search,
   () => {
     debouncedFetch();
-  }
+  },
 );
 
 watch(
@@ -137,7 +144,7 @@ watch(
   () => {
     pagination.page = 1;
     fetchCategories();
-  }
+  },
 );
 
 watch(
@@ -162,10 +169,10 @@ async function toggleStatus(category: Category) {
     });
     if (response.success) {
       category.status = newStatus;
-      toast.success(t('crud.successUpdate', { module: t('modules.category') }));
+      toast.success(t("crud.successUpdate", { module: labels.name }));
     }
   } catch (error) {
-    toast.error(t('crud.errorUpdate', { module: t('modules.category') }));
+    toast.error(t("crud.errorUpdate", { module: labels.name }));
   }
 }
 
@@ -180,13 +187,16 @@ async function confirmDelete() {
   try {
     const response = await categoryService.softDelete(categoryToDelete.value);
     if (response.success) {
-      toast.success(t('crud.successDelete', { module: t('modules.category') }));
+      toast.success(t("crud.successDelete", { module: labels.name }));
       fetchCategories();
     } else {
-      toast.error(response.message || t('crud.errorDelete', { module: t('modules.category') }));
+      toast.error(
+        response.message ||
+          t("crud.errorDelete", { module: labels.name }),
+      );
     }
   } catch (error) {
-    toast.error(t('crud.errorDelete', { module: t('modules.category') }));
+    toast.error(t("crud.errorDelete", { module: labels.name }));
   } finally {
     isDeleteDialogOpen.value = false;
     categoryToDelete.value = null;
@@ -212,7 +222,7 @@ onMounted(() => {
   <div class="space-y-4">
     <div class="flex items-center justify-between">
       <h2 class="text-3xl font-bold tracking-tight text-foreground">
-        {{ $t("modules.categories") }}
+        {{ labels.title }}
       </h2>
       <div class="flex items-center gap-2">
         <Button
@@ -224,9 +234,8 @@ onMounted(() => {
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
         <Button @click="router.push('/admin/categories/create')">
-          <Plus class="mr-2 h-4 w-4" />{{ $t("crud.createBtn") }}
-          {{ $t("modules.category") }}</Button
-        >
+          <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.title }}
+        </Button>
       </div>
     </div>
 
@@ -237,21 +246,18 @@ onMounted(() => {
         />
         <Input
           type="search"
-          :placeholder="$t('crud.search', { module: $t('modules.category') })"
+          :placeholder="t('crud.search', { module: labels.title })"
           class="pl-8"
           v-model="filters.search"
         />
       </div>
 
-      <Select v-model="filters.status">
-        <SelectTrigger class="w-full sm:w-[180px]">
-          <SelectValue :placeholder="$t('crud.filterByStatus')" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="active">{{ $t("crud.active") }}</SelectItem>
-          <SelectItem value="inactive">{{ $t("crud.inactive") }}</SelectItem>
-        </SelectContent>
-      </Select>
+      <ClearableSelect
+        v-model="filters.status"
+        :options="statusOptions"
+        :placeholder="crud.filterByStatus"
+        class="w-full sm:w-[180px]"
+      />
     </div>
 
     <div class="rounded-md border bg-card overflow-hidden shadow-sm">
@@ -259,22 +265,22 @@ onMounted(() => {
         <TableHeader>
           <TableRow>
             <TableHead class="w-[20px]">#</TableHead>
-            <TableHead class="w-[180px]">{{ $t("fields.code") }}</TableHead>
-            <TableHead class="w-[250px]">{{ $t("crud.image") }}</TableHead>
+            <TableHead class="w-[180px]">{{ fields.code }}</TableHead>
+            <TableHead class="w-[250px]">{{ crud.image }}</TableHead>
             <TableHead>
               <Button
                 variant="ghost"
                 @click="handleSort('name')"
                 class="-ml-4 h-8 font-medium"
-                >{{ $t("fields.name") }}<ArrowUpDown class="ml-1 h-3 w-3" />
+                >{{ fields.name }}<ArrowUpDown class="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
-            <TableHead>{{ $t("fields.slug") }}</TableHead>
+            <TableHead>{{ fields.slug }}</TableHead>
             <TableHead class="max-w-[200px]">{{
-              $t("fields.description")
+              fields.description
             }}</TableHead>
-            <TableHead>{{ $t("fields.status") }}</TableHead>
-            <TableHead class="text-right">{{ $t("crud.actions") }}</TableHead>
+            <TableHead>{{ fields.status }}</TableHead>
+            <TableHead class="text-right">{{ crud.actions }}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -284,12 +290,15 @@ onMounted(() => {
                 class="flex items-center justify-center text-muted-foreground italic text-sm"
               >
                 <Loader2 class="h-4 w-4 animate-spin mr-2" />
-                <span>{{ $t('crud.fetchingData') }}</span>
+                <span>{{ crud.fetchingData }}</span>
               </div>
             </TableCell>
           </TableRow>
           <template v-else-if="categories.length > 0">
-            <TableRow v-for="(category, index) in categories" :key="category.id">
+            <TableRow
+              v-for="(category, index) in categories"
+              :key="category.id"
+            >
               <TableCell class="font-medium text-muted-foreground">
                 {{ (pagination.page - 1) * pagination.limit + index + 1 }}
               </TableCell>
@@ -330,7 +339,9 @@ onMounted(() => {
                   class="cursor-pointer font-bold px-3 transition-all hover:opacity-80 active:scale-95"
                   @click="toggleStatus(category)"
                 >
-                  {{ category.status ? $t('crud.active') : $t('crud.inactive') }}
+                  {{
+                    category.status ? crud.active : crud.inactive
+                  }}
                 </Badge>
               </TableCell>
               <TableCell class="text-right">
@@ -347,7 +358,7 @@ onMounted(() => {
                   <DropdownMenuContent align="end" class="w-[180px]">
                     <DropdownMenuLabel
                       class="text-xs uppercase text-muted-foreground font-bold"
-                      >{{ $t("crud.actions") }}</DropdownMenuLabel
+                      >{{ crud.actions }}</DropdownMenuLabel
                     >
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -355,15 +366,17 @@ onMounted(() => {
                       class="cursor-pointer"
                     >
                       <Eye class="mr-2 h-4 w-4 opacity-70" />{{
-                        $t("crud.viewBtn")
+                        crud.viewBtn
                       }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      @click="router.push(`/admin/categories/${category.id}/edit`)"
+                      @click="
+                        router.push(`/admin/categories/${category.id}/edit`)
+                      "
                       class="cursor-pointer"
                     >
                       <Pencil class="mr-2 h-4 w-4 opacity-70" />{{
-                        $t("crud.editBtn")
+                        crud.editBtn
                       }}</DropdownMenuItem
                     >
                     <DropdownMenuSeparator />
@@ -372,7 +385,7 @@ onMounted(() => {
                       @click="openDeleteDialog(category.id)"
                     >
                       <Trash2 class="mr-2 h-4 w-4" />{{
-                        $t("crud.delete")
+                        crud.delete
                       }}</DropdownMenuItem
                     >
                   </DropdownMenuContent>
@@ -388,9 +401,7 @@ onMounted(() => {
               <div class="flex flex-col items-center justify-center gap-3">
                 <LayoutGrid class="h-10 w-10 opacity-10" />
                 <p class="font-medium">
-                  {{
-                    $t("crud.noRecords", { module: $t("modules.categories") })
-                  }}
+                  {{ t("crud.noRecords", { module: labels.title }) }}
                 </p>
                 <Button
                   v-if="filters.search || filters.status"
@@ -399,7 +410,7 @@ onMounted(() => {
                   @click="Object.assign(filters, { search: '', status: '' })"
                   class="h-8"
                 >
-                  {{ $t('crud.resetFilters') }}
+                  {{ crud.resetFilters }}
                 </Button>
               </div>
             </TableCell>
@@ -415,7 +426,7 @@ onMounted(() => {
         <div class="flex items-center gap-2">
           <span
             class="text-sm font-medium text-muted-foreground whitespace-nowrap"
-            >{{ $t('crud.rowsPerPage') }}</span
+            >{{ crud.rowsPerPage }}</span
           >
           <Select
             :model-value="pagination.limit.toString()"
@@ -474,19 +485,20 @@ onMounted(() => {
     <AlertDialog v-model:open="isDeleteDialogOpen">
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{{ $t('crud.confirmDelete') }}</AlertDialogTitle>
+          <AlertDialogTitle>{{ crud.confirmDelete }}</AlertDialogTitle>
           <AlertDialogDescription>
-            {{ $t('crud.confirmDeleteDesc', { module: $t('modules.category') }) }}
+            {{ t("crud.confirmDeleteDesc", { module: labels.name }) }}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel @click="isDeleteDialogOpen = false"
-            >{{ $t('crud.cancel') }}</AlertDialogCancel
-          >
+          <AlertDialogCancel @click="isDeleteDialogOpen = false">{{
+            crud.cancel
+          }}</AlertDialogCancel>
           <AlertDialogAction
             @click="confirmDelete"
             class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >{{ $t('crud.delete') }}</AlertDialogAction>
+            >{{ crud.delete }}</AlertDialogAction
+          >
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

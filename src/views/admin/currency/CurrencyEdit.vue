@@ -2,9 +2,8 @@
 import { ref, computed, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useForm } from "vee-validate";
-import * as zod from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
-import { useI18n } from "vue-i18n";
+import * as zod from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -35,7 +34,8 @@ import { cn } from "@/lib/utils";
 import { CurrencyService } from "@/services/currency/currency.service";
 import { toast } from "vue-sonner";
 
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("currency");
 const router = useRouter();
 const route = useRoute();
 const currencyService = new CurrencyService();
@@ -125,11 +125,11 @@ async function fetchCurrency() {
       });
       searchTerm.value = response.data.country;
     } else {
-      toast.error(t("crud.errorFetch", { module: t("modules.currency") }));
+      toast.error(t("crud.errorFetch", { module: labels.name }));
       router.push("/admin/currencies");
     }
   } catch (error) {
-    toast.error(t("crud.errorFetch", { module: t("modules.currency") }));
+    toast.error(t("crud.errorFetch", { module: labels.name }));
     router.push("/admin/currencies");
   } finally {
     isLoading.value = false;
@@ -142,16 +142,16 @@ const onSubmit = form.handleSubmit(async (values: any) => {
     const id = parseInt(route.params.id as string);
     const response = await currencyService.update({ ...values, id });
     if (response.success) {
-      toast.success(t("crud.successUpdate", { module: t("modules.currency") }));
+      toast.success(t("crud.successUpdate", { module: labels.name }));
       router.push("/admin/currencies");
     } else {
       toast.error(
         response.message ||
-          t("crud.errorUpdate", { module: t("modules.currency") }),
+          t("crud.errorUpdate", { module: labels.name }),
       );
     }
   } catch (error) {
-    toast.error(t("crud.errorUpdate", { module: t("modules.currency") }));
+    toast.error(t("crud.errorUpdate", { module: labels.name }));
   } finally {
     isSubmitting.value = false;
   }
@@ -177,7 +177,7 @@ onMounted(() => {
         </Button>
         <div>
           <h2 class="text-3xl font-bold tracking-tight">
-            {{ $t("crud.edit", { module: $t("modules.currency") }) }}
+            {{ crud.editBtn }} {{ labels.name }}
           </h2>
         </div>
       </div>
@@ -211,7 +211,7 @@ onMounted(() => {
           <CardHeader>
             <CardTitle class="flex items-center gap-2">
               <Coins class="h-5 w-5" />
-              {{ $t("crud.info", { module: $t("modules.currency") }) }}
+              {{ t("crud.info", { module: labels.name }) }}
             </CardTitle>
           </CardHeader>
           <CardContent
@@ -424,7 +424,7 @@ onMounted(() => {
               :disabled="isSubmitting"
             >
               <Loader2 v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
-              {{ $t("crud.updateBtn", { module: "" }).trim() }}
+              {{ crud.updateBtn }} {{ labels.name }}
             </Button>
           </CardFooter>
         </Card>

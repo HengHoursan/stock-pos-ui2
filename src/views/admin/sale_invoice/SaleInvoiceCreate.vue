@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("saleInvoice");
 import { ref, onMounted, computed,watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { toLocalISOString, formatCurrency, formatNumberInput } from "@/utils/format";
@@ -105,15 +105,15 @@ onMounted(async () => {
 const formSchema = toTypedSchema(
   z.object({
     code: z.string().max(50).optional().nullable(),
-    customerId: z.number().min(1, t('validation.required', { field: t('fields.customerId') })),
-    invoiceDate: z.string().min(1, t('validation.required', { field: t('fields.invoiceDate') })),
+    customerId: z.number().min(1, t('validation.required', { field: fields.customerId })),
+    invoiceDate: z.string().min(1, t('validation.required', { field: fields.invoiceDate })),
     paidAmount: z.coerce.number().min(0, t('validation.paidAmountNegative')).optional(),
     description: z.string().optional().nullable(),
     details: z.array(
       z.object({
         productId: z.number().min(1, t('validation.required', { field: t('modules.product') })),
-        quantity: z.coerce.number().min(0.01, t('validation.min', { field: t('fields.quantity'), min: '0.01' })),
-        price: z.coerce.number().min(0, t('validation.min', { field: t('fields.price'), min: '0' })),
+        quantity: z.coerce.number().min(0.01, t('validation.min', { field: fields.quantity, min: '0.01' })),
+        price: z.coerce.number().min(0, t('validation.min', { field: fields.price, min: '0' })),
         isSelected: z.boolean().default(true),
         saleOrderId: z.number().optional().nullable(),
         saleOrderDetailId: z.number().optional().nullable(),
@@ -211,7 +211,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
     const response = await siService.create(payload as any);
     if (response.success) {
-      toast.success(t('crud.successCreate', { module: t('modules.saleInvoice') }));
+      toast.success(t('crud.successCreate', { module: labels.name }));
 
       // Fire a warning toast for each product that fell below its alert threshold
       const warnings = response.data?.lowStockWarnings ?? [];
@@ -227,7 +227,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
       router.push("/admin/sale-invoices");
     } else {
-      toast.error(response.message || t('crud.errorCreate', { module: t('modules.saleInvoice') }));
+      toast.error(response.message || t('crud.errorCreate', { module: labels.name }));
     }
   } catch (error) {
     toast.error(t('crud.errorGeneral'));
@@ -245,10 +245,10 @@ const onSubmit = form.handleSubmit(async (values) => {
           <ChevronLeft class="h-4 w-4" />
         </Button>
         <div>
-          <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.createBtn') }} {{ $t('modules.saleInvoice') }}</h2>
+          <h2 class="text-3xl font-bold tracking-tight">{{ crud.createBtn }} {{ labels.name }}</h2>
           <p class="text-muted-foreground text-sm flex items-center mt-1">
             <CreditCard class="w-4 h-4 mr-1.5 opacity-50"/> 
-            {{ $t('fields.saleInvoiceStockDeductInfo') }}
+            {{ fields.saleInvoiceStockDeductInfo }}
           </p>
         </div>
       </div>
@@ -263,16 +263,16 @@ const onSubmit = form.handleSubmit(async (values) => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2">
               <FileText class="h-5 w-5 text-primary" />
-              {{ $t('crud.generalInfo') }}
+              {{ crud.generalInfo }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             
             <FormField v-slot="{ componentField }" name="code">
               <FormItem>
-                <FormLabel>{{ $t('fields.code') }}</FormLabel>
+                <FormLabel>{{ fields.code }}</FormLabel>
                 <FormControl>
-                  <Input :placeholder="$t('fields.autoGenerate')" v-bind="componentField" />
+                  <Input :placeholder="fields.autoGenerate" v-bind="componentField" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -280,7 +280,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="invoiceDate">
               <FormItem>
-                <FormLabel>{{ $t('fields.invoiceDate') }}</FormLabel>
+                <FormLabel>{{ fields.invoiceDate }}</FormLabel>
                 <FormControl>
                   <Input type="datetime-local" v-bind="componentField" />
                 </FormControl>
@@ -290,14 +290,14 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ value, handleChange }" name="customerId">
               <FormItem class="md:col-span-2">
-                <FormLabel>{{ $t('fields.customerId') }}</FormLabel>
+                <FormLabel>{{ fields.customerId }}</FormLabel>
                 <FormControl>
                   <SearchableSelect
                     :model-value="value"
                     @update:model-value="(v) => handleChange(v ? Number(v) : null)"
                     :options="customerOptions"
-                    :placeholder="$t('crud.selectValue', { module: $t('modules.customer') })"
-                    :empty-message="$t('crud.noResults')"
+                    :placeholder="t('crud.selectValue', { module: t('modules.customer') })"
+                    :empty-message="crud.noResults"
                   />
                 </FormControl>
                 <FormMessage />
@@ -306,9 +306,9 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="description">
               <FormItem class="md:col-span-2">
-                <FormLabel>{{ $t('fields.description') }}</FormLabel>
+                <FormLabel>{{ fields.description }}</FormLabel>
                 <FormControl>
-                  <Textarea :placeholder="$t('fields.enterDescription')" v-bind="componentField" rows="3" />
+                  <Textarea :placeholder="fields.enterDescription" v-bind="componentField" rows="3" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -321,14 +321,14 @@ const onSubmit = form.handleSubmit(async (values) => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2">
               <CreditCard class="h-5 w-5 text-primary" />
-              {{ $t('fields.paymentDetails') }}
+              {{ fields.paymentDetails }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6 space-y-4">
             
             <div class="p-3 bg-muted/20 border rounded text-sm mb-4">
               <div class="flex justify-between items-center mb-1">
-                <span class="text-muted-foreground">{{ $t('fields.totalPrice') }}:</span>
+                <span class="text-muted-foreground">{{ fields.totalPrice }}:</span>
                 <span class="font-bold text-foreground">
                   {{ formatCurrency(grandTotal) }}
                 </span>
@@ -337,7 +337,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="paidAmount">
               <FormItem>
-                <FormLabel>{{ $t('fields.paidAmount') }}</FormLabel>
+                <FormLabel>{{ fields.paidAmount }}</FormLabel>
                 <FormControl>
                   <div class="relative">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{{ currencySymbol }}</span>
@@ -357,7 +357,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
 
             <div class="flex justify-between items-center pt-2 text-sm text-muted-foreground border-t mt-4">
-              <span>{{ $t('fields.balanceDue') }}:</span>
+              <span>{{ fields.balanceDue }}:</span>
               <span class="" :class="(grandTotal - (form.values.paidAmount || 0)) > 0 ? 'text-destructive font-bold' : 'text-success'">
                 {{ formatCurrency(Math.max(0, grandTotal - (form.values.paidAmount || 0))) }}
               </span>
@@ -371,10 +371,10 @@ const onSubmit = form.handleSubmit(async (values) => {
           <CardHeader class="pb-3 border-b bg-muted/5 flex flex-row items-center justify-between">
             <CardTitle class="text-lg flex items-center gap-2">
               <FileText class="h-5 w-5 text-primary" />
-              {{ $t('fields.details') }}
+              {{ fields.details }}
             </CardTitle>
             <Button type="button" size="sm" @click="addProduct" variant="default">
-              <Plus class="h-4 w-4 mr-2"/> {{ $t('actions.addProduct') }}
+              <Plus class="h-4 w-4 mr-2"/> {{ t('actions.addProduct') }}
             </Button>
           </CardHeader>
           <CardContent class="p-0">
@@ -382,17 +382,17 @@ const onSubmit = form.handleSubmit(async (values) => {
               <TableHeader class="bg-muted/30">
                 <TableRow>
                   <TableHead class="w-[5%]"></TableHead>
-                  <TableHead class="w-[40%]">{{ $t('modules.product') }}</TableHead>
-                  <TableHead class="w-[20%] text-right">{{ $t('fields.sellingPrice') }}</TableHead>
-                  <TableHead class="w-[15%] text-right">{{ $t('fields.quantity') }}</TableHead>
-                  <TableHead class="w-[15%] text-right">{{ $t('fields.rowTotal') }}</TableHead>
+                  <TableHead class="w-[40%]">{{ t('modules.product') }}</TableHead>
+                  <TableHead class="w-[20%] text-right">{{ fields.sellingPrice }}</TableHead>
+                  <TableHead class="w-[15%] text-right">{{ fields.quantity }}</TableHead>
+                  <TableHead class="w-[15%] text-right">{{ fields.rowTotal }}</TableHead>
                   <TableHead class="w-[5%]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 <TableRow v-if="fields.length === 0">
                   <TableCell colspan="6" class="text-center py-8 text-muted-foreground italic">
-                    {{ $t('common.noData') }}
+                    {{ t('common.noData') }}
                   </TableCell>
                 </TableRow>
                 <TableRow v-for="(field, index) in fields" :key="field.key" :class="!((form.values.details || [])[index] as any).isSelected ? 'opacity-50 grayscale' : ''">
@@ -422,8 +422,8 @@ const onSubmit = form.handleSubmit(async (values) => {
                               if (id) form.setFieldValue(`details[${index}].price` as any, getProductPrice(id));
                             }"
                             :options="productOptions"
-                            :placeholder="$t('fields.selectOption')"
-                            :empty-message="$t('crud.noResults')"
+                            :placeholder="fields.selectOption"
+                            :empty-message="crud.noResults"
                             :disabled="!((form.values.details || [])[index] as any).isSelected"
                           />
                         </FormControl>
@@ -488,10 +488,10 @@ const onSubmit = form.handleSubmit(async (values) => {
             </Table>
           </CardContent>
           <CardFooter class="flex justify-end gap-2 border-t px-6 py-4 bg-muted/5 mt-4">
-            <Button variant="outline" type="button" @click="router.back()" :disabled="submitting">{{ $t('crud.cancel') }}</Button>
+            <Button variant="outline" type="button" @click="router.back()" :disabled="submitting">{{ crud.cancel }}</Button>
             <Button type="submit" :disabled="submitting || fields.length === 0 || !form.values.details?.some((d: any) => d.isSelected)">
               <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-              {{ $t('crud.save') }}
+              {{ crud.save }}
             </Button>
           </CardFooter>
         </Card>

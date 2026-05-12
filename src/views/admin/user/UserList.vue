@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud, auth } = useAppI18n("user");
 import { ref, onMounted, reactive, watch } from "vue";
 import { useRouter } from "vue-router";
 import {
@@ -63,6 +63,8 @@ import { userService } from "@/services/user/user.service";
 import type { User, PaginationMeta } from "@/types";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
+import ClearableSelect from "@/components/ClearableSelect.vue";
+import { computed } from "vue";
 
 const router = useRouter();
 
@@ -81,6 +83,11 @@ const pagination = reactive<PaginationMeta>({
   sortBy: "createdAt",
   sortOrder: "DESC",
 });
+
+const statusOptions = computed(() => [
+  { label: crud.active, value: "active" },
+  { label: crud.inactive, value: "inactive" },
+]);
 
 const isDeleteDialogOpen = ref(false);
 const userToDelete = ref<number | null>(null);
@@ -161,10 +168,10 @@ async function toggleStatus(user: User) {
     });
     if (response.success) {
       user.status = newStatus;
-      toast.success(t('crud.successUpdate', { module: t('modules.user') }));
+      toast.success(t('crud.successUpdate', { module: labels.name }));
     }
   } catch (error) {
-    toast.error(t('crud.errorUpdate', { module: t('modules.user') }));
+    toast.error(t('crud.errorUpdate', { module: user.name }));
   }
 }
 
@@ -179,13 +186,13 @@ async function confirmDelete() {
   try {
     const response = await userService.softDelete(userToDelete.value);
     if (response.success) {
-      toast.success(t('crud.successDelete', { module: t('modules.user') }));
+      toast.success(t('crud.successDelete', { module: labels.name }));
       fetchUsers();
     } else {
-      toast.error(response.message || t('crud.errorDelete', { module: t('modules.user') }));
+      toast.error(response.message || t('crud.errorDelete', { module: user.name }));
     }
   } catch (error) {
-    toast.error(t('crud.errorDelete', { module: t('modules.user') }));
+    toast.error(t('crud.errorDelete', { module: user.name }));
   } finally {
     isDeleteDialogOpen.value = false;
     userToDelete.value = null;
@@ -210,7 +217,7 @@ onMounted(() => {
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <h2 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('modules.users') }}</h2>
+      <h2 class="text-3xl font-bold tracking-tight text-foreground">{{ labels.title }}</h2>
       <div class="flex items-center gap-2">
         <Button
           variant="outline"
@@ -221,7 +228,7 @@ onMounted(() => {
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
         <Button @click="router.push('/admin/users/create')">
-          <Plus class="mr-2 h-4 w-4" />{{ $t('crud.createBtn') }} {{ $t('modules.user') }}</Button>
+          <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.name }}</Button>
       </div>
     </div>
 
@@ -232,21 +239,18 @@ onMounted(() => {
         />
         <Input
           type="search"
-          :placeholder="$t('crud.search', { module: $t('modules.user') })"
+          :placeholder="t('crud.search', { module: labels.title })"
           class="pl-8"
           v-model="filters.search"
         />
       </div>
 
-      <Select v-model="filters.status">
-        <SelectTrigger class="w-full sm:w-[180px]">
-          <SelectValue :placeholder="$t('crud.filterByStatus')" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="active">{{ $t('crud.active') }}</SelectItem>
-          <SelectItem value="inactive">{{ $t('crud.inactive') }}</SelectItem>
-        </SelectContent>
-      </Select>
+      <ClearableSelect
+        v-model="filters.status"
+        :options="statusOptions"
+        :placeholder="crud.filterByStatus"
+        class="w-full sm:w-[220px]"
+      />
     </div>
 
     <div class="rounded-md border bg-card overflow-hidden shadow-sm">
@@ -260,13 +264,13 @@ onMounted(() => {
                 variant="ghost"
                 @click="handleSort('username')"
                 class="-ml-4 h-8 font-medium"
-              >{{ $t('auth.username') }}<ArrowUpDown class="ml-1 h-3 w-3" />
+              >{{ auth.username }}<ArrowUpDown class="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
-            <TableHead>{{ $t('auth.email') }}</TableHead>
-            <TableHead>{{ $t('auth.role') }}</TableHead>
-            <TableHead>{{ $t('fields.status') }}</TableHead>
-            <TableHead class="text-right">{{ $t('crud.actions') }}</TableHead>
+            <TableHead>{{ auth.email }}</TableHead>
+            <TableHead>{{ auth.role }}</TableHead>
+            <TableHead>{{ fields.status }}</TableHead>
+            <TableHead class="text-right">{{ crud.actions }}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -276,7 +280,7 @@ onMounted(() => {
                 class="flex items-center justify-center text-muted-foreground italic text-sm"
               >
                 <Loader2 class="h-4 w-4 animate-spin mr-2" />
-                <span>{{ $t('crud.fetchingData') }}</span>
+                <span>{{ crud.fetchingData }}</span>
               </div>
             </TableCell>
           </TableRow>
@@ -301,7 +305,7 @@ onMounted(() => {
               <TableCell class="text-muted-foreground text-sm">{{ user.email }}</TableCell>
               <TableCell>
                 <Badge variant="outline" v-if="user.role" class="text-sm font-medium">{{ user.role.name }}</Badge>
-                <span v-else class="text-muted-foreground italic text-sm">{{ $t('crud.none') }}</span>
+                <span v-else class="text-muted-foreground italic text-sm">{{ crud.none }}</span>
               </TableCell>
               <TableCell class="w-[100px]">
                 <Badge
@@ -309,7 +313,7 @@ onMounted(() => {
                   class="cursor-pointer font-bold px-3 transition-all hover:opacity-80 active:scale-95"
                   @click="toggleStatus(user)"
                 >
-                  {{ user.status ? $t('crud.active') : $t('crud.inactive') }}
+                  {{ user.status ? crud.active : crud.inactive }}
                 </Badge>
               </TableCell>
               <TableCell class="text-right">
@@ -321,14 +325,14 @@ onMounted(() => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" class="w-[160px]">
-                    <DropdownMenuLabel class="text-xs uppercase text-muted-foreground font-bold">{{ $t('crud.actions') }}</DropdownMenuLabel>
+                    <DropdownMenuLabel class="text-xs uppercase text-muted-foreground font-bold">{{ crud.actions }}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem @click="router.push(`/admin/users/${user.id}/edit`)" class="cursor-pointer">
-                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{ $t('crud.editBtn') }}
+                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{ crud.editBtn }}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem class="text-destructive focus:text-destructive cursor-pointer font-medium" @click="openDeleteDialog(user.id)">
-                      <Trash2 class="mr-2 h-4 w-4" />{{ $t('crud.delete') }}
+                      <Trash2 class="mr-2 h-4 w-4" />{{ crud.delete }}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -342,7 +346,7 @@ onMounted(() => {
             >
               <div class="flex flex-col items-center justify-center gap-3">
                 <UserCog class="h-10 w-10 opacity-10" />
-                <p class="font-medium">{{ $t('crud.noRecords', { module: $t('modules.users') }) }}</p>
+                <p class="font-medium">{{ t('crud.noRecords', { module: labels.title }) }}</p>
                 <Button
                   v-if="filters.search || filters.status"
                   variant="outline"
@@ -350,7 +354,7 @@ onMounted(() => {
                   @click="Object.assign(filters, { search: '', status: '' })"
                   class="h-8"
                 >
-                  {{ $t('crud.resetFilters') }}
+                  {{ crud.resetFilters }}
                 </Button>
               </div>
             </TableCell>
@@ -366,7 +370,7 @@ onMounted(() => {
         <div class="flex items-center gap-2">
           <span
             class="text-sm font-medium text-muted-foreground whitespace-nowrap"
-            >{{ $t('crud.rowsPerPage') }}</span
+            >{{ crud.rowsPerPage }}</span
           >
           <Select
             :model-value="pagination.limit.toString()"
@@ -425,19 +429,17 @@ onMounted(() => {
     <AlertDialog v-model:open="isDeleteDialogOpen">
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{{ $t('crud.confirmDelete') }}</AlertDialogTitle>
+          <AlertDialogTitle>{{ crud.confirmDelete }}</AlertDialogTitle>
           <AlertDialogDescription>
-            {{ $t('crud.confirmDeleteDesc', { module: $t('modules.user') }) }}
+            {{ t("crud.confirmDeleteDesc", { module: labels.name }) }}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel @click="isDeleteDialogOpen = false"
-            >{{ $t('crud.cancel') }}</AlertDialogCancel
-          >
+          <AlertDialogCancel @click="isDeleteDialogOpen = false">{{ crud.cancel }}</AlertDialogCancel>
           <AlertDialogAction
             @click="confirmDelete"
             class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >{{ $t('crud.delete') }}</AlertDialogAction>
+          >{{ crud.delete }}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
-import { toLocalISOString, formatNumberInput } from "@/utils/format";
+import { toLocalISOString, formatNumberInput, formatCurrency } from "@/utils/format";
 import SearchableSelect from "@/components/SearchableSelect.vue";
 import { useForm, useFieldArray } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
@@ -41,6 +40,7 @@ import { ProductService } from "@/services/product/product.service";
 import type { Product } from "@/types";
 import { toast } from "vue-sonner";
 
+const { t, labels, fields, crud, common, actions } = useAppI18n("purchaseQuotation");
 const router = useRouter();
 const pqService = new PurchaseQuotationService();
 const productService = new ProductService();
@@ -157,13 +157,13 @@ const onSubmit = form.handleSubmit(async (values) => {
     const response = await pqService.create(fullPayload as any);
     if (response.success) {
       toast.success(
-        t("crud.successCreate", { module: t("modules.purchaseQuotation") }),
+        t("crud.successCreate", { module: labels.name }),
       );
       router.push("/admin/purchase-quotations");
     } else {
       toast.error(
         response.message ||
-          t("crud.errorCreate", { module: t("modules.purchaseQuotation") }),
+          t("crud.errorCreate", { module: labels.name }),
       );
     }
   } catch (error) {
@@ -181,7 +181,7 @@ const onSubmit = form.handleSubmit(async (values) => {
         <ChevronLeft class="h-4 w-4" />
       </Button>
       <h2 class="text-3xl font-bold tracking-tight">
-        {{ $t("crud.createBtn") }} {{ $t("modules.purchaseQuotation") }}
+        {{ crud.createBtn }} {{ labels.name }}
       </h2>
     </div>
 
@@ -192,16 +192,16 @@ const onSubmit = form.handleSubmit(async (values) => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2">
               <FileText class="h-5 w-5 text-primary" />
-              {{ $t("crud.generalInfo") }}
+              {{ crud.generalInfo }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField v-slot="{ componentField }" name="code">
               <FormItem>
-                <FormLabel>{{ $t("fields.code") }}</FormLabel>
+                <FormLabel>{{ fields.code }}</FormLabel>
                 <FormControl>
                   <Input
-                    :placeholder="$t('fields.autoGenerate')"
+                    :placeholder="fields.autoGenerate"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -211,7 +211,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="quotationDate">
               <FormItem>
-                <FormLabel>{{ $t("fields.quotationDate") }}</FormLabel>
+                <FormLabel>{{ fields.quotationDate }}</FormLabel>
                 <FormControl>
                   <Input type="datetime-local" v-bind="componentField" />
                 </FormControl>
@@ -221,10 +221,10 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="description">
               <FormItem class="md:col-span-3">
-                <FormLabel>{{ $t("fields.description") }}</FormLabel>
+                <FormLabel>{{ fields.description }}</FormLabel>
                 <FormControl>
                   <Textarea
-                    :placeholder="$t('fields.enterDescription')"
+                    :placeholder="fields.enterDescription"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -241,7 +241,7 @@ const onSubmit = form.handleSubmit(async (values) => {
           >
             <CardTitle class="text-lg flex items-center gap-2">
               <FileText class="h-5 w-5 text-primary" />
-              {{ $t("fields.details") }}
+              {{ fields.details }}
             </CardTitle>
             <Button
               type="button"
@@ -249,7 +249,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               @click="addProduct"
               variant="default"
             >
-              <Plus class="h-4 w-4 mr-2" /> {{ $t("actions.addProduct") }}
+              <Plus class="h-4 w-4 mr-2" /> {{ actions.addProduct }}
             </Button>
           </CardHeader>
           <CardContent class="p-0">
@@ -257,16 +257,16 @@ const onSubmit = form.handleSubmit(async (values) => {
               <TableHeader class="bg-muted/30">
                 <TableRow>
                   <TableHead class="w-[40%]">{{
-                    $t("modules.product")
+                    t("modules.product")
                   }}</TableHead>
                   <TableHead class="w-[20%] text-right">{{
-                    $t("fields.price")
+                    fields.price
                   }}</TableHead>
                   <TableHead class="w-[15%] text-right">{{
-                    $t("fields.quantity")
+                    fields.quantity
                   }}</TableHead>
                   <TableHead class="w-[20%] text-right">{{
-                    $t("fields.rowTotal")
+                    fields.rowTotal
                   }}</TableHead>
                   <TableHead class="w-[5%]"></TableHead>
                 </TableRow>
@@ -277,7 +277,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                     colspan="5"
                     class="text-center py-8 text-muted-foreground italic"
                   >
-                    {{ $t("common.noData") }}
+                    {{ common.noData }}
                   </TableCell>
                 </TableRow>
                 <TableRow v-for="(field, index) in fields" :key="field.key">
@@ -299,8 +299,8 @@ const onSubmit = form.handleSubmit(async (values) => {
                             }
                           "
                           :options="productOptions"
-                          :placeholder="$t('fields.selectOption')"
-                          :empty-message="$t('crud.noResults')"
+                          :placeholder="fields.selectOption"
+                          :empty-message="crud.noResults"
                           class="w-full"
                         />
                         <FormMessage />
@@ -357,13 +357,10 @@ const onSubmit = form.handleSubmit(async (values) => {
                   </TableCell>
                   <TableCell class="text-right font-medium">
                     {{
-                      (
+                      formatCurrency(
                         ((form.values.details || [])[index]?.quantity || 0) *
                         ((form.values.details || [])[index]?.price || 0)
-                      ).toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })
+                      )
                     }}
                   </TableCell>
                   <TableCell>
@@ -387,13 +384,10 @@ const onSubmit = form.handleSubmit(async (values) => {
                 <div
                   class="flex justify-between items-center text-lg font-bold"
                 >
-                  <span>{{ $t("fields.grandTotal") }}:</span>
+                  <span>{{ fields.grandTotal }}:</span>
                   <span class="text-primary"
-                    >${{
-                      grandTotal.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })
+                    >{{
+                      formatCurrency(grandTotal)
                     }}</span
                   >
                 </div>
@@ -408,11 +402,11 @@ const onSubmit = form.handleSubmit(async (values) => {
               type="button"
               @click="router.back()"
               :disabled="submitting"
-              >{{ $t("crud.cancel") }}</Button
+              >{{ crud.cancel }}</Button
             >
             <Button type="submit" :disabled="submitting || fields.length === 0">
               <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-              {{ $t("crud.save") }}
+              {{ crud.save }}
             </Button>
           </CardFooter>
         </Card>

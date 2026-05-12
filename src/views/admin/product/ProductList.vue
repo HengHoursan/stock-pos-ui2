@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("product");
 import { ref, onMounted, reactive, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 import {
@@ -58,22 +58,17 @@ import {
   ArrowUpDown,
   Package,
   RefreshCw,
-  Loader2
+  Loader2,
 } from "lucide-vue-next";
 import { ProductService } from "@/services/product/product.service";
 import { CategoryService } from "@/services/category/category.service";
 import { BrandService } from "@/services/brand/brand.service";
 import { UnitService } from "@/services/unit/unit.service";
-import type { 
-  Product, 
-  Category, 
-  Brand, 
-  Unit, 
-  PaginationMeta 
-} from "@/types";
+import type { Product, Category, Brand, Unit, PaginationMeta } from "@/types";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
 import SearchableSelect from "@/components/SearchableSelect.vue";
+import ClearableSelect from "@/components/ClearableSelect.vue";
 
 const router = useRouter();
 const productService = new ProductService();
@@ -104,6 +99,11 @@ const brandOptions = computed(() =>
 const unitOptions = computed(() =>
   units.value.map((u) => ({ label: u.name, value: u.id })),
 );
+
+const statusOptions = computed(() => [
+  { label: crud.active, value: "active" },
+  { label: crud.inactive, value: "inactive" },
+]);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -160,7 +160,7 @@ async function fetchProducts() {
     }
   } catch (error) {
     console.error("Fetch products error:", error);
-    toast.error(t('crud.errorFetch', { module: t('modules.products') }));
+    toast.error(t("crud.errorFetch", { module: labels.title }));
   } finally {
     loading.value = false;
   }
@@ -175,7 +175,7 @@ watch(
   () => filters.search,
   () => {
     debouncedFetch();
-  }
+  },
 );
 
 watch(
@@ -188,7 +188,7 @@ watch(
   () => {
     pagination.page = 1;
     fetchProducts();
-  }
+  },
 );
 
 watch(
@@ -213,10 +213,10 @@ async function toggleStatus(product: Product) {
     });
     if (response.success) {
       product.status = newStatus;
-      toast.success(t('crud.successUpdate', { module: t('modules.product') }));
+      toast.success(t("crud.successUpdate", { module: labels.name }));
     }
   } catch (error) {
-    toast.error(t('crud.errorUpdate', { module: t('modules.product') }));
+    toast.error(t("crud.errorUpdate", { module: labels.name }));
   }
 }
 
@@ -231,13 +231,16 @@ async function confirmDelete() {
   try {
     const response = await productService.softDelete(productToDelete.value);
     if (response.success) {
-      toast.success(t('crud.successDelete', { module: t('modules.product') }));
+      toast.success(t("crud.successDelete", { module: labels.name }));
       fetchProducts();
     } else {
-      toast.error(response.message || t('crud.errorDelete', { module: t('modules.product') }));
+      toast.error(
+        response.message ||
+          t("crud.errorDelete", { module: labels.name }),
+      );
     }
   } catch (error) {
-    toast.error(t('crud.errorDelete', { module: t('modules.product') }));
+    toast.error(t("crud.errorDelete", { module: labels.name }));
   } finally {
     isDeleteDialogOpen.value = false;
     productToDelete.value = null;
@@ -255,7 +258,10 @@ function handleSort(column: string) {
 }
 
 const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(value);
 };
 
 async function fetchFilterOptions() {
@@ -263,7 +269,7 @@ async function fetchFilterOptions() {
     const [catRes, brandRes, unitRes] = await Promise.all([
       categoryService.getAll(),
       brandService.getAll(),
-      unitService.getAll()
+      unitService.getAll(),
     ]);
     if (catRes.success) categories.value = catRes.data || [];
     if (brandRes.success) brands.value = brandRes.data || [];
@@ -282,7 +288,9 @@ onMounted(() => {
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <h2 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('modules.products') }}</h2>
+      <h2 class="text-3xl font-bold tracking-tight text-foreground">
+        {{ labels.title }}
+      </h2>
       <div class="flex items-center gap-2">
         <Button
           variant="outline"
@@ -293,7 +301,9 @@ onMounted(() => {
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
         <Button @click="router.push('/admin/products/create')">
-          <Plus class="mr-2 h-4 w-4" />{{ $t('crud.createBtn') }} {{ $t('modules.product') }}</Button>
+          <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }}
+          {{ labels.name }}</Button
+        >
       </div>
     </div>
 
@@ -304,80 +314,93 @@ onMounted(() => {
         />
         <Input
           type="search"
-          :placeholder="$t('crud.search', { module: $t('modules.product') })"
+          :placeholder="t('crud.search', { module: labels.name })"
           class="pl-8"
           v-model="filters.search"
         />
       </div>
 
-      <Select v-model="filters.status">
-        <SelectTrigger class="w-full sm:w-[180px]">
-          <SelectValue :placeholder="$t('crud.filterByStatus')" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="active">{{ $t('crud.active') }}</SelectItem>
-          <SelectItem value="inactive">{{ $t('crud.inactive') }}</SelectItem>
-        </SelectContent>
-      </Select>
-
-      <SearchableSelect
-        v-model="filters.categoryId"
-        :options="categoryOptions"
-        :placeholder="$t('crud.selectOption', { module: $t('modules.category') })"
-        :empty-message="$t('crud.noResults')"
+      <ClearableSelect
+        v-model="filters.status"
+        :options="statusOptions"
+        :placeholder="crud.filterByStatus"
         class="w-full sm:w-[200px]"
       />
 
       <SearchableSelect
-        v-model="filters.brandId"
-        :options="brandOptions"
-        :placeholder="$t('crud.selectOption', { module: $t('modules.brand') })"
-        :empty-message="$t('crud.noResults')"
-        class="w-full sm:w-[200px]"
+        v-model="filters.categoryId"
+        :options="categoryOptions"
+        :placeholder="crud.filterByCategory"
+        :empty-message="crud.noResults"
+        class="w-full sm:w-[250px]"
       />
 
       <SearchableSelect
         v-model="filters.unitId"
         :options="unitOptions"
-        :placeholder="$t('crud.selectOption', { module: $t('modules.unit') })"
-        :empty-message="$t('crud.noResults')"
-        class="w-full sm:w-[200px]"
+        :placeholder="crud.filterByUnit"
+        :empty-message="crud.noResults"
+        class="w-full sm:w-[250px]"
+      />
+      
+      <SearchableSelect
+        v-model="filters.brandId"
+        :options="brandOptions"
+        :placeholder="crud.filterByBrand"
+        :empty-message="crud.noResults"
+        class="w-full sm:w-[250px]"
       />
 
-      <Button 
-        v-if="filters.search || filters.status || filters.categoryId || filters.brandId || filters.unitId" 
-        variant="ghost" 
+      <Button
+        v-if="
+          filters.search ||
+          filters.status ||
+          filters.categoryId ||
+          filters.brandId ||
+          filters.unitId
+        "
+        variant="ghost"
         size="sm"
-        @click="Object.assign(filters, { search: '', status: '', categoryId: '', brandId: '', unitId: '' })"
+        @click="
+          Object.assign(filters, {
+            search: '',
+            status: '',
+            categoryId: '',
+            brandId: '',
+            unitId: '',
+          })
+        "
         class="h-9 px-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
       >
         <RefreshCw class="mr-2 h-4 w-4" />
-        {{ $t('crud.resetFilters') }}
+        {{ crud.resetFilters }}
       </Button>
     </div>
 
-    <div class="rounded-md border bg-card overflow-auto shadow-sm max-h-[700px] scrollbar-thin scrollbar-thumb-muted-foreground/20">
+    <div
+      class="rounded-md border bg-card overflow-auto shadow-sm max-h-[700px] scrollbar-thin scrollbar-thumb-muted-foreground/20"
+    >
       <Table class="min-w-[1200px]">
         <TableHeader>
           <TableRow>
             <TableHead class="w-[20px]">#</TableHead>
-            <TableHead class="w-[120px]">{{ $t('fields.code') }}</TableHead>
-            <TableHead class="w-[80px]">{{ $t('fields.photo') }}</TableHead>
+            <TableHead class="w-[120px]">{{ fields.code }}</TableHead>
+            <TableHead class="w-[80px]">{{ fields.photo }}</TableHead>
             <TableHead>
               <Button
                 variant="ghost"
                 @click="handleSort('name')"
                 class="-ml-4 h-8 font-medium"
-              >{{ $t('fields.name') }}<ArrowUpDown class="ml-1 h-3 w-3" />
+                >{{ fields.name }}<ArrowUpDown class="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
-            <TableHead>{{ $t('modules.category') }}</TableHead>
-            <TableHead>{{ $t('modules.brand') }}</TableHead>
-            <TableHead>{{ $t('modules.unit') }}</TableHead>
-            <TableHead class="text-right">{{ $t('fields.salePrice') }}</TableHead>
-            <TableHead class="text-center">{{ $t('fields.currentStock') }}</TableHead>
-            <TableHead>{{ $t('fields.status') }}</TableHead>
-            <TableHead class="text-right">{{ $t('crud.actions') }}</TableHead>
+            <TableHead>{{ fields.category }}</TableHead>
+            <TableHead>{{ fields.brand }}</TableHead>
+            <TableHead>{{ fields.unit }}</TableHead>
+            <TableHead class="text-right">{{ fields.salePrice }}</TableHead>
+            <TableHead class="text-center">{{ fields.currentStock }}</TableHead>
+            <TableHead>{{ fields.status }}</TableHead>
+            <TableHead class="text-right">{{ crud.actions }}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -387,15 +410,12 @@ onMounted(() => {
                 class="flex items-center justify-center text-muted-foreground italic text-sm"
               >
                 <Loader2 class="h-4 w-4 animate-spin mr-2" />
-                <span>{{ $t('crud.fetchingData') }}</span>
+                <span>{{ crud.fetchingData }}</span>
               </div>
             </TableCell>
           </TableRow>
           <template v-else-if="products.length > 0">
-            <TableRow
-              v-for="(product, index) in products"
-              :key="product.id"
-            >
+            <TableRow v-for="(product, index) in products" :key="product.id">
               <TableCell class="font-medium text-muted-foreground">
                 {{ (pagination.page - 1) * pagination.limit + index + 1 }}
               </TableCell>
@@ -424,19 +444,25 @@ onMounted(() => {
               }}</TableCell>
               <TableCell>
                 <div v-if="product.category">
-                   <span class="text-sm font-medium">{{ product.category.name }}</span>
+                  <span class="text-sm font-medium">{{
+                    product.category.name
+                  }}</span>
                 </div>
                 <span v-else class="text-sm text-muted-foreground">-</span>
               </TableCell>
               <TableCell>
                 <div v-if="product.brand">
-                   <span class="text-sm font-medium">{{ product.brand.name }}</span>
+                  <span class="text-sm font-medium">{{
+                    product.brand.name
+                  }}</span>
                 </div>
                 <span v-else class="text-sm text-muted-foreground">-</span>
               </TableCell>
               <TableCell>
                 <div v-if="product.unit">
-                   <span class="text-sm font-medium">{{ product.unit.name }}</span>
+                  <span class="text-sm font-medium">{{
+                    product.unit.name
+                  }}</span>
                 </div>
                 <span v-else class="text-sm text-muted-foreground">-</span>
               </TableCell>
@@ -444,10 +470,14 @@ onMounted(() => {
                 {{ formatCurrency(product.detail?.salePrice || 0) }}
               </TableCell>
               <TableCell class="text-center">
-                <Badge 
-                  variant="secondary" 
+                <Badge
+                  variant="secondary"
                   class=""
-                  :class="{ 'text-destructive': (product.detail?.currentStock || 0) <= product.alertQuantity }"
+                  :class="{
+                    'text-destructive':
+                      (product.detail?.currentStock || 0) <=
+                      product.alertQuantity,
+                  }"
                 >
                   {{ Math.trunc(product.detail?.currentStock || 0) }}
                 </Badge>
@@ -458,7 +488,7 @@ onMounted(() => {
                   class="cursor-pointer font-bold px-3 transition-all hover:opacity-80 active:scale-95"
                   @click="toggleStatus(product)"
                 >
-                  {{ product.status ? $t('crud.active') : $t('crud.inactive') }}
+                  {{ product.status ? crud.active : crud.inactive }}
                 </Badge>
               </TableCell>
               <TableCell class="text-right">
@@ -473,30 +503,32 @@ onMounted(() => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" class="w-[180px]">
-                    <DropdownMenuLabel
-                      class="text-xs uppercase text-muted-foreground font-bold"
-                      >{{ $t('crud.actions') }}</DropdownMenuLabel
-                    >
+                    <DropdownMenuLabel>{{ crud.actions }}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       @click="router.push(`/admin/products/${product.id}`)"
                       class="cursor-pointer"
                     >
-                      <Eye class="mr-2 h-4 w-4 opacity-70" /> {{ $t('crud.viewBtn') }}
+                      <Eye class="mr-2 h-4 w-4 opacity-70" />
+                      {{ crud.viewBtn }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      @click="
-                        router.push(`/admin/products/${product.id}/edit`)
-                      "
+                      @click="router.push(`/admin/products/${product.id}/edit`)"
                       class="cursor-pointer"
                     >
-                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{ $t('crud.editBtn') }}</DropdownMenuItem>
+                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{
+                        crud.editBtn
+                      }}</DropdownMenuItem
+                    >
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       class="text-destructive focus:text-destructive cursor-pointer font-medium"
                       @click="openDeleteDialog(product.id)"
                     >
-                      <Trash2 class="mr-2 h-4 w-4" />{{ $t('crud.delete') }}</DropdownMenuItem>
+                      <Trash2 class="mr-2 h-4 w-4" />{{
+                        crud.delete
+                      }}</DropdownMenuItem
+                    >
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
@@ -509,15 +541,31 @@ onMounted(() => {
             >
               <div class="flex flex-col items-center justify-center gap-3">
                 <Package class="h-10 w-10 opacity-10" />
-                <p class="font-medium">{{ $t('crud.noRecords', { module: $t('modules.products') }) }}</p>
+                <p class="font-medium">
+                  {{ t("crud.noRecords", { module: labels.title }) }}
+                </p>
                 <Button
-                  v-if="filters.search || filters.status || filters.categoryId || filters.brandId || filters.unitId"
+                  v-if="
+                    filters.search ||
+                    filters.status ||
+                    filters.categoryId ||
+                    filters.brandId ||
+                    filters.unitId
+                  "
                   variant="outline"
                   size="sm"
-                  @click="Object.assign(filters, { search: '', status: '', categoryId: '', brandId: '', unitId: '' })"
+                  @click="
+                    Object.assign(filters, {
+                      search: '',
+                      status: '',
+                      categoryId: '',
+                      brandId: '',
+                      unitId: '',
+                    })
+                  "
                   class="h-8"
                 >
-                  {{ $t('crud.resetFilters') }}
+                  {{ crud.resetFilters }}
                 </Button>
               </div>
             </TableCell>
@@ -533,7 +581,7 @@ onMounted(() => {
         <div class="flex items-center gap-2">
           <span
             class="text-sm font-medium text-muted-foreground whitespace-nowrap"
-            >{{ $t('crud.rowsPerPage') }}</span
+            >{{ crud.rowsPerPage }}</span
           >
           <Select
             :model-value="pagination.limit.toString()"
@@ -592,19 +640,20 @@ onMounted(() => {
     <AlertDialog v-model:open="isDeleteDialogOpen">
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{{ $t('crud.confirmDelete') }}</AlertDialogTitle>
+          <AlertDialogTitle>{{ crud.confirmDelete }}</AlertDialogTitle>
           <AlertDialogDescription>
-            {{ $t('crud.confirmDeleteDesc', { module: $t('modules.product') }) }}
+            {{ t("crud.confirmDeleteDesc", { module: labels.name }) }}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel @click="isDeleteDialogOpen = false"
-            >{{ $t('crud.cancel') }}</AlertDialogCancel
-          >
+          <AlertDialogCancel @click="isDeleteDialogOpen = false">{{
+            crud.cancel
+          }}</AlertDialogCancel>
           <AlertDialogAction
             @click="confirmDelete"
             class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >{{ $t('crud.delete') }}</AlertDialogAction>
+            >{{ crud.delete }}</AlertDialogAction
+          >
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

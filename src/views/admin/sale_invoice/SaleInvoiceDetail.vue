@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud, actions } = useAppI18n("saleInvoice");
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
@@ -46,15 +46,15 @@ function getStatusBadge(rec: SaleInvoice) {
   if (rec.isCancel)
     return {
       variant: "destructive",
-      label: t("fields.statusLabels.cancelled"),
+      label: fields.statusLabels.cancelled,
     };
   switch (Number(rec.status)) {
     case InvoiceStatus.DRAFT:
-      return { variant: "secondary", label: t("fields.statusLabels.draft") };
+      return { variant: "secondary", label: fields.statusLabels.draft };
     case InvoiceStatus.COMPLETED:
-      return { variant: "success", label: t("fields.statusLabels.completed") };
+      return { variant: "success", label: fields.statusLabels.completed };
     default:
-      return { variant: "outline", label: t("crud.all") };
+      return { variant: "outline", label: crud.all };
   }
 }
 
@@ -73,7 +73,7 @@ async function fetchDetail() {
     if (response.success && response.data) {
       record.value = response.data;
     } else {
-      toast.error(t("crud.notFound", { module: t("modules.saleInvoice") }));
+      toast.error(t("crud.notFound", { module: labels.name }));
       router.back();
     }
   } catch (error) {
@@ -145,7 +145,7 @@ onMounted(() => {
           "
           class="text-primary-foreground"
         >
-          {{ $t("actions.createPayment") }}
+          {{ actions.createPayment }}
           <ArrowRightCircle class="ml-2 h-4 w-4" />
         </Button>
         <Button
@@ -153,7 +153,7 @@ onMounted(() => {
           variant="outline"
           class="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/20"
         >
-          <Ban class="h-4 w-4 mr-2" /> {{ $t("actions.cancelInvoice") }}
+          <Ban class="h-4 w-4 mr-2" /> {{ actions.cancelInvoice }}
         </Button>
       </div>
     </div>
@@ -169,13 +169,13 @@ onMounted(() => {
           <CardHeader class="pb-3 border-b">
             <CardTitle class="text-lg flex items-center gap-2">
               <FileText class="h-5 w-5 text-primary" />
-              {{ $t("crud.generalInfo") }}
+              {{ crud.generalInfo }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-4 space-y-4 text-sm">
             <div>
               <p class="text-muted-foreground mb-1 flex items-center gap-1.5">
-                <Users class="h-3.5 w-3.5" />{{ $t("fields.customerId") }}
+                <Users class="h-3.5 w-3.5" />{{ fields.customerId }}
               </p>
               <p class="font-medium text-foreground">
                 {{ record.customer?.name || `ID: ${record.customerId}` }}
@@ -183,7 +183,7 @@ onMounted(() => {
             </div>
             <div>
               <p class="text-muted-foreground mb-1 flex items-center gap-1.5">
-                <Calendar class="h-3.5 w-3.5" />{{ $t("fields.invoiceDate") }}
+                <Calendar class="h-3.5 w-3.5" />{{ fields.invoiceDate }}
               </p>
               <p class="font-medium text-foreground">
                 {{ formatDateTime(record.invoiceDate) }}
@@ -191,12 +191,12 @@ onMounted(() => {
             </div>
             <div>
               <p class="text-muted-foreground mb-1 flex items-center gap-1.5">
-                <Package class="h-3.5 w-3.5" />{{ $t("fields.totalLine") }}
+                <Package class="h-3.5 w-3.5" />{{ fields.totalLine }}
               </p>
               <div class="flex flex-wrap items-center gap-2">
                 <p class="font-bold text-foreground text-lg">
                   {{ Math.trunc(record.totalLine || 0) }}
-                  {{ $t("fields.items") }}
+                  {{ fields.items }}
                 </p>
                 <template v-if="record.details?.[0]?.saleOrder">
                   <span
@@ -213,13 +213,13 @@ onMounted(() => {
                           record.details[0].saleOrder.totalCloseLine,
                       )
                     }}
-                    {{ $t("fields.remaining") }})
+                    {{ fields.remaining }})
                   </span>
                   <span
                     v-else
                     class="text-xs text-emerald-600/70 font-medium italic"
                   >
-                    ({{ $t("fields.fullyFulfilled") }})
+                    ({{ fields.fullyFulfilled }})
                   </span>
                 </template>
               </div>
@@ -227,7 +227,7 @@ onMounted(() => {
             <div v-if="record.details?.some((d) => d.saleOrder)">
               <p class="text-muted-foreground mb-1 flex items-center gap-1.5">
                 <ArrowRightCircle class="h-3.5 w-3.5" />{{
-                  $t("modules.saleOrder")
+                  t("modules.saleOrder")
                 }}
               </p>
               <div class="flex flex-wrap gap-1 mt-1">
@@ -249,7 +249,7 @@ onMounted(() => {
             </div>
             <div>
               <p class="text-muted-foreground mb-1">
-                {{ $t("fields.description") }}
+                {{ fields.description }}
               </p>
               <p class="font-medium text-foreground text-sm italic">
                 {{ record.description || "---" }}
@@ -263,13 +263,13 @@ onMounted(() => {
           <CardHeader class="pb-3 border-b">
             <CardTitle class="text-lg flex items-center gap-2">
               <CreditCard class="h-5 w-5 text-primary" />
-              {{ $t("fields.paymentDetails") }}
+              {{ fields.paymentDetails }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-4 space-y-4 text-sm">
             <div class="flex justify-between">
               <span class="text-muted-foreground"
-                >{{ $t("fields.totalPrice") }}:</span
+                >{{ fields.totalPrice }}:</span
               >
               <span class="font-medium">{{
                 formatCurrency(record.totalPrice)
@@ -277,7 +277,7 @@ onMounted(() => {
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground"
-                >{{ $t("fields.paidAmount") }}:</span
+                >{{ fields.paidAmount }}:</span
               >
               <span class="font-medium text-success">{{
                 formatCurrency(record.paidAmount)
@@ -285,7 +285,7 @@ onMounted(() => {
             </div>
             <div class="py-2 border-t flex justify-between">
               <span class="text-muted-foreground font-bold"
-                >{{ $t("fields.balanceDue") }}:</span
+                >{{ fields.balanceDue }}:</span
               >
               <span
                 class="font-bold"
@@ -312,7 +312,7 @@ onMounted(() => {
           <CardHeader class="pb-3 border-b">
             <CardTitle class="text-lg flex items-center gap-2">
               <Package class="h-5 w-5 text-primary" />
-              {{ $t("fields.details") }}
+              {{ fields.details }}
             </CardTitle>
           </CardHeader>
           <CardContent
@@ -322,15 +322,15 @@ onMounted(() => {
               <TableHeader class="bg-muted/30">
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>{{ $t("modules.product") }}</TableHead>
+                  <TableHead>{{ t("modules.product") }}</TableHead>
                   <TableHead class="text-right">{{
-                    $t("fields.sellingPrice")
+                    fields.sellingPrice
                   }}</TableHead>
                   <TableHead class="text-center">{{
-                    $t("fields.quantity")
+                    fields.quantity
                   }}</TableHead>
                   <TableHead class="text-right">{{
-                    $t("fields.rowTotal")
+                    fields.rowTotal
                   }}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -368,7 +368,7 @@ onMounted(() => {
                   <TableCell
                     colspan="5"
                     class="py-8 text-center text-muted-foreground italic"
-                    >{{ $t("common.noData") }}</TableCell
+                    >{{ t("common.noData") }}</TableCell
                   >
                 </TableRow>
               </TableBody>
@@ -379,7 +379,7 @@ onMounted(() => {
                 <div
                   class="flex justify-between items-center text-lg font-bold"
                 >
-                  <span>{{ $t("fields.grandTotal") }}:</span>
+                  <span>{{ fields.grandTotal }}:</span>
                   <span class="text-primary">{{
                     formatCurrency(record.totalPrice)
                   }}</span>
@@ -394,7 +394,7 @@ onMounted(() => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2">
               <CreditCard class="h-5 w-5 text-primary" />
-              {{ $t("fields.paymentHistory") }}
+              {{ fields.paymentHistory }}
             </CardTitle>
           </CardHeader>
           <CardContent
@@ -403,11 +403,11 @@ onMounted(() => {
             <Table class="min-w-[700px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead>{{ $t("fields.code") }}</TableHead>
-                  <TableHead>{{ $t("fields.paymentDate") }}</TableHead>
-                  <TableHead>{{ $t("fields.amount") }}</TableHead>
+                  <TableHead>{{ fields.code }}</TableHead>
+                  <TableHead>{{ fields.paymentDate }}</TableHead>
+                  <TableHead>{{ fields.amount }}</TableHead>
                   <TableHead class="text-right">{{
-                    $t("fields.actions")
+                    fields.actions
                   }}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -425,7 +425,7 @@ onMounted(() => {
                         size="sm"
                         @click="router.push(`/admin/sale-payments/${pay.id}`)"
                       >
-                        {{ $t("crud.view") }}
+                        {{ crud.view }}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -435,7 +435,7 @@ onMounted(() => {
                     colspan="4"
                     class="py-8 text-center text-muted-foreground italic"
                   >
-                    {{ $t("common.noData") }}
+                    {{ t("common.noData") }}
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -448,7 +448,7 @@ onMounted(() => {
                 <div
                   class="flex justify-between items-center text-lg font-bold"
                 >
-                  <span>{{ $t("fields.totalPaid") }}:</span>
+                  <span>{{ fields.totalPaid }}:</span>
                   <span class="text-primary">{{
                     formatCurrency(totalPaymentsSum)
                   }}</span>

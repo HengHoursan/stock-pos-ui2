@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /* 
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud, common } = useAppI18n("customer");
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 ... (all logic commented out for security)
@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { ChevronLeft, Lock } from "lucide-vue-next";
 
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud, common } = useAppI18n("customer");
 const router = useRouter();
 </script>
 
@@ -20,7 +22,7 @@ const router = useRouter();
       <Button variant="outline" size="icon" @click="router.back()">
         <ChevronLeft class="h-4 w-4" />
       </Button>
-      <h2 class="text-3xl font-bold tracking-tight text-foreground">{{ $t('modules.customer') }}</h2>
+      <h2 class="text-3xl font-bold tracking-tight text-foreground">{{ labels.name }}</h2>
     </div>
 
     <Card class="border-dashed border-2 shadow-none bg-muted/30">
@@ -28,7 +30,7 @@ const router = useRouter();
         <div class="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
           <Lock class="h-8 w-8 text-muted-foreground opacity-40" />
         </div>
-        <CardTitle class="text-2xl font-bold text-muted-foreground">{{ $t('common.featureDisabled') || 'Management Disabled' }}</CardTitle>
+        <CardTitle class="text-2xl font-bold text-muted-foreground">{{ common.featureDisabled || 'Management Disabled' }}</CardTitle>
       </CardHeader>
       <CardContent class="text-center pb-10">
         <p class="text-muted-foreground max-w-sm mx-auto">

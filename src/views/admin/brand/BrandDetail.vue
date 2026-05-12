@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { formatDateTime } from "@/utils/format";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +22,7 @@ import { BrandService } from "@/services/brand/brand.service";
 import type { Brand } from "@/types";
 import { toast } from "vue-sonner";
 
+const { t, labels, fields, crud } = useAppI18n("brand");
 const router = useRouter();
 const route = useRoute();
 const brandService = new BrandService();
@@ -47,11 +48,11 @@ async function fetchBrand() {
         }
       }
     } else {
-      toast.error(t("crud.notFound", { module: t("modules.brand") }));
+      toast.error(t("crud.notFound", { module: labels.name }));
       router.push("/admin/brands");
     }
   } catch (error) {
-    toast.error(t("crud.errorFetch", { module: t("modules.brand") }));
+    toast.error(t("crud.errorFetch", { module: labels.name }));
   } finally {
     loading.value = false;
   }
@@ -62,11 +63,11 @@ async function deleteBrand() {
   try {
     const response = await brandService.softDelete(brandId);
     if (response.success) {
-      toast.success(t("crud.successDelete", { module: t("modules.brand") }));
+      toast.success(t("crud.successDelete", { module: labels.name }));
       router.push("/admin/brands");
     }
   } catch (error) {
-    toast.error(t("crud.errorDelete", { module: t("modules.brand") }));
+    toast.error(t("crud.errorDelete", { module: labels.name }));
   }
 }
 
@@ -129,7 +130,7 @@ onMounted(() => {
       <!-- Image Section -->
       <Card class="lg:col-span-1 overflow-hidden h-fit">
         <CardHeader class="pb-3">
-          <CardTitle class="text-lg">{{ $t("crud.image") }}</CardTitle>
+          <CardTitle class="text-lg">{{ crud.image }}</CardTitle>
         </CardHeader>
         <CardContent>
           <div
@@ -156,34 +157,34 @@ onMounted(() => {
       <div class="lg:col-span-2 space-y-6">
         <Card>
           <CardHeader class="pb-3">
-            <CardTitle class="text-lg">{{ $t("crud.generalInfo") }}</CardTitle>
+            <CardTitle class="text-lg">{{ crud.generalInfo }}</CardTitle>
           </CardHeader>
           <CardContent>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Tag class="mr-2 h-4 w-4" />{{ $t("fields.name") }}
+                  <Tag class="mr-2 h-4 w-4" />{{ fields.name }}
                 </div>
                 <p class="font-medium text-base">{{ brand.name }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Barcode class="mr-2 h-4 w-4" />{{ $t("fields.code") }}
+                  <Barcode class="mr-2 h-4 w-4" />{{ fields.code }}
                 </div>
                 <p class="font-medium text-base">{{ brand.code || "N/A" }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Globe class="mr-2 h-4 w-4" />{{ $t("fields.slug") }}
+                  <Globe class="mr-2 h-4 w-4" />{{ fields.slug }}
                 </div>
                 <p class="font-medium text-base">{{ brand.slug }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Folder class="mr-2 h-4 w-4" />{{ $t("fields.parentOf", { module: $t("modules.brand") }) }}
+                  <Folder class="mr-2 h-4 w-4" />{{ t("fields.parentOf", { module: labels.name }) }}
                 </div>
                 <p class="font-medium text-base">
                   <template v-if="parentBrand">
@@ -194,14 +195,14 @@ onMounted(() => {
                       {{ parentBrand.name }}
                     </router-link>
                   </template>
-                  <template v-else>{{ $t("crud.none") }}</template>
+                  <template v-else>{{ crud.none }}</template>
                 </p>
               </div>
             </div>
 
             <div class="mt-6 pt-6 border-t space-y-2">
               <div class="flex items-center text-sm text-muted-foreground">
-                <AlignLeft class="mr-2 h-4 w-4" />{{ $t("fields.description") }}
+                <AlignLeft class="mr-2 h-4 w-4" />{{ fields.description }}
               </div>
               <p
                 class="text-sm leading-relaxed text-foreground/80 bg-muted/30 p-4 rounded-md"
@@ -216,25 +217,25 @@ onMounted(() => {
 
         <Card>
           <CardHeader class="pb-3">
-            <CardTitle class="text-lg">{{ $t("crud.systemInfo") }}</CardTitle>
+            <CardTitle class="text-lg">{{ crud.systemInfo }}</CardTitle>
           </CardHeader>
           <CardContent>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Calendar class="mr-2 h-4 w-4" />{{ $t("fields.createdAt") }}
+                  <Calendar class="mr-2 h-4 w-4" />{{ fields.createdAt }}
                 </div>
                 <p class="font-medium text-base">
-                  {{ new Date(brand.createdAt).toLocaleString() }}
+                  {{ formatDateTime(brand.createdAt) }}
                 </p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Calendar class="mr-2 h-4 w-4" />{{ $t("fields.updatedAt") }}
+                  <Calendar class="mr-2 h-4 w-4" />{{ fields.updatedAt }}
                 </div>
                 <p class="font-medium text-base">
-                  {{ new Date(brand.updatedAt).toLocaleString() }}
+                  {{ formatDateTime(brand.updatedAt) }}
                 </p>
               </div>
             </div>

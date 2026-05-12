@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
@@ -25,7 +24,7 @@ import { SaleQuotationService } from "@/services/sale_quotation/sale_quotation.s
 import type { SaleQuotation } from "@/types";
 import { QuotationStatus } from "@/types/enums";
 import { toast } from "vue-sonner";
-
+const { t, labels, fields, crud, common, actions } = useAppI18n("saleQuotation");
 const route = useRoute();
 const router = useRouter();
 const sqService = new SaleQuotationService();
@@ -35,12 +34,12 @@ const loading = ref(true);
 
 function getStatusBadge(rec: SaleQuotation) {
   switch(Number(rec.status)) {
-    case QuotationStatus.DRAFT: return { variant: 'secondary', label: t('fields.statusLabels.draft') };
-    case QuotationStatus.SENT: return { variant: 'info', label: t('fields.statusLabels.sent') };
-    case QuotationStatus.ACCEPTED: return { variant: 'success', label: t('fields.statusLabels.accepted') };
-    case QuotationStatus.REJECTED: return { variant: 'destructive', label: t('fields.statusLabels.rejected') };
-    case QuotationStatus.EXPIRED: return { variant: 'outline', label: t('fields.statusLabels.expired') };
-    default: return { variant: 'outline', label: t('crud.all') };
+    case QuotationStatus.DRAFT: return { variant: 'secondary', label: fields.statusLabels.draft };
+    case QuotationStatus.SENT: return { variant: 'info', label: fields.statusLabels.sent };
+    case QuotationStatus.ACCEPTED: return { variant: 'success', label: fields.statusLabels.accepted };
+    case QuotationStatus.REJECTED: return { variant: 'destructive', label: fields.statusLabels.rejected };
+    case QuotationStatus.EXPIRED: return { variant: 'outline', label: fields.statusLabels.expired };
+    default: return { variant: 'outline', label: crud.all };
   }
 }
 
@@ -54,7 +53,7 @@ async function fetchDetail() {
     if (response.success && response.data) {
       record.value = response.data;
     } else {
-      toast.error(t('crud.notFound', { module: t('modules.saleQuotation') }));
+      toast.error(t('crud.notFound', { module: labels.name }));
       router.back();
     }
   } catch (error) {
@@ -90,10 +89,10 @@ onMounted(() => {
       </div>
       <div class="flex items-center gap-2">
         <Button v-if="record && record.status === QuotationStatus.ACCEPTED" @click="router.push(`/admin/sale-orders/create?quotationId=${record.id}`)" class="text-primary-foreground">
-          {{ $t('actions.generateOrder') }} <ArrowRightCircle class="ml-2 h-4 w-4" />
+          {{ actions.generateOrder }} <ArrowRightCircle class="ml-2 h-4 w-4" />
         </Button>
         <Button v-if="record && record.status === QuotationStatus.DRAFT" @click="router.push(`/admin/sale-quotations/${record.id}/edit`)" variant="outline">
-          {{ $t('crud.editBtn') }}
+          {{ crud.editBtn }}
         </Button>
       </div>
     </div>
@@ -110,20 +109,20 @@ onMounted(() => {
           <CardHeader class="pb-3 border-b">
             <CardTitle class="text-lg flex items-center gap-2">
               <Users class="h-5 w-5 text-primary" />
-              {{ $t('crud.generalInfo') }}
+              {{ crud.generalInfo }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-4 space-y-4 text-sm">
             <div>
-              <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Users class="h-3.5 w-3.5" />{{ $t('fields.customerId') }}</p>
+              <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Users class="h-3.5 w-3.5" />{{ fields.customerId }}</p>
               <p class="font-medium text-foreground">{{ record.customer?.name || `ID: ${record.customerId}` }}</p>
             </div>
             <div>
-              <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Calendar class="h-3.5 w-3.5" />{{ $t('fields.date') }}</p>
+              <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Calendar class="h-3.5 w-3.5" />{{ fields.date }}</p>
               <p class="font-medium text-foreground">{{ formatDateTime(record.quotationDate) }}</p>
             </div>
             <div>
-              <p class="text-muted-foreground mb-1">{{ $t('fields.description') }}</p>
+              <p class="text-muted-foreground mb-1">{{ fields.description }}</p>
               <p class="font-medium text-foreground text-sm italic">{{ record.description || '---' }}</p>
             </div>
           </CardContent>
@@ -133,7 +132,7 @@ onMounted(() => {
           <CardHeader class="pb-3 border-b border-primary/10">
             <CardTitle class="text-lg flex items-center gap-2 text-primary">
               <FileText class="h-5 w-5" />
-              {{ $t('fields.grandTotal') }}
+              {{ fields.grandTotal }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6">
@@ -150,7 +149,7 @@ onMounted(() => {
           <CardHeader class="pb-3 border-b">
             <CardTitle class="text-lg flex items-center gap-2">
               <Package class="h-5 w-5 text-primary" />
-              {{ $t('fields.details') }}
+              {{ fields.details }}
             </CardTitle>
           </CardHeader>
           <CardContent class="p-0">
@@ -158,10 +157,10 @@ onMounted(() => {
               <TableHeader class="bg-muted/30">
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>{{ $t('modules.product') }}</TableHead>
-                  <TableHead class="text-right">{{ $t('fields.unitPrice') }}</TableHead>
-                  <TableHead class="text-center">{{ $t('fields.quantity') }}</TableHead>
-                  <TableHead class="text-right">{{ $t('fields.rowTotal') }}</TableHead>
+                  <TableHead>{{ t('modules.product') }}</TableHead>
+                  <TableHead class="text-right">{{ fields.unitPrice }}</TableHead>
+                  <TableHead class="text-center">{{ fields.quantity }}</TableHead>
+                  <TableHead class="text-right">{{ fields.rowTotal }}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -178,7 +177,7 @@ onMounted(() => {
                   </TableRow>
                 </template>
                 <TableRow v-else>
-                  <TableCell colspan="5" class="py-8 text-center text-muted-foreground italic">{{ $t('common.noData') }}</TableCell>
+                  <TableCell colspan="5" class="py-8 text-center text-muted-foreground italic">{{ common.noData }}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -186,7 +185,7 @@ onMounted(() => {
             <div class="flex justify-end p-6 border-t bg-muted/10">
               <div class="w-full max-w-sm space-y-3">
                 <div class="flex justify-between items-center text-lg font-bold">
-                  <span>{{ $t('fields.grandTotal') }}:</span>
+                  <span>{{ fields.grandTotal }}:</span>
                   <span class="text-primary">{{ formatCurrency(record.totalPrice) }}</span>
                 </div>
               </div>

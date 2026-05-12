@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, reactive, watch } from "vue";
-import { useI18n } from "vue-i18n";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import { ReportService } from "@/services/report/report.service";
 import type { SalesReport, PaginationRequest } from "@/types";
 import DateRangePicker from "@/components/DateRangePicker.vue";
@@ -57,7 +57,7 @@ import {
 import { formatCurrency, formatDateForFilename } from "@/utils/format";
 import { toast } from "vue-sonner";
 
-const { t } = useI18n();
+const { t, labels, fields, crud, menu, common } = useAppI18n("reports");
 const reportService = new ReportService();
 
 const loading = ref(true);
@@ -113,7 +113,7 @@ async function fetchData() {
       pagination.totalItems = res.data.salesByCustomer.meta.totalItems;
     }
   } catch (error: any) {
-    toast.error(t("reports.failedToLoad", { module: t("menu.salesReport") }));
+    toast.error(labels.failedToLoad.replace('{module}', menu.salesReport));
   } finally {
     loading.value = false;
   }
@@ -173,26 +173,25 @@ function getPageArray(): (number | string)[] {
 
 /* EXPORT LOGIC */
 const customExportCols: ExportColumn[] = [
-  { header: t("reports.customer"), dataKey: "customerName" },
-  { header: t("fields.phoneNumber"), dataKey: "customerPhone" },
-  { header: t("reports.invoicesCount"), dataKey: "totalInvoices" },
-  { header: t("reports.totalSpent"), dataKey: "totalSpent" },
+  { header: labels.customer, dataKey: "customerName" },
+  { header: fields.phoneNumber, dataKey: "customerPhone" },
+  { header: labels.invoicesCount, dataKey: "totalInvoices" },
+  { header: labels.totalSpent, dataKey: "totalSpent" },
 ];
 
 function handleExport(formatType: "excel" | "csv" | "pdf") {
   const ds = reportData.value.salesByCustomer.data;
   if (!ds || ds.length === 0) {
-    toast.warning(t("reports.noDataToExport"));
+    toast.warning(labels.noDataToExport);
     return;
   }
 
   const timestamp = formatDateForFilename(new Date());
-  const filename = `${t("menu.salesReport")}_${timestamp}`;
+  const filename = `${menu.salesReport}_${timestamp}`;
 
   if (formatType === "excel") exportToExcel(filename, customExportCols, ds);
   if (formatType === "csv") exportToCSV(filename, customExportCols, ds);
-  if (formatType === "pdf")
-    exportToPDF(filename, customExportCols, ds, t("menu.salesReport"));
+    exportToPDF(filename, customExportCols, ds, menu.salesReport);
 }
 </script>
 
@@ -201,9 +200,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
     <div
       class="flex flex-col md:flex-row md:items-center justify-between gap-4"
     >
-      <h2 class="text-3xl font-bold tracking-tight">
-        {{ $t("menu.salesReport") }}
-      </h2>
+        {{ menu.salesReport }}
     </div>
 
     <!-- Action Bar (Filters + Exports) - Now Under Title -->
@@ -221,7 +218,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
             <Input
               v-model="search"
               type="search"
-              :placeholder="$t('crud.searchPlaceholder')"
+              :placeholder="crud.searchPlaceholder"
               class="pl-9 bg-background"
             />
           </div>
@@ -237,21 +234,21 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
             size="sm"
             class="gap-2 bg-green-600 hover:bg-green-700 text-white transition-colors cursor-pointer"
           >
-            <FileSpreadsheet class="h-4 w-4" /> {{ $t("reports.excel") }}
+            <FileSpreadsheet class="h-4 w-4" /> {{ labels.excel }}
           </Button>
           <Button
             @click="handleExport('csv')"
             size="sm"
             class="gap-2 bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer"
           >
-            <FileText class="h-4 w-4" /> {{ $t("reports.csv") }}
+            <FileText class="h-4 w-4" /> {{ labels.csv }}
           </Button>
           <Button
             @click="handleExport('pdf')"
             size="sm"
             class="gap-2 bg-red-600 hover:bg-red-700 text-white transition-colors cursor-pointer"
           >
-            <FileText class="h-4 w-4" /> {{ $t("reports.pdf") }}
+            <FileText class="h-4 w-4" /> {{ labels.pdf }}
           </Button>
         </div>
       </CardContent>
@@ -263,8 +260,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
         <CardHeader
           class="flex flex-row items-center justify-between pb-2"
         >
-          <CardTitle class="text-sm font-medium">{{
-            $t("reports.totalRevenue")
+            labels.totalRevenue
           }}</CardTitle>
           <TrendingUp class="h-4 w-4 text-blue-600" />
         </CardHeader>
@@ -273,7 +269,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
             {{ formatCurrency(reportData.totalRevenue) }}
           </div>
           <p class="text-xs text-muted-foreground">
-            {{ $t("reports.totalRevenueDesc") }}
+            {{ labels.totalRevenueDesc }}
           </p>
         </CardContent>
       </Card>
@@ -281,8 +277,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
         <CardHeader
           class="flex flex-row items-center justify-between pb-2"
         >
-          <CardTitle class="text-sm font-medium">{{
-            $t("reports.netSales")
+            labels.netSales
           }}</CardTitle>
           <LineChart class="h-4 w-4 text-green-600" />
         </CardHeader>
@@ -291,7 +286,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
             {{ formatCurrency(reportData.netSales) }}
           </div>
           <p class="text-xs text-muted-foreground">
-            {{ $t("reports.netSalesDesc") }}
+            {{ labels.netSalesDesc }}
           </p>
         </CardContent>
       </Card>
@@ -299,8 +294,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
         <CardHeader
           class="flex flex-row items-center justify-between pb-2"
         >
-          <CardTitle class="text-sm font-medium">{{
-            $t("reports.totalReturns")
+            labels.totalReturns
           }}</CardTitle>
           <PieChart class="h-4 w-4 text-red-600" />
         </CardHeader>
@@ -309,7 +303,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
             {{ formatCurrency(reportData.totalReturns) }}
           </div>
           <p class="text-xs text-muted-foreground">
-            {{ $t("reports.totalReturnsDesc") }}
+            {{ labels.totalReturnsDesc }}
           </p>
         </CardContent>
       </Card>
@@ -318,9 +312,9 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
     <!-- Sales By Customer Data Table -->
     <Card>
       <CardHeader>
-        <CardTitle>{{ $t("reports.salesByCustomer") }}</CardTitle>
+        <CardTitle>{{ labels.salesByCustomer }}</CardTitle>
         <CardDescription>{{
-          $t("reports.salesByCustomerDesc")
+          labels.salesByCustomerDesc
         }}</CardDescription>
       </CardHeader>
       <CardContent>
@@ -328,11 +322,11 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{{ $t("reports.customer") }}</TableHead>
-                <TableHead>{{ $t("fields.phoneNumber") }}</TableHead>
-                <TableHead>{{ $t("reports.invoicesCount") }}</TableHead>
+                <TableHead>{{ labels.customer }}</TableHead>
+                <TableHead>{{ fields.phoneNumber }}</TableHead>
+                <TableHead>{{ labels.invoicesCount }}</TableHead>
                 <TableHead class="text-right">{{
-                  $t("reports.totalSpent")
+                  labels.totalSpent
                 }}</TableHead>
               </TableRow>
             </TableHeader>
@@ -341,13 +335,13 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
                 <TableCell colspan="4" class="h-24 text-center">
                   <div class="flex items-center justify-center gap-2">
                     <Loader2 class="h-4 w-4 animate-spin" />
-                    <span>{{ $t("crud.loading") }}</span>
+                    <span>{{ crud.loading }}</span>
                   </div>
                 </TableCell>
               </TableRow>
               <TableRow v-else-if="!reportData.salesByCustomer.data.length">
                 <TableCell colspan="4" class="h-24 text-center">{{
-                  $t("common.noData")
+                  common.noData
                 }}</TableCell>
               </TableRow>
               <TableRow
@@ -372,7 +366,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
         <div class="flex items-center justify-end px-4 py-4">
           <div class="flex items-center gap-4">
             <div class="flex items-center gap-2">
-              <span class="text-sm font-medium text-muted-foreground whitespace-nowrap">{{ $t('crud.rowsPerPage') }}</span>
+              <span class="text-sm font-medium text-muted-foreground whitespace-nowrap">{{ crud.rowsPerPage }}</span>
               <Select :model-value="pagination.limit.toString()" @update:model-value="(v) => (pagination.limit = parseInt(v as string))">
                 <SelectTrigger class="h-8 w-[70px] bg-transparent">
                   <SelectValue />

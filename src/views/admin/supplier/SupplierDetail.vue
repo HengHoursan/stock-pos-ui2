@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("supplier");
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { formatDateTime } from "@/utils/format";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,11 +41,11 @@ async function fetchSupplier() {
     if (response.success && response.data) {
       supplier.value = response.data;
     } else {
-      toast.error(t("crud.notFound", { module: t("modules.supplier") }));
+      toast.error(t("crud.notFound", { module: labels.name }));
       router.push("/admin/suppliers");
     }
   } catch (error) {
-    toast.error(t("crud.errorFetch", { module: t("modules.supplier") }));
+    toast.error(t("crud.errorFetch", { module: labels.name }));
   } finally {
     loading.value = false;
   }
@@ -55,16 +56,16 @@ async function deleteSupplier() {
   try {
     const response = await supplierService.softDelete(supplierId);
     if (response.success) {
-      toast.success(t("crud.successDelete", { module: t("modules.supplier") }));
+      toast.success(t("crud.successDelete", { module: labels.name }));
       router.push("/admin/suppliers");
     }
   } catch (error) {
-    toast.error(t("crud.errorDelete", { module: t("modules.supplier") }));
+    toast.error(t("crud.errorDelete", { module: labels.name }));
   }
 }
 
 function getTypeLabel(type: CustomerType) {
-  return type === CustomerType.DINE_IN ? t('fields.dineIn') : t('fields.dineOut');
+  return type === CustomerType.DINE_IN ? fields.dineIn : fields.dineOut;
 }
 
 onMounted(() => {
@@ -82,23 +83,23 @@ onMounted(() => {
         </Button>
         <div class="flex items-center gap-3">
           <h2 class="text-3xl font-bold tracking-tight">
-            {{ supplier?.name || $t("crud.detail", { module: $t("modules.supplier") }) }}
+            {{ supplier?.name || t("crud.detail", { module: labels.name }) }}
           </h2>
           <Badge
             v-if="supplier"
             :variant="supplier.status ? 'success' : 'warning'"
             class="text-[10px] h-5 px-2 uppercase font-bold shadow-sm self-center mt-1"
           >
-            {{ supplier.status ? $t("crud.active") : $t("crud.inactive") }}
+            {{ supplier.status ? crud.active : crud.inactive }}
           </Badge>
         </div>
       </div>
       <div class="flex items-center gap-2">
         <Button variant="outline" @click="router.push(`/admin/suppliers/${supplierId}/edit`)" class="flex-1 md:flex-none">
-          <Pencil class="mr-2 h-4 w-4" />{{ $t("crud.editBtn") }}
+          <Pencil class="mr-2 h-4 w-4" />{{ crud.editBtn }}
         </Button>
         <Button variant="destructive" @click="deleteSupplier" class="flex-1 md:flex-none">
-          <Trash2 class="mr-2 h-4 w-4" />{{ $t("crud.delete") }}
+          <Trash2 class="mr-2 h-4 w-4" />{{ crud.delete }}
         </Button>
       </div>
     </div>
@@ -205,7 +206,7 @@ onMounted(() => {
                   <Calendar class="mr-2 h-4 w-4" />{{ $t("fields.createdAt") }}
                 </div>
                 <p class="font-medium text-base">
-                  {{ new Date(supplier.createdAt).toLocaleString() }}
+                  {{ formatDateTime(supplier.createdAt) }}
                 </p>
               </div>
 
@@ -214,7 +215,7 @@ onMounted(() => {
                   <Calendar class="mr-2 h-4 w-4" />{{ $t("fields.updatedAt") }}
                 </div>
                 <p class="font-medium text-base">
-                  {{ new Date(supplier.updatedAt).toLocaleString() }}
+                  {{ formatDateTime(supplier.updatedAt) }}
                 </p>
               </div>
             </div>

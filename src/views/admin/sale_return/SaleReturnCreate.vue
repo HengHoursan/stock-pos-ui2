@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("saleReturn");
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { toLocalISOString, formatNumberInput } from "@/utils/format";
+import { toLocalISOString, formatNumberInput, formatCurrency } from "@/utils/format";
 
 import { useForm, useFieldArray } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
@@ -114,7 +114,7 @@ const formSchema = toTypedSchema(
       .min(1, t("validation.required", { field: t("modules.saleInvoice") })),
     returnDate: z
       .string()
-      .min(1, t("validation.required", { field: t("fields.invoiceDate") })),
+      .min(1, t("validation.required", { field: fields.date })),
     remarks: z.string().optional().nullable(),
     details: z
       .array(
@@ -126,13 +126,13 @@ const formSchema = toTypedSchema(
             .number()
             .min(
               0.01,
-              t("validation.min", { field: t("fields.quantity"), min: "0.01" }),
+              t("validation.min", { field: fields.quantity, min: "0.01" }),
             ),
           totalPrice: z
             .number()
             .min(
               0,
-              t("validation.min", { field: t("fields.price"), min: "0" }),
+              t("validation.min", { field: fields.price, min: "0" }),
             ),
         }),
       )
@@ -229,13 +229,13 @@ const onSubmit = form.handleSubmit(async (values) => {
     const response = await srService.create(payload as any);
     if (response.success) {
       toast.success(
-        t("crud.successCreate", { module: t("modules.saleReturn") }),
+        t("crud.successCreate", { module: labels.name }),
       );
       router.push("/admin/sale-returns");
     } else {
       toast.error(
         response.message ||
-          t("crud.errorCreate", { module: t("modules.saleReturn") }),
+          t("crud.errorCreate", { module: labels.name }),
       );
     }
   } catch (error) {
@@ -254,11 +254,11 @@ const onSubmit = form.handleSubmit(async (values) => {
       </Button>
       <div>
         <h2 class="text-3xl font-bold tracking-tight">
-          {{ $t("crud.createBtn") }} {{ $t("modules.saleReturn") }}
+          {{ crud.createBtn }} {{ labels.name }}
         </h2>
         <p class="text-muted-foreground text-sm flex items-center mt-1">
           <History class="w-4 h-4 mr-1.5 opacity-50" />
-          {{ $t("fields.saleReturnInfo") }}
+          {{ labels.description }}
         </p>
       </div>
     </div>
@@ -270,16 +270,16 @@ const onSubmit = form.handleSubmit(async (values) => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2">
               <Users class="h-5 w-5 text-primary" />
-              {{ $t("crud.generalInfo") }}
+              {{ crud.generalInfo }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField v-slot="{ componentField }" name="code">
               <FormItem>
-                <FormLabel>{{ $t("fields.code") }}</FormLabel>
+                <FormLabel>{{ fields.code }}</FormLabel>
                 <FormControl>
                   <Input
-                    :placeholder="$t('fields.autoGenerate')"
+                    :placeholder="fields.autoGenerate"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -289,7 +289,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="returnDate">
               <FormItem>
-                <FormLabel>{{ $t("fields.date") }}</FormLabel>
+                <FormLabel>{{ fields.date }}</FormLabel>
                 <FormControl>
                   <Input type="datetime-local" v-bind="componentField" />
                 </FormControl>
@@ -300,8 +300,8 @@ const onSubmit = form.handleSubmit(async (values) => {
             <FormField v-slot="{ value, handleChange }" name="saleInvoiceId">
               <FormItem class="md:col-span-2">
                 <FormLabel
-                  >{{ $t("modules.saleInvoice") }} ({{
-                    $t("fields.completedOnly")
+                  >{{ t("modules.saleInvoice") }} ({{
+                    fields.completedOnly
                   }})</FormLabel
                 >
                 <Select
@@ -310,7 +310,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                 >
                   <FormControl>
                     <SelectTrigger :disabled="loadingInvoices">
-                      <SelectValue :placeholder="$t('fields.selectOption')" />
+                      <SelectValue :placeholder="fields.selectOption" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -319,8 +319,8 @@ const onSubmit = form.handleSubmit(async (values) => {
                       :key="i.id"
                       :value="String(i.id)"
                     >
-                      {{ i.code }} - {{ i.customer?.name }} (${{
-                        i.totalPrice.toLocaleString()
+                      {{ i.code }} - {{ i.customer?.name }} ({{
+                        formatCurrency(i.totalPrice)
                       }})
                     </SelectItem>
                   </SelectContent>
@@ -331,10 +331,10 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="remarks">
               <FormItem class="md:col-span-2">
-                <FormLabel>{{ $t("fields.remarks") }}</FormLabel>
+                <FormLabel>{{ fields.remarks }}</FormLabel>
                 <FormControl>
                   <Textarea
-                    :placeholder="$t('fields.enterDescription')"
+                    :placeholder="fields.enterDescription"
                     v-bind="componentField"
                     rows="3"
                   />
@@ -350,17 +350,13 @@ const onSubmit = form.handleSubmit(async (values) => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2 text-primary">
               <FileText class="h-5 w-5" />
-              {{ $t("fields.grandTotal") }}
+              {{ fields.grandTotal }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6">
             <div class="text-center p-4 bg-muted/20 border rounded-lg">
               <span class="text-3xl font-bold text-primary">
-                ${{
-                  grandTotal.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                  })
-                }}
+                {{ formatCurrency(grandTotal) }}
               </span>
             </div>
 
@@ -370,22 +366,22 @@ const onSubmit = form.handleSubmit(async (values) => {
             >
               <p class="font-bold flex items-center gap-2 text-primary">
                 <FileText class="h-4 w-4" />
-                {{ $t("modules.saleInvoice") }} {{ $t("fields.details") }}
+                {{ t("modules.saleInvoice") }} {{ fields.details }}
               </p>
               <div class="flex justify-between">
                 <span class="text-muted-foreground"
-                  >{{ $t("fields.totalPrice") }}:</span
+                  >{{ fields.totalPrice }}:</span
                 >
                 <span class="font-bold"
-                  >${{ selectedInvoice.totalPrice.toLocaleString() }}</span
+                  >{{ formatCurrency(selectedInvoice.totalPrice) }}</span
                 >
               </div>
               <div class="flex justify-between">
                 <span class="text-muted-foreground"
-                  >{{ $t("fields.totalPaid") }}:</span
+                  >{{ fields.totalPaid }}:</span
                 >
                 <span class="text-success font-bold"
-                  >${{ selectedInvoice.paidAmount.toLocaleString() }}</span
+                  >{{ formatCurrency(selectedInvoice.paidAmount) }}</span
                 >
               </div>
             </div>
@@ -397,7 +393,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               :disabled="submitting || fields.length === 0"
             >
               <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-              {{ $t("crud.save") }}
+              {{ crud.save }}
             </Button>
             <Button
               variant="outline"
@@ -406,7 +402,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               @click="router.back()"
               :disabled="submitting"
             >
-              {{ $t("crud.cancel") }}
+              {{ crud.cancel }}
             </Button>
           </CardFooter>
         </Card>
@@ -418,7 +414,7 @@ const onSubmit = form.handleSubmit(async (values) => {
           >
             <CardTitle class="text-lg flex items-center gap-2">
               <Package class="h-5 w-5 text-primary" />
-              {{ $t("fields.details") }}
+              {{ fields.details }}
             </CardTitle>
             <Button
               type="button"
@@ -426,7 +422,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               @click="addProduct"
               variant="default"
             >
-              <Plus class="h-4 w-4 mr-2" /> {{ $t("actions.addProduct") }}
+              <Plus class="h-4 w-4 mr-2" /> {{ t("actions.addProduct") }}
             </Button>
           </CardHeader>
           <CardContent class="p-0">
@@ -434,16 +430,16 @@ const onSubmit = form.handleSubmit(async (values) => {
               <TableHeader class="bg-muted/30">
                 <TableRow>
                   <TableHead class="w-[40%]">{{
-                    $t("modules.product")
+                    t("modules.product")
                   }}</TableHead>
                   <TableHead class="w-[15%] text-right">{{
-                    $t("fields.unitPrice")
+                    fields.unitPrice
                   }}</TableHead>
                   <TableHead class="w-[15%] text-right">{{
-                    $t("fields.quantity")
+                    fields.quantity
                   }}</TableHead>
                   <TableHead class="w-[20%] text-right">{{
-                    $t("fields.rowTotal")
+                    fields.rowTotal
                   }}</TableHead>
                   <TableHead class="w-[5%]"></TableHead>
                 </TableRow>
@@ -454,7 +450,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                     colspan="5"
                     class="text-center py-8 text-muted-foreground italic"
                   >
-                    {{ $t("common.noData") }}
+                    {{ t("common.noData") }}
                   </TableCell>
                 </TableRow>
                 <TableRow v-for="(field, index) in fields" :key="field.key">
@@ -482,7 +478,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue
-                                :placeholder="$t('fields.selectOption')"
+                                :placeholder="fields.selectOption"
                               />
                             </SelectTrigger>
                           </FormControl>
@@ -502,9 +498,9 @@ const onSubmit = form.handleSubmit(async (values) => {
                   </TableCell>
                   <TableCell class="text-right">
                     {{
-                      getProductPrice(
+                      formatCurrency(getProductPrice(
                         (form.values.details || [])[index]?.productId,
-                      ).toLocaleString(undefined, { minimumFractionDigits: 2 })
+                      ))
                     }}
                   </TableCell>
                   <TableCell>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive, watch } from "vue";
-import { useI18n } from "vue-i18n";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import { ReportService } from "@/services/report/report.service";
 import DateRangePicker from "@/components/DateRangePicker.vue";
 import type { TopPerformersReport, PaginationRequest } from "@/types";
@@ -41,7 +41,7 @@ import {
   type ExportColumn,
 } from "@/utils/export";
 
-const { t } = useI18n();
+const { t, labels, fields, crud, menu, common } = useAppI18n("reports");
 const reportService = new ReportService();
 
 const loading = ref(true);
@@ -96,7 +96,7 @@ async function fetchData() {
       reportData.value = res.data;
     }
   } catch (error: any) {
-    toast.error(t("reports.failedToLoad", { module: t("menu.topPerformers") }));
+    toast.error(labels.failedToLoad.replace('{module}', menu.topPerformers));
   } finally {
     loading.value = false;
   }
@@ -125,22 +125,22 @@ function handleDateRangeFilter(
 function handleExport(formatType: "excel" | "csv" | "pdf", target: "products" | "customers") {
   const ds = target === "products" ? reportData.value.bestSellingProducts.data : reportData.value.topCustomers.data;
   if (!ds || ds.length === 0) {
-    toast.warning(t("reports.noDataToExport"));
+    toast.warning(labels.noDataToExport);
     return;
   }
 
   const cols: ExportColumn[] = target === "products" ? [
-    { header: t("reports.productName"), dataKey: "productName" },
-    { header: t("fields.code"), dataKey: "productCode" },
-    { header: t("reports.sold"), dataKey: "totalSold" },
-    { header: t("reports.revenue"), dataKey: "revenueGenerated" },
+    { header: labels.productName, dataKey: "productName" },
+    { header: fields.code, dataKey: "productCode" },
+    { header: labels.sold, dataKey: "totalSold" },
+    { header: labels.revenue, dataKey: "revenueGenerated" },
   ] : [
-    { header: t("reports.customer"), dataKey: "customerName" },
-    { header: t("fields.phoneNumber"), dataKey: "customerPhone" },
-    { header: t("reports.totalSpent"), dataKey: "totalSpent" },
+    { header: labels.customer, dataKey: "customerName" },
+    { header: fields.phoneNumber, dataKey: "customerPhone" },
+    { header: labels.totalSpent, dataKey: "totalSpent" },
   ];
 
-  const title = target === "products" ? t("reports.bestSellingProducts") : t("reports.topCustomers");
+  const title = target === "products" ? labels.bestSellingProducts : labels.topCustomers;
   const timestamp = formatDateForFilename(new Date());
   const filename = `${title}_${timestamp}`;
 
@@ -155,7 +155,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf", target: "products" | 
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="flex items-center gap-2">
         <h2 class="text-3xl font-bold tracking-tight">
-          {{ $t("menu.topPerformers") }}
+          {{ menu.topPerformers }}
         </h2>
       </div>
     </div>
@@ -171,7 +171,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf", target: "products" | 
             <Input
               v-model="search"
               type="search"
-              :placeholder="$t('crud.searchPlaceholder')"
+              :placeholder="crud.searchPlaceholder"
               class="pl-9 bg-background"
             />
           </div>
@@ -187,21 +187,21 @@ function handleExport(formatType: "excel" | "csv" | "pdf", target: "products" | 
               size="sm"
               class="gap-2 bg-green-600 hover:bg-green-700 text-white transition-colors cursor-pointer"
             >
-              <FileSpreadsheet class="h-4 w-4" /> {{ $t("reports.excel") }}
+              <FileSpreadsheet class="h-4 w-4" /> {{ labels.excel }}
             </Button>
             <Button
               @click="handleExport('csv', 'products')"
               size="sm"
               class="gap-2 bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer"
             >
-              <FileText class="h-4 w-4" /> {{ $t("reports.csv") }}
+              <FileText class="h-4 w-4" /> {{ labels.csv }}
             </Button>
             <Button
               @click="handleExport('pdf', 'products')"
               size="sm"
               class="gap-2 bg-red-600 hover:bg-red-700 text-white transition-colors cursor-pointer"
             >
-              <FileText class="h-4 w-4" /> {{ $t("reports.pdf") }}
+              <FileText class="h-4 w-4" /> {{ labels.pdf }}
             </Button>
         </div>
       </CardContent>
@@ -215,12 +215,12 @@ function handleExport(formatType: "excel" | "csv" | "pdf", target: "products" | 
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <Package class="h-5 w-5 text-yellow-600" />
-              <CardTitle class="text-lg font-bold">{{ $t("reports.bestSellingProducts") }}</CardTitle>
+              <CardTitle class="text-lg font-bold">{{ labels.bestSellingProducts }}</CardTitle>
             </div>
             <Star class="h-4 w-4 text-yellow-400 fill-yellow-400" />
           </div>
           <CardDescription>
-            {{ $t("reports.bestSellingProductsDesc") }}
+            {{ labels.bestSellingProductsDesc }}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -228,12 +228,12 @@ function handleExport(formatType: "excel" | "csv" | "pdf", target: "products" | 
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{{ $t("reports.productName") }}</TableHead>
+                  <TableHead>{{ labels.productName }}</TableHead>
                   <TableHead class="text-center">{{
-                    $t("reports.sold")
+                    labels.sold
                   }}</TableHead>
                   <TableHead class="text-right">{{
-                    $t("reports.revenue")
+                    labels.revenue
                   }}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -242,13 +242,13 @@ function handleExport(formatType: "excel" | "csv" | "pdf", target: "products" | 
                   <TableCell colspan="3" class="h-24 text-center">
                     <div class="flex items-center justify-center gap-2">
                       <Loader2 class="h-4 w-4 animate-spin text-primary" />
-                      <span>{{ $t("crud.loading") }}</span>
+                      <span>{{ crud.loading }}</span>
                     </div>
                   </TableCell>
                 </TableRow>
                 <TableRow v-else-if="!reportData.bestSellingProducts.data.length">
                   <TableCell colspan="3" class="h-24 text-center">
-                    {{ $t("common.noData") }}
+                    {{ common.noData }}
                   </TableCell>
                 </TableRow>
                 <TableRow
@@ -286,14 +286,14 @@ function handleExport(formatType: "excel" | "csv" | "pdf", target: "products" | 
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <Users class="h-5 w-5 text-blue-600" />
-              <CardTitle class="text-lg font-bold">{{ $t("reports.topCustomers") }}</CardTitle>
+              <CardTitle class="text-lg font-bold">{{ labels.topCustomers }}</CardTitle>
             </div>
             <div class="flex items-center gap-1">
                <ArrowUpRight class="h-4 w-4 text-blue-400" />
             </div>
           </div>
           <CardDescription>
-            {{ $t("reports.topCustomersDesc") }}
+            {{ labels.topCustomersDesc }}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -301,9 +301,9 @@ function handleExport(formatType: "excel" | "csv" | "pdf", target: "products" | 
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{{ $t("reports.customer") }}</TableHead>
+                  <TableHead>{{ labels.customer }}</TableHead>
                   <TableHead class="text-right">{{
-                    $t("reports.totalSpent")
+                    labels.totalSpent
                   }}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -317,7 +317,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf", target: "products" | 
                 </TableRow>
                 <TableRow v-else-if="!reportData.topCustomers.data.length">
                   <TableCell colspan="2" class="h-24 text-center">
-                    {{ $t("common.noData") }}
+                    {{ common.noData }}
                   </TableCell>
                 </TableRow>
                 <TableRow

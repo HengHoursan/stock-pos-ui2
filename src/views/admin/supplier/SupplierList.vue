@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud, auth } = useAppI18n("supplier");
 import { ref, onMounted, reactive, watch } from "vue";
 import { useRouter } from "vue-router";
 
@@ -66,6 +66,8 @@ import type { Supplier, PaginationMeta } from "@/types";
 import { CustomerType } from "@/types";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
+import ClearableSelect from "@/components/ClearableSelect.vue";
+import { computed } from "vue";
 
 const router = useRouter();
 const supplierService = new SupplierService();
@@ -85,6 +87,11 @@ const pagination = reactive<PaginationMeta>({
   sortBy: "createdAt",
   sortOrder: "DESC",
 });
+
+const statusOptions = computed(() => [
+  { label: crud.active, value: "active" },
+  { label: crud.inactive, value: "inactive" },
+]);
 
 const isDeleteDialogOpen = ref(false);
 const supplierToDelete = ref<number | null>(null);
@@ -117,7 +124,7 @@ async function fetchSuppliers() {
     }
   } catch (error) {
     console.error("Fetch suppliers error:", error);
-    toast.error(t('crud.errorFetch', { module: t('modules.suppliers') }));
+    toast.error(t("crud.errorFetch", { module: labels.title }));
   } finally {
     loading.value = false;
   }
@@ -132,7 +139,7 @@ watch(
   () => filters.search,
   () => {
     debouncedFetch();
-  }
+  },
 );
 
 watch(
@@ -140,7 +147,7 @@ watch(
   () => {
     pagination.page = 1;
     fetchSuppliers();
-  }
+  },
 );
 
 watch(
@@ -165,10 +172,10 @@ async function toggleStatus(supplier: Supplier) {
     });
     if (response.success) {
       supplier.status = newStatus;
-      toast.success(t('crud.successUpdate', { module: t('modules.supplier') }));
+      toast.success(t("crud.successUpdate", { module: labels.name }));
     }
   } catch (error) {
-    toast.error(t('crud.errorUpdate', { module: t('modules.supplier') }));
+    toast.error(t("crud.errorUpdate", { module: labels.name }));
   }
 }
 
@@ -183,13 +190,16 @@ async function confirmDelete() {
   try {
     const response = await supplierService.softDelete(supplierToDelete.value);
     if (response.success) {
-      toast.success(t('crud.successDelete', { module: t('modules.supplier') }));
+      toast.success(t("crud.successDelete", { module: labels.name }));
       fetchSuppliers();
     } else {
-      toast.error(response.message || t('crud.errorDelete', { module: t('modules.supplier') }));
+      toast.error(
+        response.message ||
+          t("crud.errorDelete", { module: labels.name }),
+      );
     }
   } catch (error) {
-    toast.error(t('crud.errorDelete', { module: t('modules.supplier') }));
+    toast.error(t("crud.errorDelete", { module: labels.name }));
   } finally {
     isDeleteDialogOpen.value = false;
     supplierToDelete.value = null;
@@ -207,7 +217,9 @@ function handleSort(column: string) {
 }
 
 function getTypeLabel(type: CustomerType) {
-  return type === CustomerType.DINE_IN ? t('fields.dineIn') : t('fields.dineOut');
+  return type === CustomerType.DINE_IN
+    ? t("fields.dineIn")
+    : t("fields.dineOut");
 }
 
 onMounted(() => {
@@ -219,7 +231,7 @@ onMounted(() => {
   <div class="space-y-4">
     <div class="flex items-center justify-between">
       <h2 class="text-3xl font-bold tracking-tight text-foreground">
-        {{ $t("modules.suppliers") }}
+        {{ labels.title }}
       </h2>
       <div class="flex items-center gap-2">
         <Button
@@ -231,9 +243,8 @@ onMounted(() => {
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
         <Button @click="router.push('/admin/suppliers/create')">
-          <Plus class="mr-2 h-4 w-4" />{{ $t("crud.createBtn") }}
-          {{ $t("modules.supplier") }}</Button
-        >
+          <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.name }}
+        </Button>
       </div>
     </div>
 
@@ -244,43 +255,42 @@ onMounted(() => {
         />
         <Input
           type="search"
-          :placeholder="$t('crud.search', { module: $t('modules.supplier') })"
+          :placeholder="t('crud.search', { module: labels.title })"
           class="pl-8"
           v-model="filters.search"
         />
       </div>
 
-      <Select v-model="filters.status">
-        <SelectTrigger class="w-full sm:w-[180px]">
-          <SelectValue :placeholder="$t('crud.filterByStatus')" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="active">{{ $t("crud.active") }}</SelectItem>
-          <SelectItem value="inactive">{{ $t("crud.inactive") }}</SelectItem>
-        </SelectContent>
-      </Select>
+      <ClearableSelect
+        v-model="filters.status"
+        :options="statusOptions"
+        :placeholder="crud.filterByStatus"
+        class="w-full sm:w-[220px]"
+      />
     </div>
 
-    <div class="rounded-md border bg-card overflow-auto shadow-sm max-h-[700px] scrollbar-thin scrollbar-thumb-muted-foreground/20">
+    <div
+      class="rounded-md border bg-card overflow-auto shadow-sm max-h-[700px] scrollbar-thin scrollbar-thumb-muted-foreground/20"
+    >
       <Table class="min-w-[1200px]">
         <TableHeader>
           <TableRow>
             <TableHead class="w-[20px]">#</TableHead>
-            <TableHead class="w-[120px]">{{ $t("fields.code") }}</TableHead>
+            <TableHead class="w-[120px]">{{ fields.code }}</TableHead>
             <TableHead>
               <Button
                 variant="ghost"
                 @click="handleSort('name')"
                 class="-ml-4 h-8 font-medium"
-                >{{ $t("fields.name") }}<ArrowUpDown class="ml-1 h-3 w-3" />
+                >{{ fields.name }}<ArrowUpDown class="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
-            <TableHead>{{ $t("fields.nameLatin") }}</TableHead>
-            <TableHead>{{ $t("auth.email") }}</TableHead>
-            <TableHead>{{ $t("fields.phoneNumber") }}</TableHead>
-            <TableHead>{{ $t("fields.type") }}</TableHead>
-            <TableHead>{{ $t("fields.status") }}</TableHead>
-            <TableHead class="text-right">{{ $t("crud.actions") }}</TableHead>
+            <TableHead>{{ fields.nameLatin }}</TableHead>
+            <TableHead>{{ auth.email }}</TableHead>
+            <TableHead>{{ fields.phoneNumber }}</TableHead>
+            <TableHead>{{ fields.type }}</TableHead>
+            <TableHead>{{ fields.status }}</TableHead>
+            <TableHead class="text-right">{{ crud.actions }}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -290,7 +300,7 @@ onMounted(() => {
                 class="flex items-center justify-center text-muted-foreground italic text-sm"
               >
                 <Loader2 class="h-4 w-4 animate-spin mr-2" />
-                <span>{{ $t('crud.fetchingData') }}</span>
+                <span>{{ crud.fetchingData }}</span>
               </div>
             </TableCell>
           </TableRow>
@@ -318,7 +328,10 @@ onMounted(() => {
                 supplier.phoneNumber || "-"
               }}</TableCell>
               <TableCell>
-                <Badge variant="outline" class="font-medium px-2 py-0 border-primary/20 text-primary bg-primary/5">
+                <Badge
+                  variant="outline"
+                  class="font-medium px-2 py-0 border-primary/20 text-primary bg-primary/5"
+                >
                   {{ getTypeLabel(supplier.type) }}
                 </Badge>
               </TableCell>
@@ -328,7 +341,7 @@ onMounted(() => {
                   class="cursor-pointer font-bold px-3 transition-all hover:opacity-80 active:scale-95"
                   @click="toggleStatus(supplier)"
                 >
-                  {{ supplier.status ? $t('crud.active') : $t('crud.inactive') }}
+                  {{ supplier.status ? crud.active : crud.inactive }}
                 </Badge>
               </TableCell>
               <TableCell class="text-right">
@@ -345,23 +358,23 @@ onMounted(() => {
                   <DropdownMenuContent align="end" class="w-[180px]">
                     <DropdownMenuLabel
                       class="text-xs uppercase text-muted-foreground font-bold"
-                      >{{ $t("crud.actions") }}</DropdownMenuLabel
+                      >{{ crud.actions }}</DropdownMenuLabel
                     >
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       @click="router.push(`/admin/suppliers/${supplier.id}`)"
                       class="cursor-pointer"
                     >
-                      <Eye class="mr-2 h-4 w-4 opacity-70" />{{
-                        $t("crud.viewBtn")
-                      }}
+                      <Eye class="mr-2 h-4 w-4 opacity-70" />{{ crud.viewBtn }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      @click="router.push(`/admin/suppliers/${supplier.id}/edit`)"
+                      @click="
+                        router.push(`/admin/suppliers/${supplier.id}/edit`)
+                      "
                       class="cursor-pointer"
                     >
                       <Pencil class="mr-2 h-4 w-4 opacity-70" />{{
-                        $t("crud.editBtn")
+                        crud.editBtn
                       }}</DropdownMenuItem
                     >
                     <DropdownMenuSeparator />
@@ -370,7 +383,7 @@ onMounted(() => {
                       @click="openDeleteDialog(supplier.id)"
                     >
                       <Trash2 class="mr-2 h-4 w-4" />{{
-                        $t("crud.delete")
+                        crud.delete
                       }}</DropdownMenuItem
                     >
                   </DropdownMenuContent>
@@ -386,7 +399,7 @@ onMounted(() => {
               <div class="flex flex-col items-center justify-center gap-3">
                 <Truck class="h-10 w-10 opacity-10" />
                 <p class="font-medium">
-                  {{ $t("crud.noRecords", { module: $t("modules.suppliers") }) }}
+                  {{ t("crud.noRecords", { module: labels.title }) }}
                 </p>
                 <Button
                   v-if="filters.search || filters.status"
@@ -395,7 +408,7 @@ onMounted(() => {
                   @click="Object.assign(filters, { search: '', status: '' })"
                   class="h-8"
                 >
-                  {{ $t('crud.resetFilters') }}
+                  {{ crud.resetFilters }}
                 </Button>
               </div>
             </TableCell>
@@ -411,7 +424,7 @@ onMounted(() => {
         <div class="flex items-center gap-2">
           <span
             class="text-sm font-medium text-muted-foreground whitespace-nowrap"
-            >{{ $t('crud.rowsPerPage') }}</span
+            >{{ crud.rowsPerPage }}</span
           >
           <Select
             :model-value="pagination.limit.toString()"
@@ -470,19 +483,19 @@ onMounted(() => {
     <AlertDialog v-model:open="isDeleteDialogOpen">
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{{ $t('crud.confirmDelete') }}</AlertDialogTitle>
+          <AlertDialogTitle>{{ crud.confirmDelete }}</AlertDialogTitle>
           <AlertDialogDescription>
-            {{ $t('crud.confirmDeleteDesc', { module: $t('modules.supplier') }) }}
+            {{ t("crud.confirmDeleteDesc", { module: labels.name }) }}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel @click="isDeleteDialogOpen = false">{{
-            $t("crud.cancel")
+            crud.cancel
           }}</AlertDialogCancel>
           <AlertDialogAction
             @click="confirmDelete"
             class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >{{ $t("crud.delete") }}</AlertDialogAction
+            >{{ crud.delete }}</AlertDialogAction
           >
         </AlertDialogFooter>
       </AlertDialogContent>

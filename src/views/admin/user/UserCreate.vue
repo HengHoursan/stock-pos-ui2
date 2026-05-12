@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("user");
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useForm } from "vee-validate";
@@ -93,11 +93,11 @@ const onSubmit = form.handleSubmit(async (values) => {
 
     const response = await userService.create(payload);
     if (response.success) {
-      toast.success(t("crud.successCreate", { module: t("modules.user") }));
+      toast.success(t("crud.successCreate", { module: labels.name }));
       router.push("/admin/users");
     } else {
       toast.error(
-        response.message || t("crud.errorCreate", { module: t("modules.user") })
+        response.message || t("crud.errorCreate", { module: labels.name })
       );
     }
   } catch (error) {
@@ -120,13 +120,13 @@ onMounted(() => {
         <ArrowLeft class="h-4 w-4" />
       </Button>
       <h2 class="text-3xl font-bold tracking-tight">
-        {{ $t("crud.create", { module: $t("modules.user") }) }}
+        {{ crud.createBtn }} {{ labels.name }}
       </h2>
     </div>
 
     <Card>
       <CardHeader>
-        <CardTitle>{{ $t('crud.info', { module: $t('modules.user') }) }}</CardTitle>
+        <CardTitle>{{ t('crud.info', { module: labels.name }) }}</CardTitle>
       </CardHeader>
       <CardContent>
         <form @submit="onSubmit" id="userForm" class="space-y-6">
@@ -193,7 +193,7 @@ onMounted(() => {
                     <div class="space-y-0.5">
                       <FormLabel class="text-base font-semibold">{{ $t('fields.activeStatus') }}</FormLabel>
                       <FormDescription>
-                        {{ $t('fields.statusDescription', { module: $t('modules.user') }) }}
+                        {{ t('fields.statusDescription', { module: labels.name }) }}
                       </FormDescription>
                     </div>
                     <FormControl>
@@ -216,7 +216,7 @@ onMounted(() => {
         </Button>
         <Button type="submit" form="userForm" :disabled="submitting">
           <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-          {{ $t("crud.create", { module: $t("modules.user") }) }}
+          {{ crud.createBtn }} {{ labels.name }}
         </Button>
       </CardFooter>
     </Card>

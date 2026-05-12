@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("product");
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import { formatDateTime, formatDate, formatCurrency } from "@/utils/format";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,14 +36,10 @@ const productId = Number(route.params.id);
 const product = ref<Product | null>(null);
 const loading = ref(true);
 
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
-};
-
 const formatExpiryType = (type: string | undefined | null) => {
-  if (!type || type === 'None') return t('fields.expiryTypes.none');
-  if (type === 'Best Before') return t('fields.expiryTypes.bestBefore');
-  if (type === 'Expiry') return t('fields.expiryTypes.expiry');
+  if (!type || type === 'None') return fields.expiryTypes?.none || 'None';
+  if (type === 'Best Before') return fields.expiryTypes?.bestBefore || 'Best Before';
+  if (type === 'Expiry') return fields.expiryTypes?.expiry || 'Expiry';
   return type;
 };
 
@@ -53,11 +50,11 @@ async function fetchProduct() {
     if (response.success && response.data) {
       product.value = response.data;
     } else {
-      toast.error(t('crud.notFound', { module: t('modules.product') }));
+      toast.error(t('crud.notFound', { module: labels.name }));
       router.push("/admin/products");
     }
   } catch (error) {
-    toast.error(t('crud.errorFetch', { module: t('modules.product') }));
+    toast.error(t('crud.errorFetch', { module: labels.name }));
   } finally {
     loading.value = false;
   }
@@ -68,11 +65,11 @@ async function deleteProduct() {
   try {
     const response = await productService.softDelete(productId);
     if (response.success) {
-      toast.success(t('crud.successDelete', { module: t('modules.product') }));
+      toast.success(t('crud.successDelete', { module: labels.name }));
       router.push("/admin/products");
     }
   } catch (error) {
-    toast.error(t('crud.errorDelete', { module: t('modules.product') }));
+    toast.error(t('crud.errorDelete', { module: labels.name }));
   }
 }
 
@@ -91,9 +88,9 @@ onMounted(() => {
         </Button>
         <div class="flex flex-col">
           <div class="flex items-center gap-3">
-            <h2 class="text-3xl font-bold tracking-tight">{{ product?.name || 'Product Details' }}</h2>
+            <h2 class="text-3xl font-bold tracking-tight">{{ product?.name || t("crud.detail", { module: labels.name }) }}</h2>
             <Badge v-if="product" :variant="product.status ? 'success' : 'warning'" class="text-[10px] h-5 px-2 uppercase font-bold shadow-sm self-center mt-1">
-              {{ product.status ? "Active" : "Inactive" }}
+              {{ product.status ? crud.active : crud.inactive }}
             </Badge>
           </div>
           <p class="text-muted-foreground text-sm uppercase">{{ product?.code }}</p>
@@ -101,9 +98,9 @@ onMounted(() => {
       </div>
       <div class="flex items-center gap-2">
         <Button variant="outline" @click="router.push(`/admin/products/${productId}/edit`)" class="flex-1 md:flex-none">
-          <Pencil class="mr-2 h-4 w-4" />{{ $t('crud.editBtn') }}</Button>
+          <Pencil class="mr-2 h-4 w-4" />{{ crud.editBtn }}</Button>
         <Button variant="destructive" @click="deleteProduct" class="flex-1 md:flex-none">
-          <Trash2 class="mr-2 h-4 w-4" />{{ $t('crud.delete') }}</Button>
+          <Trash2 class="mr-2 h-4 w-4" />{{ crud.delete }}</Button>
       </div>
     </div>
 
@@ -236,7 +233,7 @@ onMounted(() => {
                   <Clock class="mr-2 h-4 w-4" />{{ $t("fields.expiryDate") }}
                 </div>
                 <p class="font-medium text-base">
-                  {{ product.detail?.expiryDate ? new Date(product.detail.expiryDate).toLocaleDateString() : 'N/A' }} 
+                  {{ formatDate(product.detail?.expiryDate) }} 
                   <span v-if="product.detail?.expiryType !== 'None'" class="text-xs text-muted-foreground ml-1">({{ formatExpiryType(product.detail?.expiryType) }})</span>
                 </p>
               </div>
@@ -279,7 +276,7 @@ onMounted(() => {
                   <Calendar class="mr-2 h-4 w-4" />{{ $t("fields.createdAt") }}
                 </div>
                 <p class="font-medium text-base">
-                  {{ new Date(product.createdAt).toLocaleString() }}
+                  {{ formatDateTime(product.createdAt) }}
                 </p>
               </div>
 
@@ -288,7 +285,7 @@ onMounted(() => {
                   <Calendar class="mr-2 h-4 w-4" />{{ $t("fields.updatedAt") }}
                 </div>
                 <p class="font-medium text-base">
-                  {{ new Date(product.updatedAt).toLocaleString() }}
+                  {{ formatDateTime(product.updatedAt) }}
                 </p>
               </div>
             </div>

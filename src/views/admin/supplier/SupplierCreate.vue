@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("supplier");
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useForm } from "vee-validate";
@@ -83,10 +83,10 @@ const onSubmit = form.handleSubmit(async (values) => {
     };
     const response = await supplierService.create(payload as any);
     if (response.success) {
-      toast.success(t('crud.successCreate', { module: t('modules.supplier') }));
+      toast.success(t('crud.successCreate', { module: labels.name }));
       router.push("/admin/suppliers");
     } else {
-      toast.error(response.message || t('crud.errorCreate', { module: t('modules.supplier') }));
+      toast.error(response.message || t('crud.errorCreate', { module: labels.name }));
     }
   } catch (error) {
     toast.error(t('crud.errorGeneral'));
@@ -102,7 +102,7 @@ const onSubmit = form.handleSubmit(async (values) => {
       <Button variant="outline" size="icon" @click="router.back()">
         <ChevronLeft class="h-4 w-4" />
       </Button>
-      <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.create', { module: $t('modules.supplier') }) }}</h2>
+      <h2 class="text-3xl font-bold tracking-tight">{{ crud.createBtn }} {{ labels.name }}</h2>
     </div>
 
     <form @submit="onSubmit" id="supplierForm">
@@ -236,7 +236,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               <FormItem class="flex flex-row items-center justify-between rounded-lg border p-4 bg-muted/5">
                 <div class="space-y-0.5">
                   <FormLabel class="text-base font-semibold">{{ $t('fields.activeStatus') }}</FormLabel>
-                  <FormDescription>{{ $t('fields.statusDescription', { module: $t('modules.supplier') }) }}</FormDescription>
+                  <FormDescription>{{ t('fields.statusDescription', { module: labels.name }) }}</FormDescription>
                 </div>
                 <FormControl>
                   <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
@@ -248,7 +248,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             <Button variant="outline" type="button" @click="router.back()" :disabled="submitting">{{ $t('crud.cancel') }}</Button>
             <Button type="submit" :disabled="submitting">
               <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-              {{ $t('crud.createBtn') }} {{ $t('modules.supplier') }}
+              {{ crud.createBtn }} {{ labels.name }}
             </Button>
           </CardFooter>
         </Card>

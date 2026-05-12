@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
-import { ref, onMounted, reactive, watch,computed } from "vue";
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("transaction");
+import { ref, onMounted, reactive, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 
 import {
@@ -70,6 +70,7 @@ import { TransactionType } from "@/types";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
 import SearchableSelect from "@/components/SearchableSelect.vue";
+import ClearableSelect from "@/components/ClearableSelect.vue";
 import { formatDateTime } from "@/utils/format";
 
 const router = useRouter();
@@ -89,6 +90,12 @@ const filters = reactive({
 const productOptions = computed(() =>
   products.value.map((p) => ({ label: p.name, value: p.id })),
 );
+
+const typeOptions = computed(() => [
+  { label: fields.stockIn, value: String(TransactionType.IN) },
+  { label: fields.stockOut, value: String(TransactionType.OUT) },
+  { label: fields.adjustment, value: String(TransactionType.ADJUSTMENT) },
+]);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -135,7 +142,7 @@ async function fetchTransactions() {
     }
   } catch (error) {
     console.error("Fetch transactions error:", error);
-    toast.error(t("crud.errorFetch", { module: t("modules.transactions") }));
+    toast.error(t("crud.errorFetch", { module: labels.title }));
   } finally {
     loading.value = false;
   }
@@ -150,7 +157,7 @@ watch(
   () => filters.search,
   () => {
     debouncedFetch();
-  }
+  },
 );
 
 watch(
@@ -158,7 +165,7 @@ watch(
   () => {
     pagination.page = 1;
     fetchTransactions();
-  }
+  },
 );
 
 watch(
@@ -186,13 +193,13 @@ async function confirmDelete() {
     const response = await transactionService.delete(transactionToDelete.value);
     if (response.success) {
       toast.success(
-        t("crud.successDelete", { module: t("modules.transaction") }),
+        t("crud.successDelete", { module: labels.name }),
       );
       fetchTransactions();
     } else {
       toast.error(
         response.message ||
-          t("crud.errorDelete", { module: t("modules.transaction") }),
+          t("crud.errorDelete", { module: labels.name }),
       );
     }
   } catch (error) {
@@ -263,7 +270,7 @@ onMounted(() => {
   <div class="space-y-4">
     <div class="flex items-center justify-between">
       <h2 class="text-3xl font-bold tracking-tight text-foreground">
-        {{ $t("modules.transactions") }}
+        {{ labels.title }}
       </h2>
       <div class="flex items-center gap-2">
         <Button
@@ -275,8 +282,8 @@ onMounted(() => {
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
         <Button @click="router.push('/admin/transactions/create')">
-          <Plus class="mr-2 h-4 w-4" />{{ $t("crud.createBtn") }}
-          {{ $t("modules.transaction") }}</Button
+          <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }}
+          {{ labels.name }}</Button
         >
       </div>
     </div>
@@ -288,41 +295,31 @@ onMounted(() => {
         />
         <Input
           type="search"
-          :placeholder="
-            $t('crud.search', { module: $t('modules.transaction') })
-          "
+          :placeholder="t('crud.search', { module: labels.title })"
           class="pl-8"
           v-model="filters.search"
         />
       </div>
 
-      <Select v-model="filters.transactionType">
-        <SelectTrigger class="w-full sm:w-[180px]">
-          <SelectValue :placeholder="$t('crud.filterByType')" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem :value="String(TransactionType.IN)">{{
-            $t("fields.stockIn")
-          }}</SelectItem>
-          <SelectItem :value="String(TransactionType.OUT)">{{
-            $t("fields.stockOut")
-          }}</SelectItem>
-          <SelectItem :value="String(TransactionType.ADJUSTMENT)">{{
-            $t("fields.adjustment")
-          }}</SelectItem>
-        </SelectContent>
-      </Select>
+      <ClearableSelect
+        v-model="filters.transactionType"
+        :options="typeOptions"
+        :placeholder="crud.filterByType"
+        class="w-full sm:w-[250px]"
+      />
 
       <SearchableSelect
         v-model="filters.productId"
         :options="productOptions"
-        :placeholder="$t('crud.selectOption', { module: $t('modules.product') })"
-        :empty-message="$t('crud.noResults')"
+        :placeholder="crud.filterByProduct"
+        :empty-message="crud.noResults"
         class="w-full sm:w-[250px]"
       />
     </div>
 
-    <div class="rounded-md border bg-card overflow-auto shadow-sm max-h-[700px] scrollbar-thin scrollbar-thumb-muted-foreground/20">
+    <div
+      class="rounded-md border bg-card overflow-auto shadow-sm max-h-[700px] scrollbar-thin scrollbar-thumb-muted-foreground/20"
+    >
       <Table class="min-w-[1200px]">
         <TableHeader>
           <TableRow>
@@ -332,23 +329,19 @@ onMounted(() => {
                 variant="ghost"
                 @click="handleSort('transactionDate')"
                 class="-ml-4 h-8 font-medium"
-                >{{ $t("fields.transactionDate")
+                >{{ fields.transactionDate
                 }}<ArrowUpDown class="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
-            <TableHead>{{ $t("fields.transactionCode") }}</TableHead>
-            <TableHead>{{ $t("fields.transactionType") }}</TableHead>
-            <TableHead>{{ $t("modules.product") }}</TableHead>
+            <TableHead>{{ fields.transactionCode }}</TableHead>
+            <TableHead>{{ fields.transactionType }}</TableHead>
+            <TableHead>{{ fields.product }}</TableHead>
             <TableHead class="text-right">{{
-              $t("fields.beginningStock")
+              fields.beginningStock
             }}</TableHead>
-            <TableHead class="text-right">{{
-              $t("fields.quantity")
-            }}</TableHead>
-            <TableHead class="text-right">{{
-              $t("fields.afterStock")
-            }}</TableHead>
-            <TableHead class="text-right">{{ $t("crud.actions") }}</TableHead>
+            <TableHead class="text-right">{{ fields.quantity }}</TableHead>
+            <TableHead class="text-right">{{ fields.afterStock }}</TableHead>
+            <TableHead class="text-right">{{ crud.actions }}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -358,7 +351,7 @@ onMounted(() => {
                 class="flex items-center justify-center text-muted-foreground italic text-sm"
               >
                 <Loader2 class="h-4 w-4 animate-spin mr-2" />
-                <span>{{ $t("crud.fetchingData") }}</span>
+                <span>{{ crud.fetchingData }}</span>
               </div>
             </TableCell>
           </TableRow>
@@ -429,7 +422,7 @@ onMounted(() => {
                   <DropdownMenuContent align="end" class="w-[180px]">
                     <DropdownMenuLabel
                       class="text-xs uppercase text-muted-foreground font-bold"
-                      >{{ $t("crud.actions") }}</DropdownMenuLabel
+                      >{{ crud.actions }}</DropdownMenuLabel
                     >
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -438,9 +431,7 @@ onMounted(() => {
                       "
                       class="cursor-pointer"
                     >
-                      <Eye class="mr-2 h-4 w-4 opacity-70" />{{
-                        $t("crud.viewBtn")
-                      }}
+                      <Eye class="mr-2 h-4 w-4 opacity-70" />{{ crud.viewBtn }}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -448,7 +439,7 @@ onMounted(() => {
                       @click="openDeleteDialog(transaction.id)"
                     >
                       <Trash2 class="mr-2 h-4 w-4" />{{
-                        $t("crud.delete")
+                        crud.delete
                       }}</DropdownMenuItem
                     >
                   </DropdownMenuContent>
@@ -464,18 +455,26 @@ onMounted(() => {
               <div class="flex flex-col items-center justify-center gap-3">
                 <History class="h-10 w-10 opacity-10" />
                 <p class="font-medium">
-                  {{
-                    $t("crud.noRecords", { module: $t("modules.transactions") })
-                  }}
+                  {{ t("crud.noRecords", { module: labels.title }) }}
                 </p>
                 <Button
-                  v-if="filters.search || filters.transactionType || filters.productId"
+                  v-if="
+                    filters.search ||
+                    filters.transactionType ||
+                    filters.productId
+                  "
                   variant="outline"
                   size="sm"
-                  @click="Object.assign(filters, { search: '', transactionType: '', productId: '' })"
+                  @click="
+                    Object.assign(filters, {
+                      search: '',
+                      transactionType: '',
+                      productId: '',
+                    })
+                  "
                   class="h-8"
                 >
-                  {{ $t("crud.resetFilters") }}
+                  {{ crud.resetFilters }}
                 </Button>
               </div>
             </TableCell>
@@ -491,7 +490,7 @@ onMounted(() => {
         <div class="flex items-center gap-2">
           <span
             class="text-sm font-medium text-muted-foreground whitespace-nowrap"
-            >{{ $t("crud.rowsPerPage") }}</span
+            >{{ crud.rowsPerPage }}</span
           >
           <Select
             :model-value="pagination.limit.toString()"
@@ -549,23 +548,19 @@ onMounted(() => {
     <AlertDialog v-model:open="isDeleteDialogOpen">
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{{ $t("crud.confirmDelete") }}</AlertDialogTitle>
+          <AlertDialogTitle>{{ crud.confirmDelete }}</AlertDialogTitle>
           <AlertDialogDescription>
-            {{
-              $t("crud.confirmDeleteDesc", {
-                module: $t("modules.transaction"),
-              })
-            }}
+            {{ t("crud.confirmDeleteDesc", { module: labels.name }) }}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel @click="isDeleteDialogOpen = false">{{
-            $t("crud.cancel")
+            crud.cancel
           }}</AlertDialogCancel>
           <AlertDialogAction
             @click="confirmDelete"
             class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >{{ $t("crud.delete") }}</AlertDialogAction
+            >{{ crud.delete }}</AlertDialogAction
           >
         </AlertDialogFooter>
       </AlertDialogContent>

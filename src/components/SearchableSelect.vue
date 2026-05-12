@@ -51,33 +51,35 @@ function handleSelect(val: string | number | null) {
 
 function clearSelection(e: Event) {
   e.stopPropagation()
+  e.preventDefault()
+  searchTerm.value = ''
   handleSelect(null)
+  // Ensure popover doesn't toggle
+  open.value = false
 }
 </script>
 
 <template>
-  <Popover v-model:open="open">
-    <PopoverTrigger as-child>
-      <Button
-        variant="outline"
-        role="combobox"
-        :aria-expanded="open"
-        :class="cn('w-full justify-between font-normal min-w-[200px]', !modelValue && 'text-muted-foreground', props.class)"
-      >
-        <span class="truncate">{{ selectedLabel || placeholder || t('crud.selectOption', { module: '' }).trim() }}</span>
-        <div class="flex items-center gap-1 shrink-0 ml-2">
-          <X 
-            v-if="modelValue && modelValue !== 'all'" 
-            class="h-3 w-3 opacity-50 hover:opacity-100 transition-opacity" 
-            @click="clearSelection"
-          />
-          <ChevronsUpDown class="h-4 w-4 opacity-50" />
-        </div>
-      </Button>
-    </PopoverTrigger>
-    <PopoverContent class="w-[--reka-popover-trigger-width] p-0" align="start">
+  <div :class="cn('relative w-full', props.class)">
+    <Popover v-model:open="open">
+      <PopoverTrigger as-child>
+        <Button
+          variant="outline"
+          role="combobox"
+          :aria-expanded="open"
+          class="w-full justify-between font-normal min-w-[200px] pr-4"
+          :class="!modelValue && 'text-muted-foreground'"
+        >
+          <span class="truncate pr-8">{{ selectedLabel || placeholder || t('crud.selectOption', { module: '' }).trim() }}</span>
+          <ChevronsUpDown class="h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent class="w-[--reka-popover-trigger-width] p-0" align="start">
       <Command v-model="searchTerm">
-        <CommandInput :placeholder="placeholder || t('crud.searchPlaceholder')" />
+        <CommandInput 
+          v-model="searchTerm"
+          :placeholder="placeholder || t('crud.searchPlaceholder')" 
+        />
         <CommandList>
           <CommandEmpty>{{ emptyMessage || t('crud.noResults') }}</CommandEmpty>
           <CommandGroup>
@@ -117,4 +119,17 @@ function clearSelection(e: Event) {
       </Command>
     </PopoverContent>
   </Popover>
+
+  <!-- Clear Button - Positioned absolutely outside PopoverTrigger -->
+  <div 
+    v-if="(modelValue !== undefined && modelValue !== null && modelValue !== '') && modelValue !== 'all'"
+    class="absolute right-9 top-1/2 -translate-y-1/2 flex items-center"
+  >
+    <X 
+      class="h-3.5 w-3.5 opacity-50 hover:opacity-100 transition-opacity cursor-pointer p-0.5 rounded-sm hover:bg-muted" 
+      @mousedown.stop
+      @click.stop.prevent="clearSelection"
+    />
+  </div>
+</div>
 </template>

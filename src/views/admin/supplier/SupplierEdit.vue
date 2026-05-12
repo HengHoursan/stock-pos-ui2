@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("supplier");
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useForm } from "vee-validate";
@@ -87,12 +87,12 @@ async function fetchSupplier() {
         description: response.data.description || "",
       });
     } else {
-      toast.error(t("crud.notFound", { module: t("modules.supplier") }));
+      toast.error(t("crud.notFound", { module: labels.name }));
       router.push("/admin/suppliers");
     }
   } catch (error) {
     console.error("Fetch supplier error:", error);
-    toast.error(t("crud.errorFetch", { module: t("modules.supplier") }));
+    toast.error(t("crud.errorFetch", { module: labels.name }));
   } finally {
     loading.value = false;
   }
@@ -109,12 +109,12 @@ const onSubmit = form.handleSubmit(async (values) => {
     };
     const response = await supplierService.update(payload as any);
     if (response.success) {
-      toast.success(t("crud.successUpdate", { module: t("modules.supplier") }));
+      toast.success(t("crud.successUpdate", { module: labels.name }));
       router.push("/admin/suppliers");
     } else {
       toast.error(
         response.message ||
-          t("crud.errorUpdate", { module: t("modules.supplier") }),
+          t("crud.errorUpdate", { module: labels.name }),
       );
     }
   } catch (error) {
@@ -136,7 +136,7 @@ onMounted(() => {
         <ChevronLeft class="h-4 w-4" />
       </Button>
       <h2 class="text-3xl font-bold tracking-tight">
-        {{ $t("crud.edit", { module: $t("modules.supplier") }) }}
+        {{ crud.editBtn }} {{ labels.name }}
       </h2>
     </div>
 
@@ -309,8 +309,8 @@ onMounted(() => {
                     $t("fields.activeStatus")
                   }}</FormLabel>
                   <FormDescription>{{
-                    $t("fields.statusDescription", {
-                      module: $t("modules.supplier"),
+                    t("fields.statusDescription", {
+                      module: labels.name,
                     })
                   }}</FormDescription>
                 </div>
@@ -339,7 +339,7 @@ onMounted(() => {
               :disabled="submitting"
             >
               <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-              {{ $t("crud.updateBtn", { module: $t("modules.supplier") }) }}
+              {{ crud.updateBtn }} {{ labels.name }}
             </Button>
           </CardFooter>
         </Card>

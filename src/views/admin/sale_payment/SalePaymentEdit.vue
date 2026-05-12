@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { toLocalISOString, formatCurrency, formatNumberInput } from "@/utils/format";
@@ -41,6 +40,7 @@ import { SalePaymentService } from "@/services/sale_payment/sale_payment.service
 import type { SaleInvoice } from "@/types";
 import { toast } from "vue-sonner";
 
+const { t, labels, fields, crud } = useAppI18n("salePayment");
 const route = useRoute();
 const router = useRouter();
 const spService = new SalePaymentService();
@@ -102,7 +102,7 @@ onMounted(async () => {
       localAmount.value = formatNumberInput((d.paidAmount * rate).toFixed(2));
       selectedInvoice.value = firstDetail?.saleInvoice || null;
     } else {
-      toast.error(t('crud.notFound', { module: t('modules.salePayment') }));
+      toast.error(t('crud.notFound', { module: labels.name }));
       router.back();
     }
   } catch (error) {
@@ -157,10 +157,10 @@ const onSubmit = form.handleSubmit(async (values) => {
 
     const response = await spService.update(payload as any);
     if (response.success) {
-      toast.success(t('crud.successUpdate', { module: t('modules.salePayment') }));
+      toast.success(t('crud.successUpdate', { module: labels.name }));
       router.push("/admin/sale-payments/" + values.id);
     } else {
-      toast.error(response.message || t('crud.errorUpdate', { module: t('modules.salePayment') }));
+      toast.error(response.message || t('crud.errorUpdate', { module: labels.name }));
     }
   } catch (error) {
     toast.error(t('crud.errorGeneral'));
@@ -178,10 +178,10 @@ const onSubmit = form.handleSubmit(async (values) => {
           <ChevronLeft class="h-4 w-4" />
         </Button>
         <div>
-          <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.editBtn') }} {{ $t('modules.salePayment') }}</h2>
+          <h2 class="text-3xl font-bold tracking-tight">{{ crud.editBtn }} {{ labels.name }}</h2>
           <p class="text-muted-foreground text-sm flex items-center mt-1">
             <Banknote class="w-4 h-4 mr-1.5 opacity-50"/> 
-            {{ form.values.id ? `${$t('fields.paymentId')}: ${form.values.id}` : '...' }}
+            {{ form.values.id ? `${fields.paymentId}: ${form.values.id}` : '...' }}
           </p>
         </div>
       </div>
@@ -200,7 +200,7 @@ const onSubmit = form.handleSubmit(async (values) => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2">
               <FileText class="h-5 w-5 text-primary" />
-              {{ $t('crud.generalInfo') }}
+              {{ crud.generalInfo }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6 space-y-4">
@@ -208,7 +208,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField v-slot="{ value, handleChange }" name="saleInvoiceId">
                 <FormItem class="md:col-span-2">
-                  <FormLabel>{{ $t('modules.saleInvoice') }}</FormLabel>
+                  <FormLabel>{{ t('modules.saleInvoice') }}</FormLabel>
                   <Select
                     :model-value="value ? String(value) : undefined"
                     @update:model-value="(v) => handleChange(Number(v))"
@@ -230,7 +230,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
               <FormField v-slot="{ componentField }" name="paymentDate">
                 <FormItem class="md:col-span-2">
-                  <FormLabel>{{ $t('fields.transactionDate') }}</FormLabel>
+                  <FormLabel>{{ fields.transactionDate }}</FormLabel>
                   <FormControl>
                     <Input type="datetime-local" v-bind="componentField" />
                   </FormControl>
@@ -242,7 +242,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             <div class="grid grid-cols-1 gap-4 pt-4 border-t">
               <FormField v-slot="{ componentField }" name="amount">
                 <FormItem>
-                  <FormLabel>{{ $t('fields.paidAmount') }}</FormLabel>
+                  <FormLabel>{{ fields.paidAmount }}</FormLabel>
                   <FormControl>
                     <div class="relative">
                       <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{{ currencySymbol }}</span>
@@ -263,19 +263,19 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="description">
               <FormItem>
-                <FormLabel>{{ $t('fields.description') }}</FormLabel>
+                <FormLabel>{{ fields.description }}</FormLabel>
                 <FormControl>
-                  <Textarea :placeholder="$t('fields.enterDescription')" v-bind="componentField" rows="3" />
+                  <Textarea :placeholder="fields.enterDescription" v-bind="componentField" rows="3" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             </FormField>
           </CardContent>
           <CardFooter class="flex justify-end gap-2 border-t pt-4">
-            <Button variant="outline" type="button" @click="router.back()" :disabled="submitting">{{ $t('crud.cancel') }}</Button>
+            <Button variant="outline" type="button" @click="router.back()" :disabled="submitting">{{ crud.cancel }}</Button>
             <Button type="submit" :disabled="submitting">
               <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-              {{ $t('crud.save') }}
+              {{ crud.save }}
             </Button>
           </CardFooter>
         </Card>
@@ -286,20 +286,20 @@ const onSubmit = form.handleSubmit(async (values) => {
             <CardHeader class="pb-3 border-b border-primary/10">
               <CardTitle class="text-lg flex items-center gap-2 text-primary">
                 <History class="h-5 w-5" />
-                {{ $t('fields.balanceInfo') }}
+                {{ fields.balanceInfo }}
               </CardTitle>
             </CardHeader>
             <CardContent class="pt-6 space-y-4 text-sm">
               <div class="flex justify-between">
-                <span class="text-muted-foreground">{{ $t('fields.totalPrice') }}:</span>
+                <span class="text-muted-foreground">{{ fields.totalPrice }}:</span>
                 <span class="font-bold">{{ formatCurrency(selectedInvoice.totalPrice) }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-muted-foreground">{{ $t('fields.totalPaid') }}:</span>
+                <span class="text-muted-foreground">{{ fields.totalPaid }}:</span>
                 <span class="text-success font-bold">{{ formatCurrency(selectedInvoice.paidAmount) }}</span>
               </div>
               <div class="pt-4 border-t border-primary/10 flex justify-between text-lg">
-                <span class="font-bold">{{ $t('fields.adjBalance') }}:</span>
+                <span class="font-bold">{{ fields.adjBalance }}:</span>
                 <span class="font-black text-destructive">{{ formatCurrency(remainingBalanceExcludingThis) }}</span>
               </div>
             </CardContent>
@@ -309,12 +309,12 @@ const onSubmit = form.handleSubmit(async (values) => {
             <CardHeader class="pb-3 border-b bg-muted/5">
               <CardTitle class="text-lg flex items-center gap-2">
                 <CreditCard class="h-5 w-5 text-primary" />
-                {{ $t('fields.newPayment') }}
+                {{ fields.newPayment }}
               </CardTitle>
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-center p-6 bg-muted/20 border rounded-lg">
-                <p class="text-xs uppercase text-muted-foreground font-bold mb-2">{{ $t('fields.paymentAmount') }}</p>
+                <p class="text-xs uppercase text-muted-foreground font-bold mb-2">{{ fields.paymentAmount }}</p>
                 <div class="flex flex-col items-center">
                   <span class="text-4xl font-black text-success">
                     {{ currencySymbol }}{{ localAmount || '0.00' }}

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("brand");
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useForm } from "vee-validate";
@@ -95,7 +95,7 @@ async function fetchData() {
         status: brand.status,
       });
     } else {
-      toast.error(t('crud.notFound', { module: t('modules.brand') }));
+      toast.error(t('crud.notFound', { module: labels.name }));
       router.push("/admin/brands");
     }
 
@@ -105,7 +105,7 @@ async function fetchData() {
       );
     }
   } catch (error) {
-    toast.error(t('crud.errorFetch', { module: t('modules.brand') }));
+    toast.error(t('crud.errorFetch', { module: labels.name }));
   } finally {
     loading.value = false;
   }
@@ -124,10 +124,10 @@ const onSubmit = form.handleSubmit(async (values) => {
     };
     const response = await brandService.update(payload);
     if (response.success) {
-      toast.success(t('crud.successUpdate', { module: t('modules.brand') }));
+      toast.success(t('crud.successUpdate', { module: labels.name }));
       router.push("/admin/brands");
     } else {
-      toast.error(response.message || t('crud.errorUpdate', { module: t('modules.brand') }));
+      toast.error(response.message || t('crud.errorUpdate', { module: labels.name }));
     }
   } catch (error) {
     toast.error(t('crud.errorGeneral'));
@@ -147,7 +147,7 @@ onMounted(() => {
       <Button variant="outline" size="icon" @click="router.back()">
         <ChevronLeft class="h-4 w-4" />
       </Button>
-      <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.edit', { module: $t('modules.brand') }) }}</h2>
+      <h2 class="text-3xl font-bold tracking-tight">{{ crud.editBtn }} {{ labels.name }}</h2>
     </div>
 
     <Card v-if="loading" class="flex items-center justify-center min-h-[400px]">
@@ -156,7 +156,7 @@ onMounted(() => {
 
     <Card v-else>
       <CardHeader>
-        <CardTitle>{{ $t('crud.info', { module: $t('modules.brand') }) }}</CardTitle>
+        <CardTitle>{{ t('crud.info', { module: labels.name }) }}</CardTitle>
       </CardHeader>
       <CardContent>
         <form @submit="onSubmit" id="brandForm" class="space-y-6">
@@ -232,7 +232,7 @@ onMounted(() => {
 
                 <FormField v-slot="{ field }" name="parentId">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.parentOf', { module: $t('modules.brand') }) }}</FormLabel>
+                    <FormLabel>{{ t('fields.parentOf', { module: labels.name }) }}</FormLabel>
                     <Select v-bind="field">
                       <FormControl>
                         <SelectTrigger>
@@ -284,7 +284,7 @@ onMounted(() => {
                           >{{ $t('fields.activeStatus') }}</FormLabel
                         >
                         <FormDescription>
-                          {{ $t('fields.statusDescription', { module: $t('modules.brand') }) }}
+                          {{ t('fields.statusDescription', { module: labels.name }) }}
                         </FormDescription>
                       </div>
                       <FormControl>
@@ -302,7 +302,7 @@ onMounted(() => {
         <Button variant="outline" @click="router.back()" :disabled="submitting">{{ $t('crud.cancel') }}</Button>
         <Button type="submit" form="brandForm" :disabled="submitting">
           <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-          {{ $t('crud.updateBtn', { module: $t('modules.brand') }) }}
+          {{ crud.updateBtn }} {{ labels.name }}
         </Button>
       </CardFooter>
     </Card>

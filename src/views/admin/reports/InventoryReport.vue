@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive, watch } from "vue";
-import { useI18n } from "vue-i18n";
+import { useAppI18n } from "@/hooks/useAppI18n";
 import { ReportService } from "@/services/report/report.service";
 import DateRangePicker from "@/components/DateRangePicker.vue";
 import type { InventoryReport, PaginationRequest } from "@/types";
@@ -54,7 +54,7 @@ import {
   type ExportColumn,
 } from "@/utils/export";
 
-const { t } = useI18n();
+const { t, labels, fields, crud, menu } = useAppI18n("reports");
 const reportService = new ReportService();
 
 const loading = ref(true);
@@ -107,9 +107,7 @@ async function fetchData() {
       pagination.totalItems = res.data.lowStockAlerts.meta.totalItems;
     }
   } catch (error: any) {
-    toast.error(
-      t("reports.failedToLoad", { module: t("menu.inventoryReport") }),
-    );
+      labels.failedToLoad.replace('{module}', menu.inventoryReport),
   } finally {
     loading.value = false;
   }
@@ -149,26 +147,25 @@ function handlePageChange(newPage: number) {
 
 /* EXPORT LOGIC */
 const customExportCols: ExportColumn[] = [
-  { header: t("reports.productName"), dataKey: "name" },
-  { header: t("fields.code"), dataKey: "code" },
-  { header: t("fields.currentStock"), dataKey: "currentStock" },
-  { header: t("reports.alertQty"), dataKey: "alertQuantity" },
+  { header: labels.productName, dataKey: "name" },
+  { header: fields.code, dataKey: "code" },
+  { header: fields.currentStock, dataKey: "currentStock" },
+  { header: labels.alertQty, dataKey: "alertQuantity" },
 ];
 
 function handleExport(formatType: "excel" | "csv" | "pdf") {
   const ds = reportData.value.lowStockAlerts.data;
   if (!ds || ds.length === 0) {
-    toast.warning(t("reports.noDataToExport"));
+    toast.warning(labels.noDataToExport);
     return;
   }
 
   const timestamp = formatDateForFilename(new Date());
-  const filename = `${t("menu.inventoryReport")}_${timestamp}`;
+  const filename = `${menu.inventoryReport}_${timestamp}`;
 
   if (formatType === "excel") exportToExcel(filename, customExportCols, ds);
   if (formatType === "csv") exportToCSV(filename, customExportCols, ds);
-  if (formatType === "pdf")
-    exportToPDF(filename, customExportCols, ds, t("menu.inventoryReport"));
+    exportToPDF(filename, customExportCols, ds, menu.inventoryReport);
 }
 </script>
 
@@ -178,7 +175,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
       class="flex flex-col md:flex-row md:items-center justify-between gap-4"
     >
       <h2 class="text-3xl font-bold tracking-tight">
-        {{ $t("menu.inventoryReport") }}
+        {{ menu.inventoryReport }}
       </h2>
     </div>
 
@@ -197,7 +194,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
             <Input
               v-model="search"
               type="search"
-              :placeholder="$t('crud.searchPlaceholder')"
+              :placeholder="crud.searchPlaceholder"
               class="pl-9 bg-background"
             />
           </div>
@@ -213,21 +210,21 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
             size="sm"
             class="gap-2 bg-green-600 hover:bg-green-700 text-white transition-colors cursor-pointer"
           >
-            <FileSpreadsheet class="h-4 w-4" /> {{ $t("reports.excel") }}
+            <FileSpreadsheet class="h-4 w-4" /> {{ labels.excel }}
           </Button>
           <Button
             @click="handleExport('csv')"
             size="sm"
             class="gap-2 bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer"
           >
-            <FileText class="h-4 w-4" /> {{ $t("reports.csv") }}
+            <FileText class="h-4 w-4" /> {{ labels.csv }}
           </Button>
           <Button
             @click="handleExport('pdf')"
             size="sm"
             class="gap-2 bg-red-600 hover:bg-red-700 text-white transition-colors cursor-pointer"
           >
-            <FileText class="h-4 w-4" /> {{ $t("reports.pdf") }}
+            <FileText class="h-4 w-4" /> {{ labels.pdf }}
           </Button>
         </div>
       </CardContent>
@@ -237,25 +234,23 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
     <div class="grid gap-4 md:grid-cols-2">
       <Card class="border-l-4 border-l-blue-600">
         <CardHeader class="flex flex-row items-center justify-between pb-2">
-          <CardTitle class="text-sm font-medium">{{
-            $t("reports.currentStockLevels")
+            labels.currentStockLevels
           }}</CardTitle>
           <Warehouse class="h-4 w-4 text-blue-600" />
         </CardHeader>
         <CardContent>
           <div class="text-3xl font-bold">
-            {{ reportData.currentStockLevels }} {{ $t("reports.units") }}
+            {{ reportData.currentStockLevels }} {{ labels.units }}
           </div>
           <p class="text-xs text-muted-foreground">
-            {{ $t("reports.stockLevelsDesc") }}
+            {{ labels.stockLevelsDesc }}
           </p>
         </CardContent>
       </Card>
 
       <Card class="border-l-4 border-l-green-600">
         <CardHeader class="flex flex-row items-center justify-between pb-2">
-          <CardTitle class="text-sm font-medium">{{
-            $t("reports.totalValuation")
+            labels.totalValuation
           }}</CardTitle>
           <History class="h-4 w-4 text-green-600" />
         </CardHeader>
@@ -264,7 +259,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
             {{ formatCurrency(reportData.stockValuation) }}
           </div>
           <p class="text-xs text-muted-foreground">
-            {{ $t("reports.valuationDesc") }}
+            {{ labels.valuationDesc }}
           </p>
         </CardContent>
       </Card>
@@ -277,12 +272,11 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
       <CardHeader class="pb-3 px-6 pt-6">
         <div class="flex items-center gap-2 text-destructive">
           <AlertTriangle class="h-5 w-5" />
-          <CardTitle class="text-xl font-bold">{{
-            $t("reports.lowStockAlerts")
+            labels.lowStockAlerts
           }}</CardTitle>
         </div>
         <CardDescription class="text-sm">
-          {{ $t("reports.lowStockAlertsDesc") }}
+          {{ labels.lowStockAlertsDesc }}
         </CardDescription>
       </CardHeader>
       <CardContent class="px-6 pb-6 pt-0">
@@ -290,16 +284,16 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{{ $t("reports.productName") }}</TableHead>
-                <TableHead>{{ $t("fields.code") }}</TableHead>
+                <TableHead>{{ labels.productName }}</TableHead>
+                <TableHead>{{ fields.code }}</TableHead>
                 <TableHead class="text-center">{{
-                  $t("fields.currentStock")
+                  fields.currentStock
                 }}</TableHead>
                 <TableHead class="text-center">{{
-                  $t("reports.alertQty")
+                  labels.alertQty
                 }}</TableHead>
                 <TableHead class="text-right">{{
-                  $t("reports.status")
+                  labels.status
                 }}</TableHead>
               </TableRow>
             </TableHeader>
@@ -308,13 +302,13 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
                 <TableCell colspan="5" class="h-24 text-center">
                   <div class="flex items-center justify-center gap-2">
                     <Loader2 class="h-4 w-4 animate-spin" />
-                    <span>{{ $t("crud.loading") }}</span>
+                    <span>{{ crud.loading }}</span>
                   </div>
                 </TableCell>
               </TableRow>
               <TableRow v-else-if="!reportData.lowStockAlerts.data.length">
                 <TableCell colspan="5" class="h-24 text-center">
-                  {{ $t("reports.stockHealthy") }}
+                  {{ labels.stockHealthy }}
                 </TableCell>
               </TableRow>
               <TableRow
@@ -334,7 +328,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
                   <span
                     class="px-2 py-1 rounded-full text-xs font-bold bg-destructive/10 text-destructive border border-destructive/20"
                   >
-                    {{ $t("reports.critical") }}
+                    {{ labels.critical }}
                   </span>
                 </TableCell>
               </TableRow>
@@ -350,7 +344,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
             <div class="flex items-center gap-2">
               <span
                 class="text-sm font-medium text-muted-foreground whitespace-nowrap"
-                >{{ $t("crud.rowsPerPage") }}</span
+                >{{ crud.rowsPerPage }}</span
               >
               <Select
                 :model-value="pagination.limit.toString()"

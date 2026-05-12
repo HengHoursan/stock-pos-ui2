@@ -2,9 +2,8 @@
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useForm } from "vee-validate";
-import * as zod from "zod";
 import { toTypedSchema } from "@vee-validate/zod";
-import { useI18n } from "vue-i18n";
+import * as zod from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -36,7 +35,8 @@ import { cn } from "@/lib/utils";
 import { CurrencyService } from "@/services/currency/currency.service";
 import { toast } from "vue-sonner";
 
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("currency");
 const router = useRouter();
 const currencyService = new CurrencyService();
 const isSubmitting = ref(false);
@@ -119,16 +119,16 @@ async function onSubmit(values: any) {
   try {
     const response = await currencyService.create(values);
     if (response.success) {
-      toast.success(t("crud.successCreate", { module: t("modules.currency") }));
+      toast.success(t("crud.successCreate", { module: labels.name }));
       router.push("/admin/currencies");
     } else {
       toast.error(
         response.message ||
-          t("crud.errorCreate", { module: t("modules.currency") }),
+          t("crud.errorCreate", { module: labels.name }),
       );
     }
   } catch (error) {
-    toast.error(t("crud.errorCreate", { module: t("modules.currency") }));
+    toast.error(t("crud.errorCreate", { module: labels.name }));
   } finally {
     isSubmitting.value = false;
   }
@@ -150,7 +150,7 @@ async function onSubmit(values: any) {
         </Button>
         <div>
           <h2 class="text-3xl font-bold tracking-tight">
-            {{ $t("crud.create", { module: $t("modules.currency") }) }}
+            {{ crud.createBtn }} {{ labels.name }}
           </h2>
         </div>
       </div>
@@ -172,7 +172,7 @@ async function onSubmit(values: any) {
           <CardHeader>
             <CardTitle class="flex items-center gap-2">
               <Coins class="h-5 w-5" />
-              {{ $t("crud.info", { module: $t("modules.currency") }) }}
+              {{ t("crud.info", { module: labels.name }) }}
             </CardTitle>
           </CardHeader>
           <CardContent
@@ -395,7 +395,7 @@ async function onSubmit(values: any) {
               :disabled="isSubmitting"
             >
               <Loader2 v-if="isSubmitting" class="mr-2 h-4 w-4 animate-spin" />
-              {{ $t("crud.createBtn") }}
+              {{ crud.createBtn }} {{ labels.name }}
             </Button>
           </CardFooter>
         </Card>

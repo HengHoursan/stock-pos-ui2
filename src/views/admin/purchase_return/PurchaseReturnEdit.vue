@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("purchaseReturn");
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { toLocalISOString, formatNumberInput } from "@/utils/format";
+import { toLocalISOString, formatNumberInput, formatCurrency } from "@/utils/format";
 import SearchableSelect from "@/components/SearchableSelect.vue";
 import { useForm, useFieldArray } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
@@ -65,16 +65,16 @@ const formSchema = toTypedSchema(
   z.object({
     id: z.number(),
     code: z.string().max(50).optional().nullable(),
-    supplierId: z.number().min(1, t('validation.required', { field: t('fields.supplierId') })),
-    returnDate: z.string().min(1, t('validation.required', { field: t('fields.invoiceDate') })),
+    supplierId: z.number().min(1, t('validation.required', { field: fields.supplierId })),
+    returnDate: z.string().min(1, t('validation.required', { field: fields.date })),
     description: z.string().optional().nullable(),
     details: z.array(
       z.object({
         id: z.number().optional().nullable(),
-        productId: z.number().min(1, t('validation.required', { field: t('modules.product') })),
-        quantity: z.number().min(0.01, t('validation.min', { field: t('fields.quantity'), min: '0.01' })),
-        unitPrice: z.number().min(0, t('validation.min', { field: t('fields.price'), min: '0' })),
-        totalPrice: z.number().min(0, t('validation.min', { field: t('fields.price'), min: '0' })),
+        productId: z.number().min(1, t('validation.required', { field: t('modules.product.name') })),
+        quantity: z.number().min(0.01, t('validation.min', { field: fields.quantity, min: '0.01' })),
+        unitPrice: z.number().min(0, t('validation.min', { field: fields.price, min: '0' })),
+        totalPrice: z.number().min(0, t('validation.min', { field: fields.price, min: '0' })),
       })
     ).min(1, t('validation.atLeastOneItem')),
   })
@@ -128,7 +128,7 @@ onMounted(async () => {
         }))
       });
     } else {
-      toast.error(t('crud.notFound', { module: t('modules.purchaseReturn') }));
+      toast.error(t('crud.notFound', { module: labels.name }));
       router.back();
     }
   } catch (error) {
@@ -172,10 +172,10 @@ const onSubmit = form.handleSubmit(async (values) => {
 
     const response = await prService.update(payload as any);
     if (response.success) {
-      toast.success(t('crud.successUpdate', { module: t('modules.purchaseReturn') }));
+      toast.success(t('crud.successUpdate', { module: labels.name }));
       router.push("/admin/purchase-returns/" + values.id);
     } else {
-      toast.error(response.message || t('crud.errorUpdate', { module: t('modules.purchaseReturn') }));
+      toast.error(response.message || t('crud.errorUpdate', { module: labels.name }));
     }
   } catch (error) {
     toast.error(t('crud.errorGeneral'));
@@ -192,8 +192,8 @@ const onSubmit = form.handleSubmit(async (values) => {
         <ChevronLeft class="h-4 w-4" />
       </Button>
       <div>
-        <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.editBtn') }} {{ $t('modules.purchaseReturn') }}</h2>
-        <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Users class="h-3.5 w-3.5" />{{ $t('fields.supplierId') }}</p>
+        <h2 class="text-3xl font-bold tracking-tight">{{ crud.editBtn }} {{ labels.name }}</h2>
+        <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Users class="h-3.5 w-3.5" />{{ fields.supplierId }}</p>
         <p class="text-muted-foreground text-sm flex items-center">
           <History class="h-4 w-4 mr-1.5 opacity-50"/> 
           {{ form.values.code }}
@@ -213,14 +213,14 @@ const onSubmit = form.handleSubmit(async (values) => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2">
               <Users class="h-5 w-5 text-primary" />
-              {{ $t('crud.generalInfo') }}
+              {{ crud.generalInfo }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             
             <FormField v-slot="{ componentField }" name="code">
               <FormItem>
-                <FormLabel>{{ $t('fields.code') }}</FormLabel>
+                <FormLabel>{{ fields.code }}</FormLabel>
                 <FormControl>
                   <Input readonly v-bind="componentField" class="bg-muted text-muted-foreground" />
                 </FormControl>
@@ -230,7 +230,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="returnDate">
               <FormItem>
-                <FormLabel>{{ $t('fields.date') }}</FormLabel>
+                <FormLabel>{{ fields.date }}</FormLabel>
                 <FormControl>
                   <Input type="datetime-local" v-bind="componentField" />
                 </FormControl>
@@ -240,9 +240,9 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="description">
               <FormItem class="md:col-span-2">
-                <FormLabel>{{ $t('fields.remarks') }}</FormLabel>
+                <FormLabel>{{ fields.remarks }}</FormLabel>
                 <FormControl>
-                  <Textarea :placeholder="$t('fields.enterDescription')" v-bind="componentField" rows="3" />
+                  <Textarea :placeholder="fields.enterDescription" v-bind="componentField" rows="3" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -255,23 +255,23 @@ const onSubmit = form.handleSubmit(async (values) => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2 text-primary">
               <FileText class="h-5 w-5" />
-              {{ $t('fields.totalPrice') }}
+              {{ fields.totalPrice }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6">
             <div class="text-center p-4 bg-muted/20 border rounded-lg">
               <span class="text-3xl font-bold text-primary">
-                ${{ grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2}) }}
+                {{ formatCurrency(grandTotal) }}
               </span>
             </div>
           </CardContent>
           <CardFooter class="flex flex-col gap-2 border-t pt-4">
             <Button type="submit" class="w-full" :disabled="submitting || fields.length === 0">
               <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-              {{ $t('crud.save') }}
+              {{ crud.save }}
             </Button>
             <Button variant="outline" type="button" class="w-full" @click="router.back()" :disabled="submitting">
-              {{ $t('crud.cancel') }}
+              {{ crud.cancel }}
             </Button>
           </CardFooter>
         </Card>
@@ -281,27 +281,27 @@ const onSubmit = form.handleSubmit(async (values) => {
           <CardHeader class="pb-3 border-b bg-muted/5 flex flex-row items-center justify-between">
             <CardTitle class="text-lg flex items-center gap-2">
               <Package class="h-5 w-5 text-primary" />
-              {{ $t('fields.details') }}
+              {{ fields.details }}
             </CardTitle>
             <Button type="button" size="sm" @click="addProduct" variant="default">
-              <Plus class="h-4 w-4 mr-2"/> {{ $t('actions.addProduct') }}
+              <Plus class="h-4 w-4 mr-2"/> {{ t('actions.addProduct') }}
             </Button>
           </CardHeader>
           <CardContent class="p-0">
             <Table>
               <TableHeader class="bg-muted/30">
                 <TableRow>
-                  <TableHead class="w-[40%]">{{ $t('modules.product') }}</TableHead>
-                  <TableHead class="w-[15%] text-right">{{ $t('fields.unitPrice') }}</TableHead>
-                  <TableHead class="w-[15%] text-right">{{ $t('fields.quantity') }}</TableHead>
-                  <TableHead class="w-[20%] text-right">{{ $t('fields.rowTotal') }}</TableHead>
+                  <TableHead class="w-[40%]">{{ t('modules.product') }}</TableHead>
+                  <TableHead class="w-[15%] text-right">{{ fields.unitPrice }}</TableHead>
+                  <TableHead class="w-[15%] text-right">{{ fields.quantity }}</TableHead>
+                  <TableHead class="w-[20%] text-right">{{ fields.rowTotal }}</TableHead>
                   <TableHead class="w-[5%]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 <TableRow v-if="fields.length === 0">
                   <TableCell colspan="5" class="text-center py-8 text-muted-foreground italic">
-                    {{ $t('common.noData') }}
+                    {{ t('common.noData') }}
                   </TableCell>
                 </TableRow>
                 <TableRow v-for="(field, index) in fields" :key="field.key">
@@ -318,8 +318,8 @@ const onSubmit = form.handleSubmit(async (values) => {
                             form.setFieldValue(`details[${index}].totalPrice` as any, Number((price * qty).toFixed(2)));
                           }"
                           :options="productOptions"
-                          :placeholder="$t('fields.selectOption')"
-                          :empty-message="$t('crud.noResults')"
+                          :placeholder="fields.selectOption"
+                          :empty-message="crud.noResults"
                           class="w-full"
                         />
                         <FormMessage />

@@ -24,13 +24,13 @@ import { RouterLink } from "vue-router";
 import { ref } from "vue";
 import { Eye, EyeOff } from "lucide-vue-next";
 import { toast } from "vue-sonner";
-import { useI18n } from "vue-i18n";
+import { useAppI18n } from "@/hooks/useAppI18n";
 
 type LoginForm = zod.infer<typeof loginSchema>;
 
 const router = useRouter();
 const authStore = useAuthStore();
-const { t } = useI18n();
+const { t, auth, fields } = useAppI18n("auth");
 const isLoading = ref(false);
 const showPassword = ref(false);
 
@@ -74,18 +74,18 @@ const onSubmit = form.handleSubmit(async (values) => {
     <div class="w-full max-w-sm">
       <Card>
         <CardHeader class="text-center">
-          <CardTitle class="text-xl">{{ $t('auth.welcomeBack') }}</CardTitle>
-          <CardDescription>{{ $t('auth.loginDescription') }}</CardDescription>
+          <CardTitle class="text-xl">{{ auth.welcomeBack }}</CardTitle>
+          <CardDescription>{{ auth.loginDescription }}</CardDescription>
         </CardHeader>
         <CardContent>
           <form @submit="onSubmit" class="grid gap-6">
             <FormField v-slot="{ componentField }" name="email">
               <FormItem>
-                <FormLabel>{{ $t('auth.email') }}</FormLabel>
+                <FormLabel>{{ auth.email }}</FormLabel>
                 <FormControl>
                   <Input
                     type="email"
-                    :placeholder="$t('fields.emailPlaceholder')"
+                    :placeholder="fields.emailPlaceholder"
                     v-bind="componentField"
                     :disabled="isLoading"
                   />
@@ -96,7 +96,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="password">
               <FormItem>
-                <FormLabel>{{ $t('auth.password') }}</FormLabel>
+                <FormLabel>{{ auth.password }}</FormLabel>
                 <FormControl>
                   <div class="relative">
                     <Input
@@ -120,13 +120,13 @@ const onSubmit = form.handleSubmit(async (values) => {
             </FormField>
 
             <Button type="submit" class="w-full" :disabled="isLoading">
-              {{ isLoading ? $t('auth.loggingIn') : $t('auth.login') }}
+              {{ isLoading ? auth.loggingIn : auth.login }}
             </Button>
 
             <div class="text-center text-sm">
-              {{ $t('auth.noAccount') }}
+              {{ auth.noAccount }}
               <RouterLink to="/register" class="underline underline-offset-4"
-                >{{ $t('auth.signup') }}</RouterLink
+                >{{ auth.signup }}</RouterLink
               >
             </div>
           </form>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useForm } from "vee-validate";
@@ -47,6 +46,7 @@ import { CustomerService } from "@/services/customer/customer.service";
 import { CustomerType } from "@/types";
 import { toast } from "vue-sonner";
 
+const { t, labels, fields, crud, common, auth } = useAppI18n("customer");
 const router = useRouter();
 const route = useRoute();
 const customerService = new CustomerService();
@@ -87,12 +87,12 @@ async function fetchCustomer() {
         description: response.data.description || "",
       });
     } else {
-      toast.error(t("crud.notFound", { module: t("modules.customer") }));
+      toast.error(t("crud.notFound", { module: labels.name }));
       router.push("/admin/customers");
     }
   } catch (error) {
     console.error("Fetch customer error:", error);
-    toast.error(t("crud.errorFetch", { module: t("modules.customer") }));
+    toast.error(t("crud.errorFetch", { module: labels.name }));
   } finally {
     loading.value = false;
   }
@@ -109,12 +109,12 @@ const onSubmit = form.handleSubmit(async (values) => {
     };
     const response = await customerService.update(payload as any);
     if (response.success) {
-      toast.success(t("crud.successUpdate", { module: t("modules.customer") }));
+      toast.success(t("crud.successUpdate", { module: labels.name }));
       router.push("/admin/customers");
     } else {
       toast.error(
         response.message ||
-          t("crud.errorUpdate", { module: t("modules.customer") }),
+          t("crud.errorUpdate", { module: labels.name }),
       );
     }
   } catch (error) {
@@ -136,7 +136,7 @@ onMounted(() => {
         <ChevronLeft class="h-4 w-4" />
       </Button>
       <h2 class="text-3xl font-bold tracking-tight">
-        {{ $t("crud.edit", { module: $t("modules.customer") }) }}
+        {{ t("crud.edit", { module: labels.name }) }}
       </h2>
     </div>
 
@@ -145,7 +145,7 @@ onMounted(() => {
       class="flex flex-col items-center justify-center h-[400px] border rounded-lg bg-card shadow-sm"
     >
       <Loader2 class="h-8 w-8 animate-spin text-primary mb-4" />
-      <p class="text-muted-foreground">{{ $t("crud.loading") }}</p>
+      <p class="text-muted-foreground">{{ crud.loading }}</p>
     </div>
 
     <form v-else @submit="onSubmit" id="customerEditForm">
@@ -155,16 +155,16 @@ onMounted(() => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2">
               <UserPlus class="h-5 w-5 text-primary" />
-              {{ $t("crud.generalInfo") }}
+              {{ crud.generalInfo }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6 space-y-4">
             <FormField v-slot="{ componentField }" name="name">
               <FormItem>
-                <FormLabel>{{ $t("fields.name") }}</FormLabel>
+                <FormLabel>{{ fields.name }}</FormLabel>
                 <FormControl>
                   <Input
-                    :placeholder="$t('fields.enterName')"
+                    :placeholder="fields.enterName"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -174,10 +174,10 @@ onMounted(() => {
 
             <FormField v-slot="{ componentField }" name="nameLatin">
               <FormItem>
-                <FormLabel>{{ $t("fields.nameLatin") }}</FormLabel>
+                <FormLabel>{{ fields.nameLatin }}</FormLabel>
                 <FormControl>
                   <Input
-                    :placeholder="$t('fields.nameLatin')"
+                    :placeholder="fields.nameLatin"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -187,10 +187,10 @@ onMounted(() => {
 
             <FormField v-slot="{ componentField }" name="code">
               <FormItem>
-                <FormLabel>{{ $t("fields.code") }}</FormLabel>
+                <FormLabel>{{ fields.code }}</FormLabel>
                 <FormControl>
                   <Input
-                    :placeholder="$t('fields.code')"
+                    :placeholder="fields.code"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -205,16 +205,16 @@ onMounted(() => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2">
               <Phone class="h-5 w-5 text-primary" />
-              {{ $t("fields.phoneNumber") }} & {{ $t("auth.email") }}
+              {{ fields.phoneNumber }} & {{ auth.email }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6 space-y-4">
             <FormField v-slot="{ componentField }" name="email">
               <FormItem>
-                <FormLabel>{{ $t("auth.email") }}</FormLabel>
+                <FormLabel>{{ auth.email }}</FormLabel>
                 <FormControl>
                   <Input
-                    :placeholder="$t('fields.emailPlaceholder')"
+                    :placeholder="fields.emailPlaceholder"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -224,10 +224,10 @@ onMounted(() => {
 
             <FormField v-slot="{ componentField }" name="phoneNumber">
               <FormItem>
-                <FormLabel>{{ $t("fields.phoneNumber") }}</FormLabel>
+                <FormLabel>{{ fields.phoneNumber }}</FormLabel>
                 <FormControl>
                   <Input
-                    :placeholder="$t('fields.phoneNumber')"
+                    :placeholder="fields.phoneNumber"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -239,11 +239,11 @@ onMounted(() => {
               <FormItem>
                 <FormLabel class="flex items-center gap-2">
                   <MapPin class="h-4 w-4 text-muted-foreground" />
-                  {{ $t("fields.address") }}
+                  {{ fields.address }}
                 </FormLabel>
                 <FormControl>
                   <Textarea
-                    :placeholder="$t('fields.address')"
+                    :placeholder="fields.address"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -258,28 +258,28 @@ onMounted(() => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2">
               <Settings class="h-5 w-5 text-primary" />
-              {{ $t("layout.adminPanel") }}
+              {{ t("layout.adminPanel") }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6 space-y-6">
             <FormField v-slot="{ field }" name="type">
               <FormItem>
-                <FormLabel>{{ $t("fields.type") }}</FormLabel>
+                <FormLabel>{{ fields.type }}</FormLabel>
                 <Select
                   :model-value="String(field.value)"
                   @update:model-value="(v) => field.onChange(Number(v))"
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue :placeholder="$t('crud.selectType')" />
+                      <SelectValue :placeholder="crud.selectType" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     <SelectItem :value="String(CustomerType.DINE_IN)">{{
-                      $t("fields.dineIn")
+                      fields.dineIn
                     }}</SelectItem>
                     <SelectItem :value="String(CustomerType.DINE_OUT)">{{
-                      $t("fields.dineOut")
+                      fields.dineOut
                     }}</SelectItem>
                   </SelectContent>
                 </Select>
@@ -289,10 +289,10 @@ onMounted(() => {
 
             <FormField v-slot="{ componentField }" name="description">
               <FormItem>
-                <FormLabel>{{ $t("fields.description") }}</FormLabel>
+                <FormLabel>{{ fields.description }}</FormLabel>
                 <FormControl>
                   <Textarea
-                    :placeholder="$t('fields.enterDescription')"
+                    :placeholder="fields.enterDescription"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -306,11 +306,11 @@ onMounted(() => {
               >
                 <div class="space-y-0.5">
                   <FormLabel class="text-base font-semibold">{{
-                    $t("fields.activeStatus")
+                    fields.activeStatus
                   }}</FormLabel>
                   <FormDescription>{{
-                    $t("fields.statusDescription", {
-                      module: $t("modules.customer"),
+                    t("fields.statusDescription", {
+                      module: labels.name,
                     })
                   }}</FormDescription>
                 </div>
@@ -331,7 +331,7 @@ onMounted(() => {
               type="button"
               @click="router.back()"
               :disabled="submitting"
-              >{{ $t("crud.cancel") }}</Button
+              >{{ crud.cancel }}</Button
             >
             <Button
               type="submit"
@@ -339,7 +339,7 @@ onMounted(() => {
               :disabled="submitting"
             >
               <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-              {{ $t("crud.updateBtn", { module: $t("modules.customer") }) }}
+              {{ t("crud.updateBtn", { module: labels.name }) }}
             </Button>
           </CardFooter>
         </Card>

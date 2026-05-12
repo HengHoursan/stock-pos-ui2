@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("purchasePayment");
 import { ref, onMounted, reactive, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
 import SearchableSelect from "@/components/SearchableSelect.vue";
+import ClearableSelect from "@/components/ClearableSelect.vue";
 
 import {
   Table,
@@ -86,8 +87,20 @@ const filters = reactive({
   endDate: "",
 });
 const supplierOptions = computed(() =>
-  suppliers.value.map(s => ({ label: s.name, value: s.id }))
+  suppliers.value.map((s) => ({ label: s.name, value: s.id })),
 );
+
+const paymentMethodOptions = computed(() => [
+  { label: fields.paymentMethodLabels.cash, value: String(PaymentMethod.CASH) },
+  {
+    label: fields.paymentMethodLabels.transfer,
+    value: String(PaymentMethod.TRANSFER),
+  },
+  {
+    label: fields.paymentMethodLabels.other,
+    value: String(PaymentMethod.OTHER),
+  },
+]);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -157,13 +170,21 @@ const debouncedFetch = useDebounceFn(() => {
   fetchData();
 }, 500);
 
-watch(() => filters.search, () => debouncedFetch());
 watch(
-  () => [filters.paymentMethod, filters.supplierId, filters.startDate, filters.endDate],
+  () => filters.search,
+  () => debouncedFetch(),
+);
+watch(
+  () => [
+    filters.paymentMethod,
+    filters.supplierId,
+    filters.startDate,
+    filters.endDate,
+  ],
   () => {
     pagination.page = 1;
     fetchData();
-  }
+  },
 );
 watch(
   () => pagination.limit,
@@ -241,7 +262,7 @@ onMounted(() => {
   <div class="space-y-4">
     <div class="flex items-center justify-between">
       <h2 class="text-3xl font-bold tracking-tight text-foreground">
-        {{ $t("menu.purchasePayments") }}
+        {{ labels.title }}
       </h2>
       <div class="flex items-center gap-2">
         <CurrencyToggle />
@@ -254,7 +275,7 @@ onMounted(() => {
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
         <Button @click="router.push('/admin/purchase-payments/create')">
-          <Plus class="mr-2 h-4 w-4" />{{ $t("crud.createBtn") }}
+          <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.name }}
         </Button>
       </div>
     </div>
@@ -266,9 +287,7 @@ onMounted(() => {
         />
         <Input
           type="search"
-          :placeholder="
-            $t('crud.search', { module: $t('modules.purchasePayment') })
-          "
+          :placeholder="t('crud.search', { module: labels.title })"
           class="pl-8 bg-background/50 border-border/60 shadow-sm transition-all focus:ring-2 focus:ring-primary/20"
           v-model="filters.search"
         />
@@ -276,54 +295,77 @@ onMounted(() => {
 
       <DateRangePicker
         :model-value="{ start: filters.startDate, end: filters.endDate }"
-        @update:model-value="(val) => { filters.startDate = val?.start || ''; filters.endDate = val?.end || ''; }"
+        @update:model-value="
+          (val) => {
+            filters.startDate = val?.start || '';
+            filters.endDate = val?.end || '';
+          }
+        "
         class="w-full sm:w-[260px] shadow-sm"
-        :placeholder="$t('crud.filterByDate')"
+        :placeholder="crud.filterByDate"
       />
 
       <SearchableSelect
         v-model="filters.supplierId"
         :options="supplierOptions"
-        :placeholder="$t('fields.supplierId')"
-        :empty-message="$t('crud.noResults')"
-        class="w-full sm:w-[200px]"
+        :placeholder="crud.filterBySupplier"
+        :empty-message="crud.noResults"
+        class="w-full sm:w-[220px]"
       />
 
-
+      <!-- <ClearableSelect
+        v-model="filters.paymentMethod"
+        :options="paymentMethodOptions"
+        :placeholder="fields.paymentMethod"
+        class="w-full sm:w-[180px]"
+      /> -->
 
       <Button
-        v-if="filters.search || filters.paymentMethod || filters.supplierId || filters.startDate || filters.endDate"
+        v-if="
+          filters.search ||
+          filters.paymentMethod ||
+          filters.supplierId ||
+          filters.startDate ||
+          filters.endDate
+        "
         variant="ghost"
         size="sm"
-        @click="Object.assign(filters, { search: '', paymentMethod: '', supplierId: '', startDate: '', endDate: '' })"
+        @click="
+          Object.assign(filters, {
+            search: '',
+            paymentMethod: '',
+            supplierId: '',
+            startDate: '',
+            endDate: '',
+          })
+        "
         class="h-9 px-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
       >
         <RefreshCw class="mr-2 h-4 w-4" />
-        {{ $t("crud.resetFilters") }}
+        {{ crud.resetFilters }}
       </Button>
     </div>
 
-    <div class="rounded-md border bg-card overflow-auto shadow-sm max-h-[700px] scrollbar-thin scrollbar-thumb-muted-foreground/20">
+    <div
+      class="rounded-md border bg-card overflow-auto shadow-sm max-h-[700px] scrollbar-thin scrollbar-thumb-muted-foreground/20"
+    >
       <Table class="min-w-[1000px]">
         <TableHeader>
           <TableRow>
             <TableHead class="w-[50px]">#</TableHead>
-            <TableHead class="w-[150px]">{{ $t("fields.code") }}</TableHead>
-            <TableHead>{{ $t("modules.purchaseInvoice") }}</TableHead>
+            <TableHead class="w-[150px]">{{ fields.code }}</TableHead>
+            <TableHead>{{ t('modules.purchaseInvoice.name') }}</TableHead>
             <TableHead>
               <Button
                 variant="ghost"
                 @click="handleSort('paymentDate')"
                 class="-ml-4 h-8 font-medium"
               >
-                {{ $t("fields.transactionDate")
-                }}<ArrowUpDown class="ml-1 h-3 w-3" />
+                {{ fields.transactionDate }}<ArrowUpDown class="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
-            <TableHead class="text-right">{{
-              $t("fields.paidAmount")
-            }}</TableHead>
-            <TableHead class="text-right">{{ $t("crud.actions") }}</TableHead>
+            <TableHead class="text-right">{{ fields.paidAmount }}</TableHead>
+            <TableHead class="text-right">{{ crud.actions }}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -333,7 +375,7 @@ onMounted(() => {
                 class="flex items-center justify-center text-muted-foreground italic text-sm"
               >
                 <Loader2 class="h-4 w-4 animate-spin mr-2" />
-                <span>{{ $t("crud.fetchingData") }}</span>
+                <span>{{ crud.fetchingData }}</span>
               </div>
             </TableCell>
           </TableRow>
@@ -352,19 +394,26 @@ onMounted(() => {
               <TableCell class="font-medium">
                 <template v-if="record.details && record.details.length > 0">
                   <div class="flex flex-wrap gap-1">
-                    <Badge v-for="d in record.details" :key="d.id" variant="secondary" class="text-xs font-bold">
-                      {{ d.purchaseInvoice?.code || `INV-${d.purchaseInvoiceId}` }}
+                    <Badge
+                      v-for="d in record.details"
+                      :key="d.id"
+                      variant="secondary"
+                      class="text-xs font-bold"
+                    >
+                      {{
+                        d.purchaseInvoice?.code || `INV-${d.purchaseInvoiceId}`
+                      }}
                     </Badge>
                   </div>
                 </template>
-                <span v-else class="text-muted-foreground italic text-xs italic">N/A</span>
+                <span v-else class="text-muted-foreground italic text-xs italic"
+                  >N/A</span
+                >
               </TableCell>
               <TableCell class="text-foreground/90">
                 {{ formatDateTime(record.paymentDate) }}
               </TableCell>
-              <TableCell
-                class="text-right text-success font-semibold"
-              >
+              <TableCell class="text-right text-success font-semibold">
                 + {{ formatCurrency(record.paidAmount) }}
               </TableCell>
               <TableCell class="text-right">
@@ -382,7 +431,7 @@ onMounted(() => {
                     <DropdownMenuLabel
                       class="text-xs uppercase text-muted-foreground font-bold"
                     >
-                      {{ $t("crud.actions") }}
+                      {{ crud.actions }}
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
@@ -391,9 +440,7 @@ onMounted(() => {
                       "
                       class="cursor-pointer"
                     >
-                      <Eye class="mr-2 h-4 w-4 opacity-70" />{{
-                        $t("crud.viewBtn")
-                      }}
+                      <Eye class="mr-2 h-4 w-4 opacity-70" />{{ crud.viewBtn }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       @click="
@@ -403,14 +450,16 @@ onMounted(() => {
                       "
                       class="cursor-pointer"
                     >
-                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{ $t("crud.editBtn") }}
+                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{
+                        crud.editBtn
+                      }}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       class="text-destructive focus:text-destructive cursor-pointer font-medium"
                       @click="openDeleteDialog(record.id)"
                     >
-                      <Trash2 class="mr-2 h-4 w-4" />{{ $t("crud.delete") }}
+                      <Trash2 class="mr-2 h-4 w-4" />{{ crud.delete }}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -425,20 +474,30 @@ onMounted(() => {
               <div class="flex flex-col items-center justify-center gap-3">
                 <CreditCard class="h-10 w-10 opacity-10" />
                 <p class="font-medium">
-                  {{
-                    $t("crud.noRecords", {
-                      module: $t("modules.purchasePayments"),
-                    })
-                  }}
+                  {{ t("crud.noRecords", { module: labels.title }) }}
                 </p>
                 <Button
-                  v-if="filters.search || filters.paymentMethod || filters.supplierId || filters.startDate || filters.endDate"
+                  v-if="
+                    filters.search ||
+                    filters.paymentMethod ||
+                    filters.supplierId ||
+                    filters.startDate ||
+                    filters.endDate
+                  "
                   variant="outline"
                   size="sm"
-                  @click="Object.assign(filters, { search: '', paymentMethod: '', supplierId: '', startDate: '', endDate: '' })"
+                  @click="
+                    Object.assign(filters, {
+                      search: '',
+                      paymentMethod: '',
+                      supplierId: '',
+                      startDate: '',
+                      endDate: '',
+                    })
+                  "
                   class="h-8"
                 >
-                  {{ $t("crud.resetFilters") }}
+                  {{ crud.resetFilters }}
                 </Button>
               </div>
             </TableCell>
@@ -455,7 +514,7 @@ onMounted(() => {
         <div class="flex items-center gap-2">
           <span
             class="text-sm font-medium text-muted-foreground whitespace-nowrap"
-            >{{ $t("crud.rowsPerPage") }}</span
+            >{{ crud.rowsPerPage }}</span
           >
           <Select
             :model-value="pagination.limit.toString()"
@@ -511,24 +570,20 @@ onMounted(() => {
     <AlertDialog v-model:open="isDeleteDialogOpen">
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{{ $t("crud.confirmDelete") }}</AlertDialogTitle>
+          <AlertDialogTitle>{{ crud.confirmDelete }}</AlertDialogTitle>
           <AlertDialogDescription>
-            {{
-              $t("crud.confirmDeleteDesc", {
-                module: $t("modules.purchasePayment"),
-              })
-            }}
+            {{ t("crud.confirmDeleteDesc", { module: labels.name }) }}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel @click="isDeleteDialogOpen = false">{{
-            $t("crud.cancel")
+            crud.cancel
           }}</AlertDialogCancel>
           <AlertDialogAction
             @click="confirmDelete"
             class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {{ $t("crud.delete") }}
+            {{ crud.delete }}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

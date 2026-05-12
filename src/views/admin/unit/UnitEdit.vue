@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("unit");
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useForm } from "vee-validate";
@@ -99,7 +99,7 @@ async function fetchData() {
         status: u.status,
       });
     } else {
-      toast.error(t('crud.notFound', { module: t('modules.unit') }));
+      toast.error(t('crud.notFound', { module: labels.name }));
       router.push("/admin/units");
     }
 
@@ -109,7 +109,7 @@ async function fetchData() {
       );
     }
   } catch (error) {
-    toast.error(t('crud.errorFetch', { module: t('modules.unit') }));
+    toast.error(t('crud.errorFetch', { module: labels.name }));
   } finally {
     loading.value = false;
   }
@@ -128,10 +128,10 @@ const onSubmit = form.handleSubmit(async (values) => {
     };
     const response = await unitService.update(payload);
     if (response.success) {
-      toast.success(t('crud.successUpdate', { module: t('modules.unit') }));
+      toast.success(t('crud.successUpdate', { module: labels.name }));
       router.push("/admin/units");
     } else {
-      toast.error(response.message || t('crud.errorUpdate', { module: t('modules.unit') }));
+      toast.error(response.message || t('crud.errorUpdate', { module: labels.name }));
     }
   } catch (error) {
     toast.error(t('crud.errorGeneral'));
@@ -151,7 +151,7 @@ onMounted(() => {
       <Button variant="outline" size="icon" @click="router.back()">
         <ChevronLeft class="h-4 w-4" />
       </Button>
-      <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.edit', { module: $t('modules.unit') }) }}</h2>
+      <h2 class="text-3xl font-bold tracking-tight">{{ crud.editBtn }} {{ labels.name }}</h2>
     </div>
 
     <Card v-if="loading" class="flex items-center justify-center min-h-[400px]">
@@ -160,7 +160,7 @@ onMounted(() => {
 
     <Card v-else>
       <CardHeader>
-        <CardTitle>{{ $t('crud.info', { module: $t('modules.unit') }) }}</CardTitle>
+        <CardTitle>{{ t('crud.info', { module: labels.name }) }}</CardTitle>
       </CardHeader>
       <CardContent>
         <form @submit="onSubmit" id="unitForm" class="space-y-6">
@@ -208,7 +208,7 @@ onMounted(() => {
 
             <FormField v-slot="{ field }" name="parentId">
               <FormItem>
-                <FormLabel>{{ $t('fields.parentOf', { module: $t('modules.unit') }) }}</FormLabel>
+                <FormLabel>{{ t('fields.parentOf', { module: labels.name }) }}</FormLabel>
                 <Select v-bind="field">
                   <FormControl>
                     <SelectTrigger>
@@ -259,7 +259,7 @@ onMounted(() => {
                     v-bind="componentField"
                   />
                 </FormControl>
-                <FormDescription>{{ $t('fields.relativeToBase', { module: $t('modules.unit') }) }}</FormDescription>
+                <FormDescription>{{ t('fields.relativeToBase', { module: labels.name }) }}</FormDescription>
                 <FormMessage />
               </FormItem>
             </FormField>
@@ -288,7 +288,7 @@ onMounted(() => {
                     >{{ $t('fields.isCalculateDetail') }}</FormLabel
                   >
                   <FormDescription>
-                    {{ $t('fields.calculateDetailInfo', { module: $t('modules.unit') }) }}
+                    {{ t('fields.calculateDetailInfo', { module: labels.name }) }}
                   </FormDescription>
                 </div>
                 <FormControl>
@@ -306,7 +306,7 @@ onMounted(() => {
                     $t("fields.activeStatus")
                   }}</FormLabel>
                   <FormDescription>
-                    {{ $t("fields.statusDescription", { module: $t("modules.unit") }) }}
+                    {{ t("fields.statusDescription", { module: labels.name }) }}
                   </FormDescription>
                 </div>
                 <FormControl>
@@ -321,7 +321,7 @@ onMounted(() => {
         <Button variant="outline" @click="router.back()" :disabled="submitting">{{ $t('crud.cancel') }}</Button>
         <Button type="submit" form="unitForm" :disabled="submitting">
           <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-          {{ $t('crud.updateBtn', { module: $t('modules.unit') }) }}
+          {{ crud.updateBtn }} {{ labels.name }}
         </Button>
       </CardFooter>
     </Card>

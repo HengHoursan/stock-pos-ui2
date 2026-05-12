@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import { useAppI18n } from "@/hooks/useAppI18n";
+const { t, labels, fields, crud } = useAppI18n("product");
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { toLocalISOString, formatNumberInput } from "@/utils/format";
@@ -148,12 +148,12 @@ async function fetchData() {
       localCurrentStock.value = formatNumberInput(prod.detail?.currentStock || 0);
       localAlertQuantity.value = formatNumberInput(prod.alertQuantity || 0);
     } else {
-      toast.error(t('crud.notFound', { module: t('modules.product') }));
+      toast.error(t('crud.notFound', { module: labels.name }));
       router.push("/admin/products");
     }
   } catch (error) {
     console.error("Failed to fetch data", error);
-    toast.error(t('crud.errorFetch', { module: t('modules.product') }));
+    toast.error(t('crud.errorFetch', { module: labels.name }));
   } finally {
     loading.value = false;
   }
@@ -171,10 +171,10 @@ const onSubmit = form.handleSubmit(async (values) => {
     };
     const response = await productService.update(payload as any);
     if (response.success) {
-      toast.success(t('crud.successUpdate', { module: t('modules.product') }));
+      toast.success(t('crud.successUpdate', { module: labels.name }));
       router.push("/admin/products");
     } else {
-      toast.error(response.message || t('crud.errorUpdate', { module: t('modules.product') }));
+      toast.error(response.message || t('crud.errorUpdate', { module: labels.name }));
     }
   } catch (error) {
     toast.error(t('crud.errorGeneral'));
@@ -194,7 +194,7 @@ onMounted(() => {
       <Button variant="outline" size="icon" @click="router.back()">
         <ChevronLeft class="h-4 w-4" />
       </Button>
-      <h2 class="text-3xl font-bold tracking-tight">{{ $t('crud.edit', { module: $t('modules.product') }) }}</h2>
+      <h2 class="text-3xl font-bold tracking-tight">{{ crud.editBtn }} {{ labels.name }}</h2>
     </div>
 
     <Card v-if="loading" class="flex items-center justify-center min-h-[500px]">
@@ -247,7 +247,7 @@ onMounted(() => {
 
                 <FormField v-slot="{ field }" name="categoryId">
                   <FormItem>
-                    <FormLabel>{{ $t('modules.category') }}</FormLabel>
+                    <FormLabel>{{ labels.category }}</FormLabel>
                     <Select v-bind="field">
                       <FormControl>
                         <SelectTrigger>
@@ -271,7 +271,7 @@ onMounted(() => {
 
                 <FormField v-slot="{ field }" name="brandId">
                   <FormItem>
-                    <FormLabel>{{ $t('modules.brand') }}</FormLabel>
+                    <FormLabel>{{ labels.brand }}</FormLabel>
                     <Select v-bind="field">
                       <FormControl>
                         <SelectTrigger>
@@ -296,7 +296,7 @@ onMounted(() => {
 
                 <FormField v-slot="{ field }" name="unitId">
                   <FormItem>
-                    <FormLabel>{{ $t('modules.unit') }}</FormLabel>
+                    <FormLabel>{{ labels.unit }}</FormLabel>
                     <Select v-bind="field">
                       <FormControl>
                         <SelectTrigger>
@@ -557,7 +557,7 @@ onMounted(() => {
         </Button>
         <Button type="submit" form="productForm" :disabled="submitting" size="lg" class="px-8 shadow-lg">
           <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-          {{ $t('crud.updateBtn', { module: $t('modules.product') }) }}
+          {{ crud.updateBtn }} {{ labels.name }}
         </Button>
       </div>
     </template>

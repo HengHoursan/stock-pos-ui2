@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { useI18n } from "vue-i18n";
-import { formatRate } from "@/utils/format";
+import { useAppI18n } from "@/hooks/useAppI18n";
+import { formatRate, formatDateTime } from "@/utils/format";
 import { CurrencyService } from "@/services/currency/currency.service";
 import type { Currency } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ import {
 } from "lucide-vue-next";
 import { toast } from "vue-sonner";
 
-const { t } = useI18n();
+const { t, labels, fields, crud } = useAppI18n("currency");
 const router = useRouter();
 const route = useRoute();
 const currencyService = new CurrencyService();
@@ -33,26 +33,18 @@ async function fetchCurrency() {
     if (response.success && response.data) {
       currency.value = response.data;
     } else {
-      toast.error(t("crud.errorFetch", { module: t("modules.currency") }));
+      toast.error(t("crud.errorFetch", { module: labels.name }));
       router.push("/admin/currencies");
     }
   } catch (error) {
-    toast.error(t("crud.errorFetch", { module: t("modules.currency") }));
+    toast.error(t("crud.errorFetch", { module: labels.name }));
     router.push("/admin/currencies");
   } finally {
     isLoading.value = false;
   }
 }
 
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+
 
 onMounted(() => {
   fetchCurrency();
@@ -75,7 +67,7 @@ onMounted(() => {
         <div class="space-y-1">
           <div class="flex items-center gap-3">
             <h2 class="text-3xl font-bold tracking-tight text-foreground/90">
-              {{ $t("crud.detail", { module: $t("modules.currency") }) }}
+              {{ t("crud.detail", { module: labels.name }) }}
             </h2>
             <Badge v-if="currency?.isDefault" variant="secondary" class="bg-primary/10 text-primary border-primary/20 px-3 py-0.5">
               Default System Currency
@@ -92,20 +84,20 @@ onMounted(() => {
         class="bg-primary hover:bg-primary/90 shadow-md transition-all active:scale-95 gap-2"
       >
         <Pencil class="h-4 w-4" />
-        {{ $t("crud.editBtn") }}
+        {{ crud.editBtn }}
       </Button>
     </div>
 
     <div v-if="isLoading" class="flex flex-col items-center justify-center min-h-[400px] gap-4">
       <Loader2 class="h-10 w-10 animate-spin text-primary" />
-      <p class="text-muted-foreground animate-pulse">{{ $t("crud.fetchingData") }}</p>
+      <p class="text-muted-foreground animate-pulse">{{ crud.fetchingData }}</p>
     </div>
 
     <div v-else-if="currency" class="grid gap-6 grid-cols-1 lg:grid-cols-3">
       <!-- Image Section -->
       <Card class="lg:col-span-1 overflow-hidden h-fit">
         <CardHeader class="pb-3">
-          <CardTitle class="text-lg">{{ $t("crud.image") }}</CardTitle>
+          <CardTitle class="text-lg">{{ crud.image }}</CardTitle>
         </CardHeader>
         <CardContent>
           <div class="aspect-square relative rounded-lg border bg-muted/50 flex items-center justify-center overflow-hidden">
@@ -121,55 +113,55 @@ onMounted(() => {
       <div class="lg:col-span-2 space-y-6">
         <Card>
           <CardHeader class="pb-3">
-            <CardTitle class="text-lg">{{ $t("crud.generalInfo") }}</CardTitle>
+            <CardTitle class="text-lg">{{ crud.generalInfo }}</CardTitle>
           </CardHeader>
           <CardContent>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Coins class="mr-2 h-4 w-4" />{{ $t("fields.currency") }}
+                  <Coins class="mr-2 h-4 w-4" />{{ fields.currency }}
                 </div>
                 <p class="font-medium text-base">{{ currency.currency }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Globe class="mr-2 h-4 w-4" />{{ $t("fields.country") }}
+                  <Globe class="mr-2 h-4 w-4" />{{ fields.country }}
                 </div>
                 <p class="font-medium text-base">{{ currency.country }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <BadgeCent class="mr-2 h-4 w-4" />{{ $t("fields.code") }}
+                  <BadgeCent class="mr-2 h-4 w-4" />{{ fields.code }}
                 </div>
                 <p class="font-medium text-base">{{ currency.code }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <BadgeCent class="mr-2 h-4 w-4" />{{ $t("fields.symbol") }}
+                  <BadgeCent class="mr-2 h-4 w-4" />{{ fields.symbol }}
                 </div>
                 <p class="font-medium text-base">{{ currency.symbol || "-" }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-primary font-bold">
-                  <Coins class="mr-2 h-4 w-4" />{{ $t("fields.exchangeRate") || 'Exchange Rate' }}
+                  <Coins class="mr-2 h-4 w-4" />{{ fields.exchangeRate || 'Exchange Rate' }}
                 </div>
                 <p class="font-bold text-lg text-primary decoration-primary/20 underline">1 USD = {{ formatRate(currency.exchangeRate || (currency.code === 'KHR' ? 4100 : 1)) }} {{ currency.code }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <SeparatorHorizontal class="mr-2 h-4 w-4" />{{ $t("fields.thousandSeparator") }}
+                  <SeparatorHorizontal class="mr-2 h-4 w-4" />{{ fields.thousandSeparator }}
                 </div>
                 <p class="font-medium text-base">"{{ currency.thousandSeparator }}"</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <SeparatorHorizontal class="mr-2 h-4 w-4" />{{ $t("fields.decimalSeparator") }}
+                  <SeparatorHorizontal class="mr-2 h-4 w-4" />{{ fields.decimalSeparator }}
                 </div>
                 <p class="font-medium text-base">"{{ currency.decimalSeparator }}"</p>
               </div>
@@ -179,25 +171,25 @@ onMounted(() => {
 
         <Card>
           <CardHeader class="pb-3">
-            <CardTitle class="text-lg">{{ $t("crud.systemInfo") }}</CardTitle>
+            <CardTitle class="text-lg">{{ crud.systemInfo }}</CardTitle>
           </CardHeader>
           <CardContent>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Calendar class="mr-2 h-4 w-4" />{{ $t("fields.createdAt") }}
+                  <Calendar class="mr-2 h-4 w-4" />{{ fields.createdAt }}
                 </div>
                 <p class="font-medium text-base">
-                  {{ formatDate(currency.createdAt) }}
+                  {{ formatDateTime(currency.createdAt) }}
                 </p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Calendar class="mr-2 h-4 w-4" />{{ $t("fields.updatedAt") }}
+                  <Calendar class="mr-2 h-4 w-4" />{{ fields.updatedAt }}
                 </div>
                 <p class="font-medium text-base">
-                  {{ formatDate(currency.updatedAt) }}
+                  {{ formatDateTime(currency.updatedAt) }}
                 </p>
               </div>
             </div>
