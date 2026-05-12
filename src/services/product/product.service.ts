@@ -41,4 +41,16 @@ export class ProductService extends BaseService {
   async forceDelete(id: number): Promise<ApiResponse<null>> {
     return this.post<ApiResponse<null>>("/products/force-delete", { id });
   }
+
+  async duplicate(id: number): Promise<ApiResponse<Product>> {
+    return this.post<ApiResponse<Product>>("/products/duplicate", { id });
+  }
+
+  async bulkSoftDelete(ids: number[]): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/products/bulk-soft-delete", { ids });
+  }
+
+  async bulkUpdateStatus(ids: number[], status: boolean): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/products/bulk-status-update", { ids, status });
+  }
 }

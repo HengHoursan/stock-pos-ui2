@@ -32,4 +32,20 @@ export class DiscountService extends BaseService {
   async softDelete(id: number): Promise<ApiResponse<null>> {
     return this.post<ApiResponse<null>>("/discounts/soft-delete", { id });
   }
+
+  async updateStatus(id: number, status: boolean): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/discounts/status-update", { id, status });
+  }
+
+  async duplicate(id: number): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/discounts/duplicate", { id });
+  }
+
+  async bulkSoftDelete(ids: number[]): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/discounts/bulk-soft-delete", { ids });
+  }
+
+  async bulkUpdateStatus(ids: number[], status: boolean): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/discounts/bulk-status-update", { ids, status });
+  }
 }

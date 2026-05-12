@@ -2,7 +2,7 @@
 import { useAppI18n } from "@/hooks/useAppI18n";
 const { t, labels, fields, crud } = useAppI18n("customer");
 import { ref, onMounted, reactive, watch } from "vue";
-// import { useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 
 import {
   Table,
@@ -12,15 +12,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-/* import {
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"; */
-/* import {
+} from "@/components/ui/dropdown-menu";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -29,7 +29,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"; */
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -59,6 +59,11 @@ import {
   XCircle,
   UtensilsCrossed,
   ShoppingBag,
+  Plus,
+  Eye,
+  Pencil,
+  Trash2,
+  MoreHorizontal
 } from "lucide-vue-next";
 import { CustomerService } from "@/services/customer/customer.service";
 import type { Customer, PaginationMeta } from "@/types";
@@ -68,7 +73,7 @@ import { useDebounceFn } from "@vueuse/core";
 import ClearableSelect from "@/components/ClearableSelect.vue";
 import { computed } from "vue";
 
-// const router = useRouter();
+const router = useRouter();
 const customerService = new CustomerService();
 
 const customers = ref<Customer[]>([]);
@@ -98,8 +103,48 @@ const customerTypeOptions = computed(() => [
   { label: fields.dineOut, value: String(CustomerType.DINE_OUT) },
 ]);
 
-// const isDeleteDialogOpen = ref(false);
-// const customerToDelete = ref<number | null>(null);
+const isDeleteDialogOpen = ref(false);
+const customerToDelete = ref<number | null>(null);
+
+const selectedIds = ref<number[]>([]);
+const isSelectAll = computed({
+  get: () => customers.value.length > 0 && selectedIds.value.length === customers.value.length,
+  set: (val: boolean) => {
+    if (val) {
+      selectedIds.value = customers.value.map((c) => c.id);
+    } else {
+      selectedIds.value = [];
+    }
+  },
+});
+
+async function handleBulkAction(action: "delete" | "activate" | "deactivate") {
+  if (selectedIds.value.length === 0) return;
+
+  const moduleTitle = labels.title;
+  
+  try {
+    if (action === "delete") {
+      if (!confirm(t("crud.confirmBulkDelete", { count: selectedIds.value.length, module: moduleTitle }))) return;
+      const res = await customerService.bulkSoftDelete(selectedIds.value);
+      if (res.success) {
+        toast.success(t("crud.successBulkDelete", { module: moduleTitle }));
+        selectedIds.value = [];
+        fetchCustomers();
+      }
+    } else {
+      const status = action === "activate";
+      const res = await customerService.bulkUpdateStatus(selectedIds.value, status);
+      if (res.success) {
+        toast.success(t("crud.successBulkUpdate", { module: moduleTitle }));
+        selectedIds.value = [];
+        fetchCustomers();
+      }
+    }
+  } catch (error) {
+    toast.error(t("crud.errorBulkAction"));
+  }
+}
 
 async function fetchCustomers() {
   loading.value = true;
@@ -176,7 +221,7 @@ function handlePageChange(page: number) {
   fetchCustomers();
 }
 
-/* async function toggleStatus(customer: Customer) {
+async function toggleStatus(customer: Customer) {
   try {
     const newStatus = !customer.status;
     const response = await customerService.updateStatus({
@@ -190,9 +235,9 @@ function handlePageChange(page: number) {
   } catch (error) {
     toast.error(t('crud.errorUpdate', { module: labels.name }));
   }
-} */
+}
 
-/* function openDeleteDialog(id: number) {
+function openDeleteDialog(id: number) {
   customerToDelete.value = id;
   isDeleteDialogOpen.value = true;
 }
@@ -214,7 +259,7 @@ async function confirmDelete() {
     isDeleteDialogOpen.value = false;
     customerToDelete.value = null;
   }
-} */
+}
 
 function handleSort(column: string) {
   if (pagination.sortBy === column) {
@@ -252,10 +297,27 @@ onMounted(() => {
         >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <!-- <Button @click="router.push('/admin/customers/create')">
+        <Button @click="router.push('/admin/customers/create')">
           <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.name }}
-        </Button> -->
+        </Button>
       </div>
+    </div>
+
+    <div v-if="selectedIds.length > 0" class="flex items-center gap-2 p-3 bg-muted/30 border rounded-lg animate-in fade-in slide-in-from-top-2">
+      <span class="text-sm font-medium mr-2">{{ t('crud.selectedCount', { count: selectedIds.length }) }}</span>
+      <Button variant="outline" size="sm" @click="handleBulkAction('activate')" class="h-8">
+        {{ crud.activate }}
+      </Button>
+      <Button variant="outline" size="sm" @click="handleBulkAction('deactivate')" class="h-8">
+        {{ crud.deactivate }}
+      </Button>
+      <Button variant="destructive" size="sm" @click="handleBulkAction('delete')" class="h-8">
+        <Trash2 class="mr-2 h-4 w-4" />
+        {{ crud.delete }}
+      </Button>
+      <Button variant="ghost" size="sm" @click="selectedIds = []" class="h-8 ml-auto">
+        {{ crud.cancel }}
+      </Button>
     </div>
 
     <div class="flex flex-col sm:flex-row items-center gap-4">
@@ -290,7 +352,15 @@ onMounted(() => {
       <Table class="min-w-[1200px]">
         <TableHeader>
           <TableRow>
-            <TableHead class="w-[20px]">#</TableHead>
+        <TableHeader>
+          <TableRow>
+            <TableHead class="w-[40px]">
+              <input 
+                type="checkbox" 
+                class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                v-model="isSelectAll"
+              />
+            </TableHead>
             <TableHead class="w-[120px]">{{ fields.code }}</TableHead>
             <TableHead>
               <Button
@@ -320,9 +390,14 @@ onMounted(() => {
             </TableCell>
           </TableRow>
           <template v-else-if="customers.length > 0">
-            <TableRow v-for="(customer, index) in customers" :key="customer.id">
-              <TableCell class="font-medium text-muted-foreground">
-                {{ (pagination.page - 1) * pagination.limit + index + 1 }}
+            <TableRow v-for="(customer, index) in customers" :key="customer.id" :class="{ 'bg-muted/30': selectedIds.includes(customer.id) }">
+              <TableCell>
+                <input 
+                  type="checkbox" 
+                  class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                  :value="customer.id"
+                  v-model="selectedIds"
+                />
               </TableCell>
               <TableCell>
                 <code
@@ -370,7 +445,8 @@ onMounted(() => {
               <TableCell class="w-[100px]">
                 <Badge
                   :variant="customer.status ? 'success' : 'warning'"
-                  class="flex items-center gap-1.5 px-3 py-1 font-bold cursor-default"
+                  class="flex items-center gap-1.5 px-3 py-1 font-bold cursor-pointer transition-all hover:opacity-80 active:scale-95"
+                  @click="toggleStatus(customer)"
                 >
                   <CheckCircle2 v-if="customer.status" class="h-3.5 w-3.5" />
                   <XCircle v-else class="h-3.5 w-3.5" />
@@ -381,7 +457,7 @@ onMounted(() => {
                   </span>
                 </Badge>
               </TableCell>
-              <!-- <TableCell class="text-right">
+              <TableCell class="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger as-child>
                     <Button
@@ -425,7 +501,7 @@ onMounted(() => {
                     >
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </TableCell> -->
+              </TableCell>
             </TableRow>
           </template>
           <TableRow v-else>
@@ -521,7 +597,7 @@ onMounted(() => {
     </div>
 
     <!-- Delete Confirmation Dialog -->
-    <!-- <AlertDialog v-model:open="isDeleteDialogOpen">
+    <AlertDialog v-model:open="isDeleteDialogOpen">
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{{ crud.confirmDelete }}</AlertDialogTitle>
@@ -537,6 +613,6 @@ onMounted(() => {
           >{{ crud.delete }}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
-    </AlertDialog> -->
+    </AlertDialog>
   </div>
 </template>

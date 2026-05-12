@@ -61,7 +61,8 @@ import {
   RefreshCw,
   Loader2,
   CheckCircle2,
-  XCircle
+  XCircle,
+  Scale
 } from "lucide-vue-next";
 import { UnitService } from "@/services/unit/unit.service";
 import type { Unit, PaginationMeta } from "@/types";
@@ -97,6 +98,46 @@ const statusOptions = computed(() => [
 
 const isDeleteDialogOpen = ref(false);
 const unitToDelete = ref<number | null>(null);
+
+const selectedIds = ref<number[]>([]);
+const isSelectAll = computed({
+  get: () => units.value.length > 0 && selectedIds.value.length === units.value.length,
+  set: (val: boolean) => {
+    if (val) {
+      selectedIds.value = units.value.map((u) => u.id);
+    } else {
+      selectedIds.value = [];
+    }
+  },
+});
+
+async function handleBulkAction(action: "delete" | "activate" | "deactivate") {
+  if (selectedIds.value.length === 0) return;
+
+  const moduleTitle = labels.title;
+  
+  try {
+    if (action === "delete") {
+      if (!confirm(t("crud.confirmBulkDelete", { count: selectedIds.value.length, module: moduleTitle }))) return;
+      const res = await unitService.bulkSoftDelete(selectedIds.value);
+      if (res.success) {
+        toast.success(t("crud.successBulkDelete", { module: moduleTitle }));
+        selectedIds.value = [];
+        fetchUnits();
+      }
+    } else {
+      const status = action === "activate";
+      const res = await unitService.bulkUpdateStatus(selectedIds.value, status);
+      if (res.success) {
+        toast.success(t("crud.successBulkUpdate", { module: moduleTitle }));
+        selectedIds.value = [];
+        fetchUnits();
+      }
+    }
+  } catch (error) {
+    toast.error(t("crud.errorBulkAction"));
+  }
+}
 
 async function fetchUnits() {
   loading.value = true;
@@ -241,6 +282,23 @@ onMounted(() => {
       </div>
     </div>
 
+    <div v-if="selectedIds.length > 0" class="flex items-center gap-2 p-3 bg-muted/30 border rounded-lg animate-in fade-in slide-in-from-top-2">
+      <span class="text-sm font-medium mr-2">{{ t('crud.selectedCount', { count: selectedIds.length }) }}</span>
+      <Button variant="outline" size="sm" @click="handleBulkAction('activate')" class="h-8">
+        {{ crud.activate }}
+      </Button>
+      <Button variant="outline" size="sm" @click="handleBulkAction('deactivate')" class="h-8">
+        {{ crud.deactivate }}
+      </Button>
+      <Button variant="destructive" size="sm" @click="handleBulkAction('delete')" class="h-8">
+        <Trash2 class="mr-2 h-4 w-4" />
+        {{ crud.delete }}
+      </Button>
+      <Button variant="ghost" size="sm" @click="selectedIds = []" class="h-8 ml-auto">
+        {{ crud.cancel }}
+      </Button>
+    </div>
+
     <div class="flex flex-col sm:flex-row items-center gap-4">
       <div class="relative flex-1 w-full max-w-sm">
         <Search
@@ -266,7 +324,13 @@ onMounted(() => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead class="w-[20px]">#</TableHead>
+            <TableHead class="w-[40px]">
+              <input 
+                type="checkbox" 
+                class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                v-model="isSelectAll"
+              />
+            </TableHead>
             <TableHead class="w-[180px]">{{ fields.code }}</TableHead>
             <TableHead>
               <Button
@@ -293,9 +357,14 @@ onMounted(() => {
             </TableCell>
           </TableRow>
           <template v-else-if="units.length > 0">
-            <TableRow v-for="(unit, index) in units" :key="unit.id">
-              <TableCell class="font-medium text-muted-foreground">
-                {{ (pagination.page - 1) * pagination.limit + index + 1 }}
+            <TableRow v-for="(unit, index) in units" :key="unit.id" :class="{ 'bg-muted/30': selectedIds.includes(unit.id) }">
+              <TableCell>
+                <input 
+                  type="checkbox" 
+                  class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                  :value="unit.id"
+                  v-model="selectedIds"
+                />
               </TableCell>
               <TableCell>
                 <code

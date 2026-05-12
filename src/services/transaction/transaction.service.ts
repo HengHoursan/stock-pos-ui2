@@ -30,4 +30,8 @@ export class TransactionService extends BaseService {
   async delete(id: number): Promise<ApiResponse<void>> {
     return this.post(`${this.endpoint}/soft-delete`, { id });
   }
+
+  async bulkDelete(ids: number[]): Promise<ApiResponse<void>> {
+    return this.post(`${this.endpoint}/bulk-soft-delete`, { ids });
+  }
 }

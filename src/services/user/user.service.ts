@@ -45,6 +45,14 @@ export class UserService extends BaseService {
   async forceDelete(id: number): Promise<ApiResponse<null>> {
     return this.post<ApiResponse<null>>("/users/force-delete", { id });
   }
+
+  async bulkSoftDelete(ids: number[]): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/users/bulk-soft-delete", { ids });
+  }
+
+  async bulkUpdateStatus(ids: number[], status: boolean): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/users/bulk-status-update", { ids, status });
+  }
 }
 
 export const userService = new UserService();

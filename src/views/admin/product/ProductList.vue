@@ -59,6 +59,8 @@ import {
   Package,
   RefreshCw,
   Loader2,
+  Copy,
+  CheckSquare,
 } from "lucide-vue-next";
 import { ProductService } from "@/services/product/product.service";
 import { CategoryService } from "@/services/category/category.service";
@@ -116,6 +118,67 @@ const pagination = reactive<PaginationMeta>({
 
 const isDeleteDialogOpen = ref(false);
 const productToDelete = ref<number | null>(null);
+
+const selectedIds = ref<number[]>([]);
+const isSelectAll = computed({
+  get: () => products.value.length > 0 && selectedIds.value.length === products.value.length,
+  set: (val: boolean) => {
+    if (val) {
+      selectedIds.value = products.value.map((p) => p.id);
+    } else {
+      selectedIds.value = [];
+    }
+  },
+});
+
+function toggleSelection(id: number) {
+  const index = selectedIds.value.indexOf(id);
+  if (index > -1) {
+    selectedIds.value.splice(index, 1);
+  } else {
+    selectedIds.value.push(id);
+  }
+}
+
+async function handleBulkAction(action: "delete" | "activate" | "deactivate") {
+  if (selectedIds.value.length === 0) return;
+
+  const moduleTitle = labels.title;
+  
+  try {
+    if (action === "delete") {
+      if (!confirm(t("crud.confirmBulkDelete", { count: selectedIds.value.length, module: moduleTitle }))) return;
+      const res = await productService.bulkSoftDelete(selectedIds.value);
+      if (res.success) {
+        toast.success(t("crud.successBulkDelete", { module: moduleTitle }));
+        selectedIds.value = [];
+        fetchProducts();
+      }
+    } else {
+      const status = action === "activate";
+      const res = await productService.bulkUpdateStatus(selectedIds.value, status);
+      if (res.success) {
+        toast.success(t("crud.successBulkUpdate", { module: moduleTitle }));
+        selectedIds.value = [];
+        fetchProducts();
+      }
+    }
+  } catch (error) {
+    toast.error(t("crud.errorBulkAction"));
+  }
+}
+
+async function duplicateProduct(id: number) {
+  try {
+    const res = await productService.duplicate(id);
+    if (res.success) {
+      toast.success(t("crud.successDuplicate", { module: labels.name }));
+      fetchProducts();
+    }
+  } catch (error) {
+    toast.error(t("crud.errorDuplicate", { module: labels.name }));
+  }
+}
 
 async function fetchProducts() {
   loading.value = true;
@@ -307,6 +370,23 @@ onMounted(() => {
       </div>
     </div>
 
+    <div v-if="selectedIds.length > 0" class="flex items-center gap-2 p-3 bg-muted/30 border rounded-lg animate-in fade-in slide-in-from-top-2">
+      <span class="text-sm font-medium mr-2">{{ t('crud.selectedCount', { count: selectedIds.length }) }}</span>
+      <Button variant="outline" size="sm" @click="handleBulkAction('activate')" class="h-8">
+        {{ crud.activate }}
+      </Button>
+      <Button variant="outline" size="sm" @click="handleBulkAction('deactivate')" class="h-8">
+        {{ crud.deactivate }}
+      </Button>
+      <Button variant="destructive" size="sm" @click="handleBulkAction('delete')" class="h-8">
+        <Trash2 class="mr-2 h-4 w-4" />
+        {{ crud.delete }}
+      </Button>
+      <Button variant="ghost" size="sm" @click="selectedIds = []" class="h-8 ml-auto">
+        {{ crud.cancel }}
+      </Button>
+    </div>
+
     <div class="flex flex-col sm:flex-row items-center gap-4">
       <div class="relative flex-1 w-full max-w-sm">
         <Search
@@ -383,7 +463,13 @@ onMounted(() => {
       <Table class="min-w-[1200px]">
         <TableHeader>
           <TableRow>
-            <TableHead class="w-[20px]">#</TableHead>
+            <TableHead class="w-[40px]">
+              <input 
+                type="checkbox" 
+                class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                v-model="isSelectAll"
+              />
+            </TableHead>
             <TableHead class="w-[120px]">{{ fields.code }}</TableHead>
             <TableHead class="w-[80px]">{{ fields.photo }}</TableHead>
             <TableHead>
@@ -415,9 +501,14 @@ onMounted(() => {
             </TableCell>
           </TableRow>
           <template v-else-if="products.length > 0">
-            <TableRow v-for="(product, index) in products" :key="product.id">
-              <TableCell class="font-medium text-muted-foreground">
-                {{ (pagination.page - 1) * pagination.limit + index + 1 }}
+            <TableRow v-for="(product, index) in products" :key="product.id" :class="{ 'bg-muted/30': selectedIds.includes(product.id) }">
+              <TableCell>
+                <input 
+                  type="checkbox" 
+                  class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                  :value="product.id"
+                  v-model="selectedIds"
+                />
               </TableCell>
               <TableCell>
                 <code
@@ -518,6 +609,14 @@ onMounted(() => {
                     >
                       <Pencil class="mr-2 h-4 w-4 opacity-70" />{{
                         crud.editBtn
+                      }}</DropdownMenuItem
+                    >
+                    <DropdownMenuItem
+                      @click="duplicateProduct(product.id)"
+                      class="cursor-pointer"
+                    >
+                      <Copy class="mr-2 h-4 w-4 opacity-70" />{{
+                        crud.duplicate
                       }}</DropdownMenuItem
                     >
                     <DropdownMenuSeparator />

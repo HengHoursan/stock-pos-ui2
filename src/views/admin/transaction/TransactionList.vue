@@ -109,6 +109,38 @@ const pagination = reactive<PaginationMeta>({
 const isDeleteDialogOpen = ref(false);
 const transactionToDelete = ref<number | null>(null);
 
+const selectedIds = ref<number[]>([]);
+const isSelectAll = computed({
+  get: () => transactions.value.length > 0 && selectedIds.value.length === transactions.value.length,
+  set: (val: boolean) => {
+    if (val) {
+      selectedIds.value = transactions.value.map((t) => t.id);
+    } else {
+      selectedIds.value = [];
+    }
+  },
+});
+
+async function handleBulkAction(action: "delete") {
+  if (selectedIds.value.length === 0) return;
+
+  const moduleTitle = labels.title;
+  
+  try {
+    if (action === "delete") {
+      if (!confirm(t("crud.confirmBulkDelete", { count: selectedIds.value.length, module: moduleTitle }))) return;
+      const res = await transactionService.bulkDelete(selectedIds.value);
+      if (res.success) {
+        toast.success(t("crud.successBulkDelete", { module: moduleTitle }));
+        selectedIds.value = [];
+        fetchTransactions();
+      }
+    }
+  } catch (error) {
+    toast.error(t("crud.errorBulkAction"));
+  }
+}
+
 async function fetchTransactions() {
   loading.value = true;
   try {
@@ -288,6 +320,17 @@ onMounted(() => {
       </div>
     </div>
 
+    <div v-if="selectedIds.length > 0" class="flex items-center gap-2 p-3 bg-muted/30 border rounded-lg animate-in fade-in slide-in-from-top-2">
+      <span class="text-sm font-medium mr-2">{{ t('crud.selectedCount', { count: selectedIds.length }) }}</span>
+      <Button variant="destructive" size="sm" @click="handleBulkAction('delete')" class="h-8">
+        <Trash2 class="mr-2 h-4 w-4" />
+        {{ crud.delete }}
+      </Button>
+      <Button variant="ghost" size="sm" @click="selectedIds = []" class="h-8 ml-auto">
+        {{ crud.cancel }}
+      </Button>
+    </div>
+
     <div class="flex flex-col sm:flex-row items-center gap-4">
       <div class="relative flex-1 w-full max-w-sm">
         <Search
@@ -323,7 +366,15 @@ onMounted(() => {
       <Table class="min-w-[1200px]">
         <TableHeader>
           <TableRow>
-            <TableHead class="w-[20px]">#</TableHead>
+        <TableHeader>
+          <TableRow>
+            <TableHead class="w-[40px]">
+              <input 
+                type="checkbox" 
+                class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                v-model="isSelectAll"
+              />
+            </TableHead>
             <TableHead>
               <Button
                 variant="ghost"
@@ -359,9 +410,15 @@ onMounted(() => {
             <TableRow
               v-for="(transaction, index) in transactions"
               :key="transaction.id"
+              :class="{ 'bg-muted/30': selectedIds.includes(transaction.id) }"
             >
-              <TableCell class="font-medium text-muted-foreground">
-                {{ (pagination.page - 1) * pagination.limit + index + 1 }}
+              <TableCell>
+                <input 
+                  type="checkbox" 
+                  class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                  :value="transaction.id"
+                  v-model="selectedIds"
+                />
               </TableCell>
               <TableCell class="text-base font-medium">
                 {{ formatDateTime(transaction.transactionDate) }}

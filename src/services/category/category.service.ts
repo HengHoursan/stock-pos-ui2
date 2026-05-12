@@ -41,4 +41,12 @@ export class CategoryService extends BaseService {
   async forceDelete(id: number): Promise<ApiResponse<null>> {
     return this.post<ApiResponse<null>>("/categories/force-delete", { id });
   }
+
+  async bulkSoftDelete(ids: number[]): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/categories/bulk-soft-delete", { ids });
+  }
+
+  async bulkUpdateStatus(ids: number[], status: boolean): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/categories/bulk-status-update", { ids, status });
+  }
 }
