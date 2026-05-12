@@ -200,7 +200,9 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
     <div
       class="flex flex-col md:flex-row md:items-center justify-between gap-4"
     >
+      <h2 class="text-3xl font-bold tracking-tight">
         {{ menu.salesReport }}
+      </h2>
     </div>
 
     <!-- Action Bar (Filters + Exports) - Now Under Title -->
@@ -260,6 +262,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
         <CardHeader
           class="flex flex-row items-center justify-between pb-2"
         >
+          <CardTitle class="text-sm font-medium">{{
             labels.totalRevenue
           }}</CardTitle>
           <TrendingUp class="h-4 w-4 text-blue-600" />
@@ -277,6 +280,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
         <CardHeader
           class="flex flex-row items-center justify-between pb-2"
         >
+          <CardTitle class="text-sm font-medium">{{
             labels.netSales
           }}</CardTitle>
           <LineChart class="h-4 w-4 text-green-600" />
@@ -294,6 +298,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
         <CardHeader
           class="flex flex-row items-center justify-between pb-2"
         >
+          <CardTitle class="text-sm font-medium">{{
             labels.totalReturns
           }}</CardTitle>
           <PieChart class="h-4 w-4 text-red-600" />

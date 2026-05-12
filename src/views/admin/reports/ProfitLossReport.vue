@@ -166,6 +166,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
       <!-- Revenue & Sales -->
       <Card class="border-l-4 border-l-green-600">
         <CardHeader class="flex flex-row items-center justify-between pb-2">
+          <CardTitle class="text-sm font-medium">{{
             labels.revenue
           }}</CardTitle>
           <TrendingUp class="h-4 w-4 text-green-600" />
@@ -183,6 +184,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
       <!-- COGS -->
       <Card class="border-l-4 border-l-orange-600">
         <CardHeader class="flex flex-row items-center justify-between pb-2">
+          <CardTitle class="text-sm font-medium">{{
             labels.cogs
           }}</CardTitle>
           <TrendingDown class="h-4 w-4 text-orange-600" />
@@ -200,6 +202,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
       <!-- Gross Profit -->
       <Card class="border-l-4 border-l-blue-600">
         <CardHeader class="flex flex-row items-center justify-between pb-2">
+          <CardTitle class="text-sm font-medium">{{
             labels.grossProfit
           }}</CardTitle>
           <PieChart class="h-4 w-4 text-blue-600" />
@@ -217,6 +220,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
       <!-- Operating Expenses (Purchases) -->
       <Card class="border-l-4 border-l-destructive">
         <CardHeader class="flex flex-row items-center justify-between pb-2">
+          <CardTitle class="text-sm font-medium">{{
             labels.otherExpenses
           }}</CardTitle>
           <TrendingDown class="h-4 w-4 text-destructive" />
@@ -236,6 +240,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
         class="border-l-4 border-l-primary bg-primary/5 md:col-span-2 lg:col-span-1 shadow-lg"
       >
         <CardHeader class="flex flex-row items-center justify-between pb-2">
+          <CardTitle class="text-sm font-medium">{{
             labels.netProfit
           }}</CardTitle>
           <DollarSign class="h-4 w-4 text-primary" />

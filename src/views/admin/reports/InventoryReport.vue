@@ -107,7 +107,7 @@ async function fetchData() {
       pagination.totalItems = res.data.lowStockAlerts.meta.totalItems;
     }
   } catch (error: any) {
-      labels.failedToLoad.replace('{module}', menu.inventoryReport),
+    toast.error(labels.failedToLoad.replace('{module}', menu.inventoryReport));
   } finally {
     loading.value = false;
   }
@@ -234,6 +234,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
     <div class="grid gap-4 md:grid-cols-2">
       <Card class="border-l-4 border-l-blue-600">
         <CardHeader class="flex flex-row items-center justify-between pb-2">
+          <CardTitle class="text-sm font-medium">{{
             labels.currentStockLevels
           }}</CardTitle>
           <Warehouse class="h-4 w-4 text-blue-600" />
@@ -250,6 +251,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
 
       <Card class="border-l-4 border-l-green-600">
         <CardHeader class="flex flex-row items-center justify-between pb-2">
+          <CardTitle class="text-sm font-medium">{{
             labels.totalValuation
           }}</CardTitle>
           <History class="h-4 w-4 text-green-600" />
@@ -272,6 +274,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
       <CardHeader class="pb-3 px-6 pt-6">
         <div class="flex items-center gap-2 text-destructive">
           <AlertTriangle class="h-5 w-5" />
+          <CardTitle class="text-lg font-bold text-destructive">{{
             labels.lowStockAlerts
           }}</CardTitle>
         </div>

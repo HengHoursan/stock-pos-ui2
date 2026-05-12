@@ -108,7 +108,7 @@ async function fetchData() {
       pagination.totalItems = res.data.purchasesBySupplier.meta.totalItems;
     }
   } catch (error: any) {
-      labels.failedToLoad.replace('{module}', menu.purchasesReport),
+    toast.error(labels.failedToLoad.replace('{module}', menu.purchasesReport));
   } finally {
     loading.value = false;
   }
@@ -192,7 +192,9 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
 <template>
   <div class="h-full flex flex-col gap-6">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <h2 class="text-3xl font-bold tracking-tight">
         {{ menu.purchasesReport }}
+      </h2>
     </div>
 
     <!-- Action Bar (Filters + Exports) - Now Under Title -->
@@ -246,6 +248,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
     <div class="grid gap-4 md:grid-cols-2">
       <Card class="border-l-4 border-l-blue-600">
         <CardHeader class="flex flex-row items-center justify-between pb-2">
+          <CardTitle class="text-sm font-medium">{{
             labels.totalExpenses
           }}</CardTitle>
           <TrendingDown class="h-4 w-4 text-blue-600" />
