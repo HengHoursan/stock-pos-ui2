@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("salePayment");
-const { labels: customerLabels } = useAppI18n("customer");
+const { t, labels, fields, crud, group } = useAppI18n("salePayment");
+const customerLabels = group("customer");
 
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";

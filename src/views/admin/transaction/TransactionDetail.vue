@@ -12,7 +12,8 @@ import { TransactionType } from "@/types";
 import { toast } from "vue-sonner";
 import { formatFullDateTime } from "@/utils/format";
 
-const { t, labels, fields, crud, common } = useAppI18n("transaction");
+const { t, labels, fields, crud, common, group } = useAppI18n("transaction");
+const productLabels = group("product");
 const route = useRoute();
 const router = useRouter();
 const transactionService = new TransactionService();
@@ -78,7 +79,7 @@ onMounted(() => {
             <CardHeader class="pb-3 border-b text-primary">
                 <CardTitle class="text-sm uppercase tracking-wider flex items-center gap-2">
                 <Package class="h-4 w-4" />
-                {{ t('modules.product') }}
+                {{ productLabels.name }}
                 </CardTitle>
             </CardHeader>
             <CardContent class="pt-6">

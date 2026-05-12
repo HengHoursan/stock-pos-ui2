@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("saleReturn");
+const { t, labels, fields, crud, group } = useAppI18n("saleReturn");
+const productLabels = group("product");
+const saleInvoiceLabels = group("saleInvoice");
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { toLocalISOString, formatNumberInput, formatCurrency } from "@/utils/format";
@@ -111,7 +113,7 @@ const formSchema = toTypedSchema(
     code: z.string().max(50).optional().nullable(),
     saleInvoiceId: z
       .number()
-      .min(1, t("validation.required", { field: t("modules.saleInvoice") })),
+      .min(1, t("validation.required", { field: saleInvoiceLabels.name })),
     returnDate: z
       .string()
       .min(1, t("validation.required", { field: fields.date })),
@@ -121,7 +123,7 @@ const formSchema = toTypedSchema(
         z.object({
           productId: z
             .number()
-            .min(1, t("validation.required", { field: t("modules.product") })),
+            .min(1, t("validation.required", { field: productLabels.name })),
           quantity: z
             .number()
             .min(
@@ -167,7 +169,7 @@ async function loadItemsFromInvoice(invoiceId: number) {
       }));
       replace(returnItems);
       toast.info(
-        t("validation.loadedFromSource", { source: t("modules.saleInvoice") }),
+        t("validation.loadedFromSource", { source: saleInvoiceLabels.name }),
       );
     }
   } catch (error) {
@@ -300,7 +302,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             <FormField v-slot="{ value, handleChange }" name="saleInvoiceId">
               <FormItem class="md:col-span-2">
                 <FormLabel
-                  >{{ t("modules.saleInvoice") }} ({{
+                  >{{ saleInvoiceLabels.name }} ({{
                     fields.completedOnly
                   }})</FormLabel
                 >
@@ -366,7 +368,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             >
               <p class="font-bold flex items-center gap-2 text-primary">
                 <FileText class="h-4 w-4" />
-                {{ t("modules.saleInvoice") }} {{ fields.details }}
+                {{ saleInvoiceLabels.name }} {{ fields.details }}
               </p>
               <div class="flex justify-between">
                 <span class="text-muted-foreground"
@@ -430,7 +432,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               <TableHeader class="bg-muted/30">
                 <TableRow>
                   <TableHead class="w-[40%]">{{
-                    t("modules.product")
+                    productLabels.name
                   }}</TableHead>
                   <TableHead class="w-[15%] text-right">{{
                     fields.unitPrice

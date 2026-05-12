@@ -39,7 +39,8 @@ import { PurchasePaymentService } from "@/services/purchase_payment/purchase_pay
 import type { PurchaseInvoice } from "@/types";
 import { toast } from "vue-sonner";
 
-const { t, labels, fields, crud } = useAppI18n("purchasePayment");
+const { t, labels, fields, crud, group } = useAppI18n("purchasePayment");
+const purchaseInvoiceLabels = group("purchaseInvoice");
 const route = useRoute();
 const router = useRouter();
 const ppService = new PurchasePaymentService();
@@ -55,9 +56,9 @@ const selectedInvoice = ref<PurchaseInvoice | null>(null);
 const formSchema = toTypedSchema(
   z.object({
     id: z.number(),
-    purchaseInvoiceId: z.number().min(1, t('validation.required', { field: t('modules.purchaseInvoice') })),
-    paymentDate: z.string().min(1, t('validation.required', { field: t('fields.invoiceDate') })),
-    amount: z.number().min(0.01, t('validation.min', { field: t('fields.paidAmount'), min: '0.01' })),
+    purchaseInvoiceId: z.number().min(1, t('validation.required', { field: purchaseInvoiceLabels.name })),
+    paymentDate: z.string().min(1, t('validation.required', { field: fields.date })),
+    amount: z.number().min(0.01, t('validation.min', { field: fields.paidAmount, min: '0.01' })),
     description: z.string().optional().nullable(),
   })
 );
@@ -204,7 +205,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField v-slot="{ value, handleChange }" name="purchaseInvoiceId">
                 <FormItem class="md:col-span-2">
-                  <FormLabel>{{ t('modules.purchaseInvoice') }}</FormLabel>
+                  <FormLabel>{{ purchaseInvoiceLabels.name }}</FormLabel>
                   <Select
                     :model-value="value ? String(value) : undefined"
                     @update:model-value="(v) => handleChange(Number(v))"

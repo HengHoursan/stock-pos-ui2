@@ -40,7 +40,8 @@ import { SalePaymentService } from "@/services/sale_payment/sale_payment.service
 import type { SaleInvoice } from "@/types";
 import { toast } from "vue-sonner";
 
-const { t, labels, fields, crud } = useAppI18n("salePayment");
+const { t, labels, fields, crud, group } = useAppI18n("salePayment");
+const saleInvoiceLabels = group("saleInvoice");
 const route = useRoute();
 const router = useRouter();
 const spService = new SalePaymentService();
@@ -56,9 +57,9 @@ const selectedInvoice = ref<SaleInvoice | null>(null);
 const formSchema = toTypedSchema(
   z.object({
     id: z.number(),
-    saleInvoiceId: z.number().min(1, t('validation.required', { field: t('modules.saleInvoice') })),
-    paymentDate: z.string().min(1, t('validation.required', { field: t('fields.invoiceDate') })),
-    amount: z.number().min(0.01, t('validation.min', { field: t('fields.paidAmount'), min: '0.01' })),
+    saleInvoiceId: z.number().min(1, t('validation.required', { field: saleInvoiceLabels.name })),
+    paymentDate: z.string().min(1, t('validation.required', { field: fields.date })),
+    amount: z.number().min(0.01, t('validation.min', { field: fields.paidAmount, min: '0.01' })),
     description: z.string().optional().nullable(),
   })
 );
@@ -208,7 +209,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField v-slot="{ value, handleChange }" name="saleInvoiceId">
                 <FormItem class="md:col-span-2">
-                  <FormLabel>{{ t('modules.saleInvoice') }}</FormLabel>
+                  <FormLabel>{{ saleInvoiceLabels.name }}</FormLabel>
                   <Select
                     :model-value="value ? String(value) : undefined"
                     @update:model-value="(v) => handleChange(Number(v))"

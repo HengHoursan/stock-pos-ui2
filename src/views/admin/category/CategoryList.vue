@@ -121,7 +121,7 @@ async function fetchCategories() {
     }
   } catch (error) {
     console.error("Fetch categories error:", error);
-    toast.error(t("crud.errorFetch", { module: t("modules.categories") }));
+    toast.error(t("crud.errorFetch", { module: labels.title }));
   } finally {
     loading.value = false;
   }

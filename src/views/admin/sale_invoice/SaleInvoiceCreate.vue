@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("saleInvoice");
+const { t, labels, fields, crud, group } = useAppI18n("saleInvoice");
+const customerLabels = group("customer");
+const productLabels = group("product");
+const saleOrderLabels = group("saleOrder");
 import { ref, onMounted, computed,watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { toLocalISOString, formatCurrency, formatNumberInput } from "@/utils/format";
@@ -94,7 +97,7 @@ onMounted(async () => {
           }));
         
         form.setFieldValue("details", mappedDetails as any);
-        toast.info(t('validation.loadedFromSource', { source: t('modules.saleOrder') }));
+        toast.info(t('validation.loadedFromSource', { source: saleOrderLabels.name }));
       }
     }
   } catch (error) {
@@ -111,7 +114,7 @@ const formSchema = toTypedSchema(
     description: z.string().optional().nullable(),
     details: z.array(
       z.object({
-        productId: z.number().min(1, t('validation.required', { field: t('modules.product') })),
+        productId: z.number().min(1, t('validation.required', { field: productLabels.name })),
         quantity: z.coerce.number().min(0.01, t('validation.min', { field: fields.quantity, min: '0.01' })),
         price: z.coerce.number().min(0, t('validation.min', { field: fields.price, min: '0' })),
         isSelected: z.boolean().default(true),
@@ -134,7 +137,7 @@ const form = useForm({
   },
 });
 
-const { remove, push, fields } = useFieldArray("details");
+const { remove, push, fields: detailsFields } = useFieldArray("details");
 
 function addProduct() {
   push({
@@ -296,7 +299,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                     :model-value="value"
                     @update:model-value="(v) => handleChange(v ? Number(v) : null)"
                     :options="customerOptions"
-                    :placeholder="t('crud.selectValue', { module: t('modules.customer') })"
+                    :placeholder="t('crud.selectValue', { module: customerLabels.name })"
                     :empty-message="crud.noResults"
                   />
                 </FormControl>
@@ -382,7 +385,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               <TableHeader class="bg-muted/30">
                 <TableRow>
                   <TableHead class="w-[5%]"></TableHead>
-                  <TableHead class="w-[40%]">{{ t('modules.product') }}</TableHead>
+                  <TableHead class="w-[40%]">{{ productLabels.name }}</TableHead>
                   <TableHead class="w-[20%] text-right">{{ fields.sellingPrice }}</TableHead>
                   <TableHead class="w-[15%] text-right">{{ fields.quantity }}</TableHead>
                   <TableHead class="w-[15%] text-right">{{ fields.rowTotal }}</TableHead>
@@ -390,12 +393,12 @@ const onSubmit = form.handleSubmit(async (values) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow v-if="fields.length === 0">
+                <TableRow v-if="detailsFields.length === 0">
                   <TableCell colspan="6" class="text-center py-8 text-muted-foreground italic">
                     {{ t('common.noData') }}
                   </TableCell>
                 </TableRow>
-                <TableRow v-for="(field, index) in fields" :key="field.key" :class="!((form.values.details || [])[index] as any).isSelected ? 'opacity-50 grayscale' : ''">
+                <TableRow v-for="(field, index) in detailsFields" :key="field.key" :class="!((form.values.details || [])[index] as any).isSelected ? 'opacity-50 grayscale' : ''">
                   <TableCell>
                     <FormField v-slot="{ value, handleChange }" :name="`details[${index}].isSelected`">
                       <FormItem class="mb-0">

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed,watch} from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Check, ChevronsUpDown, X } from 'lucide-vue-next'
 import { cn } from '@/lib/utils'
@@ -38,6 +38,15 @@ const { t } = useI18n()
 const open = ref(false)
 const searchTerm = ref('')
 
+const filteredOptions = computed(() => {
+  if (!searchTerm.value) return props.options
+  const term = searchTerm.value.toLowerCase()
+  return props.options.filter(opt => 
+    opt.label.toLowerCase().includes(term) || 
+    String(opt.value).toLowerCase().includes(term)
+  )
+})
+
 const selectedLabel = computed(() => {
   const selected = props.options.find((opt) => String(opt.value) === String(props.modelValue))
   return selected ? selected.label : null
@@ -47,7 +56,13 @@ function handleSelect(val: string | number | null) {
   emit('update:modelValue', val)
   emit('change', val)
   open.value = false
+  searchTerm.value = ''
 }
+
+// Reset search term when opening
+watch(open, (val) => {
+  if (val) searchTerm.value = ''
+})
 
 function clearSelection(e: Event) {
   e.stopPropagation()
@@ -75,9 +90,8 @@ function clearSelection(e: Event) {
         </Button>
       </PopoverTrigger>
       <PopoverContent class="w-[--reka-popover-trigger-width] p-0" align="start">
-      <Command v-model="searchTerm">
+      <Command v-model:search-term="searchTerm">
         <CommandInput 
-          v-model="searchTerm"
           :placeholder="placeholder || t('crud.searchPlaceholder')" 
         />
         <CommandList>
@@ -100,7 +114,7 @@ function clearSelection(e: Event) {
             </CommandItem>
             
             <CommandItem
-              v-for="option in options"
+              v-for="option in filteredOptions"
               :key="option.value"
               :value="option.label" 
               @select="handleSelect(option.value)"

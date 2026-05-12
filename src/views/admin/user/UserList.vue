@@ -120,7 +120,7 @@ async function fetchUsers() {
     }
   } catch (error) {
     console.error("Fetch users error:", error);
-    toast.error(t('crud.errorFetch', { module: t('modules.users') }));
+    toast.error(t('crud.errorFetch', { module: labels.title }));
   } finally {
     loading.value = false;
   }

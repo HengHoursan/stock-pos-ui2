@@ -23,7 +23,8 @@ import { PurchaseQuotationService } from "@/services/purchase_quotation/purchase
 import type { PurchaseQuotation } from "@/types";
 import { toast } from "vue-sonner";
 
-const { t, labels, fields, crud, common, actions } = useAppI18n("purchaseQuotation");
+const { t, labels, fields, crud, common, actions, group } = useAppI18n("purchaseQuotation");
+const productLabels = group("product");
 const route = useRoute();
 const router = useRouter();
 const pqService = new PurchaseQuotationService();
@@ -126,7 +127,7 @@ onMounted(() => {
               <TableHeader class="bg-muted/30">
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>{{ t('modules.product') }}</TableHead>
+                  <TableHead>{{ productLabels.name }}</TableHead>
                   <TableHead class="text-right">{{ fields.price }}</TableHead>
                   <TableHead class="text-center">{{ fields.quantity }}</TableHead>
                   <TableHead class="text-right">{{ fields.rowTotal }}</TableHead>

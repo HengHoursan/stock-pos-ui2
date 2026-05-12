@@ -40,7 +40,8 @@ import { ProductService } from "@/services/product/product.service";
 import type { Product } from "@/types";
 import { toast } from "vue-sonner";
 
-const { t, labels, fields, crud, common, actions } = useAppI18n("purchaseQuotation");
+const { t, labels, fields, crud, common, actions, group } = useAppI18n("purchaseQuotation");
+const productLabels = group("product");
 const router = useRouter();
 const pqService = new PurchaseQuotationService();
 const productService = new ProductService();
@@ -74,7 +75,7 @@ const formSchema = toTypedSchema(
         z.object({
           productId: z
             .number()
-            .min(1, t("validation.required", { field: t("modules.product") })),
+            .min(1, t("validation.required", { field: productLabels.name })),
           quantity: z
             .number()
             .min(
@@ -103,7 +104,7 @@ const form = useForm({
   },
 });
 
-const { remove, push, fields } = useFieldArray("details");
+const { remove, push, fields: detailsFields } = useFieldArray("details");
 
 function addProduct() {
   push({
@@ -257,7 +258,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               <TableHeader class="bg-muted/30">
                 <TableRow>
                   <TableHead class="w-[40%]">{{
-                    t("modules.product")
+                    productLabels.name
                   }}</TableHead>
                   <TableHead class="w-[20%] text-right">{{
                     fields.price
@@ -272,7 +273,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow v-if="fields.length === 0">
+                <TableRow v-if="detailsFields.length === 0">
                   <TableCell
                     colspan="5"
                     class="text-center py-8 text-muted-foreground italic"
@@ -280,7 +281,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                     {{ common.noData }}
                   </TableCell>
                 </TableRow>
-                <TableRow v-for="(field, index) in fields" :key="field.key">
+                <TableRow v-for="(field, index) in detailsFields" :key="field.key">
                   <TableCell>
                     <FormField
                       v-slot="{ value, handleChange }"

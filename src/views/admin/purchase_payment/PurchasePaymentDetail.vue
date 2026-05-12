@@ -17,7 +17,8 @@ import type { PurchasePayment } from "@/types";
 import { PaymentMethod } from "@/types/enums";
 import { toast } from "vue-sonner";
 
-const { t, labels, fields, crud } = useAppI18n("purchasePayment");
+const { t, labels, fields, crud, group } = useAppI18n("purchasePayment");
+const purchaseInvoiceLabels = group("purchaseInvoice");
 const route = useRoute();
 const router = useRouter();
 const ppService = new PurchasePaymentService();
@@ -102,7 +103,7 @@ onMounted(() => {
           </CardHeader>
           <CardContent class="pt-4 space-y-4 text-sm">
             <div>
-              <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Receipt class="h-3.5 w-3.5" />{{ t('modules.purchaseInvoices') }}</p>
+              <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Receipt class="h-3.5 w-3.5" />{{ purchaseInvoiceLabels.name }}</p>
               <div class="flex flex-wrap gap-1">
                 <Badge v-for="d in record.details" :key="d.id" variant="secondary" class="text-[10px] cursor-pointer hover:bg-muted transition-colors" @click="router.push(`/admin/purchase-invoices/${d.purchaseInvoiceId}`)">
                   {{ d.purchaseInvoice?.code || `ID: ${d.purchaseInvoiceId}` }}

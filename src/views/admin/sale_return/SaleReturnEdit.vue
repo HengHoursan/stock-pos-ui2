@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("saleReturn");
+const { t, labels, fields, crud, group } = useAppI18n("saleReturn");
+const customerLabels = group("customer");
+const productLabels = group("product");
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { toLocalISOString, formatNumberInput, formatCurrency } from "@/utils/format";
@@ -59,13 +61,13 @@ const formSchema = toTypedSchema(
   z.object({
     id: z.number(),
     code: z.string().max(50).optional().nullable(),
-    customerId: z.number().min(1, t('validation.required', { field: t('modules.customer') })),
+    customerId: z.number().min(1, t('validation.required', { field: customerLabels.name })),
     returnDate: z.string().min(1, t('validation.required', { field: fields.date })),
     description: z.string().optional().nullable(),
     details: z.array(
       z.object({
         id: z.number().optional().nullable(),
-        productId: z.number().min(1, t('validation.required', { field: t('modules.product') })),
+        productId: z.number().min(1, t('validation.required', { field: productLabels.name })),
         quantity: z.number().min(0.01, t('validation.min', { field: fields.quantity, min: '0.01' })),
         unitPrice: z.number().min(0, t('validation.min', { field: fields.price, min: '0' })),
         totalPrice: z.number().min(0, t('validation.min', { field: fields.price, min: '0' })),
@@ -86,7 +88,7 @@ const form = useForm({
   },
 });
 
-const { remove, push, fields } = useFieldArray("details");
+const { remove, push, fields: detailsFields } = useFieldArray("details");
 
 onMounted(async () => {
   const id = Number(route.params.id);
@@ -284,7 +286,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             <Table>
               <TableHeader class="bg-muted/30">
                 <TableRow>
-                  <TableHead class="w-[40%]">{{ t('modules.product') }}</TableHead>
+                  <TableHead class="w-[40%]">{{ productLabels.name }}</TableHead>
                   <TableHead class="w-[15%] text-right">{{ fields.unitPrice }}</TableHead>
                   <TableHead class="w-[15%] text-right">{{ fields.quantity }}</TableHead>
                   <TableHead class="w-[20%] text-right">{{ fields.rowTotal }}</TableHead>
@@ -297,7 +299,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                     {{ t('common.noData') }}
                   </TableCell>
                 </TableRow>
-                <TableRow v-for="(field, index) in fields" :key="field.key">
+                <TableRow v-for="(field, index) in detailsFields" :key="field.key">
                   <TableCell>
                     <FormField v-slot="{ value, handleChange }" :name="`details[${index}].productId`">
                       <FormItem class="mb-0">

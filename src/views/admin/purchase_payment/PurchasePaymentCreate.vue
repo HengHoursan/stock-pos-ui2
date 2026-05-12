@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("purchasePayment");
-const { labels: invoiceLabels } = useAppI18n("purchaseInvoice");
+const { t, labels, fields, crud, group } = useAppI18n("purchasePayment");
+const purchaseInvoiceLabels = group("purchaseInvoice");
+const purchaseOrderLabels = group("purchaseOrder");
 
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -117,7 +118,7 @@ const formSchema = toTypedSchema(
   z.object({
     purchaseInvoiceId: z
       .number()
-      .min(1, t("validation.required", { field: invoiceLabels.name })),
+      .min(1, t("validation.required", { field: purchaseInvoiceLabels.name })),
     paymentDate: z
       .string()
       .min(1, t("validation.required", { field: fields.date })),
@@ -241,7 +242,7 @@ const onSubmit = form.handleSubmit(async (values) => {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField v-slot="{ value, handleChange }" name="purchaseInvoiceId">
               <FormItem class="md:col-span-2">
-                <FormLabel>{{ invoiceLabels.name }}</FormLabel>
+                <FormLabel>{{ purchaseInvoiceLabels.name }}</FormLabel>
                 <Select
                   :model-value="value ? String(value) : undefined"
                   @update:model-value="(v) => handleChange(Number(v))"
@@ -378,7 +379,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                     class="pt-2"
                   >
                     <p class="text-xs text-orange-600 font-medium">
-                      * {{ t("modules.purchaseOrder.name") }} #{{
+                      * {{ purchaseOrderLabels.name }} #{{
                         selectedInvoice.details[0].purchaseOrder.code
                       }}
                       <span

@@ -43,7 +43,9 @@ import type { Product, Customer } from "@/types";
 import { QuotationStatus } from "@/types/enums";
 import { toast } from "vue-sonner";
 
-const { t, labels, fields, crud, common } = useAppI18n("saleQuotation");
+const { t, labels, fields, crud, common, group } = useAppI18n("saleQuotation");
+const customerLabels = group("customer");
+const productLabels = group("product");
 const route = useRoute();
 const router = useRouter();
 const sqService = new SaleQuotationService();
@@ -66,15 +68,15 @@ const formSchema = toTypedSchema(
   z.object({
     id: z.number(),
     code: z.string().max(50).optional().nullable(),
-    customerId: z.number().min(1, t('validation.required', { field: t('fields.customerId') })),
+    customerId: z.number().min(1, t('validation.required', { field: customerLabels.name })),
     quotationDate: z.string().min(1, t('validation.required', { field: t('fields.invoiceDate') })),
     description: z.string().optional().nullable(),
     details: z.array(
       z.object({
         id: z.number().optional().nullable(),
-        productId: z.number().min(1, t('validation.required', { field: t('modules.product') })),
+        productId: z.number().min(1, t('validation.required', { field: productLabels.name })),
         quantity: z.number().min(0.01, t('validation.min', { field: t('fields.quantity'), min: '0.01' })),
-        price: z.number().min(0, t('validation.min', { field: t('fields.price'), min: '0' })),
+        price: z.number().min(0, t('validation.min', { field: fields.price, min: '0' })),
       })
     ).min(1, t('validation.atLeastOneItem')),
   })
@@ -92,7 +94,7 @@ const form = useForm({
   },
 });
 
-const { remove, push, fields } = useFieldArray("details");
+const { remove, push, fields: detailsFields } = useFieldArray("details");
 
 onMounted(async () => {
   const id = Number(route.params.id);
@@ -313,7 +315,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             <Table>
               <TableHeader class="bg-muted/30">
                 <TableRow>
-                  <TableHead class="w-[40%]">{{ t('modules.product') }}</TableHead>
+                  <TableHead class="w-[40%]">{{ productLabels.name }}</TableHead>
                   <TableHead class="w-[20%] text-right">{{ fields.unitPrice }}</TableHead>
                   <TableHead class="w-[15%] text-right">{{ fields.quantity }}</TableHead>
                   <TableHead class="w-[20%] text-right">{{ fields.rowTotal }}</TableHead>
@@ -326,7 +328,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                     {{ common.noData }}
                   </TableCell>
                 </TableRow>
-                <TableRow v-for="(field, index) in fields" :key="field.key">
+                <TableRow v-for="(field, index) in detailsFields" :key="field.key">
                   <TableCell>
                     <FormField v-slot="{ value, handleChange }" :name="`details[${index}].productId`">
                       <FormItem class="mb-0">

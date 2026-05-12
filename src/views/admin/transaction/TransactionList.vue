@@ -203,7 +203,7 @@ async function confirmDelete() {
       );
     }
   } catch (error) {
-    toast.error(t("crud.errorDelete", { module: t("modules.transaction") }));
+    toast.error(t("crud.errorDelete", { module: labels.name }));
   } finally {
     isDeleteDialogOpen.value = false;
     transactionToDelete.value = null;

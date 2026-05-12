@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("purchaseReturn");
+const { t, labels, fields, crud, group } = useAppI18n("purchaseReturn");
+const productLabels = group("product");
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
@@ -157,7 +158,7 @@ onMounted(() => {
               <TableHeader class="bg-muted/30">
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>{{ t('modules.product') }}</TableHead>
+                  <TableHead>{{ productLabels.name }}</TableHead>
                   <TableHead class="text-right">{{ fields.quantity }}</TableHead>
                   <TableHead class="text-right">{{ fields.unitPrice }}</TableHead>
                   <TableHead class="text-right">{{ fields.rowTotal }}</TableHead>

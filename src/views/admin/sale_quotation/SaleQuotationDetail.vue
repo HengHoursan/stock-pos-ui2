@@ -24,7 +24,8 @@ import { SaleQuotationService } from "@/services/sale_quotation/sale_quotation.s
 import type { SaleQuotation } from "@/types";
 import { QuotationStatus } from "@/types/enums";
 import { toast } from "vue-sonner";
-const { t, labels, fields, crud, common, actions } = useAppI18n("saleQuotation");
+const { t, labels, fields, crud, common, actions, group } = useAppI18n("saleQuotation");
+const productLabels = group("product");
 const route = useRoute();
 const router = useRouter();
 const sqService = new SaleQuotationService();
@@ -157,7 +158,7 @@ onMounted(() => {
               <TableHeader class="bg-muted/30">
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>{{ t('modules.product') }}</TableHead>
+                  <TableHead>{{ productLabels.name }}</TableHead>
                   <TableHead class="text-right">{{ fields.unitPrice }}</TableHead>
                   <TableHead class="text-center">{{ fields.quantity }}</TableHead>
                   <TableHead class="text-right">{{ fields.rowTotal }}</TableHead>

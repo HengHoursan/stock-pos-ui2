@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("purchasePayment");
+const { t, labels, fields, crud, group } = useAppI18n("purchasePayment");
+const purchaseInvoiceLabels = group("purchaseInvoice");
 import { ref, onMounted, reactive, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
@@ -148,7 +149,7 @@ async function fetchData() {
     }
   } catch (error) {
     console.error("Fetch error:", error);
-    toast.error(t("crud.errorFetch", { module: t("modules.purchasePayment") }));
+    toast.error(t("crud.errorFetch", { module: labels.name }));
   } finally {
     loading.value = false;
   }
@@ -210,18 +211,18 @@ async function confirmDelete() {
     const response = await ppService.softDelete(recordToDelete.value);
     if (response.success) {
       toast.success(
-        t("crud.successDelete", { module: t("modules.purchasePayment") }),
+        t("crud.successDelete", { module: labels.name }),
       );
       fetchData();
     } else {
       toast.error(
         response.message ||
-          t("crud.errorDelete", { module: t("modules.purchasePayment") }),
+          t("crud.errorDelete", { module: labels.name }),
       );
     }
   } catch (error) {
     toast.error(
-      t("crud.errorDelete", { module: t("modules.purchasePayment") }),
+      t("crud.errorDelete", { module: labels.name }),
     );
   } finally {
     isDeleteDialogOpen.value = false;
@@ -354,7 +355,7 @@ onMounted(() => {
           <TableRow>
             <TableHead class="w-[50px]">#</TableHead>
             <TableHead class="w-[150px]">{{ fields.code }}</TableHead>
-            <TableHead>{{ t('modules.purchaseInvoice.name') }}</TableHead>
+            <TableHead>{{ purchaseInvoiceLabels.name }}</TableHead>
             <TableHead>
               <Button
                 variant="ghost"

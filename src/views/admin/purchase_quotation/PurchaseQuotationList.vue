@@ -116,7 +116,7 @@ async function fetchData() {
   } catch (error) {
     console.error("Fetch error:", error);
     toast.error(
-      t("crud.errorFetch", { module: t("modules.purchaseQuotation") }),
+      t("crud.errorFetch", { module: labels.name }),
     );
   } finally {
     loading.value = false;
@@ -163,13 +163,13 @@ async function confirmDelete() {
     const response = await pqService.delete(recordToDelete.value);
     if (response.success) {
       toast.success(
-        t("crud.successDelete", { module: t("modules.purchaseQuotation") }),
+        t("crud.successDelete", { module: labels.name }),
       );
       fetchData();
     }
   } catch (error) {
     toast.error(
-      t("crud.errorDelete", { module: t("modules.purchaseQuotation") }),
+      t("crud.errorDelete", { module: labels.name }),
     );
   } finally {
     isDeleteDialogOpen.value = false;

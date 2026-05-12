@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("purchaseOrder");
+const { t, labels, fields, crud, group } = useAppI18n("purchaseOrder");
+const productLabels = group("product");
+const purchaseQuotationLabels = group("purchaseQuotation");
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { toLocalISOString, formatNumberInput, formatCurrency } from "@/utils/format";
@@ -96,7 +98,7 @@ onMounted(async () => {
         form.setFieldValue("details" as any, mappedDetails);
         toast.info(
           t("validation.loadedFromSource", {
-            source: t("modules.purchaseQuotation"),
+            source: purchaseQuotationLabels.name,
           }),
         );
       }
@@ -121,7 +123,7 @@ const formSchema = toTypedSchema(
         z.object({
           productId: z
             .number()
-            .min(1, t("validation.required", { field: t("modules.product") })),
+            .min(1, t("validation.required", { field: productLabels.name })),
           quantity: z
             .number()
             .min(
@@ -153,7 +155,7 @@ const form = useForm({
   },
 });
 
-const { remove, push, fields } = useFieldArray("details");
+const { remove, push, fields: detailsFields } = useFieldArray("details");
 
 function addProduct() {
   push({
@@ -316,7 +318,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               <TableHeader class="bg-muted/30">
                 <TableRow>
                   <TableHead class="w-[40%]">{{
-                    t("modules.product")
+                    productLabels.name
                   }}</TableHead>
                   <TableHead class="w-[20%] text-right">{{
                     fields.price
@@ -331,7 +333,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow v-if="fields.length === 0">
+                <TableRow v-if="detailsFields.length === 0">
                   <TableCell
                     colspan="5"
                     class="text-center py-8 text-muted-foreground italic"
@@ -339,7 +341,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                     {{ t("common.noData") }}
                   </TableCell>
                 </TableRow>
-                <TableRow v-for="(field, index) in fields" :key="field.key">
+                <TableRow v-for="(field, index) in detailsFields" :key="field.key">
                   <TableCell>
                     <FormField
                       v-slot="{ value, handleChange }"
@@ -463,7 +465,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               :disabled="submitting"
               >{{ crud.cancel }}</Button
             >
-            <Button type="submit" :disabled="submitting || fields.length === 0">
+            <Button type="submit" :disabled="submitting || detailsFields.length === 0">
               <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
               {{ crud.save }}
             </Button>

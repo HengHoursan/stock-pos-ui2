@@ -95,7 +95,7 @@ onMounted(() => {
       <!-- Image Section -->
       <Card class="lg:col-span-1 overflow-hidden h-fit">
         <CardHeader class="pb-3">
-          <CardTitle class="text-lg">{{ $t("crud.image") }}</CardTitle>
+          <CardTitle class="text-lg">{{ crud.image }}</CardTitle>
         </CardHeader>
         <CardContent>
           <div class="aspect-square relative rounded-lg border bg-muted/50 flex items-center justify-center overflow-hidden">
@@ -111,49 +111,49 @@ onMounted(() => {
       <div class="lg:col-span-2 space-y-6">
         <Card>
           <CardHeader class="pb-3">
-            <CardTitle class="text-lg">{{ $t('crud.generalInfo') }}</CardTitle>
+            <CardTitle class="text-lg">{{ crud.generalInfo }}</CardTitle>
           </CardHeader>
           <CardContent>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Type class="mr-2 h-4 w-4" />{{ $t('fields.name') }}</div>
+                  <Type class="mr-2 h-4 w-4" />{{ fields.name }}</div>
                 <p class="font-medium text-base">{{ unit.name }}</p>
               </div>
               
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Barcode class="mr-2 h-4 w-4" />{{ $t('fields.code') }}</div>
+                  <Barcode class="mr-2 h-4 w-4" />{{ fields.code }}</div>
                 <p class="font-medium text-base">{{ unit.code || 'N/A' }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Globe class="mr-2 h-4 w-4" />{{ $t('fields.slug') }}</div>
+                  <Globe class="mr-2 h-4 w-4" />{{ fields.slug }}</div>
                 <p class="font-medium text-base">{{ unit.slug }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Ruler class="mr-2 h-4 w-4" />{{ $t('fields.symbol') }}</div>
+                  <Ruler class="mr-2 h-4 w-4" />{{ fields.symbol }}</div>
                 <p class="font-medium text-base">{{ unit.symbol || 'N/A' }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Calculator class="mr-2 h-4 w-4" />{{ $t('fields.conversionFactor') }}</div>
+                  <Calculator class="mr-2 h-4 w-4" />{{ fields.conversionFactor }}</div>
                 <p class="font-medium text-base">{{ unit.conversionFactor || 1 }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Coins class="mr-2 h-4 w-4" />{{ $t('fields.defaultPrice') }}</div>
+                  <Coins class="mr-2 h-4 w-4" />{{ fields.defaultPrice }}</div>
                 <p class="font-medium text-base">{{ unit.defaultPrice || 0 }}</p>
               </div>
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Folder class="mr-2 h-4 w-4" />{{ $t('fields.parentOf', { module: $t('modules.unit') }) }}</div>
+                  <Folder class="mr-2 h-4 w-4" />{{ t('fields.parentOf', { module: labels.name }) }}</div>
                 <p class="font-medium text-base">
                   <template v-if="parentUnit">
                     <router-link :to="`/admin/units/${parentUnit.id}`" class="text-primary hover:underline inline-flex items-center">
@@ -166,7 +166,7 @@ onMounted(() => {
 
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <AlignLeft class="mr-2 h-4 w-4" />{{ $t('fields.isCalculateDetail') }}</div>
+                  <AlignLeft class="mr-2 h-4 w-4" />{{ fields.isCalculateDetail }}</div>
                 <div class="mt-1">
                   <Badge :variant="unit.isCalculateDetail ? 'success' : 'secondary'" class="text-[10px] h-5 px-2 uppercase font-bold shadow-sm">
                     {{ unit.isCalculateDetail ? "Yes" : "No" }}
@@ -180,19 +180,19 @@ onMounted(() => {
 
         <Card>
           <CardHeader class="pb-3">
-            <CardTitle class="text-lg">{{ $t('crud.systemInfo') }}</CardTitle>
+            <CardTitle class="text-lg">{{ crud.systemInfo }}</CardTitle>
           </CardHeader>
           <CardContent>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Calendar class="mr-2 h-4 w-4" />{{ $t('fields.createdAt') }}</div>
+                  <Calendar class="mr-2 h-4 w-4" />{{ fields.createdAt }}</div>
                 <p class="font-medium text-base">{{ formatDateTime(unit.createdAt) }}</p>
               </div>
               
               <div class="space-y-1">
                 <div class="flex items-center text-sm text-muted-foreground">
-                  <Calendar class="mr-2 h-4 w-4" />{{ $t('fields.updatedAt') }}</div>
+                  <Calendar class="mr-2 h-4 w-4" />{{ fields.updatedAt }}</div>
                 <p class="font-medium text-base">{{ formatDateTime(unit.updatedAt) }}</p>
               </div>
             </div>

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("purchaseReturn");
+const { t, labels, fields, crud, group } = useAppI18n("purchaseReturn");
+const productLabels = group("product");
+const purchaseInvoiceLabels = group("purchaseInvoice");
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { toLocalISOString, formatNumberInput, formatCurrency } from "@/utils/format";
@@ -127,7 +129,7 @@ const formSchema = toTypedSchema(
         z.object({
           productId: z
             .number()
-            .min(1, t("validation.required", { field: t("modules.product") })),
+            .min(1, t("validation.required", { field: productLabels.name })),
           quantity: z
             .number()
             .min(
@@ -164,7 +166,7 @@ const form = useForm({
   },
 });
 
-const { remove, push, fields, replace } = useFieldArray("details");
+const { remove, push, fields: detailsFields, replace } = useFieldArray("details");
 
 async function loadItemsFromInvoice(invoiceId: number) {
   try {
@@ -181,7 +183,7 @@ async function loadItemsFromInvoice(invoiceId: number) {
       replace(returnItems);
       toast.info(
         t("validation.loadedFromSource", {
-          source: t("modules.purchaseInvoice"),
+          source: purchaseInvoiceLabels.name,
         }),
       );
     }
@@ -339,7 +341,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             >
               <FormItem>
                 <FormLabel
-                  >{{ t("modules.purchaseInvoice") }} ({{
+                  >{{ purchaseInvoiceLabels.name }} ({{
                     t("fields.optional")
                   }})</FormLabel
                 >
@@ -403,7 +405,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             <Button
               type="submit"
               class="w-full"
-              :disabled="submitting || fields.length === 0"
+              :disabled="submitting || detailsFields.length === 0"
             >
               <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
               {{ crud.save }}
@@ -445,7 +447,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               <TableHeader class="bg-muted/30">
                 <TableRow>
                   <TableHead class="w-[40%]">{{
-                    t("modules.product")
+                    productLabels.name
                   }}</TableHead>
                   <TableHead class="w-[15%] text-right">{{
                     fields.unitPrice
@@ -460,7 +462,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow v-if="fields.length === 0">
+                <TableRow v-if="detailsFields.length === 0">
                   <TableCell
                     colspan="5"
                     class="text-center py-8 text-muted-foreground italic"
@@ -468,7 +470,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                     {{ t("common.noData") }}
                   </TableCell>
                 </TableRow>
-                <TableRow v-for="(field, index) in fields" :key="field.key">
+                <TableRow v-for="(field, index) in detailsFields" :key="field.key">
                   <TableCell>
                     <FormField
                       v-slot="{ value, handleChange }"

@@ -137,7 +137,7 @@ async function fetchCustomers() {
     }
   } catch (error) {
     console.error("Fetch customers error:", error);
-    toast.error(t("crud.errorFetch", { module: t("modules.customers") }));
+    toast.error(t("crud.errorFetch", { module: labels.title }));
   } finally {
     loading.value = false;
   }
@@ -185,10 +185,10 @@ function handlePageChange(page: number) {
     });
     if (response.success) {
       customer.status = newStatus;
-      toast.success(t('crud.successUpdate', { module: t('modules.customer') }));
+      toast.success(t('crud.successUpdate', { module: labels.name }));
     }
   } catch (error) {
-    toast.error(t('crud.errorUpdate', { module: t('modules.customer') }));
+    toast.error(t('crud.errorUpdate', { module: labels.name }));
   }
 } */
 
@@ -203,13 +203,13 @@ async function confirmDelete() {
   try {
     const response = await customerService.softDelete(customerToDelete.value);
     if (response.success) {
-      toast.success(t('crud.successDelete', { module: t('modules.customer') }));
+      toast.success(t('crud.successDelete', { module: labels.name }));
       fetchCustomers();
     } else {
-      toast.error(response.message || t('crud.errorDelete', { module: t('modules.customer') }));
+      toast.error(response.message || t('crud.errorDelete', { module: labels.name }));
     }
   } catch (error) {
-    toast.error(t('crud.errorDelete', { module: t('modules.customer') }));
+    toast.error(t('crud.errorDelete', { module: labels.name }));
   } finally {
     isDeleteDialogOpen.value = false;
     customerToDelete.value = null;
@@ -275,14 +275,14 @@ onMounted(() => {
         v-model="filters.status"
         :options="statusOptions"
         :placeholder="crud.filterByStatus"
-        class="w-full sm:w-[180px]"
+        class="w-full sm:w-[220px]"
       />
 
       <ClearableSelect
         v-model="filters.customerType"
         :options="customerTypeOptions"
         :placeholder="crud.filterByType"
-        class="w-full sm:w-[180px]"
+        class="w-full sm:w-[220px]"
       />
     </div>
 

@@ -17,7 +17,9 @@ import { SalePaymentService } from "@/services/sale_payment/sale_payment.service
 import type { SalePayment } from "@/types";
 import { toast } from "vue-sonner";
 
-const { t, labels, fields, crud } = useAppI18n("salePayment");
+const { t, labels, fields, crud, group } = useAppI18n("salePayment");
+const saleInvoiceLabels = group("saleInvoice");
+const productLabels = group("product");
 const route = useRoute();
 const router = useRouter();
 const spService = new SalePaymentService();
@@ -95,7 +97,7 @@ onMounted(() => {
           </CardHeader>
           <CardContent class="pt-4 space-y-4 text-sm">
             <div>
-              <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Receipt class="h-3.5 w-3.5" />{{ t('modules.saleInvoices') }}</p>
+              <p class="text-muted-foreground mb-1 flex items-center gap-1.5"><Receipt class="h-3.5 w-3.5" />{{ saleInvoiceLabels.name }}</p>
               <div class="flex flex-wrap gap-1">
                 <Badge v-for="d in record.details" :key="d.id" variant="secondary" class="text-[10px] cursor-pointer hover:bg-muted transition-colors" @click="router.push(`/admin/sale-invoices/${d.saleInvoiceId}`)">
                   {{ d.saleInvoice?.code || `ID: ${d.saleInvoiceId}` }}
@@ -153,7 +155,7 @@ onMounted(() => {
                   <thead class="bg-muted text-muted-foreground">
                     <tr>
                       <th class="px-4 py-2 text-left font-medium">{{ fields.code }}</th>
-                      <th class="px-4 py-2 text-left font-medium">{{ t('modules.product') }}</th>
+                      <th class="px-4 py-2 text-left font-medium">{{ productLabels.name }}</th>
                       <th class="px-4 py-2 text-right font-medium">{{ fields.totalPrice }}</th>
                       <th class="px-4 py-2 text-right font-medium">{{ fields.paidAmount }}</th>
                     </tr>

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud, actions } = useAppI18n("saleInvoice");
+const { t, labels, fields, crud, actions, group } = useAppI18n("saleInvoice");
+const productLabels = group("product");
+const saleOrderLabels = group("saleOrder");
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
@@ -226,9 +228,7 @@ onMounted(() => {
             </div>
             <div v-if="record.details?.some((d) => d.saleOrder)">
               <p class="text-muted-foreground mb-1 flex items-center gap-1.5">
-                <ArrowRightCircle class="h-3.5 w-3.5" />{{
-                  t("modules.saleOrder")
-                }}
+                <ArrowRightCircle class="h-3.5 w-3.5" />{{ saleOrderLabels.name }}
               </p>
               <div class="flex flex-wrap gap-1 mt-1">
                 <div
@@ -322,7 +322,7 @@ onMounted(() => {
               <TableHeader class="bg-muted/30">
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>{{ t("modules.product") }}</TableHead>
+                  <TableHead>{{ productLabels.name }}</TableHead>
                   <TableHead class="text-right">{{
                     fields.sellingPrice
                   }}</TableHead>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("salePayment");
+const { t, labels, fields, crud, group } = useAppI18n("salePayment");
+const saleInvoiceLabels = group("saleInvoice");
 import { ref, onMounted, reactive, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
@@ -142,7 +143,7 @@ async function fetchData() {
     }
   } catch (error) {
     console.error("Fetch error:", error);
-    toast.error(t('crud.errorFetch', { module: t('modules.salePayment') }));
+    toast.error(t('crud.errorFetch', { module: labels.name }));
   } finally {
     loading.value = false;
   }
@@ -186,11 +187,11 @@ async function confirmDelete() {
   try {
     const response = await spService.softDelete(recordToDelete.value);
     if (response.success) {
-      toast.success(t('crud.successDelete', { module: t('modules.salePayment') }));
+      toast.success(t('crud.successDelete', { module: labels.name }));
       fetchData();
     }
   } catch (error) {
-    toast.error(t('crud.errorDelete', { module: t('modules.salePayment') }));
+    toast.error(t('crud.errorDelete', { module: labels.name }));
   } finally {
     isDeleteDialogOpen.value = false;
     recordToDelete.value = null;
@@ -290,7 +291,7 @@ onMounted(() => {
           <TableRow>
             <TableHead class="w-[50px]">#</TableHead>
             <TableHead class="w-[150px]">{{ fields.code }}</TableHead>
-            <TableHead>{{ t('modules.saleInvoice') }}</TableHead>
+            <TableHead>{{ saleInvoiceLabels.name }}</TableHead>
             <TableHead>
               <Button variant="ghost" @click="handleSort('paymentDate')" class="-ml-4 h-8 font-medium">
                 {{ fields.transactionDate }}<ArrowUpDown class="ml-1 h-3 w-3" />
