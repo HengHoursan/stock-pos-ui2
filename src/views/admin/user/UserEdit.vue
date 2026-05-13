@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("user");
+const { t, labels, crud } = useAppI18n("user");
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useForm } from "vee-validate";
@@ -36,6 +36,7 @@ import { userService } from "@/services/user/user.service";
 import { roleService } from "@/services/role/role.service";
 import type { Role } from "@/types";
 import { toast } from "vue-sonner";
+import ImageUpload from "@/components/upload/ImageUpload.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -48,12 +49,16 @@ const userId = Number(route.params.id);
 
 const formSchema = toTypedSchema(
   z.object({
-    username: z.string().min(3, "Username must be at least 3 characters").max(60),
+    username: z
+      .string()
+      .min(3, "Username must be at least 3 characters")
+      .max(60),
     email: z.string().email("Invalid email address"),
     password: z.string().optional(),
     roleId: z.string().nullable().optional(),
     status: z.boolean().default(true),
-  })
+    photo: z.string().optional(),
+  }),
 );
 
 const form = useForm({
@@ -61,9 +66,9 @@ const form = useForm({
   initialValues: {
     username: "",
     email: "",
-    password: "",
     roleId: null,
     status: true,
+    photo: "",
   },
 });
 
@@ -93,14 +98,15 @@ const fetchUser = async () => {
         email: user.email,
         status: user.status,
         roleId: user.role ? String(user.role.id) : null,
+        photo: user.photo || "",
       });
     } else {
-      toast.error(t('crud.errorFetch', { module: labels.name }));
-      router.push('/admin/users');
+      toast.error(t("crud.errorFetch", { module: labels.name }));
+      router.push("/admin/users");
     }
   } catch (error) {
-    console.error('Failed to fetch user configuration:', error);
-    toast.error(t('crud.errorFetch', { module: labels.name }));
+    console.error("Failed to fetch user configuration:", error);
+    toast.error(t("crud.errorFetch", { module: labels.name }));
   } finally {
     fetchingData.value = false;
   }
@@ -114,18 +120,10 @@ const onSubmit = form.handleSubmit(async (values) => {
       username: values.username,
       email: values.email,
       status: values.status,
+      photo: values.photo,
     };
     if (values.roleId && values.roleId !== "null") {
       payload.roleId = Number(values.roleId);
-    }
-    // Only pass password if it was entered
-    if (values.password && values.password.trim().length > 0) {
-      if (values.password.trim().length < 6) {
-        toast.error("Password must be at least 6 characters.");
-        submitting.value = false;
-        return;
-      }
-      payload.password = values.password.trim();
     }
 
     const response = await userService.update(payload);
@@ -134,7 +132,7 @@ const onSubmit = form.handleSubmit(async (values) => {
       router.push("/admin/users");
     } else {
       toast.error(
-        response.message || t("crud.errorUpdate", { module: labels.name })
+        response.message || t("crud.errorUpdate", { module: labels.name }),
       );
     }
   } catch (error) {
@@ -163,16 +161,18 @@ onMounted(() => {
 
     <Card>
       <CardHeader>
-        <CardTitle>{{ t('crud.info', { module: labels.name }) }}</CardTitle>
+        <CardTitle>{{ t("crud.info", { module: labels.name }) }}</CardTitle>
       </CardHeader>
       <CardContent>
         <form @submit="onSubmit" id="userForm" class="space-y-6">
           <div class="flex-1 space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
               <FormField v-slot="{ componentField }" name="username">
                 <FormItem>
-                  <FormLabel>{{ $t("auth.username") }} <span class="text-destructive">*</span></FormLabel>
+                  <FormLabel
+                    >{{ $t("auth.username") }}
+                    <span class="text-destructive">*</span></FormLabel
+                  >
                   <FormControl>
                     <Input placeholder="johndoe123" v-bind="componentField" />
                   </FormControl>
@@ -182,41 +182,50 @@ onMounted(() => {
 
               <FormField v-slot="{ componentField }" name="email">
                 <FormItem>
-                  <FormLabel>{{ $t("auth.email") }} <span class="text-destructive">*</span></FormLabel>
+                  <FormLabel
+                    >{{ $t("auth.email") }}
+                    <span class="text-destructive">*</span></FormLabel
+                  >
                   <FormControl>
-                    <Input type="email" placeholder="johndoe@example.com" v-bind="componentField" />
+                    <Input
+                      type="email"
+                      placeholder="johndoe@example.com"
+                      v-bind="componentField"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               </FormField>
-
-              <FormField v-slot="{ componentField }" name="password">
-                <FormItem>
-                  <FormLabel>New Password</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="••••••••" v-bind="componentField" />
-                  </FormControl>
-                  <FormDescription>Leave blank if you do not want to change it.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              </FormField>
-
               <FormField v-slot="{ field }" name="roleId">
                 <FormItem>
-                  <FormLabel>{{ $t('auth.role') }}</FormLabel>
+                  <FormLabel>{{ $t("auth.role") }}</FormLabel>
                   <Select v-bind="field" :disabled="fetchingRoles">
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue :placeholder="$t('fields.selectRole')">
-                          <span v-if="field.value && roles.find((r) => String(r.id) === field.value)">
-                            {{ roles.find((r) => String(r.id) === field.value)?.name }}
+                          <span
+                            v-if="
+                              field.value &&
+                              roles.find((r) => String(r.id) === field.value)
+                            "
+                          >
+                            {{
+                              roles.find((r) => String(r.id) === field.value)
+                                ?.name
+                            }}
                           </span>
                         </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="null">{{ $t('crud.none') }}</SelectItem>
-                      <SelectItem v-for="ro in roles" :key="ro.id" :value="String(ro.id)">
+                      <SelectItem value="null">{{
+                        $t("crud.none")
+                      }}</SelectItem>
+                      <SelectItem
+                        v-for="ro in roles"
+                        :key="ro.id"
+                        :value="String(ro.id)"
+                      >
                         {{ ro.name }}
                       </SelectItem>
                     </SelectContent>
@@ -227,11 +236,17 @@ onMounted(() => {
 
               <div class="md:col-span-2 mt-2">
                 <FormField v-slot="{ value, handleChange }" name="status">
-                  <FormItem class="flex flex-row items-center justify-between rounded-lg border p-4 bg-background">
+                  <FormItem
+                    class="flex flex-row items-center justify-between rounded-lg border p-4 bg-background"
+                  >
                     <div class="space-y-0.5">
-                      <FormLabel class="text-base font-semibold">{{ $t('fields.activeStatus') }}</FormLabel>
+                      <FormLabel class="text-base font-semibold">{{
+                        $t("fields.activeStatus")
+                      }}</FormLabel>
                       <FormDescription>
-                        {{ t('fields.statusDescription', { module: labels.name }) }}
+                        {{
+                          t("fields.statusDescription", { module: labels.name })
+                        }}
                       </FormDescription>
                     </div>
                     <FormControl>
@@ -244,6 +259,31 @@ onMounted(() => {
                 </FormField>
               </div>
 
+              <div class="md:col-span-2 space-y-4">
+                <FormField v-slot="{ value, handleChange }" name="photo">
+                  <FormItem class="space-y-4">
+                    <FormLabel>{{ $t("fields.photo") }}</FormLabel>
+                    <div class="flex flex-col items-center justify-center gap-4 p-8 rounded-2xl border border-dashed border-muted-foreground/20 bg-muted/10 hover:bg-muted/30 transition-all">
+                      <FormControl>
+                        <ImageUpload
+                          :image-url="value"
+                          @update:image-url="handleChange"
+                          shape="circle"
+                        />
+                      </FormControl>
+                      <div class="text-center space-y-1 mt-2">
+                        <p class="text-sm font-bold tracking-tight">
+                          {{ $t("fields.userAvatar") }}
+                        </p>
+                        <p class="text-[11px] text-muted-foreground leading-relaxed max-w-[250px] mx-auto">
+                          {{ $t("fields.userAvatarHint") }}
+                        </p>
+                      </div>
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                </FormField>
+              </div>
             </div>
           </div>
         </form>
@@ -259,9 +299,14 @@ onMounted(() => {
       </CardFooter>
     </Card>
   </div>
-  
-  <div v-else class="flex flex-col items-center justify-center min-h-[400px] gap-4">
+
+  <div
+    v-else
+    class="flex flex-col items-center justify-center min-h-[400px] gap-4"
+  >
     <Loader2 class="h-8 w-8 animate-spin text-primary" />
-    <p class="text-muted-foreground font-medium">{{ $t('crud.fetchingData') }}</p>
+    <p class="text-muted-foreground font-medium">
+      {{ $t("crud.fetchingData") }}
+    </p>
   </div>
 </template>

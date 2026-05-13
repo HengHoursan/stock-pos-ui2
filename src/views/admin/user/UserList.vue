@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { usePermissions } from "@/hooks/usePermissions";
 const { t, labels, fields, crud, auth } = useAppI18n("user");
+const { hasPermission } = usePermissions();
 import { ref, onMounted, reactive, watch } from "vue";
 import { useRouter } from "vue-router";
 import {
@@ -39,7 +41,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Pagination,
   PaginationContent,
@@ -58,6 +60,7 @@ import {
   UserCog,
   RefreshCw,
   Loader2,
+  KeyRound,
 } from "lucide-vue-next";
 import { userService } from "@/services/user/user.service";
 import type { User, PaginationMeta } from "@/types";
@@ -92,9 +95,15 @@ const statusOptions = computed(() => [
 const isDeleteDialogOpen = ref(false);
 const userToDelete = ref<number | null>(null);
 
+const isResetDialogOpen = ref(false);
+const userToReset = ref<number | null>(null);
+const newPassword = ref("");
+const resetting = ref(false);
+
 const selectedIds = ref<number[]>([]);
 const isSelectAll = computed({
-  get: () => users.value.length > 0 && selectedIds.value.length === users.value.length,
+  get: () =>
+    users.value.length > 0 && selectedIds.value.length === users.value.length,
   set: (val: boolean) => {
     if (val) {
       selectedIds.value = users.value.map((u) => u.id);
@@ -108,10 +117,18 @@ async function handleBulkAction(action: "delete" | "activate" | "deactivate") {
   if (selectedIds.value.length === 0) return;
 
   const moduleTitle = labels.title;
-  
+
   try {
     if (action === "delete") {
-      if (!confirm(t("crud.confirmBulkDelete", { count: selectedIds.value.length, module: moduleTitle }))) return;
+      if (
+        !confirm(
+          t("crud.confirmBulkDelete", {
+            count: selectedIds.value.length,
+            module: moduleTitle,
+          }),
+        )
+      )
+        return;
       const res = await userService.bulkSoftDelete(selectedIds.value);
       if (res.success) {
         toast.success(t("crud.successBulkDelete", { module: moduleTitle }));
@@ -160,7 +177,7 @@ async function fetchUsers() {
     }
   } catch (error) {
     console.error("Fetch users error:", error);
-    toast.error(t('crud.errorFetch', { module: labels.title }));
+    toast.error(t("crud.errorFetch", { module: labels.title }));
   } finally {
     loading.value = false;
   }
@@ -175,7 +192,7 @@ watch(
   () => filters.search,
   () => {
     debouncedFetch();
-  }
+  },
 );
 
 watch(
@@ -183,7 +200,7 @@ watch(
   () => {
     pagination.page = 1;
     fetchUsers();
-  }
+  },
 );
 
 watch(
@@ -208,10 +225,10 @@ async function toggleStatus(user: User) {
     });
     if (response.success) {
       user.status = newStatus;
-      toast.success(t('crud.successUpdate', { module: labels.name }));
+      toast.success(t("crud.successUpdate", { module: labels.name }));
     }
   } catch (error) {
-    toast.error(t('crud.errorUpdate', { module: user.name }));
+    toast.error(t("crud.errorUpdate", { module: labels.name }));
   }
 }
 
@@ -226,16 +243,51 @@ async function confirmDelete() {
   try {
     const response = await userService.softDelete(userToDelete.value);
     if (response.success) {
-      toast.success(t('crud.successDelete', { module: labels.name }));
+      toast.success(t("crud.successDelete", { module: labels.name }));
       fetchUsers();
     } else {
-      toast.error(response.message || t('crud.errorDelete', { module: user.name }));
+      toast.error(
+        response.message || t("crud.errorDelete", { module: labels.name }),
+      );
     }
   } catch (error) {
-    toast.error(t('crud.errorDelete', { module: user.name }));
+    toast.error(t("crud.errorDelete", { module: labels.name }));
   } finally {
     isDeleteDialogOpen.value = false;
     userToDelete.value = null;
+  }
+}
+
+function openResetDialog(id: number) {
+  userToReset.value = id;
+  newPassword.value = "";
+  isResetDialogOpen.value = true;
+}
+
+async function confirmReset() {
+  if (!userToReset.value || !newPassword.value.trim()) return;
+
+  if (newPassword.value.trim().length < 6) {
+    toast.error(t("validation.min", { field: t("auth.password"), min: 6 }));
+    return;
+  }
+
+  resetting.value = true;
+  try {
+    const response = await userService.resetPassword(
+      userToReset.value,
+      newPassword.value.trim(),
+    );
+    if (response.success) {
+      toast.success(t("crud.successPasswordChange"));
+      isResetDialogOpen.value = false;
+    } else {
+      toast.error(response.message || t("crud.errorPasswordChange"));
+    }
+  } catch (error) {
+    toast.error(t("crud.errorPasswordChange"));
+  } finally {
+    resetting.value = false;
   }
 }
 
@@ -257,7 +309,9 @@ onMounted(() => {
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <h2 class="text-3xl font-bold tracking-tight text-foreground">{{ labels.title }}</h2>
+      <h2 class="text-3xl font-bold tracking-tight text-foreground">
+        {{ labels.title }}
+      </h2>
       <div class="flex items-center gap-2">
         <Button
           variant="outline"
@@ -267,24 +321,51 @@ onMounted(() => {
         >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button @click="router.push('/admin/users/create')">
-          <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.name }}</Button>
+        <Button v-permission="'users.create'" @click="router.push('/admin/users/create')">
+          <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }}
+          {{ labels.name }}</Button
+        >
       </div>
     </div>
 
-    <div v-if="selectedIds.length > 0" class="flex items-center gap-2 p-3 bg-muted/30 border rounded-lg animate-in fade-in slide-in-from-top-2">
-      <span class="text-sm font-medium mr-2">{{ t('crud.selectedCount', { count: selectedIds.length }) }}</span>
-      <Button variant="outline" size="sm" @click="handleBulkAction('activate')" class="h-8">
+    <div
+      v-if="selectedIds.length > 0"
+      class="flex items-center gap-2 p-3 bg-muted/30 border rounded-lg animate-in fade-in slide-in-from-top-2"
+    >
+      <span class="text-sm font-medium mr-2">{{
+        t("crud.selectedCount", { count: selectedIds.length })
+      }}</span>
+      <Button
+        variant="outline"
+        size="sm"
+        @click="handleBulkAction('activate')"
+        class="h-8"
+      >
         {{ crud.activate }}
       </Button>
-      <Button variant="outline" size="sm" @click="handleBulkAction('deactivate')" class="h-8">
+      <Button
+        variant="outline"
+        size="sm"
+        @click="handleBulkAction('deactivate')"
+        class="h-8"
+      >
         {{ crud.deactivate }}
       </Button>
-      <Button variant="destructive" size="sm" @click="handleBulkAction('delete')" class="h-8">
+      <Button
+        variant="destructive"
+        size="sm"
+        @click="handleBulkAction('delete')"
+        class="h-8"
+      >
         <Trash2 class="mr-2 h-4 w-4" />
         {{ crud.delete }}
       </Button>
-      <Button variant="ghost" size="sm" @click="selectedIds = []" class="h-8 ml-auto">
+      <Button
+        variant="ghost"
+        size="sm"
+        @click="selectedIds = []"
+        class="h-8 ml-auto"
+      >
         {{ crud.cancel }}
       </Button>
     </div>
@@ -315,8 +396,8 @@ onMounted(() => {
         <TableHeader>
           <TableRow>
             <TableHead class="w-[40px]">
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
                 v-model="isSelectAll"
               />
@@ -327,7 +408,7 @@ onMounted(() => {
                 variant="ghost"
                 @click="handleSort('username')"
                 class="-ml-4 h-8 font-medium"
-              >{{ auth.username }}<ArrowUpDown class="ml-1 h-3 w-3" />
+                >{{ auth.username }}<ArrowUpDown class="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
             <TableHead>{{ auth.email }}</TableHead>
@@ -349,13 +430,13 @@ onMounted(() => {
           </TableRow>
           <template v-else-if="users.length > 0">
             <TableRow
-              v-for="(user, index) in users"
+              v-for="user in users"
               :key="user.id"
               :class="{ 'bg-muted/30': selectedIds.includes(user.id) }"
             >
               <TableCell>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
                   :value="user.id"
                   v-model="selectedIds"
@@ -363,6 +444,7 @@ onMounted(() => {
               </TableCell>
               <TableCell>
                 <Avatar class="h-8 w-8">
+                  <AvatarImage v-if="user.photo" :src="user.photo" />
                   <AvatarFallback class="bg-primary/10 text-primary font-bold">
                     {{ user.username.slice(0, 2).toUpperCase() }}
                   </AvatarFallback>
@@ -371,16 +453,26 @@ onMounted(() => {
               <TableCell class="font-bold text-base text-foreground/90">
                 {{ user.username }}
               </TableCell>
-              <TableCell class="text-muted-foreground text-sm">{{ user.email }}</TableCell>
+              <TableCell class="text-muted-foreground text-sm">{{
+                user.email
+              }}</TableCell>
               <TableCell>
-                <Badge variant="outline" v-if="user.role" class="text-sm font-medium">{{ user.role.name }}</Badge>
-                <span v-else class="text-muted-foreground italic text-sm">{{ crud.none }}</span>
+                <Badge
+                  variant="outline"
+                  v-if="user.role"
+                  class="text-sm font-medium"
+                  >{{ user.role.name }}</Badge
+                >
+                <span v-else class="text-muted-foreground italic text-sm">{{
+                  crud.none
+                }}</span>
               </TableCell>
               <TableCell class="w-[100px]">
                 <Badge
                   :variant="user.status ? 'success' : 'warning'"
-                  class="cursor-pointer font-bold px-3 transition-all hover:opacity-80 active:scale-95"
-                  @click="toggleStatus(user)"
+                  class="font-bold px-3 transition-all"
+                  :class="{ 'cursor-pointer hover:opacity-80 active:scale-95': hasPermission('users.edit') }"
+                  @click="hasPermission('users.edit') ? toggleStatus(user) : null"
                 >
                   {{ user.status ? crud.active : crud.inactive }}
                 </Badge>
@@ -388,19 +480,44 @@ onMounted(() => {
               <TableCell class="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger as-child>
-                    <Button variant="ghost" class="h-8 w-8 p-0 hover:bg-muted/80 rounded-full">
+                    <Button
+                      variant="ghost"
+                      class="h-8 w-8 p-0 hover:bg-muted/80 rounded-full"
+                    >
                       <span class="sr-only">Open menu</span>
                       <MoreHorizontal class="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" class="w-[160px]">
-                    <DropdownMenuLabel class="text-xs uppercase text-muted-foreground font-bold">{{ crud.actions }}</DropdownMenuLabel>
+                    <DropdownMenuLabel
+                      class="text-xs uppercase text-muted-foreground font-bold"
+                      >{{ crud.actions }}</DropdownMenuLabel
+                    >
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem @click="router.push(`/admin/users/${user.id}/edit`)" class="cursor-pointer">
-                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{ crud.editBtn }}
+                    <DropdownMenuItem
+                      v-permission="'users.edit'"
+                      @click="router.push(`/admin/users/${user.id}/edit`)"
+                      class="cursor-pointer"
+                    >
+                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{
+                        crud.editBtn
+                      }}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      v-permission="'users.edit'"
+                      @click="openResetDialog(user.id)"
+                      class="cursor-pointer"
+                    >
+                      <KeyRound class="mr-2 h-4 w-4 opacity-70" />{{
+                        auth.resetPassword
+                      }}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem class="text-destructive focus:text-destructive cursor-pointer font-medium" @click="openDeleteDialog(user.id)">
+                    <DropdownMenuItem
+                      v-permission="'users.delete'"
+                      class="text-destructive focus:text-destructive cursor-pointer font-medium"
+                      @click="openDeleteDialog(user.id)"
+                    >
                       <Trash2 class="mr-2 h-4 w-4" />{{ crud.delete }}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -415,7 +532,9 @@ onMounted(() => {
             >
               <div class="flex flex-col items-center justify-center gap-3">
                 <UserCog class="h-10 w-10 opacity-10" />
-                <p class="font-medium">{{ t('crud.noRecords', { module: labels.title }) }}</p>
+                <p class="font-medium">
+                  {{ t("crud.noRecords", { module: labels.title }) }}
+                </p>
                 <Button
                   v-if="filters.search || filters.status"
                   variant="outline"
@@ -504,11 +623,47 @@ onMounted(() => {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel @click="isDeleteDialogOpen = false">{{ crud.cancel }}</AlertDialogCancel>
+          <AlertDialogCancel @click="isDeleteDialogOpen = false">{{
+            crud.cancel
+          }}</AlertDialogCancel>
           <AlertDialogAction
             @click="confirmDelete"
             class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >{{ crud.delete }}</AlertDialogAction>
+            >{{ crud.delete }}</AlertDialogAction
+          >
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
+    <!-- Reset Password Dialog -->
+    <AlertDialog v-model:open="isResetDialogOpen">
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{{ auth.resetPassword }}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {{ auth.resetPasswordDesc }}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <div class="py-4">
+          <Input
+            v-model="newPassword"
+            type="password"
+            :placeholder="auth.newPasswordPlaceholder"
+            class="w-full"
+            @keyup.enter="confirmReset"
+          />
+        </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel @click="isResetDialogOpen = false">{{
+            crud.cancel
+          }}</AlertDialogCancel>
+          <Button
+            :disabled="resetting || newPassword.length < 6"
+            @click="confirmReset"
+          >
+            <Loader2 v-if="resetting" class="mr-2 h-4 w-4 animate-spin" />
+            {{ crud.save }}
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

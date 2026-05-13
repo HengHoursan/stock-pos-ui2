@@ -20,7 +20,11 @@
     "language": "Language",
     "currency": "Currency",
     "lightMode": "Light Mode",
-    "darkMode": "Dark Mode"
+    "darkMode": "Dark Mode",
+    "settings": "Settings",
+    "profile": "Profile",
+    "security": "Security",
+    "settingsDescription": "Manage your account settings and preferences."
   },
   "menu": {
     "dashboard": "Dashboard",
@@ -114,7 +118,15 @@
     "hasAccount": "Already have an account?",
     "registerSuccess": "Registration successful",
     "registerFailed": "Registration failed",
-    "registerError": "An error occurred during registration"
+    "registerError": "An error occurred during registration",
+    "changePassword": "Change Password",
+    "resetPassword": "Reset Password",
+    "resetPasswordDesc": "Enter a new password for this user. This action cannot be undone.",
+    "newPasswordPlaceholder": "Enter new password (min 6 characters)",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "passwordMismatch": "New password and confirm password do not match"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -205,7 +217,18 @@
     "typeToSearch": "Type to search...",
     "noCountryFound": "No country found.",
     "useCustom": "Use custom",
-    "selectType": "Select type"
+    "selectType": "Select type",
+    "profileInfo": "Profile Information",
+    "securitySettings": "Security Settings",
+    "updateProfile": "Update Profile",
+    "successProfileUpdate": "Profile updated successfully",
+    "successPasswordChange": "Password changed successfully",
+    "errorProfileUpdate": "Failed to update profile",
+    "errorPasswordChange": "Failed to change password",
+    "apply": "Apply",
+    "clickToUpload": "Click to Upload",
+    "uploadHint": "PNG, JPG, WEBP (Max 5MB)",
+    "uploading": "Uploading..."
   },
   "fields": {
     "name": "Name",
@@ -216,6 +239,13 @@
     "status": "Status",
     "category": "Category",
     "product": "Product",
+    "imageUrl": "Image URL",
+    "enterImageUrl": "https://example.com/image.jpg",
+    "enterUrlPrompt": "Enter an external image URL below to preview it here",
+    "userAvatar": "User Avatar",
+    "userAvatarHint": "Upload a high-resolution profile picture. Supported formats: PNG, JPG, WEBP (Max 5MB).",
+    "profileVisibility": "Profile Visibility",
+    "profileVisibilityDesc": "Your profile information is visible to other administrators. Ensure your email is correct to receive system notifications.",
     "brand": "Brand",
     "unit": "Unit",
     "description": "Description",

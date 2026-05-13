@@ -42,7 +42,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { toast } from "vue-sonner";
@@ -259,6 +259,11 @@ const navDomains: NavDomain[] = [
   {
     domainKey: "layout.settingsDomain",
     items: [
+      {
+        titleKey: "layout.settingsDomain",
+        url: "/admin/settings",
+        icon: Settings,
+      },
       {
         titleKey: "menu.currencies",
         icon: Coins,
@@ -499,6 +504,7 @@ onMounted(() => {
                   class="data-[state=open]:bg-sidebar-accent"
                 >
                   <Avatar class="h-8 w-8 rounded-lg">
+                    <AvatarImage v-if="authStore.user?.photo" :src="authStore.user.photo" />
                     <AvatarFallback class="rounded-lg">{{
                       userInitials
                     }}</AvatarFallback>
@@ -523,6 +529,7 @@ onMounted(() => {
                     <Avatar
                       class="h-9 w-9 rounded-full border-2 border-primary/20 shadow-sm"
                     >
+                      <AvatarImage v-if="authStore.user?.photo" :src="authStore.user.photo" />
                       <AvatarFallback
                         class="rounded-full bg-primary/10 text-primary font-bold"
                         >{{ userInitials }}</AvatarFallback
@@ -540,6 +547,15 @@ onMounted(() => {
                     </div>
                   </div>
                 </DropdownMenuLabel>
+
+                <DropdownMenuGroup>
+                  <DropdownMenuItem @click="router.push('/admin/settings')" class="cursor-pointer py-2 px-2.5">
+                    <Settings class="mr-3 h-4 w-4 text-muted-foreground opacity-70" />
+                    <span class="text-sm font-medium text-foreground/80">{{ t('layout.settingsDomain') }}</span>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+
+                <DropdownMenuSeparator class="my-1" />
 
                 <DropdownMenuGroup class="mt-1">
                   <DropdownMenuItem

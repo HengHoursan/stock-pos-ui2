@@ -562,6 +562,13 @@ const routes: RouteRecordRaw[] = [
           import("../views/admin/reports/TopPerformersReport.vue"),
         meta: { title: "menu.topPerformers" },
       },
+      // Settings
+      {
+        path: "admin/settings",
+        name: "Settings",
+        component: () => import("../views/admin/setting/SettingIndex.vue"),
+        meta: { title: "layout.settingsDomain" },
+      },
     ],
   },
 
@@ -586,6 +593,14 @@ router.beforeEach((to) => {
   // Route requires auth but user is not logged in → redirect to login
   if (to.meta.requiresAuth && !isAuthenticated) {
     return { name: "Login" };
+  }
+
+  // Force password change guard
+  if (isAuthenticated && authStore.user?.must_change_password) {
+    // Only allow them to access the Settings page
+    if (to.name !== "Settings") {
+      return { name: "Settings", query: { tab: 'security', alert: 'must_change_password' } };
+    }
   }
 
   // Route is for guests only but user is already logged in → redirect to dashboard

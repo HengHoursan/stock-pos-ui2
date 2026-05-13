@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("user");
+const { t, labels, crud } = useAppI18n("user");
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useForm } from "vee-validate";
@@ -36,6 +36,7 @@ import { userService } from "@/services/user/user.service";
 import { roleService } from "@/services/role/role.service";
 import type { Role } from "@/types";
 import { toast } from "vue-sonner";
+import ImageUpload from "@/components/upload/ImageUpload.vue";
 
 const router = useRouter();
 
@@ -50,6 +51,7 @@ const formSchema = toTypedSchema(
     password: z.string().min(6, "Password must be at least 6 characters"),
     roleId: z.string().nullable().optional(),
     status: z.boolean().default(true),
+    photo: z.string().optional(),
   })
 );
 
@@ -61,6 +63,7 @@ const form = useForm({
     password: "",
     roleId: null,
     status: true,
+    photo: "",
   },
 });
 
@@ -86,6 +89,7 @@ const onSubmit = form.handleSubmit(async (values) => {
       email: values.email,
       password: values.password,
       status: values.status,
+      photo: values.photo,
     };
     if (values.roleId && values.roleId !== "null") {
       payload.roleId = Number(values.roleId);
@@ -202,6 +206,32 @@ onMounted(() => {
                         @update:model-value="(v: boolean) => handleChange(v)"
                       />
                     </FormControl>
+                  </FormItem>
+                </FormField>
+              </div>
+
+              <div class="md:col-span-2 space-y-4">
+                <FormField v-slot="{ value, handleChange }" name="photo">
+                  <FormItem class="space-y-4">
+                    <FormLabel>{{ $t("fields.photo") }}</FormLabel>
+                    <div class="flex flex-col items-center justify-center gap-4 p-8 rounded-2xl border border-dashed border-muted-foreground/20 bg-muted/10 hover:bg-muted/30 transition-all">
+                      <FormControl>
+                        <ImageUpload
+                          :image-url="value"
+                          @update:image-url="handleChange"
+                          shape="circle"
+                        />
+                      </FormControl>
+                      <div class="text-center space-y-1 mt-2">
+                        <p class="text-sm font-bold tracking-tight">
+                          {{ $t("fields.userAvatar") }}
+                        </p>
+                        <p class="text-[11px] text-muted-foreground leading-relaxed max-w-[250px] mx-auto">
+                          {{ $t("fields.userAvatarHint") }}
+                        </p>
+                      </div>
+                    </div>
+                    <FormMessage />
                   </FormItem>
                 </FormField>
               </div>

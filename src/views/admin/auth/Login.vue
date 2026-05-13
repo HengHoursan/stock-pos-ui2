@@ -45,7 +45,7 @@ const form = useForm<LoginForm>({
   validationSchema: formSchema,
   initialValues: {
     email: "superadmin@gmail.com",
-    password: "superadmin123",
+    password: "123456",
   },
 });
 

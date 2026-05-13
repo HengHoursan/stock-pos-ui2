@@ -8,11 +8,14 @@ import 'vue-sonner/style.css';
 
 import App from './App.vue';
 
+import { permission } from './directives/permission';
+
 const pinia = createPinia();
 const app = createApp(App);
 
 app.use(pinia);
 app.use(router);
 app.use(i18n);
+app.directive('permission', permission);
 
 app.mount('#app');

@@ -3,7 +3,10 @@ export interface User {
   email: string;
   username: string;
   role: any;
+  permissions?: string[];
+  must_change_password?: boolean;
   status: boolean;
+  photo?: string;
 }
 
 export interface LoginResponse {
@@ -30,6 +33,7 @@ export interface CreateUserRequest {
   email: string;
   roleId: number;
   status?: boolean;
+  photo?: string;
 }
 
 export interface UpdateUserRequest {
@@ -39,9 +43,26 @@ export interface UpdateUserRequest {
   email?: string;
   roleId?: number;
   status?: boolean;
+  photo?: string;
 }
 
 export interface UpdateUserStatusRequest {
   id: number;
   status: boolean;
+}
+
+export interface UpdateProfileRequest {
+  username: string;
+  email: string;
+  photo?: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface ResetPasswordRequest {
+  userId: number;
+  newPassword: string;
 }

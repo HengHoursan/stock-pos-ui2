@@ -53,6 +53,18 @@ export class UserService extends BaseService {
   async bulkUpdateStatus(ids: number[], status: boolean): Promise<ApiResponse<null>> {
     return this.post<ApiResponse<null>>("/users/bulk-status-update", { ids, status });
   }
+
+  async updateProfile(payload: any): Promise<ApiResponse<User>> {
+    return this.post<ApiResponse<User>>("/users/update-profile", payload);
+  }
+
+  async changePassword(payload: any): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/users/change-password", payload);
+  }
+
+  async resetPassword(userId: number, newPassword: string): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/users/reset-password", { userId, newPassword });
+  }
 }
 
 export const userService = new UserService();
