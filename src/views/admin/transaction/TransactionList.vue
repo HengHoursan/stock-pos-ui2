@@ -366,8 +366,6 @@ onMounted(() => {
       <Table class="min-w-[1200px]">
         <TableHeader>
           <TableRow>
-        <TableHeader>
-          <TableRow>
             <TableHead class="w-[40px]">
               <input 
                 type="checkbox" 
