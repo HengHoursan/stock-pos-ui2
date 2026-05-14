@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("product");
+const { t, labels, crud } = useAppI18n("product");
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { toLocalISOString, formatNumberInput } from "@/utils/format";
+import { formatNumberInput } from "@/utils/format";
 import { toTypedSchema } from "@vee-validate/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
@@ -23,12 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, Loader2, Package, Tag, Camera } from "lucide-vue-next";
 import { ProductService } from "@/services/product/product.service";
 import { CategoryService } from "@/services/category/category.service";
@@ -38,6 +33,7 @@ import DatePicker from "@/components/DatePicker.vue";
 import ImageUpload from "@/components/upload/ImageUpload.vue";
 import type { Category, Brand, Unit } from "@/types";
 import { toast } from "vue-sonner";
+import { useForm } from "vee-validate";
 
 const router = useRouter();
 const route = useRoute();
@@ -139,21 +135,27 @@ async function fetchData() {
         salePrice: Number(prod.detail?.salePrice || 0),
         currentStock: Number(prod.detail?.currentStock || 0),
         stockNumber: prod.detail?.stockNumber || "",
-        expiryDate: prod.detail?.expiryDate ? prod.detail.expiryDate.split('T')[0] : "",
+        expiryDate: prod.detail?.expiryDate
+          ? prod.detail.expiryDate.split("T")[0]
+          : "",
         expiryType: prod.detail?.expiryType || "None",
       });
 
-      localPurchasePrice.value = formatNumberInput(prod.detail?.purchasePrice || 0);
+      localPurchasePrice.value = formatNumberInput(
+        prod.detail?.purchasePrice || 0,
+      );
       localSalePrice.value = formatNumberInput(prod.detail?.salePrice || 0);
-      localCurrentStock.value = formatNumberInput(prod.detail?.currentStock || 0);
+      localCurrentStock.value = formatNumberInput(
+        prod.detail?.currentStock || 0,
+      );
       localAlertQuantity.value = formatNumberInput(prod.alertQuantity || 0);
     } else {
-      toast.error(t('crud.notFound', { module: labels.name }));
+      toast.error(t("crud.notFound", { module: labels.name }));
       router.push("/admin/products");
     }
   } catch (error) {
     console.error("Failed to fetch data", error);
-    toast.error(t('crud.errorFetch', { module: labels.name }));
+    toast.error(t("crud.errorFetch", { module: labels.name }));
   } finally {
     loading.value = false;
   }
@@ -166,18 +168,23 @@ const onSubmit = form.handleSubmit(async (values) => {
       id: productId,
       ...values,
       categoryId: Number(values.categoryId),
-      brandId: values.brandId && values.brandId !== "0" ? Number(values.brandId) : undefined,
+      brandId:
+        values.brandId && values.brandId !== "0"
+          ? Number(values.brandId)
+          : undefined,
       unitId: Number(values.unitId),
     };
     const response = await productService.update(payload as any);
     if (response.success) {
-      toast.success(t('crud.successUpdate', { module: labels.name }));
+      toast.success(t("crud.successUpdate", { module: labels.name }));
       router.push("/admin/products");
     } else {
-      toast.error(response.message || t('crud.errorUpdate', { module: labels.name }));
+      toast.error(
+        response.message || t("crud.errorUpdate", { module: labels.name }),
+      );
     }
   } catch (error) {
-    toast.error(t('crud.errorGeneral'));
+    toast.error(t("crud.errorGeneral"));
   } finally {
     submitting.value = false;
   }
@@ -194,7 +201,9 @@ onMounted(() => {
       <Button variant="outline" size="icon" @click="router.back()">
         <ChevronLeft class="h-4 w-4" />
       </Button>
-      <h2 class="text-3xl font-bold tracking-tight">{{ crud.editBtn }} {{ labels.name }}</h2>
+      <h2 class="text-3xl font-bold tracking-tight">
+        {{ crud.editBtn }} {{ labels.name }}
+      </h2>
     </div>
 
     <Card v-if="loading" class="flex items-center justify-center min-h-[500px]">
@@ -204,22 +213,24 @@ onMounted(() => {
     <template v-else>
       <form @submit="onSubmit" id="productForm" class="space-y-6">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
           <!-- Left Column: Primary Details -->
           <div class="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle class="flex items-center gap-2">
                   <Package class="h-5 w-5 text-primary" />
-                  {{ $t('crud.generalInfo') }}
+                  {{ $t("crud.generalInfo") }}
                 </CardTitle>
               </CardHeader>
               <CardContent class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField v-slot="{ componentField }" name="name">
                   <FormItem class="md:col-span-2">
-                    <FormLabel>{{ $t('fields.name') }}</FormLabel>
+                    <FormLabel>{{ $t("fields.name") }}</FormLabel>
                     <FormControl>
-                      <Input :placeholder="$t('fields.enterProductName')" v-bind="componentField" />
+                      <Input
+                        :placeholder="$t('fields.enterProductName')"
+                        v-bind="componentField"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -227,9 +238,12 @@ onMounted(() => {
 
                 <FormField v-slot="{ componentField }" name="skuCode">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.sku') }}</FormLabel>
+                    <FormLabel>{{ $t("fields.sku") }}</FormLabel>
                     <FormControl>
-                      <Input :placeholder="$t('fields.autoGenerate')" v-bind="componentField" />
+                      <Input
+                        :placeholder="$t('fields.autoGenerate')"
+                        v-bind="componentField"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -237,9 +251,12 @@ onMounted(() => {
 
                 <FormField v-slot="{ componentField }" name="code">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.code') }}</FormLabel>
+                    <FormLabel>{{ $t("fields.code") }}</FormLabel>
                     <FormControl>
-                      <Input :placeholder="$t('fields.autoGenerate')" v-bind="componentField" />
+                      <Input
+                        :placeholder="$t('fields.autoGenerate')"
+                        v-bind="componentField"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -256,12 +273,21 @@ onMounted(() => {
                       </FormControl>
                       <SelectContent>
                         <template v-if="categories.length > 0">
-                          <SelectItem v-for="cat in categories" :key="cat.id" :value="String(cat.id)">
+                          <SelectItem
+                            v-for="cat in categories"
+                            :key="cat.id"
+                            :value="String(cat.id)"
+                          >
                             {{ cat.name }}
                           </SelectItem>
                         </template>
-                        <SelectItem v-else disabled value="none" class="text-muted-foreground italic text-xs py-3 text-center">
-                          {{ $t('common.noData') }}
+                        <SelectItem
+                          v-else
+                          disabled
+                          value="none"
+                          class="text-muted-foreground italic text-xs py-3 text-center"
+                        >
+                          {{ $t("common.noData") }}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -279,14 +305,23 @@ onMounted(() => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="0">{{ $t('crud.none') }}</SelectItem>
+                        <SelectItem value="0">{{ $t("crud.none") }}</SelectItem>
                         <template v-if="brands.length > 0">
-                          <SelectItem v-for="brand in brands" :key="brand.id" :value="String(brand.id)">
+                          <SelectItem
+                            v-for="brand in brands"
+                            :key="brand.id"
+                            :value="String(brand.id)"
+                          >
                             {{ brand.name }}
                           </SelectItem>
                         </template>
-                        <SelectItem v-else disabled value="none" class="text-muted-foreground italic text-xs py-3 text-center">
-                          {{ $t('common.noData') }}
+                        <SelectItem
+                          v-else
+                          disabled
+                          value="none"
+                          class="text-muted-foreground italic text-xs py-3 text-center"
+                        >
+                          {{ $t("common.noData") }}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -305,12 +340,21 @@ onMounted(() => {
                       </FormControl>
                       <SelectContent>
                         <template v-if="units.length > 0">
-                          <SelectItem v-for="u in units" :key="u.id" :value="String(u.id)">
+                          <SelectItem
+                            v-for="u in units"
+                            :key="u.id"
+                            :value="String(u.id)"
+                          >
                             {{ u.name }}
                           </SelectItem>
                         </template>
-                        <SelectItem v-else disabled value="none" class="text-muted-foreground italic text-xs py-3 text-center">
-                          {{ $t('common.noData') }}
+                        <SelectItem
+                          v-else
+                          disabled
+                          value="none"
+                          class="text-muted-foreground italic text-xs py-3 text-center"
+                        >
+                          {{ $t("common.noData") }}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -320,11 +364,13 @@ onMounted(() => {
 
                 <FormField v-slot="{ field }" name="barcodeType">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.barcodeType') }}</FormLabel>
+                    <FormLabel>{{ $t("fields.barcodeType") }}</FormLabel>
                     <Select v-bind="field">
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue :placeholder="$t('fields.selectBarcodeType')" />
+                          <SelectValue
+                            :placeholder="$t('fields.selectBarcodeType')"
+                          />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -344,23 +390,28 @@ onMounted(() => {
             <Card>
               <CardHeader>
                 <CardTitle class="flex items-center gap-2">
-                   <Tag class="h-5 w-5 text-primary" />
-                   {{ $t('fields.salePrice') }} & {{ $t('fields.currentStock') }}
+                  <Tag class="h-5 w-5 text-primary" />
+                  {{ $t("fields.salePrice") }} & {{ $t("fields.currentStock") }}
                 </CardTitle>
               </CardHeader>
               <CardContent class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <FormField v-slot="{ componentField }" name="purchasePrice">
+                <FormField v-slot="{ componentField }" name="purchasePrice">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.purchasePrice') }}</FormLabel>
+                    <FormLabel>{{ $t("fields.purchasePrice") }}</FormLabel>
                     <FormControl>
                       <Input
                         type="text"
                         :name="componentField.name"
                         @blur="componentField.onBlur"
-                        :model-value="localPurchasePrice || formatNumberInput(componentField.modelValue)"
+                        :model-value="
+                          localPurchasePrice ||
+                          formatNumberInput(componentField.modelValue)
+                        "
                         @input="
                           (e: any) => {
-                            localPurchasePrice = formatNumberInput(e.target.value);
+                            localPurchasePrice = formatNumberInput(
+                              e.target.value,
+                            );
                             form.setFieldValue(
                               'purchasePrice',
                               Number(localPurchasePrice.replace(/,/g, '')),
@@ -375,13 +426,16 @@ onMounted(() => {
 
                 <FormField v-slot="{ componentField }" name="salePrice">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.salePrice') }}</FormLabel>
+                    <FormLabel>{{ $t("fields.salePrice") }}</FormLabel>
                     <FormControl>
                       <Input
                         type="text"
                         :name="componentField.name"
                         @blur="componentField.onBlur"
-                        :model-value="localSalePrice || formatNumberInput(componentField.modelValue)"
+                        :model-value="
+                          localSalePrice ||
+                          formatNumberInput(componentField.modelValue)
+                        "
                         @input="
                           (e: any) => {
                             localSalePrice = formatNumberInput(e.target.value);
@@ -399,16 +453,21 @@ onMounted(() => {
 
                 <FormField v-slot="{ componentField }" name="currentStock">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.currentStock') }}</FormLabel>
+                    <FormLabel>{{ $t("fields.currentStock") }}</FormLabel>
                     <FormControl>
                       <Input
                         type="text"
                         :name="componentField.name"
                         @blur="componentField.onBlur"
-                        :model-value="localCurrentStock || formatNumberInput(componentField.modelValue)"
+                        :model-value="
+                          localCurrentStock ||
+                          formatNumberInput(componentField.modelValue)
+                        "
                         @input="
                           (e: any) => {
-                            localCurrentStock = formatNumberInput(e.target.value);
+                            localCurrentStock = formatNumberInput(
+                              e.target.value,
+                            );
                             form.setFieldValue(
                               'currentStock',
                               Number(localCurrentStock.replace(/,/g, '')),
@@ -423,16 +482,21 @@ onMounted(() => {
 
                 <FormField v-slot="{ componentField }" name="alertQuantity">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.alertQuantity') }}</FormLabel>
+                    <FormLabel>{{ $t("fields.alertQuantity") }}</FormLabel>
                     <FormControl>
                       <Input
                         type="text"
                         :name="componentField.name"
                         @blur="componentField.onBlur"
-                        :model-value="localAlertQuantity || formatNumberInput(componentField.modelValue)"
+                        :model-value="
+                          localAlertQuantity ||
+                          formatNumberInput(componentField.modelValue)
+                        "
                         @input="
                           (e: any) => {
-                            localAlertQuantity = formatNumberInput(e.target.value);
+                            localAlertQuantity = formatNumberInput(
+                              e.target.value,
+                            );
                             form.setFieldValue(
                               'alertQuantity',
                               Number(localAlertQuantity.replace(/,/g, '')),
@@ -454,14 +518,17 @@ onMounted(() => {
               <CardHeader>
                 <CardTitle class="flex items-center gap-2">
                   <Camera class="h-5 w-5 text-primary" />
-                  {{ $t('fields.photo') }}
+                  {{ $t("fields.photo") }}
                 </CardTitle>
               </CardHeader>
               <CardContent class="flex justify-center py-4">
                 <FormField v-slot="{ value, handleChange }" name="photoPath">
                   <FormItem>
                     <FormControl>
-                      <ImageUpload :image-url="value || ''" @update:image-url="handleChange" />
+                      <ImageUpload
+                        :image-url="value || ''"
+                        @update:image-url="handleChange"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -470,42 +537,76 @@ onMounted(() => {
             </Card>
 
             <Card>
-               <CardHeader>
-                <CardTitle>{{ $t('fields.status') }} & {{ $t('layout.mainMenu') }}</CardTitle>
+              <CardHeader>
+                <CardTitle
+                  >{{ $t("fields.status") }} &
+                  {{ $t("layout.mainMenu") }}</CardTitle
+                >
               </CardHeader>
               <CardContent class="space-y-4">
                 <FormField v-slot="{ value, handleChange }" name="status">
-                  <FormItem class="flex flex-row items-center justify-between rounded-lg border p-3">
-                    <FormLabel class="text-sm font-medium">{{ $t('fields.activeStatus') }}</FormLabel>
+                  <FormItem
+                    class="flex flex-row items-center justify-between rounded-lg border p-3"
+                  >
+                    <FormLabel class="text-sm font-medium">{{
+                      $t("fields.activeStatus")
+                    }}</FormLabel>
                     <FormControl>
-                      <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
+                      <Switch
+                        :model-value="!!value"
+                        @update:model-value="(v: boolean) => handleChange(v)"
+                      />
                     </FormControl>
                   </FormItem>
                 </FormField>
 
                 <FormField v-slot="{ value, handleChange }" name="manageStock">
-                  <FormItem class="flex flex-row items-center justify-between rounded-lg border p-3">
-                    <FormLabel class="text-sm font-medium">{{ $t('fields.manageStock') }}</FormLabel>
+                  <FormItem
+                    class="flex flex-row items-center justify-between rounded-lg border p-3"
+                  >
+                    <FormLabel class="text-sm font-medium">{{
+                      $t("fields.manageStock")
+                    }}</FormLabel>
                     <FormControl>
-                      <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
+                      <Switch
+                        :model-value="!!value"
+                        @update:model-value="(v: boolean) => handleChange(v)"
+                      />
                     </FormControl>
                   </FormItem>
                 </FormField>
 
                 <FormField v-slot="{ value, handleChange }" name="forSelling">
-                  <FormItem class="flex flex-row items-center justify-between rounded-lg border p-3">
-                    <FormLabel class="text-sm font-medium">{{ $t('fields.forSelling') }}</FormLabel>
+                  <FormItem
+                    class="flex flex-row items-center justify-between rounded-lg border p-3"
+                  >
+                    <FormLabel class="text-sm font-medium">{{
+                      $t("fields.forSelling")
+                    }}</FormLabel>
                     <FormControl>
-                      <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
+                      <Switch
+                        :model-value="!!value"
+                        @update:model-value="(v: boolean) => handleChange(v)"
+                      />
                     </FormControl>
                   </FormItem>
                 </FormField>
 
-                <FormField v-slot="{ value, handleChange }" name="isManufacture">
-                  <FormItem class="flex flex-row items-center justify-between rounded-lg border p-3">
-                    <FormLabel class="text-sm font-medium">{{ $t('fields.isManufacture') }}</FormLabel>
+                <FormField
+                  v-slot="{ value, handleChange }"
+                  name="isManufacture"
+                >
+                  <FormItem
+                    class="flex flex-row items-center justify-between rounded-lg border p-3"
+                  >
+                    <FormLabel class="text-sm font-medium">{{
+                      $t("fields.isManufacture")
+                    }}</FormLabel>
                     <FormControl>
-                      <Switch :model-value="!!value" @update:model-value="(v: boolean) => handleChange(v)" />
+                      <Switch
+                        :model-value="!!value"
+                        @update:model-value="(v: boolean) => handleChange(v)"
+                      />
                     </FormControl>
                   </FormItem>
                 </FormField>
@@ -514,14 +615,17 @@ onMounted(() => {
 
             <Card>
               <CardHeader>
-                <CardTitle>{{ $t('fields.expiryDate') }}</CardTitle>
+                <CardTitle>{{ $t("fields.expiryDate") }}</CardTitle>
               </CardHeader>
               <CardContent class="space-y-4">
-                 <FormField v-slot="{ field }" name="expiryDate">
+                <FormField v-slot="{ field }" name="expiryDate">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.expiryDate') }}</FormLabel>
+                    <FormLabel>{{ $t("fields.expiryDate") }}</FormLabel>
                     <FormControl>
-                      <DatePicker v-bind="field" :placeholder="$t('fields.selectDate')" />
+                      <DatePicker
+                        v-bind="field"
+                        :placeholder="$t('fields.selectDate')"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -529,7 +633,7 @@ onMounted(() => {
 
                 <FormField v-slot="{ field }" name="expiryType">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.expiryType') }}</FormLabel>
+                    <FormLabel>{{ $t("fields.expiryType") }}</FormLabel>
                     <Select v-bind="field">
                       <FormControl>
                         <SelectTrigger>
@@ -537,9 +641,15 @@ onMounted(() => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="None">{{ $t('fields.expiryTypes.none') }}</SelectItem>
-                        <SelectItem value="Best Before">{{ $t('fields.expiryTypes.bestBefore') }}</SelectItem>
-                        <SelectItem value="Expiry">{{ $t('fields.expiryTypes.expiry') }}</SelectItem>
+                        <SelectItem value="None">{{
+                          $t("fields.expiryTypes.none")
+                        }}</SelectItem>
+                        <SelectItem value="Best Before">{{
+                          $t("fields.expiryTypes.bestBefore")
+                        }}</SelectItem>
+                        <SelectItem value="Expiry">{{
+                          $t("fields.expiryTypes.expiry")
+                        }}</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -552,10 +662,22 @@ onMounted(() => {
       </form>
 
       <div class="flex justify-end gap-2 fixed bottom-6 right-6 lg:static mt-6">
-        <Button variant="outline" @click="router.back()" :disabled="submitting" size="lg" class="bg-card">
-          {{ $t('crud.cancel') }}
+        <Button
+          variant="outline"
+          @click="router.back()"
+          :disabled="submitting"
+          size="lg"
+          class="bg-card"
+        >
+          {{ $t("crud.cancel") }}
         </Button>
-        <Button type="submit" form="productForm" :disabled="submitting" size="lg" class="px-8 shadow-lg">
+        <Button
+          type="submit"
+          form="productForm"
+          :disabled="submitting"
+          size="lg"
+          class="px-8 shadow-lg"
+        >
           <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
           {{ crud.updateBtn }} {{ labels.name }}
         </Button>

@@ -30,7 +30,8 @@
     "assignedPermissions": "Assigned Permissions",
     "activePermissions": "Active",
     "selectRolePrompt": "Select a role from the left menu to manage its permissions.",
-    "settingsDescription": "Manage your account settings and preferences."
+    "settingsDescription": "Manage your account settings and preferences.",
+    "reportsDomainDesc": "Access all business reports and analytical insights."
   },
   "menu": {
     "dashboard": "Dashboard",
@@ -64,6 +65,11 @@
     "inventoryReport": "Inventory Report",
     "plReport": "Profit & Loss",
     "topPerformers": "Top Performers",
+    "salesReportDesc": "View detailed reports of all sales transactions and revenue.",
+    "purchasesReportDesc": "Monitor all purchase orders and supplier transactions.",
+    "inventoryReportDesc": "Track current stock levels, low stock alerts, and movements.",
+    "plReportDesc": "Analyze business profitability with comprehensive income and expense data.",
+    "topPerformersDesc": "Identify best-selling products and top-performing categories.",
     "allcustomer": "Customer",
     "allTransactions": "All Transactions",
     "addTransaction": "Add Transaction",
@@ -101,7 +107,7 @@
     "addSalePayment": "Add Sale Payment",
     "allSaleQuotations": "Sale Quotations",
     "addSaleQuotation": "Add Sale Quotation",
-    "allPurchaseQuotations":"All Purchase Quotations",
+    "allPurchaseQuotations": "All Purchase Quotations",
     "addPurchaseQuoatation": "Add Purchase Quotation"
   },
   "auth": {
@@ -206,6 +212,7 @@
     "filterByUnit": "Filter by Unit",
     "filterByProduct": "Filter by Product",
     "filterByType": "Filter by Type",
+    "filterByModule": "Filter by Module",
     "successCreate": "Successfully created {module}",
     "successUpdate": "{module} updated successfully",
     "successDelete": "{module} deleted successfully",

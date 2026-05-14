@@ -44,7 +44,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
 import { toast } from "vue-sonner";
 import {
   LayoutDashboard,
@@ -71,14 +70,10 @@ import {
   Globe,
   RotateCcw,
   Banknote,
-  LineChart,
   BarChart3,
-  TrendingUp,
-  PieChart,
   Sun,
   Moon,
   Settings,
-  Star,
 } from "lucide-vue-next";
 import {
   Collapsible,
@@ -310,35 +305,9 @@ const navDomains: NavDomain[] = [
     domainKey: "layout.reportsDomain",
     items: [
       {
-        titleKey: "menu.analytics",
-        icon: LineChart,
-        children: [
-          {
-            titleKey: "menu.salesReport",
-            url: "/admin/reports/sales",
-            icon: TrendingUp,
-          },
-          {
-            titleKey: "menu.purchasesReport",
-            url: "/admin/reports/purchases",
-            icon: ShoppingBag,
-          },
-          {
-            titleKey: "menu.inventoryReport",
-            url: "/admin/reports/inventory",
-            icon: Package,
-          },
-          {
-            titleKey: "menu.plReport",
-            url: "/admin/reports/profit-loss",
-            icon: PieChart,
-          },
-          {
-            titleKey: "menu.topPerformers",
-            url: "/admin/reports/top-performers",
-            icon: BarChart3,
-          },
-        ],
+        titleKey: "layout.reportsDomain",
+        url: "/admin/reports",
+        icon: BarChart3,
       },
     ],
   },

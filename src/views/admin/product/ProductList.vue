@@ -60,7 +60,6 @@ import {
   RefreshCw,
   Loader2,
   Copy,
-  CheckSquare,
 } from "lucide-vue-next";
 import { ProductService } from "@/services/product/product.service";
 import { CategoryService } from "@/services/category/category.service";
@@ -131,14 +130,14 @@ const isSelectAll = computed({
   },
 });
 
-function toggleSelection(id: number) {
-  const index = selectedIds.value.indexOf(id);
-  if (index > -1) {
-    selectedIds.value.splice(index, 1);
-  } else {
-    selectedIds.value.push(id);
-  }
-}
+// function toggleSelection(id: number) {
+//   const index = selectedIds.value.indexOf(id);
+//   if (index > -1) {
+//     selectedIds.value.splice(index, 1);
+//   } else {
+//     selectedIds.value.push(id);
+//   }
+// }
 
 async function handleBulkAction(action: "delete" | "activate" | "deactivate") {
   if (selectedIds.value.length === 0) return;
@@ -404,7 +403,7 @@ onMounted(() => {
         v-model="filters.status"
         :options="statusOptions"
         :placeholder="crud.filterByStatus"
-        class="w-full sm:w-[200px]"
+        class="w-full sm:w-[220px]"
       />
 
       <SearchableSelect
@@ -501,7 +500,7 @@ onMounted(() => {
             </TableCell>
           </TableRow>
           <template v-else-if="products.length > 0">
-            <TableRow v-for="(product, index) in products" :key="product.id" :class="{ 'bg-muted/30': selectedIds.includes(product.id) }">
+            <TableRow v-for="(product) in products" :key="product.id" :class="{ 'bg-muted/30': selectedIds.includes(product.id) }">
               <TableCell>
                 <input 
                   type="checkbox" 

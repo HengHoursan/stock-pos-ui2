@@ -1,14 +1,21 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, reactive } from "vue";
 import { useAppI18n } from "@/hooks/useAppI18n";
+const { layout, menu, crud, t } = useAppI18n();
 import { roleService } from "@/services/role/role.service";
 import { permissionService } from "@/services/permission/permission.service";
 import type { Role, Permission, RolePermission } from "@/types";
-import { ShieldAlert, CheckCircle2, Shield, Loader2 } from "lucide-vue-next";
+import {
+  ShieldAlert,
+  CheckCircle2,
+  Shield,
+  Loader2,
+  Search,
+} from "lucide-vue-next";
 import { toast } from "vue-sonner";
 import { Switch } from "@/components/ui/switch";
-
-const { layout, menu } = useAppI18n();
+import { Input } from "@/components/ui/input";
+import SearchableSelect from "@/components/SearchableSelect.vue";
 
 const roles = ref<Role[]>([]);
 const permissions = ref<Permission[]>([]);
@@ -18,11 +25,50 @@ const selectedRoleId = ref<number | null>(null);
 const isLoadingRoles = ref(false);
 const isLoadingPermissions = ref(false);
 const isSyncing = ref<Record<number, boolean>>({});
+const filters = reactive({
+  search: "",
+  module: "",
+});
+
+const activeRolePermissions = computed(() => {
+  return new Set(rolePermissions.value.map((rp) => rp.permissionId));
+});
+
+const availableModules = computed(() => {
+  const modules = new Set<string>();
+  permissions.value.forEach((p) => {
+    modules.add(p.group || "Other");
+  });
+  return Array.from(modules).sort();
+});
+
+const moduleOptions = computed(() => {
+  return availableModules.value.map((mod) => ({
+    label: mod,
+    value: mod,
+  }));
+});
+
+const filteredPermissions = computed(() => {
+  return permissions.value.filter((p) => {
+    const searchMatch =
+      !filters.search ||
+      p.name.toLowerCase().includes(filters.search.toLowerCase()) ||
+      (p.displayName &&
+        p.displayName.toLowerCase().includes(filters.search.toLowerCase()));
+
+    // Filter by module
+    const groupName = p.group || "Other";
+    const moduleMatch = !filters.module || groupName === filters.module;
+
+    return searchMatch && moduleMatch;
+  });
+});
 
 // Group permissions by their 'group' field
 const groupedPermissions = computed(() => {
   const groups: Record<string, Permission[]> = {};
-  permissions.value.forEach((p) => {
+  filteredPermissions.value.forEach((p) => {
     const groupName = p.group || "Other";
     if (!groups[groupName]) {
       groups[groupName] = [];
@@ -30,10 +76,6 @@ const groupedPermissions = computed(() => {
     groups[groupName].push(p);
   });
   return groups;
-});
-
-const activeRolePermissions = computed(() => {
-  return new Set(rolePermissions.value.map((rp) => rp.permissionId));
 });
 
 async function fetchRoles() {
@@ -99,7 +141,9 @@ async function togglePermission(permissionId: number, checked: boolean) {
         rolePermissions.value.push({
           roleId,
           permissionId,
-          permission: permissions.value.find((p) => p.id === permissionId) as Permission,
+          permission: permissions.value.find(
+            (p) => p.id === permissionId,
+          ) as Permission,
         });
         toast.success(`Permission assigned successfully`);
       } else {
@@ -110,7 +154,7 @@ async function togglePermission(permissionId: number, checked: boolean) {
       if (res.success) {
         // Optimistically remove from state
         rolePermissions.value = rolePermissions.value.filter(
-          (rp) => rp.permissionId !== permissionId
+          (rp) => rp.permissionId !== permissionId,
         );
         toast.success(`Permission revoked successfully`);
       } else {
@@ -153,7 +197,10 @@ onMounted(() => {
         <div v-if="isLoadingRoles" class="flex justify-center p-8">
           <Loader2 class="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
-        <div v-else class="h-[500px] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-muted-foreground/20">
+        <div
+          v-else
+          class="h-[500px] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-muted-foreground/20"
+        >
           <div class="p-2 space-y-1">
             <button
               v-for="role in roles"
@@ -180,27 +227,75 @@ onMounted(() => {
 
       <!-- Permissions Grid -->
       <div class="col-span-1 md:col-span-3 border rounded-lg bg-card">
-        <div class="bg-muted px-4 py-3 border-b flex justify-between items-center">
-          <h4 class="font-semibold text-sm flex items-center">
-            <ShieldAlert class="h-4 w-4 mr-2 text-primary" />
-            {{ layout.assignedPermissions }}
-          </h4>
-          <span class="text-xs text-muted-foreground font-medium" v-if="selectedRoleId">
-            {{ activeRolePermissions.size }} / {{ permissions.length }} {{ layout.activePermissions }}
-          </span>
+        <div
+          class="bg-muted px-4 py-3 border-b flex flex-col sm:flex-row justify-between items-center gap-4"
+        >
+          <div class="flex items-center gap-4 w-full sm:w-auto">
+            <h4 class="font-semibold text-sm flex items-center shrink-0">
+              <ShieldAlert class="h-4 w-4 mr-2 text-primary" />
+              {{ layout.assignedPermissions }}
+            </h4>
+            <span
+              class="text-xs text-muted-foreground font-medium shrink-0"
+              v-if="selectedRoleId"
+            >
+              {{ activeRolePermissions.size }} / {{ permissions.length }}
+              {{ layout.activePermissions }}
+            </span>
+          </div>
+
+          <div
+            class="flex flex-wrap items-center gap-2 w-full sm:w-auto"
+            v-if="selectedRoleId"
+          >
+            <div class="relative w-full sm:w-64 shrink-0">
+              <Search
+                class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"
+              />
+              <Input
+                v-model="filters.search"
+                :placeholder="
+                  t('crud.search', { module: layout.rolePermissions })
+                "
+                class="pl-8 h-9"
+              />
+            </div>
+
+            <SearchableSelect
+              v-model="filters.module"
+              :options="moduleOptions"
+              :placeholder="crud.filterByModule"
+              :show-all-option="false"
+              class="w-[220px] shrink-0"
+            />
+          </div>
         </div>
-        
-        <div v-if="!selectedRoleId" class="flex flex-col items-center justify-center h-[500px] text-muted-foreground">
+
+        <div
+          v-if="!selectedRoleId"
+          class="flex flex-col items-center justify-center h-[500px] text-muted-foreground"
+        >
           <Shield class="h-12 w-12 opacity-20 mb-4" />
           <p>{{ layout.selectRolePrompt }}</p>
         </div>
-        <div v-else-if="isLoadingPermissions" class="flex justify-center items-center h-[500px]">
+        <div
+          v-else-if="isLoadingPermissions"
+          class="flex justify-center items-center h-[500px]"
+        >
           <Loader2 class="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
-        <div v-else class="h-[500px] p-6 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-muted-foreground/20">
+        <div
+          v-else
+          class="h-[500px] p-6 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-muted-foreground/20"
+        >
           <div class="space-y-8">
-            <div v-for="(groupPerms, groupName) in groupedPermissions" :key="groupName">
-              <h5 class="text-sm font-bold text-foreground mb-4 uppercase tracking-wider bg-muted/50 py-1.5 px-3 rounded inline-block">
+            <div
+              v-for="(groupPerms, groupName) in groupedPermissions"
+              :key="groupName"
+            >
+              <h5
+                class="text-sm font-bold text-foreground mb-4 uppercase tracking-wider bg-muted/50 py-1.5 px-3 rounded inline-block"
+              >
                 {{ groupName }}
               </h5>
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -208,7 +303,11 @@ onMounted(() => {
                   v-for="permission in groupPerms"
                   :key="permission.id"
                   class="flex items-center justify-between p-3 border rounded-lg bg-card hover:border-primary/50 transition-colors"
-                  :class="{'border-primary/50 bg-primary/5': activeRolePermissions.has(permission.id)}"
+                  :class="{
+                    'border-primary/50 bg-primary/5': activeRolePermissions.has(
+                      permission.id,
+                    ),
+                  }"
                 >
                   <div class="flex flex-col gap-0.5">
                     <span class="text-sm font-medium">
@@ -219,11 +318,16 @@ onMounted(() => {
                     </span>
                   </div>
                   <div class="relative flex items-center">
-                    <Loader2 v-if="isSyncing[permission.id]" class="h-4 w-4 animate-spin absolute -left-6 text-primary" />
+                    <Loader2
+                      v-if="isSyncing[permission.id]"
+                      class="h-4 w-4 animate-spin absolute -left-6 text-primary"
+                    />
                     <Switch
                       :model-value="activeRolePermissions.has(permission.id)"
                       :disabled="isSyncing[permission.id]"
-                      @update:model-value="(val) => togglePermission(permission.id, val)"
+                      @update:model-value="
+                        (val) => togglePermission(permission.id, val)
+                      "
                     />
                   </div>
                 </div>

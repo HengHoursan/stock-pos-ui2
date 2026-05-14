@@ -532,35 +532,47 @@ const routes: RouteRecordRaw[] = [
       },
       // Reports
       {
-        path: "admin/reports/sales",
-        name: "SalesReport",
-        component: () => import("../views/admin/reports/SalesReport.vue"),
-        meta: { title: "menu.salesReport" },
-      },
-      {
-        path: "admin/reports/purchases",
-        name: "PurchasesReport",
-        component: () => import("../views/admin/reports/PurchasesReport.vue"),
-        meta: { title: "menu.purchasesReport" },
-      },
-      {
-        path: "admin/reports/inventory",
-        name: "InventoryReport",
-        component: () => import("../views/admin/reports/InventoryReport.vue"),
-        meta: { title: "menu.inventoryReport" },
-      },
-      {
-        path: "admin/reports/profit-loss",
-        name: "ProfitLossReport",
-        component: () => import("../views/admin/reports/ProfitLossReport.vue"),
-        meta: { title: "menu.plReport" },
-      },
-      {
-        path: "admin/reports/top-performers",
-        name: "TopPerformersReport",
-        component: () =>
-          import("../views/admin/reports/TopPerformersReport.vue"),
-        meta: { title: "menu.topPerformers" },
+        path: "admin/reports",
+        component: () => import("../views/admin/reports/ReportIndex.vue"),
+        meta: { title: "layout.reportsDomain" },
+        children: [
+          {
+            path: "",
+            name: "ReportsRoot",
+            component: () => import("../views/admin/reports/ReportCards.vue")
+          },
+          {
+            path: "sales",
+            name: "SalesReport",
+            component: () => import("../views/admin/reports/SalesReport.vue"),
+            meta: { title: "menu.salesReport" },
+          },
+          {
+            path: "purchases",
+            name: "PurchasesReport",
+            component: () => import("../views/admin/reports/PurchasesReport.vue"),
+            meta: { title: "menu.purchasesReport" },
+          },
+          {
+            path: "inventory",
+            name: "InventoryReport",
+            component: () => import("../views/admin/reports/InventoryReport.vue"),
+            meta: { title: "menu.inventoryReport" },
+          },
+          {
+            path: "profit-loss",
+            name: "ProfitLossReport",
+            component: () => import("../views/admin/reports/ProfitLossReport.vue"),
+            meta: { title: "menu.plReport" },
+          },
+          {
+            path: "top-performers",
+            name: "TopPerformersReport",
+            component: () =>
+              import("../views/admin/reports/TopPerformersReport.vue"),
+            meta: { title: "menu.topPerformers" },
+          },
+        ]
       },
       // Settings
       {

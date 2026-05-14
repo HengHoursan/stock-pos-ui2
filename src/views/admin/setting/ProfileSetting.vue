@@ -21,7 +21,7 @@ import { toast } from "vue-sonner";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import ImageUpload from "@/components/upload/ImageUpload.vue";
 
-const { t, crud, auth, fields, layout } = useAppI18n();
+const { t, crud, auth, fields } = useAppI18n();
 const authStore = useAuthStore();
 const router = useRouter();
 const submitting = ref(false);

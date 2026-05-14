@@ -65,14 +65,14 @@ function triggerUpload() {
   fileInput.value?.click();
 }
 
-const userInitials = props.name
-  ? props.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2)
-  : "??";
+// const userInitials = props.name
+//   ? props.name
+//       .split(" ")
+//       .map((n) => n[0])
+//       .join("")
+//       .toUpperCase()
+//       .slice(0, 2)
+//   : "??";
 </script>
 
 <template>
@@ -129,7 +129,7 @@ const userInitials = props.name
     <!-- Standard Square/Rect Mode -->
     <template v-else>
       <div
-        class="relative flex flex-col items-center justify-center border-2 border-dashed border-muted-foreground/20 rounded-2xl p-4 transition-all hover:border-primary/40 hover:bg-muted/30 group h-96 w-full overflow-hidden bg-muted/20 shadow-inner"
+        class="relative flex flex-col items-center justify-center border-2 border-dashed border-muted-foreground/20 rounded-2xl p-4 transition-all hover:border-primary/40 hover:bg-muted/30 group aspect-square w-full overflow-hidden bg-muted/20 shadow-inner"
       >
         <template v-if="imageUrl">
           <img
