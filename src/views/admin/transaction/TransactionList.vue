@@ -111,7 +111,9 @@ const transactionToDelete = ref<number | null>(null);
 
 const selectedIds = ref<number[]>([]);
 const isSelectAll = computed({
-  get: () => transactions.value.length > 0 && selectedIds.value.length === transactions.value.length,
+  get: () =>
+    transactions.value.length > 0 &&
+    selectedIds.value.length === transactions.value.length,
   set: (val: boolean) => {
     if (val) {
       selectedIds.value = transactions.value.map((t) => t.id);
@@ -125,10 +127,18 @@ async function handleBulkAction(action: "delete") {
   if (selectedIds.value.length === 0) return;
 
   const moduleTitle = labels.title;
-  
+
   try {
     if (action === "delete") {
-      if (!confirm(t("crud.confirmBulkDelete", { count: selectedIds.value.length, module: moduleTitle }))) return;
+      if (
+        !confirm(
+          t("crud.confirmBulkDelete", {
+            count: selectedIds.value.length,
+            module: moduleTitle,
+          }),
+        )
+      )
+        return;
       const res = await transactionService.bulkDelete(selectedIds.value);
       if (res.success) {
         toast.success(t("crud.successBulkDelete", { module: moduleTitle }));
@@ -224,14 +234,11 @@ async function confirmDelete() {
   try {
     const response = await transactionService.delete(transactionToDelete.value);
     if (response.success) {
-      toast.success(
-        t("crud.successDelete", { module: labels.name }),
-      );
+      toast.success(t("crud.successDelete", { module: labels.name }));
       fetchTransactions();
     } else {
       toast.error(
-        response.message ||
-          t("crud.errorDelete", { module: labels.name }),
+        response.message || t("crud.errorDelete", { module: labels.name }),
       );
     }
   } catch (error) {
@@ -320,13 +327,28 @@ onMounted(() => {
       </div>
     </div>
 
-    <div v-if="selectedIds.length > 0" class="flex items-center gap-2 p-3 bg-muted/30 border rounded-lg animate-in fade-in slide-in-from-top-2">
-      <span class="text-sm font-medium mr-2">{{ t('crud.selectedCount', { count: selectedIds.length }) }}</span>
-      <Button variant="destructive" size="sm" @click="handleBulkAction('delete')" class="h-8">
+    <div
+      v-if="selectedIds.length > 0"
+      class="flex items-center gap-2 p-3 bg-muted/30 border rounded-lg animate-in fade-in slide-in-from-top-2"
+    >
+      <span class="text-sm font-medium mr-2">{{
+        t("crud.selectedCount", { count: selectedIds.length })
+      }}</span>
+      <Button
+        variant="destructive"
+        size="sm"
+        @click="handleBulkAction('delete')"
+        class="h-8"
+      >
         <Trash2 class="mr-2 h-4 w-4" />
         {{ crud.delete }}
       </Button>
-      <Button variant="ghost" size="sm" @click="selectedIds = []" class="h-8 ml-auto">
+      <Button
+        variant="ghost"
+        size="sm"
+        @click="selectedIds = []"
+        class="h-8 ml-auto"
+      >
         {{ crud.cancel }}
       </Button>
     </div>
@@ -367,8 +389,8 @@ onMounted(() => {
         <TableHeader>
           <TableRow>
             <TableHead class="w-[40px]">
-              <input 
-                type="checkbox" 
+              <input
+                type="checkbox"
                 class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
                 v-model="isSelectAll"
               />
@@ -406,13 +428,13 @@ onMounted(() => {
           </TableRow>
           <template v-else-if="transactions.length > 0">
             <TableRow
-              v-for="(transaction, index) in transactions"
+              v-for="transaction in transactions"
               :key="transaction.id"
               :class="{ 'bg-muted/30': selectedIds.includes(transaction.id) }"
             >
               <TableCell>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
                   :value="transaction.id"
                   v-model="selectedIds"
