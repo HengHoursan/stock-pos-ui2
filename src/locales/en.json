@@ -23,7 +23,13 @@
     "darkMode": "Dark Mode",
     "settings": "Settings",
     "profile": "Profile",
+    "profileDesc": "Update your personal information and security preferences.",
     "security": "Security",
+    "rolePermissions": "Roles & Permissions",
+    "rolePermissionsDesc": "Select a role to view and update its system permissions.",
+    "assignedPermissions": "Assigned Permissions",
+    "activePermissions": "Active",
+    "selectRolePrompt": "Select a role from the left menu to manage its permissions.",
     "settingsDescription": "Manage your account settings and preferences."
   },
   "menu": {
@@ -41,6 +47,7 @@
     "sales": "Sales",
     "purchases": "Purchases",
     "users": "Users",
+    "roles": "Roles",
     "purchaseQuotations": "Purchase Quotations",
     "purchaseOrders": "Purchase Orders",
     "purchaseInvoices": "Purchase Invoices",

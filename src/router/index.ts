@@ -565,9 +565,33 @@ const routes: RouteRecordRaw[] = [
       // Settings
       {
         path: "admin/settings",
-        name: "Settings",
         component: () => import("../views/admin/setting/SettingIndex.vue"),
         meta: { title: "layout.settingsDomain" },
+        children: [
+          {
+            path: "",
+            name: "SettingsRoot",
+            component: () => import("../views/admin/setting/SettingCards.vue")
+          },
+          {
+            path: "profile",
+            name: "SettingProfile",
+            component: () => import("../views/admin/setting/ProfileSetting.vue"),
+            meta: { title: "layout.profile" },
+          },
+          {
+            path: "security",
+            name: "SettingSecurity",
+            component: () => import("../views/admin/setting/SecuritySetting.vue"),
+            meta: { title: "layout.security" },
+          },
+          {
+            path: "permissions",
+            name: "SettingPermissions",
+            component: () => import("../views/admin/setting/RolePermissionSetting.vue"),
+            meta: { title: "Role Permissions" },
+          }
+        ]
       },
     ],
   },
@@ -597,9 +621,9 @@ router.beforeEach((to) => {
 
   // Force password change guard
   if (isAuthenticated && authStore.user?.must_change_password) {
-    // Only allow them to access the Settings page
-    if (to.name !== "Settings") {
-      return { name: "Settings", query: { tab: 'security', alert: 'must_change_password' } };
+    // Only allow them to access the Security Settings page
+    if (to.name !== "SettingSecurity") {
+      return { name: "SettingSecurity", query: { alert: 'must_change_password' } };
     }
   }
 

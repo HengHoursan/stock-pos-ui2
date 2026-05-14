@@ -19,16 +19,16 @@ import { toast } from "vue-sonner";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { useAuthStore } from "@/stores/auth";
 
-const { t } = useAppI18n();
+const { t, auth, crud } = useAppI18n();
 const submitting = ref(false);
 
 const formSchema = toTypedSchema(
   z.object({
-    currentPassword: z.string().min(1, t("validation.required", { field: t("auth.currentPassword") })),
-    newPassword: z.string().min(6, t("validation.min", { field: t("auth.newPassword"), min: 6 })),
-    confirmPassword: z.string().min(1, t("validation.required", { field: t("auth.confirmPassword") })),
+    currentPassword: z.string().min(1, t("validation.required", { field: auth.currentPassword })),
+    newPassword: z.string().min(6, t("validation.min", { field: auth.newPassword, min: 6 })),
+    confirmPassword: z.string().min(1, t("validation.required", { field: auth.confirmPassword })),
   }).refine((data) => data.newPassword === data.confirmPassword, {
-    message: t("auth.passwordMismatch"),
+    message: auth.passwordMismatch,
     path: ["confirmPassword"],
   })
 );
@@ -50,7 +50,7 @@ const onSubmit = form.handleSubmit(async (values) => {
       newPassword: values.newPassword,
     });
     if (response.success) {
-      toast.success(t("crud.successPasswordChange"));
+      toast.success(crud.successPasswordChange);
       
       // Clear the forced password change flag
       const authStore = useAuthStore();
@@ -62,10 +62,10 @@ const onSubmit = form.handleSubmit(async (values) => {
       
       form.resetForm();
     } else {
-      toast.error(response.message || t("crud.errorPasswordChange"));
+      toast.error(response.message || crud.errorPasswordChange);
     }
   } catch (error) {
-    toast.error(t("crud.errorPasswordChange"));
+    toast.error(crud.errorPasswordChange);
   } finally {
     submitting.value = false;
   }
@@ -73,11 +73,11 @@ const onSubmit = form.handleSubmit(async (values) => {
 </script>
 
 <template>
-  <Card>
+  <Card class="w-full border-none shadow-xl bg-card/60 backdrop-blur-md">
     <CardHeader>
       <CardTitle class="flex items-center gap-2">
         <ShieldCheck class="h-5 w-5 text-primary" />
-        {{ t("crud.securitySettings") }}
+        {{ crud.securitySettings }}
       </CardTitle>
     </CardHeader>
     <CardContent>
@@ -85,7 +85,7 @@ const onSubmit = form.handleSubmit(async (values) => {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <FormField v-slot="{ componentField }" name="currentPassword">
             <FormItem>
-              <FormLabel>{{ t("auth.currentPassword") }}</FormLabel>
+              <FormLabel>{{ auth.currentPassword }}</FormLabel>
               <FormControl>
                 <Input type="password" v-bind="componentField" />
               </FormControl>
@@ -97,7 +97,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
           <FormField v-slot="{ componentField }" name="newPassword">
             <FormItem>
-              <FormLabel>{{ t("auth.newPassword") }}</FormLabel>
+              <FormLabel>{{ auth.newPassword }}</FormLabel>
               <FormControl>
                 <Input type="password" v-bind="componentField" />
               </FormControl>
@@ -107,7 +107,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 
           <FormField v-slot="{ componentField }" name="confirmPassword">
             <FormItem>
-              <FormLabel>{{ t("auth.confirmPassword") }}</FormLabel>
+              <FormLabel>{{ auth.confirmPassword }}</FormLabel>
               <FormControl>
                 <Input type="password" v-bind="componentField" />
               </FormControl>
@@ -120,7 +120,7 @@ const onSubmit = form.handleSubmit(async (values) => {
     <CardFooter class="flex justify-end border-t px-6 py-4">
       <Button type="submit" form="securityForm" :disabled="submitting">
         <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
-        {{ t("auth.changePassword") }}
+        {{ auth.changePassword }}
       </Button>
     </CardFooter>
   </Card>

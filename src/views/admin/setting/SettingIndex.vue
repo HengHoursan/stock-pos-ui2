@@ -1,38 +1,40 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { computed } from "vue";
 import { useAppI18n } from "@/hooks/useAppI18n";
-import ProfileSetting from "./ProfileSetting.vue";
-import SecuritySetting from "./SecuritySetting.vue";
-import { User, ShieldCheck, Settings, AlertTriangle } from "lucide-vue-next";
-import { Button } from "@/components/ui/button";
+import { useRoute, useRouter } from "vue-router";
+import { Settings, AlertTriangle, ArrowLeft } from "lucide-vue-next";
 import { useAuthStore } from "@/stores/auth";
+import { Button } from "@/components/ui/button";
 
-const { t } = useAppI18n();
+const { layout } = useAppI18n();
 const authStore = useAuthStore();
-const activeTab = ref("profile");
+const route = useRoute();
+const router = useRouter();
 
-onMounted(() => {
-  if (authStore.user?.must_change_password) {
-    activeTab.value = "security";
-  }
-});
+// Only show back button if we are NOT on the settings root page
+const showBackButton = computed(() => route.path !== "/admin/settings");
 
-const tabs = [
-  { id: "profile", label: t("layout.profile"), icon: User },
-  { id: "security", label: t("layout.security"), icon: ShieldCheck },
-];
 </script>
 
 <template>
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-4">
+        <Button 
+          v-if="showBackButton && !authStore.user?.must_change_password" 
+          variant="outline" 
+          size="icon"
+          class="mr-2"
+          @click="router.push('/admin/settings')"
+        >
+          <ArrowLeft class="h-4 w-4" />
+        </Button>
         <div class="p-2 bg-primary/10 rounded-lg">
           <Settings class="h-6 w-6 text-primary" />
         </div>
         <div>
-          <h2 class="text-3xl font-bold tracking-tight">{{ t("layout.settingsDomain") }}</h2>
-          <p class="text-muted-foreground">{{ t("layout.settingsDescription") || "Manage your account settings and preferences." }}</p>
+          <h2 class="text-3xl font-bold tracking-tight">{{ layout.settingsDomain }}</h2>
+          <p class="text-muted-foreground">{{ layout.settingsDescription || "Manage your account settings and preferences." }}</p>
         </div>
       </div>
     </div>
@@ -40,7 +42,7 @@ const tabs = [
     <!-- Security Warning Banner -->
     <div 
       v-if="authStore.user?.must_change_password" 
-      class="bg-destructive/10 border-l-4 border-destructive p-4 rounded-r-lg flex items-start gap-4 mb-6"
+      class="bg-destructive/10 border-l-4 border-destructive p-4 rounded-r-lg flex items-start gap-4 mb-6 animate-in slide-in-from-top-4"
     >
       <AlertTriangle class="h-6 w-6 text-destructive shrink-0 mt-0.5" />
       <div>
@@ -51,35 +53,7 @@ const tabs = [
       </div>
     </div>
 
-    <div class="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
-      <aside class="lg:w-1/5">
-        <nav class="flex space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1">
-          <Button
-            v-for="tab in tabs"
-            :key="tab.id"
-            variant="ghost"
-            class="justify-start gap-2"
-            :class="{ 
-              'bg-muted hover:bg-muted': activeTab === tab.id,
-              'opacity-50 cursor-not-allowed': authStore.user?.must_change_password && tab.id !== 'security'
-            }"
-            :disabled="authStore.user?.must_change_password && tab.id !== 'security'"
-            @click="activeTab = tab.id"
-          >
-            <component :is="tab.icon" class="h-4 w-4" />
-            {{ tab.label }}
-          </Button>
-        </nav>
-      </aside>
-      
-      <div class="flex-1 lg:max-w-4xl">
-        <div v-if="activeTab === 'profile'" class="space-y-6 animate-in fade-in duration-500">
-          <ProfileSetting />
-        </div>
-        <div v-if="activeTab === 'security'" class="space-y-6 animate-in fade-in duration-500">
-          <SecuritySetting />
-        </div>
-      </div>
-    </div>
+    <!-- This will render either SettingCards (the grid) or a specific setting view (full width) -->
+    <RouterView class="animate-in fade-in duration-500" />
   </div>
 </template>

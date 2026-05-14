@@ -23,7 +23,13 @@
     "darkMode": "ម៉ូដងងឹត",
     "settings": "ការកំណត់",
     "profile": "ព័ត៌មានផ្ទាល់ខ្លួន",
+    "profileDesc": "ធ្វើបច្ចុប្បន្នភាពព័ត៌មានផ្ទាល់ខ្លួន និងការកំណត់សុវត្ថិភាពរបស់អ្នក។",
     "security": "សុវត្ថិភាព",
+    "rolePermissions": "សិទ្ធិ និង តួនាទី",
+    "rolePermissionsDesc": "ជ្រើសរើសតួនាទីដើម្បីមើល និងធ្វើបច្ចុប្បន្នភាពសិទ្ធិប្រព័ន្ធរបស់វា។",
+    "assignedPermissions": "សិទ្ធិដែលបានកំណត់",
+    "activePermissions": "សកម្ម",
+    "selectRolePrompt": "សូមជ្រើសរើសតួនាទីពីម៉ឺនុយខាងឆ្វេងដើម្បីគ្រប់គ្រងសិទ្ធិ។",
     "settingsDescription": "គ្រប់គ្រងការកំណត់គណនី និងចំណូលចិត្តរបស់អ្នក។"
   },
   "menu": {
@@ -41,6 +47,7 @@
     "purchases": "ការទិញ",
     "sales": "ការលក់",
     "users": "អ្នកប្រើប្រាស់",
+    "roles": "តួនាទី",
     "purchaseQuotations": "ការទិញ",
     "purchaseOrders": "ការបញ្ជាទិញ",
     "purchaseInvoices": "វិក្កយបត្រ",

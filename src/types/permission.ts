@@ -18,3 +18,9 @@ export interface CreatePermissionRequest {
 export interface UpdatePermissionRequest extends Partial<CreatePermissionRequest> {
   id: number;
 }
+
+export interface RolePermission {
+  roleId: number;
+  permissionId: number;
+  permission: Permission;
+}
