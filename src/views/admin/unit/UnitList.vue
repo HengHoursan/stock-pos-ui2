@@ -376,7 +376,7 @@ onMounted(() => {
                 unit.name
               }}</TableCell>
               <TableCell class="text-muted-foreground text-sm italic font-medium">{{
-                unit.
+                unit.latinName
               }}</TableCell>
               <TableCell class="w-[100px]">
                 <Badge

@@ -3,6 +3,7 @@ export interface Unit {
   code: string;
   parentId: number | null;
   name: string;
+  latinName: string;
   slug: string;
   symbol: string;
   conversionFactor: number;
@@ -17,6 +18,7 @@ export interface CreateUnitRequest {
   code?: string;
   parentId?: number;
   name: string;
+  latinName: string;
   slug?: string;
   symbol?: string;
   conversionFactor?: number;
@@ -30,6 +32,7 @@ export interface UpdateUnitRequest {
   code?: string;
   parentId?: number;
   name?: string;
+  latinName?: string;
   slug?: string;
   symbol?: string;
   conversionFactor?: number;

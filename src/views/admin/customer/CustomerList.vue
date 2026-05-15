@@ -375,7 +375,7 @@ onMounted(() => {
             <TableHead>{{ fields.phoneNumber }}</TableHead>
             <TableHead>{{ fields.type }}</TableHead>
             <TableHead>{{ fields.status }}</TableHead>
-            <TableHead class="text-right">{{ crud.actions }}</TableHead>
+            <TableHead class="text-right" v-if="hasPermission(['customer:view', 'customer:update', 'customer:delete'])">{{ crud.actions }}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -458,7 +458,7 @@ onMounted(() => {
                   </span>
                 </Badge>
               </TableCell>
-              <TableCell class="text-right">
+              <TableCell class="text-right" v-if="hasPermission(['customer:view', 'customer:update', 'customer:delete'])">
                 <DropdownMenu>
                   <DropdownMenuTrigger as-child>
                     <Button
