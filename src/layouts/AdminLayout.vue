@@ -96,7 +96,12 @@ interface NavItem {
   icon: any;
   url?: string;
   permission?: string | string[];
-  children?: { titleKey: string; url: string; icon: any; permission?: string | string[] }[];
+  children?: {
+    titleKey: string;
+    url: string;
+    icon: any;
+    permission?: string | string[];
+  }[];
 }
 
 interface NavDomain {
@@ -110,11 +115,21 @@ const navDomains: NavDomain[] = [
     domainKey: "layout.posDomain",
     items: [
       { titleKey: "menu.dashboard", url: "/dashboard", icon: LayoutDashboard },
-      { titleKey: "menu.customers", url: "/admin/customers", icon: Users, permission: "customer:view" },
+      {
+        titleKey: "menu.customers",
+        url: "/admin/customers",
+        icon: Users,
+        permission: "customer:view",
+      },
       {
         titleKey: "menu.sales",
         icon: Coins,
-        permission: ["sale_order:view", "sale_invoice:view", "sale_payment:view", "sale_return:view"],
+        permission: [
+          "sale_order:view",
+          "sale_invoice:view",
+          "sale_payment:view",
+          "sale_return:view",
+        ],
         children: [
           {
             titleKey: "menu.saleOrders",
@@ -175,7 +190,12 @@ const navDomains: NavDomain[] = [
       {
         titleKey: "menu.purchases",
         icon: Truck,
-        permission: ["purchase_order:view", "purchase_invoice:view", "purchase_payment:view", "purchase_return:view"],
+        permission: [
+          "purchase_order:view",
+          "purchase_invoice:view",
+          "purchase_payment:view",
+          "purchase_return:view",
+        ],
         children: [
           {
             titleKey: "menu.purchaseQuotations",
@@ -223,7 +243,7 @@ const navDomains: NavDomain[] = [
             titleKey: "menu.allProducts",
             url: "/admin/products",
             icon: Package,
-            permission: "product:list",
+            permission: "product:all",
           },
           {
             titleKey: "menu.addProduct",
@@ -257,7 +277,12 @@ const navDomains: NavDomain[] = [
         icon: Bookmark,
         permission: "brand:view",
         children: [
-          { titleKey: "menu.allBrands", url: "/admin/brands", icon: Bookmark, permission: "brand:view" },
+          {
+            titleKey: "menu.allBrands",
+            url: "/admin/brands",
+            icon: Bookmark,
+            permission: "brand:view",
+          },
           {
             titleKey: "menu.addBrand",
             url: "/admin/brands/create",
@@ -271,8 +296,18 @@ const navDomains: NavDomain[] = [
         icon: Ruler,
         permission: "unit:view",
         children: [
-          { titleKey: "menu.allUnits", url: "/admin/units", icon: Ruler, permission: "unit:view" },
-          { titleKey: "menu.addUnit", url: "/admin/units/create", icon: Plus, permission: "unit:create" },
+          {
+            titleKey: "menu.allUnits",
+            url: "/admin/units",
+            icon: Ruler,
+            permission: "unit:view",
+          },
+          {
+            titleKey: "menu.addUnit",
+            url: "/admin/units/create",
+            icon: Plus,
+            permission: "unit:create",
+          },
         ],
       },
     ],
@@ -309,8 +344,18 @@ const navDomains: NavDomain[] = [
         icon: UserCog,
         permission: "user:view",
         children: [
-          { titleKey: "menu.allUsers", url: "/admin/users", icon: ShieldCheck, permission: "user:view" },
-          { titleKey: "menu.addUser", url: "/admin/users/create", icon: Plus, permission: "user:create" },
+          {
+            titleKey: "menu.allUsers",
+            url: "/admin/users",
+            icon: ShieldCheck,
+            permission: "user:view",
+          },
+          {
+            titleKey: "menu.addUser",
+            url: "/admin/users/create",
+            icon: Plus,
+            permission: "user:create",
+          },
         ],
       },
       {
@@ -336,7 +381,13 @@ const navDomains: NavDomain[] = [
   },
   {
     domainKey: "layout.reportsDomain",
-    permission: ["report:view_sales", "report:view_purchases", "report:view_inventory", "report:view_profit_loss", "report:view_top_performers"],
+    permission: [
+      "report:view_sales",
+      "report:view_purchases",
+      "report:view_inventory",
+      "report:view_profit_loss",
+      "report:view_top_performers",
+    ],
     items: [
       {
         titleKey: "layout.reportsDomain",
@@ -354,7 +405,8 @@ const filteredNavDomains = computed(() => {
 
   const checkPerm = (p?: string | string[]) => {
     if (isSuperAdmin || !p) return true;
-    if (Array.isArray(p)) return p.some((perm) => userPermissions.includes(perm));
+    if (Array.isArray(p))
+      return p.some((perm) => userPermissions.includes(perm));
     return userPermissions.includes(p);
   };
 
@@ -368,7 +420,11 @@ const filteredNavDomains = computed(() => {
             const filteredChildren = item.children.filter((child) =>
               checkPerm(child.permission),
             );
-            return { ...item, children: filteredChildren.length > 0 ? filteredChildren : undefined };
+            return {
+              ...item,
+              children:
+                filteredChildren.length > 0 ? filteredChildren : undefined,
+            };
           }
           return item;
         })
@@ -446,8 +502,8 @@ onMounted(() => {
 
       <!-- Navigation -->
       <SidebarContent>
-        <SidebarGroup 
-          v-for="domain in filteredNavDomains" 
+        <SidebarGroup
+          v-for="domain in filteredNavDomains"
           :key="domain.domainKey"
         >
           <SidebarGroupLabel>{{ $t(domain.domainKey) }}</SidebarGroupLabel>
@@ -547,7 +603,10 @@ onMounted(() => {
                   class="data-[state=open]:bg-sidebar-accent"
                 >
                   <Avatar class="h-8 w-8 rounded-lg">
-                    <AvatarImage v-if="authStore.user?.photo" :src="authStore.user.photo" />
+                    <AvatarImage
+                      v-if="authStore.user?.photo"
+                      :src="authStore.user.photo"
+                    />
                     <AvatarFallback class="rounded-lg">{{
                       userInitials
                     }}</AvatarFallback>
@@ -572,7 +631,10 @@ onMounted(() => {
                     <Avatar
                       class="h-9 w-9 rounded-full border-2 border-primary/20 shadow-sm"
                     >
-                      <AvatarImage v-if="authStore.user?.photo" :src="authStore.user.photo" />
+                      <AvatarImage
+                        v-if="authStore.user?.photo"
+                        :src="authStore.user.photo"
+                      />
                       <AvatarFallback
                         class="rounded-full bg-primary/10 text-primary font-bold"
                         >{{ userInitials }}</AvatarFallback
@@ -592,9 +654,16 @@ onMounted(() => {
                 </DropdownMenuLabel>
 
                 <DropdownMenuGroup>
-                  <DropdownMenuItem @click="router.push('/admin/settings')" class="cursor-pointer py-2 px-2.5">
-                    <Settings class="mr-3 h-4 w-4 text-muted-foreground opacity-70" />
-                    <span class="text-sm font-medium text-foreground/80">{{ t('layout.settingsDomain') }}</span>
+                  <DropdownMenuItem
+                    @click="router.push('/admin/settings')"
+                    class="cursor-pointer py-2 px-2.5"
+                  >
+                    <Settings
+                      class="mr-3 h-4 w-4 text-muted-foreground opacity-70"
+                    />
+                    <span class="text-sm font-medium text-foreground/80">{{
+                      t("layout.settingsDomain")
+                    }}</span>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
 

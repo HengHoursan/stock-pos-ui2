@@ -242,7 +242,9 @@
     "apply": "យល់ព្រម",
     "clickToUpload": "ចុចដើម្បីផ្ទុកឡើង",
     "uploadHint": "PNG, JPG, WEBP (អតិបរមា 5MB)",
-    "uploading": "កំពុងផ្ទុកឡើង..."
+    "uploading": "កំពុងផ្ទុកឡើង...",
+    "uploadSuccess": "បានបញ្ជូនរូបភាពដោយជោគជ័យ",
+    "uploadError": "មិនអាចបញ្ជូនរូបភាពបានទេ"
   },
   "fields": {
     "name": "ឈ្មោះ",

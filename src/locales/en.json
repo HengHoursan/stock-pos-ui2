@@ -242,7 +242,9 @@
     "apply": "Apply",
     "clickToUpload": "Click to Upload",
     "uploadHint": "PNG, JPG, WEBP (Max 5MB)",
-    "uploading": "Uploading..."
+    "uploading": "Uploading...",
+    "uploadSuccess": "Image uploaded successfully",
+    "uploadError": "Failed to upload image"
   },
   "fields": {
     "name": "Name",
