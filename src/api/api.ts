@@ -13,7 +13,16 @@ const api: AxiosInstance = axios.create({
   withCredentials: true,
 });
 
-// Request interceptor to add auth token
+// 1. Helpers for the refresh state
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
+
+const onTokenRefreshed = (token: string) => {
+  refreshSubscribers.forEach((callback) => callback(token));
+  refreshSubscribers = [];
+};
+
+// 2. Request interceptor to add auth token
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = localStorage.getItem("accessToken");
@@ -27,25 +36,56 @@ api.interceptors.request.use(
   },
 );
 
-// Response interceptor for global error handling
+// 3. The Core Response Interceptor (Clean & Short)
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Don't redirect if we're already trying to log in
-      const isLoginRequest = error.config?.url?.includes("/authentications/login");
+  async (error) => {
+    const { config, response } = error;
+    const isAuthRequest = config.url.includes("/authentications/");
 
-      if (!isLoginRequest) {
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("user");
+    // If not a 401 error, or it's a login/refresh request itself, just fail
+    if (response?.status !== 401 || isAuthRequest) {
+      return Promise.reject(error);
+    }
 
-        // Force a hard reload to the login page to clear all store states
-        window.location.href = "/login";
+    // Guard & Retry Logic
+    if (!isRefreshing) {
+      isRefreshing = true;
+      const refreshToken = localStorage.getItem("refreshToken");
+
+      try {
+        const res = await axios.post(`${api.defaults.baseURL}authentications/refresh`, { refreshToken });
+        const newToken = res.data.data.accessToken;
+
+        localStorage.setItem("accessToken", newToken);
+        onTokenRefreshed(newToken);
+        isRefreshing = false;
+
+        // Retry original request
+        config.headers.Authorization = `Bearer ${newToken}`;
+        return api(config);
+      } catch (refreshError) {
+        isRefreshing = false;
+        handleLogout();
+        return Promise.reject(refreshError);
       }
     }
-    return Promise.reject(error);
-  },
+
+    // If already refreshing, wait for the new token
+    return new Promise((resolve) => {
+      refreshSubscribers.push((token) => {
+        config.headers.Authorization = `Bearer ${token}`;
+        resolve(api(config));
+      });
+    });
+  }
 );
+
+function handleLogout() {
+  localStorage.clear();
+  if (!window.location.pathname.includes('/login')) {
+    window.location.href = "/login";
+  }
+}
 
 export default api;

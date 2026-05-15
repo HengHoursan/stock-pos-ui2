@@ -42,7 +42,9 @@ export const useAuthStore = defineStore("auth", {
       this.refreshToken = data.refreshToken;
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
-      // user is NOT set here — fetchUser() will handle it with full permissions
+      
+      // Dispatch a storage event manually for same-tab listeners if needed (optional)
+      // fetchUser() will handle setting the user object
     },
     async logout() {
       try {
@@ -75,6 +77,20 @@ export const useAuthStore = defineStore("auth", {
     setUser(user: User) {
       this.user = user;
       localStorage.setItem("user", JSON.stringify(user));
+    },
+    initSync() {
+      window.addEventListener("storage", (event) => {
+        if (event.key === "accessToken") {
+          if (!event.newValue) {
+            // Logged out in another tab
+            this.clearAuth();
+            window.location.href = "/login";
+          } else if (event.newValue !== this.accessToken) {
+            // Logged in as another user in another tab
+            window.location.reload();
+          }
+        }
+      });
     },
   },
 });
