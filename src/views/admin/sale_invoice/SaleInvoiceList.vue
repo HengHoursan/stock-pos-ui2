@@ -2,6 +2,9 @@
 import { useAppI18n } from "@/hooks/useAppI18n";
 const { t, labels, fields, crud, actions } = useAppI18n("saleInvoice");
 import { ref, onMounted, reactive, watch,computed } from "vue";
+
+
+
 import { useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
 
@@ -238,7 +241,7 @@ onMounted(() => {
         <Button variant="outline" size="icon" @click="fetchData" :disabled="loading">
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button @click="router.push('/admin/sale_invoices/create')">
+        <Button v-permission="'sale_invoice:create'" @click="router.push('/admin/sale_invoices/create')">
           <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.name }}
         </Button>
       </div>
@@ -347,7 +350,7 @@ onMounted(() => {
                 </Badge>
               </TableCell>
               <TableCell class="text-right">
-                <DropdownMenu align="end">
+                <DropdownMenu>
                   <DropdownMenuTrigger as-child>
                     <Button variant="ghost" class="h-8 w-8 p-0 hover:bg-muted/80 rounded-full">
                       <span class="sr-only">Open menu</span>
@@ -362,11 +365,20 @@ onMounted(() => {
                     <DropdownMenuItem @click="router.push(`/admin/sale-invoices/${record.id}`)" class="cursor-pointer">
                       <Eye class="mr-2 h-4 w-4 opacity-70" />{{ crud.viewBtn }}
                     </DropdownMenuItem>
-                    <DropdownMenuItem v-if="!record.isCancel && (record.totalPrice - record.paidAmount) > 0" @click="router.push(`/admin/sale-payments/create?invoiceId=${record.id}`)" class="cursor-pointer">
+                    <DropdownMenuItem
+                      v-permission="'sale_payment:create'"
+                      v-if="!record.isCancel && (record.totalPrice - record.paidAmount) > 0"
+                      @click="router.push(`/admin/sale-payments/create?invoiceId=${record.id}`)"
+                      class="cursor-pointer"
+                    >
                       <CreditCard class="mr-2 h-4 w-4 opacity-70" />{{ actions.createPayment }}
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem class="text-destructive focus:text-destructive cursor-pointer font-medium" @click="openDeleteDialog(record.id)">
+                    <DropdownMenuSeparator v-permission="'sale_invoice:delete'" />
+                    <DropdownMenuItem
+                      v-permission="'sale_invoice:delete'"
+                      class="text-destructive focus:text-destructive cursor-pointer font-medium"
+                      @click="openDeleteDialog(record.id)"
+                    >
                       <Trash2 class="mr-2 h-4 w-4" />{{ crud.delete }}
                     </DropdownMenuItem>
                   </DropdownMenuContent>

@@ -29,6 +29,7 @@ const settingCards = computed(() => {
       title: layout.profile,
       description: layout.profileDesc,
       icon: User,
+      permission: null, // Public for all logged in users
     },
   ];
   if (isSuperAdmin.value) {
@@ -38,6 +39,7 @@ const settingCards = computed(() => {
       title: layout.rolePermissions,
       description: layout.rolePermissionsDesc,
       icon: ShieldAlert,
+      permission: "role:all",
     });
   }
   return cards;
@@ -56,6 +58,7 @@ const navigateTo = (path: string, id: string) => {
     <Card
       v-for="card in settingCards"
       :key="card.id"
+      v-permission="card.permission"
       class="group cursor-pointer transition-all hover:border-primary/50 hover:shadow-md relative overflow-hidden"
       :class="{
         'opacity-50 cursor-not-allowed pointer-events-none grayscale':
@@ -66,7 +69,7 @@ const navigateTo = (path: string, id: string) => {
       @click="navigateTo(card.path, card.id)"
     >
       <div
-        class="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+        class="absolute inset-0 bg-linear-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
       ></div>
       <CardHeader
         class="pb-3 flex flex-row items-start justify-between space-y-0"

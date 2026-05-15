@@ -3,10 +3,11 @@ import { useAppI18n } from "@/hooks/useAppI18n";
 const { t, labels, fields, crud, group } = useAppI18n("salePayment");
 const saleInvoiceLabels = group("saleInvoice");
 import { ref, onMounted, reactive, watch, computed } from "vue";
+
+
 import { useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
 import SearchableSelect from "@/components/SearchableSelect.vue";
-import ClearableSelect from "@/components/ClearableSelect.vue";
 
 import {
   Table,
@@ -62,14 +63,13 @@ import {
   RefreshCw,
   Loader2,
   CreditCard,
-  Pencil
+  Pencil,
 } from "lucide-vue-next";
 import DateRangePicker from "@/components/DateRangePicker.vue";
 import CurrencyToggle from "@/components/CurrencyToggle.vue";
 import { SalePaymentService } from "@/services/sale_payment/sale_payment.service";
 import { CustomerService } from "@/services/customer/customer.service";
 import type { SalePayment, PaginationMeta, Customer } from "@/types";
-import { PaymentMethod } from "@/types/enums";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
 
@@ -88,14 +88,9 @@ const filters = reactive({
   endDate: "",
 });
 const customerOptions = computed(() =>
-  customers.value.map(c => ({ label: c.name, value: c.id }))
+  customers.value.map((c) => ({ label: c.name, value: c.id })),
 );
 
-const paymentMethodOptions = computed(() => [
-  { label: fields.paymentMethodLabels.cash, value: String(PaymentMethod.CASH) },
-  { label: fields.paymentMethodLabels.transfer, value: String(PaymentMethod.TRANSFER) },
-  { label: fields.paymentMethodLabels.other, value: String(PaymentMethod.OTHER) },
-]);
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -121,7 +116,7 @@ async function fetchData() {
     if (filters.search.trim()) {
       payload.search = filters.search.trim();
     }
-    
+
     payload.filter = {};
     if (filters.paymentMethod) {
       payload.filter.paymentMethod = filters.paymentMethod;
@@ -143,7 +138,7 @@ async function fetchData() {
     }
   } catch (error) {
     console.error("Fetch error:", error);
-    toast.error(t('crud.errorFetch', { module: labels.name }));
+    toast.error(t("crud.errorFetch", { module: labels.name }));
   } finally {
     loading.value = false;
   }
@@ -165,12 +160,29 @@ const debouncedFetch = useDebounceFn(() => {
   fetchData();
 }, 500);
 
-watch(() => filters.search, () => debouncedFetch());
 watch(
-  () => [filters.paymentMethod, filters.customerId, filters.startDate, filters.endDate],
-  () => { pagination.page = 1; fetchData(); }
+  () => filters.search,
+  () => debouncedFetch(),
 );
-watch(() => pagination.limit, () => { pagination.page = 1; fetchData(); });
+watch(
+  () => [
+    filters.paymentMethod,
+    filters.customerId,
+    filters.startDate,
+    filters.endDate,
+  ],
+  () => {
+    pagination.page = 1;
+    fetchData();
+  },
+);
+watch(
+  () => pagination.limit,
+  () => {
+    pagination.page = 1;
+    fetchData();
+  },
+);
 
 function handlePageChange(page: number) {
   pagination.page = page;
@@ -187,11 +199,11 @@ async function confirmDelete() {
   try {
     const response = await spService.softDelete(recordToDelete.value);
     if (response.success) {
-      toast.success(t('crud.successDelete', { module: labels.name }));
+      toast.success(t("crud.successDelete", { module: labels.name }));
       fetchData();
     }
   } catch (error) {
-    toast.error(t('crud.errorDelete', { module: labels.name }));
+    toast.error(t("crud.errorDelete", { module: labels.name }));
   } finally {
     isDeleteDialogOpen.value = false;
     recordToDelete.value = null;
@@ -209,16 +221,6 @@ function handleSort(column: string) {
 }
 
 
-
-function getPaymentMethodLabel(pm: PaymentMethod) {
-  switch (Number(pm)) {
-    case PaymentMethod.CASH: return t('fields.paymentMethodLabels.cash');
-    case PaymentMethod.TRANSFER: return t('fields.paymentMethodLabels.transfer');
-    case PaymentMethod.OTHER: return t('fields.paymentMethodLabels.other');
-    default: return 'N/A';
-  }
-}
-
 onMounted(() => {
   fetchData();
   fetchCustomers();
@@ -228,13 +230,23 @@ onMounted(() => {
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <h2 class="text-3xl font-bold tracking-tight text-foreground">{{ labels.title }}</h2>
+      <h2 class="text-3xl font-bold tracking-tight text-foreground">
+        {{ labels.title }}
+      </h2>
       <div class="flex items-center gap-2">
         <CurrencyToggle />
-        <Button variant="outline" size="icon" @click="fetchData" :disabled="loading">
+        <Button
+          variant="outline"
+          size="icon"
+          @click="fetchData"
+          :disabled="loading"
+        >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button @click="router.push('/admin/sale-payments/create')">
+        <Button
+          v-permission="'sale_payment:create'"
+          @click="router.push('/admin/sale-payments/create')"
+        >
           <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.name }}
         </Button>
       </div>
@@ -242,7 +254,9 @@ onMounted(() => {
 
     <div class="flex flex-wrap items-center gap-2">
       <div class="relative flex-1 min-w-[200px] max-w-sm">
-        <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Search
+          class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"
+        />
         <Input
           type="search"
           :placeholder="t('crud.search', { module: labels.title })"
@@ -251,9 +265,14 @@ onMounted(() => {
         />
       </div>
 
-      <DateRangePicker 
+      <DateRangePicker
         :model-value="{ start: filters.startDate, end: filters.endDate }"
-        @update:model-value="(val) => { filters.startDate = val?.start || ''; filters.endDate = val?.end || ''; }"
+        @update:model-value="
+          (val) => {
+            filters.startDate = val?.start || '';
+            filters.endDate = val?.end || '';
+          }
+        "
         class="w-full sm:w-[260px] shadow-sm"
         :placeholder="crud.filterByDate"
       />
@@ -273,11 +292,25 @@ onMounted(() => {
         class="w-full sm:w-[180px]"
       /> -->
 
-      <Button 
-        v-if="filters.search || filters.paymentMethod || filters.customerId || filters.startDate || filters.endDate"
-        variant="ghost" 
+      <Button
+        v-if="
+          filters.search ||
+          filters.paymentMethod ||
+          filters.customerId ||
+          filters.startDate ||
+          filters.endDate
+        "
+        variant="ghost"
         size="sm"
-        @click="Object.assign(filters, { search: '', paymentMethod: '', customerId: '', startDate: '', endDate: '' })"
+        @click="
+          Object.assign(filters, {
+            search: '',
+            paymentMethod: '',
+            customerId: '',
+            startDate: '',
+            endDate: '',
+          })
+        "
         class="h-9 px-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
       >
         <RefreshCw class="mr-2 h-4 w-4" />
@@ -285,7 +318,9 @@ onMounted(() => {
       </Button>
     </div>
 
-    <div class="rounded-md border bg-card overflow-auto shadow-sm max-h-[700px] scrollbar-thin scrollbar-thumb-muted-foreground/20">
+    <div
+      class="rounded-md border bg-card overflow-auto shadow-sm max-h-[700px] scrollbar-thin scrollbar-thumb-muted-foreground/20"
+    >
       <Table class="min-w-[1000px]">
         <TableHeader>
           <TableRow>
@@ -293,7 +328,11 @@ onMounted(() => {
             <TableHead class="w-[150px]">{{ fields.code }}</TableHead>
             <TableHead>{{ saleInvoiceLabels.name }}</TableHead>
             <TableHead>
-              <Button variant="ghost" @click="handleSort('paymentDate')" class="-ml-4 h-8 font-medium">
+              <Button
+                variant="ghost"
+                @click="handleSort('paymentDate')"
+                class="-ml-4 h-8 font-medium"
+              >
                 {{ fields.transactionDate }}<ArrowUpDown class="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
@@ -304,7 +343,9 @@ onMounted(() => {
         <TableBody>
           <TableRow v-if="loading && records.length === 0">
             <TableCell colspan="6" class="h-24 text-center">
-              <div class="flex items-center justify-center text-muted-foreground italic text-sm">
+              <div
+                class="flex items-center justify-center text-muted-foreground italic text-sm"
+              >
                 <Loader2 class="h-4 w-4 animate-spin mr-2" />
                 <span>{{ crud.fetchingData }}</span>
               </div>
@@ -316,47 +357,78 @@ onMounted(() => {
                 {{ (pagination.page - 1) * pagination.limit + index + 1 }}
               </TableCell>
               <TableCell>
-                <code class="bg-muted px-2 py-0.5 rounded text-xs font-bold text-foreground/70 border border-muted-foreground/10 uppercase">
+                <code
+                  class="bg-muted px-2 py-0.5 rounded text-xs font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
+                >
                   {{ record.code }}
                 </code>
               </TableCell>
               <TableCell class="font-medium">
                 <template v-if="record.details && record.details.length > 0">
                   <div class="flex flex-wrap gap-1">
-                    <Badge v-for="d in record.details" :key="d.id" variant="secondary" class="text-xs font-bold">
+                    <Badge
+                      v-for="d in record.details"
+                      :key="d.id"
+                      variant="secondary"
+                      class="text-xs font-bold"
+                    >
                       {{ d.saleInvoice?.code || `INV-${d.saleInvoiceId}` }}
                     </Badge>
                   </div>
                 </template>
-                <span v-else class="text-muted-foreground italic text-xs italic">N/A</span>
+                <span v-else class="text-muted-foreground italic text-xs"
+                  >N/A</span
+                >
               </TableCell>
               <TableCell class="text-foreground/90">
                 {{ formatDateTime(record.paymentDate) }}
               </TableCell>
               <TableCell class="text-right text-success font-semibold">
-                 {{ formatCurrency(record.paidAmount) }}
+                {{ formatCurrency(record.paidAmount) }}
               </TableCell>
               <TableCell class="text-right">
-                <DropdownMenu align="end">
+                <DropdownMenu>
                   <DropdownMenuTrigger as-child>
-                    <Button variant="ghost" class="h-8 w-8 p-0 hover:bg-muted/80 rounded-full">
+                    <Button
+                      variant="ghost"
+                      class="h-8 w-8 p-0 hover:bg-muted/80 rounded-full"
+                    >
                       <span class="sr-only">Open menu</span>
                       <MoreHorizontal class="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" class="w-[180px]">
-                    <DropdownMenuLabel class="text-xs uppercase text-muted-foreground font-bold">
+                    <DropdownMenuLabel
+                      class="text-xs uppercase text-muted-foreground font-bold"
+                    >
                       {{ crud.actions }}
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem @click="router.push(`/admin/sale-payments/${record.id}`)" class="cursor-pointer">
+                    <DropdownMenuItem
+                      @click="router.push(`/admin/sale-payments/${record.id}`)"
+                      class="cursor-pointer"
+                    >
                       <Eye class="mr-2 h-4 w-4 opacity-70" />{{ crud.viewBtn }}
                     </DropdownMenuItem>
-                    <DropdownMenuItem @click="router.push(`/admin/sale-payments/${record.id}/edit`)" class="cursor-pointer">
-                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{ crud.editBtn }}
+                    <DropdownMenuItem
+                      v-permission="'sale_payment:update'"
+                      @click="
+                        router.push(`/admin/sale-payments/${record.id}/edit`)
+                      "
+                      class="cursor-pointer"
+                    >
+                      <Pencil class="mr-2 h-4 w-4 opacity-70" />{{
+                        crud.editBtn
+                      }}
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem class="text-destructive focus:text-destructive cursor-pointer font-medium" @click="openDeleteDialog(record.id)">
+                    <DropdownMenuSeparator
+                      v-permission="'sale_payment:delete'"
+                    />
+                    <DropdownMenuItem
+                      v-permission="'sale_payment:delete'"
+                      class="text-destructive focus:text-destructive cursor-pointer font-medium"
+                      @click="openDeleteDialog(record.id)"
+                    >
                       <Trash2 class="mr-2 h-4 w-4" />{{ crud.delete }}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -365,14 +437,34 @@ onMounted(() => {
             </TableRow>
           </template>
           <TableRow v-else>
-            <TableCell colspan="6" class="h-32 text-center text-muted-foreground">
+            <TableCell
+              colspan="6"
+              class="h-32 text-center text-muted-foreground"
+            >
               <div class="flex flex-col items-center justify-center gap-3">
                 <CreditCard class="h-10 w-10 opacity-10" />
-                <p class="font-medium">{{ t("crud.noRecords", { module: labels.title }) }}</p>
+                <p class="font-medium">
+                  {{ t("crud.noRecords", { module: labels.title }) }}
+                </p>
                 <Button
-                  v-if="filters.search || filters.paymentMethod || filters.customerId || filters.startDate || filters.endDate"
-                  variant="outline" size="sm"
-                  @click="Object.assign(filters, { search: '', paymentMethod: '', customerId: '', startDate: '', endDate: '' })"
+                  v-if="
+                    filters.search ||
+                    filters.paymentMethod ||
+                    filters.customerId ||
+                    filters.startDate ||
+                    filters.endDate
+                  "
+                  variant="outline"
+                  size="sm"
+                  @click="
+                    Object.assign(filters, {
+                      search: '',
+                      paymentMethod: '',
+                      customerId: '',
+                      startDate: '',
+                      endDate: '',
+                    })
+                  "
                   class="h-8"
                 >
                   {{ crud.resetFilters }}
@@ -384,11 +476,21 @@ onMounted(() => {
       </Table>
     </div>
 
-    <div class="flex items-center justify-end px-4 py-4 border-t bg-muted/5 rounded-b-lg">
+    <div
+      class="flex items-center justify-end px-4 py-4 border-t bg-muted/5 rounded-b-lg"
+    >
       <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">
-          <span class="text-sm font-medium text-muted-foreground whitespace-nowrap">{{ crud.rowsPerPage }}</span>
-          <Select :model-value="pagination.limit.toString()" @update:model-value="(v) => (pagination.limit = parseInt(v as string))">
+          <span
+            class="text-sm font-medium text-muted-foreground whitespace-nowrap"
+            >{{ crud.rowsPerPage }}</span
+          >
+          <Select
+            :model-value="pagination.limit.toString()"
+            @update:model-value="
+              (v) => (pagination.limit = parseInt(v as string))
+            "
+          >
             <SelectTrigger class="h-8 w-[70px] bg-transparent">
               <SelectValue />
             </SelectTrigger>
@@ -400,16 +502,34 @@ onMounted(() => {
             </SelectContent>
           </Select>
         </div>
-        <Pagination v-if="pagination.totalItems > 0" :total="pagination.totalItems" :items-per-page="pagination.limit" :sibling-count="1" :show-edges="false" v-model:page="pagination.page" @update:page="handlePageChange">
+        <Pagination
+          v-if="pagination.totalItems > 0"
+          :total="pagination.totalItems"
+          :items-per-page="pagination.limit"
+          :sibling-count="1"
+          :show-edges="false"
+          v-model:page="pagination.page"
+          @update:page="handlePageChange"
+        >
           <PaginationContent v-slot="{ items }" class="flex items-center gap-1">
-            <PaginationPrevious class="h-8 px-2 text-foreground font-medium border-0 hover:bg-muted/50 bg-transparent" />
+            <PaginationPrevious
+              class="h-8 px-2 text-foreground font-medium border-0 hover:bg-muted/50 bg-transparent"
+            />
             <template v-for="(item, index) in items">
-              <PaginationItem v-if="item.type === 'page'" :key="index" :value="item.value" :is-active="item.value === pagination.page" class="w-8 h-8 p-0 font-medium">
+              <PaginationItem
+                v-if="item.type === 'page'"
+                :key="index"
+                :value="item.value"
+                :is-active="item.value === pagination.page"
+                class="w-8 h-8 p-0 font-medium"
+              >
                 {{ item.value }}
               </PaginationItem>
               <PaginationEllipsis v-else :key="item.type" :index="index" />
             </template>
-            <PaginationNext class="h-8 px-2 text-foreground font-medium border-0 hover:bg-muted/50 bg-transparent" />
+            <PaginationNext
+              class="h-8 px-2 text-foreground font-medium border-0 hover:bg-muted/50 bg-transparent"
+            />
           </PaginationContent>
         </Pagination>
       </div>
@@ -420,12 +540,17 @@ onMounted(() => {
         <AlertDialogHeader>
           <AlertDialogTitle>{{ crud.confirmDelete }}</AlertDialogTitle>
           <AlertDialogDescription>
-            {{ t('crud.confirmDeleteDesc', { module: labels.name }) }}
+            {{ t("crud.confirmDeleteDesc", { module: labels.name }) }}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel @click="isDeleteDialogOpen = false">{{ crud.cancel }}</AlertDialogCancel>
-          <AlertDialogAction @click="confirmDelete" class="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+          <AlertDialogCancel @click="isDeleteDialogOpen = false">{{
+            crud.cancel
+          }}</AlertDialogCancel>
+          <AlertDialogAction
+            @click="confirmDelete"
+            class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
             {{ crud.delete }}
           </AlertDialogAction>
         </AlertDialogFooter>

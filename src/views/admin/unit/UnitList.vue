@@ -57,11 +57,8 @@ import {
   Pencil,
   Trash2,
   ArrowUpDown,
-  Tag,
   RefreshCw,
   Loader2,
-  CheckCircle2,
-  XCircle,
   Scale
 } from "lucide-vue-next";
 import { UnitService } from "@/services/unit/unit.service";
@@ -70,6 +67,9 @@ import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
 import ClearableSelect from "@/components/ClearableSelect.vue";
 import { computed } from "vue";
+import { usePermissions } from "@/hooks/usePermissions";
+
+const { hasPermission } = usePermissions();
 
 
 const router = useRouter();
@@ -276,7 +276,7 @@ onMounted(() => {
         >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button @click="router.push('/admin/units/create')">
+        <Button v-permission="'unit:create'" @click="router.push('/admin/units/create')">
           <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.title }}
         </Button>
       </div>
@@ -357,7 +357,7 @@ onMounted(() => {
             </TableCell>
           </TableRow>
           <template v-else-if="units.length > 0">
-            <TableRow v-for="(unit, index) in units" :key="unit.id" :class="{ 'bg-muted/30': selectedIds.includes(unit.id) }">
+            <TableRow v-for="(unit) in units" :key="unit.id" :class="{ 'bg-muted/30': selectedIds.includes(unit.id) }">
               <TableCell>
                 <input 
                   type="checkbox" 
@@ -376,13 +376,14 @@ onMounted(() => {
                 unit.name
               }}</TableCell>
               <TableCell class="text-muted-foreground text-sm italic font-medium">{{
-                unit.shortName
+                unit.
               }}</TableCell>
               <TableCell class="w-[100px]">
                 <Badge
                   :variant="unit.status ? 'success' : 'warning'"
-                  class="cursor-pointer font-bold px-3 transition-all hover:opacity-80 active:scale-95"
-                  @click="toggleStatus(unit)"
+                  class="font-bold px-3 transition-all"
+                  :class="hasPermission('unit:update') ? 'cursor-pointer hover:opacity-80 active:scale-95' : 'cursor-default opacity-70'"
+                  @click="hasPermission('unit:update') && toggleStatus(unit)"
                 >
                   {{ unit.status ? crud.active : crud.inactive }}
                 </Badge>
@@ -413,6 +414,7 @@ onMounted(() => {
                       }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      v-permission="'unit:update'"
                       @click="router.push(`/admin/units/${unit.id}/edit`)"
                       class="cursor-pointer"
                     >
@@ -420,8 +422,9 @@ onMounted(() => {
                         crud.editBtn
                       }}</DropdownMenuItem
                     >
-                    <DropdownMenuSeparator />
+                    <DropdownMenuSeparator v-permission="'unit:delete'" />
                     <DropdownMenuItem
+                      v-permission="'unit:delete'"
                       class="text-destructive focus:text-destructive cursor-pointer font-medium"
                       @click="openDeleteDialog(unit.id)"
                     >

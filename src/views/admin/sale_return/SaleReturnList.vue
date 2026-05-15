@@ -2,6 +2,8 @@
 import { useAppI18n } from "@/hooks/useAppI18n";
 const { t, labels, fields, crud } = useAppI18n("saleReturn");
 import { ref, onMounted, reactive, watch, computed } from "vue";
+
+
 import { useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
 import SearchableSelect from "@/components/SearchableSelect.vue";
@@ -60,7 +62,7 @@ import {
   ArrowUpDown,
   RefreshCw,
   Loader2,
-  RotateCcw
+  RotateCcw,
 } from "lucide-vue-next";
 import DateRangePicker from "@/components/DateRangePicker.vue";
 import { SaleReturnService } from "@/services/sale_return/sale_return.service";
@@ -84,8 +86,8 @@ const filters = reactive({
   startDate: "",
   endDate: "",
 });
-const customerOptions = computed(() => 
-  customers.value.map(c => ({ label: c.name, value: c.id }))
+const customerOptions = computed(() =>
+  customers.value.map((c) => ({ label: c.name, value: c.id })),
 );
 
 const pagination = reactive<PaginationMeta>({
@@ -99,8 +101,14 @@ const pagination = reactive<PaginationMeta>({
 
 const statusOptions = computed(() => [
   { label: fields.statusLabels.draft, value: String(InvoiceStatus.DRAFT) },
-  { label: fields.statusLabels.completed, value: String(InvoiceStatus.COMPLETED) },
-  { label: fields.statusLabels.cancelled, value: String(InvoiceStatus.CANCELLED) },
+  {
+    label: fields.statusLabels.completed,
+    value: String(InvoiceStatus.COMPLETED),
+  },
+  {
+    label: fields.statusLabels.cancelled,
+    value: String(InvoiceStatus.CANCELLED),
+  },
 ]);
 
 const isDeleteDialogOpen = ref(false);
@@ -118,7 +126,7 @@ async function fetchData() {
     if (filters.search.trim()) {
       payload.search = filters.search.trim();
     }
-    
+
     payload.filter = {};
     if (filters.status) {
       payload.filter.status = filters.status;
@@ -140,7 +148,7 @@ async function fetchData() {
     }
   } catch (error) {
     console.error("Fetch error:", error);
-    toast.error(t('crud.errorFetch', { module: labels.name }));
+    toast.error(t("crud.errorFetch", { module: labels.name }));
   } finally {
     loading.value = false;
   }
@@ -162,12 +170,29 @@ const debouncedFetch = useDebounceFn(() => {
   fetchData();
 }, 500);
 
-watch(() => filters.search, () => debouncedFetch());
 watch(
-  () => [filters.status, filters.customerId, filters.startDate, filters.endDate],
-  () => { pagination.page = 1; fetchData(); }
+  () => filters.search,
+  () => debouncedFetch(),
 );
-watch(() => pagination.limit, () => { pagination.page = 1; fetchData(); });
+watch(
+  () => [
+    filters.status,
+    filters.customerId,
+    filters.startDate,
+    filters.endDate,
+  ],
+  () => {
+    pagination.page = 1;
+    fetchData();
+  },
+);
+watch(
+  () => pagination.limit,
+  () => {
+    pagination.page = 1;
+    fetchData();
+  },
+);
 
 function handlePageChange(page: number) {
   pagination.page = page;
@@ -184,11 +209,11 @@ async function confirmDelete() {
   try {
     const response = await srService.softDelete(recordToDelete.value);
     if (response.success) {
-      toast.success(t('crud.successDelete', { module: labels.name }));
+      toast.success(t("crud.successDelete", { module: labels.name }));
       fetchData();
     }
   } catch (error) {
-    toast.error(t('crud.errorDelete', { module: labels.name }));
+    toast.error(t("crud.errorDelete", { module: labels.name }));
   } finally {
     isDeleteDialogOpen.value = false;
     recordToDelete.value = null;
@@ -205,14 +230,16 @@ function handleSort(column: string) {
   fetchData();
 }
 
-
-
 function getStatusBadge(record: SaleReturn) {
   switch (Number(record.status)) {
-    case InvoiceStatus.DRAFT: return { variant: 'secondary', label: fields.statusLabels.draft };
-    case InvoiceStatus.COMPLETED: return { variant: 'success', label: fields.statusLabels.completed };
-    case InvoiceStatus.CANCELLED: return { variant: 'destructive', label: fields.statusLabels.cancelled };
-    default: return { variant: 'outline', label: crud.all };
+    case InvoiceStatus.DRAFT:
+      return { variant: "secondary", label: fields.statusLabels.draft };
+    case InvoiceStatus.COMPLETED:
+      return { variant: "success", label: fields.statusLabels.completed };
+    case InvoiceStatus.CANCELLED:
+      return { variant: "destructive", label: fields.statusLabels.cancelled };
+    default:
+      return { variant: "outline", label: crud.all };
   }
 }
 
@@ -225,12 +252,22 @@ onMounted(() => {
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <h2 class="text-3xl font-bold tracking-tight text-foreground">{{ labels.title }}</h2>
+      <h2 class="text-3xl font-bold tracking-tight text-foreground">
+        {{ labels.title }}
+      </h2>
       <div class="flex items-center gap-2">
-        <Button variant="outline" size="icon" @click="fetchData" :disabled="loading">
+        <Button
+          variant="outline"
+          size="icon"
+          @click="fetchData"
+          :disabled="loading"
+        >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button @click="router.push('/admin/sale_returns/create')">
+        <Button
+          v-permission="'sale_return:create'"
+          @click="router.push('/admin/sale_returns/create')"
+        >
           <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.name }}
         </Button>
       </div>
@@ -238,7 +275,9 @@ onMounted(() => {
 
     <div class="flex flex-wrap items-center gap-2">
       <div class="relative flex-1 min-w-[200px] max-w-sm">
-        <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Search
+          class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"
+        />
         <Input
           type="search"
           :placeholder="t('crud.search', { module: labels.title })"
@@ -247,9 +286,14 @@ onMounted(() => {
         />
       </div>
 
-      <DateRangePicker 
+      <DateRangePicker
         :model-value="{ start: filters.startDate, end: filters.endDate }"
-        @update:model-value="(val) => { filters.startDate = val?.start || ''; filters.endDate = val?.end || ''; }"
+        @update:model-value="
+          (val) => {
+            filters.startDate = val?.start || '';
+            filters.endDate = val?.end || '';
+          }
+        "
         class="w-full sm:w-[260px] shadow-sm"
         :placeholder="crud.filterByDate"
       />
@@ -269,11 +313,25 @@ onMounted(() => {
         class="w-full sm:w-[250px]"
       />
 
-      <Button 
-        v-if="filters.search || filters.status || filters.customerId || filters.startDate || filters.endDate"
-        variant="ghost" 
+      <Button
+        v-if="
+          filters.search ||
+          filters.status ||
+          filters.customerId ||
+          filters.startDate ||
+          filters.endDate
+        "
+        variant="ghost"
         size="sm"
-        @click="Object.assign(filters, { search: '', status: '', customerId: '', startDate: '', endDate: '' })"
+        @click="
+          Object.assign(filters, {
+            search: '',
+            status: '',
+            customerId: '',
+            startDate: '',
+            endDate: '',
+          })
+        "
         class="h-9 px-3 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
       >
         <RefreshCw class="mr-2 h-4 w-4" />
@@ -289,7 +347,11 @@ onMounted(() => {
             <TableHead class="w-[150px]">{{ fields.code }}</TableHead>
             <TableHead>{{ fields.customerId }}</TableHead>
             <TableHead>
-              <Button variant="ghost" @click="handleSort('returnDate')" class="-ml-4 h-8 font-medium">
+              <Button
+                variant="ghost"
+                @click="handleSort('returnDate')"
+                class="-ml-4 h-8 font-medium"
+              >
                 {{ fields.date }}<ArrowUpDown class="ml-1 h-3 w-3" />
               </Button>
             </TableHead>
@@ -302,7 +364,9 @@ onMounted(() => {
         <TableBody>
           <TableRow v-if="loading && records.length === 0">
             <TableCell colspan="8" class="h-24 text-center">
-              <div class="flex items-center justify-center text-muted-foreground italic text-sm">
+              <div
+                class="flex items-center justify-center text-muted-foreground italic text-sm"
+              >
                 <Loader2 class="h-4 w-4 animate-spin mr-2" />
                 <span>{{ crud.fetchingData }}</span>
               </div>
@@ -314,12 +378,16 @@ onMounted(() => {
                 {{ (pagination.page - 1) * pagination.limit + index + 1 }}
               </TableCell>
               <TableCell>
-                <code class="bg-muted px-2 py-0.5 rounded text-xs font-bold text-foreground/70 border border-muted-foreground/10 uppercase">
+                <code
+                  class="bg-muted px-2 py-0.5 rounded text-xs font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
+                >
                   {{ record.code }}
                 </code>
               </TableCell>
               <TableCell class="font-medium">
-                {{ record.customer?.name || `Customer ID ${record.customerId}` }}
+                {{
+                  record.customer?.name || `Customer ID ${record.customerId}`
+                }}
               </TableCell>
               <TableCell class="text-foreground/90">
                 {{ formatDateTime(record.returnDate) }}
@@ -331,31 +399,55 @@ onMounted(() => {
                 {{ formatCurrency(record.totalPrice) }}
               </TableCell>
               <TableCell class="text-center">
-                <Badge :variant="getStatusBadge(record).variant as any" class="font-medium text-xs px-2 py-0">
+                <Badge
+                  :variant="getStatusBadge(record).variant as any"
+                  class="font-medium text-xs px-2 py-0"
+                >
                   {{ getStatusBadge(record).label }}
                 </Badge>
               </TableCell>
               <TableCell class="text-right">
-                <DropdownMenu align="end">
+                <DropdownMenu>
                   <DropdownMenuTrigger as-child>
-                    <Button variant="ghost" class="h-8 w-8 p-0 hover:bg-muted/80 rounded-full">
+                    <Button
+                      variant="ghost"
+                      class="h-8 w-8 p-0 hover:bg-muted/80 rounded-full"
+                    >
                       <span class="sr-only">Open menu</span>
                       <MoreHorizontal class="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" class="w-[180px]">
-                    <DropdownMenuLabel class="text-xs uppercase text-muted-foreground font-bold">
+                    <DropdownMenuLabel
+                      class="text-xs uppercase text-muted-foreground font-bold"
+                    >
                       {{ crud.actions }}
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem @click="router.push(`/admin/sale-returns/${record.id}`)" class="cursor-pointer">
+                    <DropdownMenuItem
+                      @click="router.push(`/admin/sale-returns/${record.id}`)"
+                      class="cursor-pointer"
+                    >
                       <Eye class="mr-2 h-4 w-4 opacity-70" />{{ crud.viewBtn }}
                     </DropdownMenuItem>
-                    <DropdownMenuItem v-if="record.status === InvoiceStatus.DRAFT" @click="router.push(`/admin/sale-returns/${record.id}/edit`)" class="cursor-pointer">
+                    <DropdownMenuItem
+                      v-permission="'sale_return:update'"
+                      v-if="record.status === InvoiceStatus.DRAFT"
+                      @click="
+                        router.push(`/admin/sale-returns/${record.id}/edit`)
+                      "
+                      class="cursor-pointer"
+                    >
                       {{ crud.editBtn }}
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem class="text-destructive focus:text-destructive cursor-pointer font-medium" @click="openDeleteDialog(record.id)">
+                    <DropdownMenuSeparator
+                      v-permission="'sale_return:delete'"
+                    />
+                    <DropdownMenuItem
+                      v-permission="'sale_return:delete'"
+                      class="text-destructive focus:text-destructive cursor-pointer font-medium"
+                      @click="openDeleteDialog(record.id)"
+                    >
                       <Trash2 class="mr-2 h-4 w-4" />{{ crud.delete }}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -364,15 +456,34 @@ onMounted(() => {
             </TableRow>
           </template>
           <TableRow v-else>
-            <TableCell colspan="8" class="h-32 text-center text-muted-foreground">
+            <TableCell
+              colspan="8"
+              class="h-32 text-center text-muted-foreground"
+            >
               <div class="flex flex-col items-center justify-center gap-3">
                 <RotateCcw class="h-10 w-10 opacity-10" />
-                <p class="font-medium">{{ t('crud.noRecords', { module: labels.title }) }}</p>
+                <p class="font-medium">
+                  {{ t("crud.noRecords", { module: labels.title }) }}
+                </p>
                 <Button
-                  v-if="filters.search || filters.status || filters.customerId || filters.startDate || filters.endDate"
+                  v-if="
+                    filters.search ||
+                    filters.status ||
+                    filters.customerId ||
+                    filters.startDate ||
+                    filters.endDate
+                  "
                   variant="outline"
                   size="sm"
-                  @click="Object.assign(filters, { search: '', status: '', customerId: '', startDate: '', endDate: '' })"
+                  @click="
+                    Object.assign(filters, {
+                      search: '',
+                      status: '',
+                      customerId: '',
+                      startDate: '',
+                      endDate: '',
+                    })
+                  "
                   class="h-8"
                 >
                   {{ crud.resetFilters }}
@@ -385,11 +496,21 @@ onMounted(() => {
     </div>
 
     <!-- Pagination -->
-    <div class="flex items-center justify-end px-4 py-4 border-t bg-muted/5 rounded-b-lg">
+    <div
+      class="flex items-center justify-end px-4 py-4 border-t bg-muted/5 rounded-b-lg"
+    >
       <div class="flex items-center gap-4">
         <div class="flex items-center gap-2">
-          <span class="text-sm font-medium text-muted-foreground whitespace-nowrap">{{ crud.rowsPerPage }}</span>
-          <Select :model-value="pagination.limit.toString()" @update:model-value="(v) => (pagination.limit = parseInt(v as string))">
+          <span
+            class="text-sm font-medium text-muted-foreground whitespace-nowrap"
+            >{{ crud.rowsPerPage }}</span
+          >
+          <Select
+            :model-value="pagination.limit.toString()"
+            @update:model-value="
+              (v) => (pagination.limit = parseInt(v as string))
+            "
+          >
             <SelectTrigger class="h-8 w-[70px] bg-transparent">
               <SelectValue />
             </SelectTrigger>
@@ -401,16 +522,34 @@ onMounted(() => {
             </SelectContent>
           </Select>
         </div>
-        <Pagination v-if="pagination.totalItems > 0" :total="pagination.totalItems" :items-per-page="pagination.limit" :sibling-count="1" :show-edges="false" v-model:page="pagination.page" @update:page="handlePageChange">
+        <Pagination
+          v-if="pagination.totalItems > 0"
+          :total="pagination.totalItems"
+          :items-per-page="pagination.limit"
+          :sibling-count="1"
+          :show-edges="false"
+          v-model:page="pagination.page"
+          @update:page="handlePageChange"
+        >
           <PaginationContent v-slot="{ items }" class="flex items-center gap-1">
-            <PaginationPrevious class="h-8 px-2 text-foreground font-medium border-0 hover:bg-muted/50 bg-transparent" />
+            <PaginationPrevious
+              class="h-8 px-2 text-foreground font-medium border-0 hover:bg-muted/50 bg-transparent"
+            />
             <template v-for="(item, index) in items">
-              <PaginationItem v-if="item.type === 'page'" :key="index" :value="item.value" :is-active="item.value === pagination.page" class="w-8 h-8 p-0 font-medium">
+              <PaginationItem
+                v-if="item.type === 'page'"
+                :key="index"
+                :value="item.value"
+                :is-active="item.value === pagination.page"
+                class="w-8 h-8 p-0 font-medium"
+              >
                 {{ item.value }}
               </PaginationItem>
               <PaginationEllipsis v-else :key="item.type" :index="index" />
             </template>
-            <PaginationNext class="h-8 px-2 text-foreground font-medium border-0 hover:bg-muted/50 bg-transparent" />
+            <PaginationNext
+              class="h-8 px-2 text-foreground font-medium border-0 hover:bg-muted/50 bg-transparent"
+            />
           </PaginationContent>
         </Pagination>
       </div>
@@ -426,8 +565,13 @@ onMounted(() => {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel @click="isDeleteDialogOpen = false">{{ crud.cancel }}</AlertDialogCancel>
-          <AlertDialogAction @click="confirmDelete" class="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+          <AlertDialogCancel @click="isDeleteDialogOpen = false">{{
+            crud.cancel
+          }}</AlertDialogCancel>
+          <AlertDialogAction
+            @click="confirmDelete"
+            class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
             {{ crud.delete }}
           </AlertDialogAction>
         </AlertDialogFooter>

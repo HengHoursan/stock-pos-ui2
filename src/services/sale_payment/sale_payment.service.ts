@@ -37,7 +37,11 @@ export class SalePaymentService extends BaseService {
     return this.post<ApiResponse<null>>("/sale-payments/force-delete", { id });
   }
 
+  async softDelete(id: number): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/sale-payments/soft-delete", { id });
+  }
+
   async delete(id: number): Promise<ApiResponse<null>> {
-    return this.forceDelete(id);
+    return this.softDelete(id);
   }
 }

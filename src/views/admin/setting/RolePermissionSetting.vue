@@ -88,6 +88,7 @@ async function fetchRoles() {
         selectRole(roles.value[0].id);
       }
     }
+    console.log("Roles:", roles.value);
   } catch (error) {
     toast.error("Failed to load roles");
   } finally {

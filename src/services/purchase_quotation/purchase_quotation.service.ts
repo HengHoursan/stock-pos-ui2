@@ -25,7 +25,15 @@ export class PurchaseQuotationService extends BaseService {
     return this.post<ApiResponse<null>>("/purchase-quotations/update", payload);
   }
 
+  async softDelete(id: number): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/purchase-quotations/soft-delete", { id });
+  }
+
+  async forceDelete(id: number): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/purchase-quotations/force-delete", { id });
+  }
+
   async delete(id: number): Promise<ApiResponse<null>> {
-    return this.post<ApiResponse<null>>("/purchase-quotations/delete", { id });
+    return this.softDelete(id);
   }
 }

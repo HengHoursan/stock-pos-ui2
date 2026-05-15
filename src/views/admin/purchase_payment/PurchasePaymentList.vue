@@ -3,10 +3,11 @@ import { useAppI18n } from "@/hooks/useAppI18n";
 const { t, labels, fields, crud, group } = useAppI18n("purchasePayment");
 const purchaseInvoiceLabels = group("purchaseInvoice");
 import { ref, onMounted, reactive, watch, computed } from "vue";
+
+
 import { useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
 import SearchableSelect from "@/components/SearchableSelect.vue";
-import ClearableSelect from "@/components/ClearableSelect.vue";
 
 import {
   Table,
@@ -69,7 +70,6 @@ import CurrencyToggle from "@/components/CurrencyToggle.vue";
 import { PurchasePaymentService } from "@/services/purchase_payment/purchase_payment.service";
 import { SupplierService } from "@/services/supplier/supplier.service";
 import type { PurchasePayment, PaginationMeta, Supplier } from "@/types";
-import { PaymentMethod } from "@/types/enums";
 import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
 
@@ -91,17 +91,7 @@ const supplierOptions = computed(() =>
   suppliers.value.map((s) => ({ label: s.name, value: s.id })),
 );
 
-const paymentMethodOptions = computed(() => [
-  { label: fields.paymentMethodLabels.cash, value: String(PaymentMethod.CASH) },
-  {
-    label: fields.paymentMethodLabels.transfer,
-    value: String(PaymentMethod.TRANSFER),
-  },
-  {
-    label: fields.paymentMethodLabels.other,
-    value: String(PaymentMethod.OTHER),
-  },
-]);
+;
 
 const pagination = reactive<PaginationMeta>({
   page: 1,
@@ -210,20 +200,15 @@ async function confirmDelete() {
   try {
     const response = await ppService.softDelete(recordToDelete.value);
     if (response.success) {
-      toast.success(
-        t("crud.successDelete", { module: labels.name }),
-      );
+      toast.success(t("crud.successDelete", { module: labels.name }));
       fetchData();
     } else {
       toast.error(
-        response.message ||
-          t("crud.errorDelete", { module: labels.name }),
+        response.message || t("crud.errorDelete", { module: labels.name }),
       );
     }
   } catch (error) {
-    toast.error(
-      t("crud.errorDelete", { module: labels.name }),
-    );
+    toast.error(t("crud.errorDelete", { module: labels.name }));
   } finally {
     isDeleteDialogOpen.value = false;
     recordToDelete.value = null;
@@ -239,20 +224,6 @@ function handleSort(column: string) {
   }
   fetchData();
 }
-
-function getPaymentMethodLabel(pm: PaymentMethod) {
-  switch (Number(pm)) {
-    case PaymentMethod.CASH:
-      return t("fields.paymentMethodLabels.cash");
-    case PaymentMethod.TRANSFER:
-      return t("fields.paymentMethodLabels.transfer");
-    case PaymentMethod.OTHER:
-      return t("fields.paymentMethodLabels.other");
-    default:
-      return "N/A";
-  }
-}
-
 onMounted(() => {
   fetchData();
   fetchSuppliers();
@@ -275,7 +246,10 @@ onMounted(() => {
         >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button @click="router.push('/admin/purchase-payments/create')">
+        <Button
+          v-permission="'purchase_payment:create'"
+          @click="router.push('/admin/purchase-payments/create')"
+        >
           <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.name }}
         </Button>
       </div>
@@ -407,7 +381,7 @@ onMounted(() => {
                     </Badge>
                   </div>
                 </template>
-                <span v-else class="text-muted-foreground italic text-xs italic"
+                <span v-else class="text-muted-foreground italic text-xs"
                   >N/A</span
                 >
               </TableCell>
@@ -444,6 +418,7 @@ onMounted(() => {
                       <Eye class="mr-2 h-4 w-4 opacity-70" />{{ crud.viewBtn }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      v-permission="'purchase_payment:update'"
                       @click="
                         router.push(
                           `/admin/purchase-payments/${record.id}/edit`,
@@ -455,8 +430,11 @@ onMounted(() => {
                         crud.editBtn
                       }}
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
+                    <DropdownMenuSeparator
+                      v-permission="'purchase_payment:delete'"
+                    />
                     <DropdownMenuItem
+                      v-permission="'purchase_payment:delete'"
                       class="text-destructive focus:text-destructive cursor-pointer font-medium"
                       @click="openDeleteDialog(record.id)"
                     >

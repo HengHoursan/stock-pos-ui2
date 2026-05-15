@@ -30,7 +30,15 @@ export class PurchaseInvoiceService extends BaseService {
     return this.post<ApiResponse<null>>("/purchase-invoices/update-status", payload);
   }
 
+  async softDelete(id: number): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/purchase-invoices/soft-delete", { id });
+  }
+
+  async forceDelete(id: number): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/purchase-invoices/force-delete", { id });
+  }
+
   async delete(id: number): Promise<ApiResponse<null>> {
-    return this.post<ApiResponse<null>>("/purchase-invoices/delete", { id });
+    return this.softDelete(id);
   }
 }

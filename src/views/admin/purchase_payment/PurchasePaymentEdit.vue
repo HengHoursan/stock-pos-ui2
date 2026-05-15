@@ -150,7 +150,7 @@ const onSubmit = form.handleSubmit(async (values) => {
       details: [
         {
           purchaseInvoiceId: values.purchaseInvoiceId,
-          paidAmount: values.amount,
+          totalPrice: values.amount,
         },
       ],
     };

@@ -2,6 +2,9 @@
 import { useAppI18n } from "@/hooks/useAppI18n";
 const { t, labels, fields, crud } = useAppI18n("saleQuotation");
 import { ref, onMounted, reactive, watch, computed } from "vue";
+
+
+
 import { useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
 import SearchableSelect from "@/components/SearchableSelect.vue";
@@ -268,7 +271,7 @@ onMounted(() => {
         >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button @click="router.push('/admin/sale-quotations/create')">
+        <Button v-permission="'sale_quotation:create'" @click="router.push('/admin/sale-quotations/create')">
           <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.name }}
         </Button>
       </div>
@@ -408,7 +411,7 @@ onMounted(() => {
                 </Badge>
               </TableCell>
               <TableCell class="text-right">
-                <DropdownMenu align="end">
+                <DropdownMenu>
                   <DropdownMenuTrigger as-child>
                     <Button
                       variant="ghost"
@@ -434,6 +437,7 @@ onMounted(() => {
                       <Eye class="mr-2 h-4 w-4 opacity-70" />{{ crud.viewBtn }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      v-permission="'sale_order:create'"
                       v-if="record.status === QuotationStatus.ACCEPTED"
                       @click="
                         router.push(
@@ -447,6 +451,7 @@ onMounted(() => {
                       }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      v-permission="'sale_quotation:update'"
                       v-if="record.status === QuotationStatus.DRAFT"
                       @click="
                         router.push(`/admin/sale-quotations/${record.id}/edit`)
@@ -455,8 +460,9 @@ onMounted(() => {
                     >
                       {{ crud.editBtn }}
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
+                    <DropdownMenuSeparator v-permission="'sale_quotation:delete'" />
                     <DropdownMenuItem
+                      v-permission="'sale_quotation:delete'"
                       class="text-destructive focus:text-destructive cursor-pointer font-medium"
                       @click="openDeleteDialog(record.id)"
                     >

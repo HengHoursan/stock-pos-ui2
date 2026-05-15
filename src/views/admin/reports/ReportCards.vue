@@ -5,7 +5,6 @@ import { useRouter } from "vue-router";
 import { 
   BarChart3, 
   ShoppingBag, 
-  ShoppingCart, 
   Package, 
   PieChart, 
   TrendingUp,
@@ -82,11 +81,12 @@ const navigateTo = (path: string) => {
     <Card
       v-for="card in reportCards"
       :key="card.id"
+      v-permission="`report:view_${card.id.replace('-', '_')}`"
       class="group cursor-pointer transition-all hover:border-primary/50 hover:shadow-md relative overflow-hidden"
       @click="navigateTo(card.path)"
     >
       <div
-        class="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+        class="absolute inset-0 bg-linear-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
       ></div>
       <CardHeader
         class="pb-3 flex flex-row items-start justify-between space-y-0"

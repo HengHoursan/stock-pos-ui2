@@ -68,6 +68,9 @@ import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
 import ClearableSelect from "@/components/ClearableSelect.vue";
 import { computed } from "vue";
+import { usePermissions } from "@/hooks/usePermissions";
+
+const { hasPermission } = usePermissions();
 
 const router = useRouter();
 const supplierService = new SupplierService();
@@ -282,7 +285,7 @@ onMounted(() => {
         >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button @click="router.push('/admin/suppliers/create')">
+        <Button v-permission="'supplier:create'" @click="router.push('/admin/suppliers/create')">
           <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.name }}
         </Button>
       </div>
@@ -368,7 +371,7 @@ onMounted(() => {
             </TableCell>
           </TableRow>
           <template v-else-if="suppliers.length > 0">
-            <TableRow v-for="(supplier, index) in suppliers" :key="supplier.id" :class="{ 'bg-muted/30': selectedIds.includes(supplier.id) }">
+            <TableRow v-for="(supplier) in suppliers" :key="supplier.id" :class="{ 'bg-muted/30': selectedIds.includes(supplier.id) }">
               <TableCell>
                 <input 
                   type="checkbox" 
@@ -406,8 +409,9 @@ onMounted(() => {
               <TableCell class="w-[100px]">
                 <Badge
                   :variant="supplier.status ? 'success' : 'warning'"
-                  class="cursor-pointer font-bold px-3 transition-all hover:opacity-80 active:scale-95"
-                  @click="toggleStatus(supplier)"
+                  class="font-bold px-3 transition-all"
+                  :class="hasPermission('supplier:update') ? 'cursor-pointer hover:opacity-80 active:scale-95' : 'cursor-default opacity-70'"
+                  @click="hasPermission('supplier:update') && toggleStatus(supplier)"
                 >
                   {{ supplier.status ? crud.active : crud.inactive }}
                 </Badge>
@@ -436,6 +440,7 @@ onMounted(() => {
                       <Eye class="mr-2 h-4 w-4 opacity-70" />{{ crud.viewBtn }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      v-permission="'supplier:update'"
                       @click="
                         router.push(`/admin/suppliers/${supplier.id}/edit`)
                       "
@@ -445,8 +450,9 @@ onMounted(() => {
                         crud.editBtn
                       }}</DropdownMenuItem
                     >
-                    <DropdownMenuSeparator />
+                    <DropdownMenuSeparator v-permission="'supplier:delete'" />
                     <DropdownMenuItem
+                      v-permission="'supplier:delete'"
                       class="text-destructive focus:text-destructive cursor-pointer font-medium"
                       @click="openDeleteDialog(supplier.id)"
                     >

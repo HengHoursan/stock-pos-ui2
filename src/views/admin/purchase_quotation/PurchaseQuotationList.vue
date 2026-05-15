@@ -2,6 +2,9 @@
 import { useAppI18n } from "@/hooks/useAppI18n";
 const { t, labels, fields, crud } = useAppI18n("purchaseQuotation");
 import { ref, onMounted, reactive, watch } from "vue";
+
+
+
 import { useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
 import {
@@ -207,7 +210,7 @@ onMounted(() => {
         >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button @click="router.push('/admin/purchase-quotations/create')">
+        <Button v-permission="'purchase_quotation:create'" @click="router.push('/admin/purchase-quotations/create')">
           <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.name }}
         </Button>
       </div>
@@ -305,7 +308,7 @@ onMounted(() => {
                 {{ formatCurrency(record.totalPrice) }}
               </TableCell>
               <TableCell class="text-right">
-                <DropdownMenu align="end">
+                <DropdownMenu>
                   <DropdownMenuTrigger as-child>
                     <Button
                       variant="ghost"
@@ -330,8 +333,9 @@ onMounted(() => {
                     >
                       <Eye class="mr-2 h-4 w-4 opacity-70" />{{ crud.viewBtn }}
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
+                    <DropdownMenuSeparator v-permission="'purchase_quotation:delete'" />
                     <DropdownMenuItem
+                      v-permission="'purchase_quotation:delete'"
                       class="text-destructive focus:text-destructive cursor-pointer font-medium"
                       @click="openDeleteDialog(record.id)"
                     >

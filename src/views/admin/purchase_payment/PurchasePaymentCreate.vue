@@ -46,7 +46,6 @@ import {
   ChevronLeft,
   Loader2,
   FileText,
-  CreditCard,
   Banknote,
   History,
 } from "lucide-vue-next";

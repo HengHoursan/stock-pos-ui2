@@ -33,4 +33,12 @@ export class PurchaseReturnService extends BaseService {
   async softDelete(id: number): Promise<ApiResponse<null>> {
     return this.post<ApiResponse<null>>("/purchase-returns/soft-delete", { id });
   }
+
+  async forceDelete(id: number): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/purchase-returns/force-delete", { id });
+  }
+
+  async delete(id: number): Promise<ApiResponse<null>> {
+    return this.softDelete(id);
+  }
 }

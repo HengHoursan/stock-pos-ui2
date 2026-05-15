@@ -44,8 +44,8 @@ const formSchema = toTypedSchema(loginSchema);
 const form = useForm<LoginForm>({
   validationSchema: formSchema,
   initialValues: {
-    email: "superadmin@gmail.com",
-    password: "123456",
+    email: "",
+    password: "",
   },
 });
 

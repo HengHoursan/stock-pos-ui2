@@ -20,7 +20,7 @@ export function usePermissions() {
 
     // Allow everything for Super Admin (optional safety net)
     const roleName = authStore.user?.role?.name?.toLowerCase() || "";
-    if (roleName.includes("admin") || roleName === "super admin") return true;
+    if (roleName === "superadmin") return true;
 
     if (Array.isArray(permission)) {
       // Check if user has ANY of the required permissions

@@ -39,6 +39,10 @@ export class SaleInvoiceService extends BaseService {
     return this.post<ApiResponse<null>>("/sale-invoices/soft-delete", { id });
   }
 
+  async forceDelete(id: number): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/sale-invoices/force-delete", { id });
+  }
+
   async delete(id: number): Promise<ApiResponse<null>> {
     return this.softDelete(id);
   }

@@ -25,6 +25,7 @@ export const useAuthStore = defineStore("auth", {
       const response = await authService.login(payload);
       if (response.success && response.data) {
         this.setAuth(response.data);
+        await this.fetchUser(); // fetchUser gets full profile including permissions[]
       }
       return response;
     },
@@ -32,17 +33,16 @@ export const useAuthStore = defineStore("auth", {
       const response = await authService.register(payload);
       if (response.success && response.data) {
         this.setAuth(response.data);
+        await this.fetchUser();
       }
       return response;
     },
-    setAuth(data: { accessToken: string; refreshToken: string; user: User }) {
+    setAuth(data: { accessToken: string; refreshToken: string; user?: User }) {
       this.accessToken = data.accessToken;
       this.refreshToken = data.refreshToken;
-      this.user = data.user;
-
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      // user is NOT set here — fetchUser() will handle it with full permissions
     },
     async logout() {
       try {
@@ -55,7 +55,6 @@ export const useAuthStore = defineStore("auth", {
       this.accessToken = null;
       this.refreshToken = null;
       this.user = null;
-
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
       localStorage.removeItem("user");
@@ -63,6 +62,7 @@ export const useAuthStore = defineStore("auth", {
     async fetchUser() {
       if (!this.accessToken) return;
       try {
+        // Backend /users/me now returns permissions[] directly in UserResponse
         const response = await userService.getMe();
         if (response.success && response.data) {
           this.user = response.data;
@@ -78,4 +78,3 @@ export const useAuthStore = defineStore("auth", {
     },
   },
 });
-

@@ -30,11 +30,15 @@ export class SaleReturnService extends BaseService {
     return this.post<ApiResponse<null>>("/sale-returns/status-update", payload);
   }
 
+  async softDelete(id: number): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/sale-returns/soft-delete", { id });
+  }
+
   async forceDelete(id: number): Promise<ApiResponse<null>> {
     return this.post<ApiResponse<null>>("/sale-returns/force-delete", { id });
   }
 
   async delete(id: number): Promise<ApiResponse<null>> {
-    return this.forceDelete(id);
+    return this.softDelete(id);
   }
 }

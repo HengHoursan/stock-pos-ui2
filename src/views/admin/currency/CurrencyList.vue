@@ -68,6 +68,9 @@ import { toast } from "vue-sonner";
 import { useDebounceFn } from "@vueuse/core";
 import ClearableSelect from "@/components/ClearableSelect.vue";
 import { computed } from "vue";
+import { usePermissions } from "@/hooks/usePermissions";
+
+const { hasPermission } = usePermissions();
 
 const router = useRouter();
 const currencyService = new CurrencyService();
@@ -231,7 +234,7 @@ onMounted(() => {
         >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button @click="router.push('/admin/currencies/create')">
+        <Button v-permission="'currency:create'" @click="router.push('/admin/currencies/create')">
           <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.title }}</Button>
       </div>
     </div>
@@ -325,8 +328,9 @@ onMounted(() => {
               <TableCell class="w-[100px]">
                 <Badge
                   :variant="currency.status ? 'success' : 'warning'"
-                  class="cursor-pointer font-bold px-3 transition-all hover:opacity-80 active:scale-95"
-                  @click="toggleStatus(currency)"
+                  class="font-bold px-3 transition-all"
+                  :class="hasPermission('currency:update') ? 'cursor-pointer hover:opacity-80 active:scale-95' : 'cursor-default opacity-70'"
+                  @click="hasPermission('currency:update') && toggleStatus(currency)"
                 >
                   {{ currency.status ? crud.active : crud.inactive }}
                 </Badge>
@@ -351,10 +355,18 @@ onMounted(() => {
                     <DropdownMenuItem @click="router.push(`/admin/currencies/${currency.id}`)" class="cursor-pointer">
                       <Eye class="mr-2 h-4 w-4 opacity-70" /> {{ crud.viewBtn }}
                     </DropdownMenuItem>
-                    <DropdownMenuItem @click="router.push(`/admin/currencies/${currency.id}/edit`)" class="cursor-pointer">
+                    <DropdownMenuItem
+                      v-permission="'currency:update'"
+                      @click="router.push(`/admin/currencies/${currency.id}/edit`)"
+                      class="cursor-pointer"
+                    >
                       <Pencil class="mr-2 h-4 w-4 opacity-70" />{{ crud.editBtn }}</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem class="text-destructive focus:text-destructive cursor-pointer font-medium" @click="openDeleteDialog(currency.id)">
+                    <DropdownMenuSeparator v-permission="'currency:delete'" />
+                    <DropdownMenuItem
+                      v-permission="'currency:delete'"
+                      class="text-destructive focus:text-destructive cursor-pointer font-medium"
+                      @click="openDeleteDialog(currency.id)"
+                    >
                       <Trash2 class="mr-2 h-4 w-4" />{{ crud.delete }}</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

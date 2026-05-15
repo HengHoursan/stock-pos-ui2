@@ -1,28 +1,37 @@
 import type { SaleInvoice } from './sale_invoice';
-import type { PaymentMethod } from './enums';
+import type { Customer } from './customer';
+
+export interface SalePaymentDetail {
+  id: number;
+  saleInvoiceId: number;
+  paidAmount: number;
+  saleInvoice?: SaleInvoice;
+}
 
 export interface SalePayment {
   id: number;
   code: string;
-  saleInvoiceId: number;
+  customerId: number;
+  totalPrice: number;
+  paidAmount: number;
   paymentDate: string;
-  amount: number;
-  paymentMethod: PaymentMethod;
-  referenceNumber: string | null;
   description: string | null;
+  isCancel: boolean;
   createdAt: string;
   updatedAt: string;
-  saleInvoice?: SaleInvoice;
+  customer?: Customer;
+  details?: SalePaymentDetail[];
 }
 
 export interface CreateSalePaymentRequest {
   code?: string;
-  saleInvoiceId: number;
+  customerId: number;
   paymentDate: string;
-  amount: number;
-  paymentMethod: PaymentMethod;
-  referenceNumber?: string;
   description?: string;
+  details?: {
+    saleInvoiceId: number;
+    paidAmount: number;
+  }[];
 }
 
 export interface UpdateSalePaymentRequest extends CreateSalePaymentRequest {

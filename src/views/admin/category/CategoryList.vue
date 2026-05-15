@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { usePermissions } from "@/hooks/usePermissions";
 const { t, labels, fields, crud } = useAppI18n("category");
+const { hasPermission } = usePermissions();
 import { ref, onMounted, reactive, watch } from "vue";
 import { useRouter } from "vue-router";
 import {
@@ -274,7 +276,7 @@ onMounted(() => {
         >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button @click="router.push('/admin/categories/create')">
+        <Button v-permission="'category:create'" @click="router.push('/admin/categories/create')">
           <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.title }}
         </Button>
       </div>
@@ -282,13 +284,13 @@ onMounted(() => {
 
     <div v-if="selectedIds.length > 0" class="flex items-center gap-2 p-3 bg-muted/30 border rounded-lg animate-in fade-in slide-in-from-top-2">
       <span class="text-sm font-medium mr-2">{{ t('crud.selectedCount', { count: selectedIds.length }) }}</span>
-      <Button variant="outline" size="sm" @click="handleBulkAction('activate')" class="h-8">
+      <Button v-permission="'category:update'" variant="outline" size="sm" @click="handleBulkAction('activate')" class="h-8">
         {{ crud.activate }}
       </Button>
-      <Button variant="outline" size="sm" @click="handleBulkAction('deactivate')" class="h-8">
+      <Button v-permission="'category:update'" variant="outline" size="sm" @click="handleBulkAction('deactivate')" class="h-8">
         {{ crud.deactivate }}
       </Button>
-      <Button variant="destructive" size="sm" @click="handleBulkAction('delete')" class="h-8">
+      <Button v-permission="'category:delete'" variant="destructive" size="sm" @click="handleBulkAction('delete')" class="h-8">
         <Trash2 class="mr-2 h-4 w-4" />
         {{ crud.delete }}
       </Button>
@@ -406,8 +408,9 @@ onMounted(() => {
               <TableCell class="w-[100px]">
                 <Badge
                   :variant="category.status ? 'success' : 'warning'"
-                  class="cursor-pointer font-bold px-3 transition-all hover:opacity-80 active:scale-95"
-                  @click="toggleStatus(category)"
+                  class="font-bold px-3 transition-all"
+                  :class="{ 'cursor-pointer hover:opacity-80 active:scale-95': hasPermission('category:update') }"
+                  @click="hasPermission('category:update') ? toggleStatus(category) : null"
                 >
                   {{
                     category.status ? crud.active : crud.inactive
@@ -432,6 +435,7 @@ onMounted(() => {
                     >
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
+                      v-permission="'category:view'"
                       @click="router.push(`/admin/categories/${category.id}`)"
                       class="cursor-pointer"
                     >
@@ -440,6 +444,7 @@ onMounted(() => {
                       }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      v-permission="'category:update'"
                       @click="
                         router.push(`/admin/categories/${category.id}/edit`)
                       "
@@ -451,6 +456,7 @@ onMounted(() => {
                     >
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
+                      v-permission="'category:delete'"
                       class="text-destructive focus:text-destructive cursor-pointer font-medium"
                       @click="openDeleteDialog(category.id)"
                     >

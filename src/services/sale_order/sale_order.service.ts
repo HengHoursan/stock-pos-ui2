@@ -41,6 +41,10 @@ export class SaleOrderService extends BaseService {
     return this.post<ApiResponse<null>>("/sale-orders/soft-delete", { id });
   }
 
+  async forceDelete(id: number): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/sale-orders/force-delete", { id });
+  }
+
   async delete(id: number): Promise<ApiResponse<null>> {
     return this.softDelete(id);
   }

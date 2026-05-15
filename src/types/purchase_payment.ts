@@ -1,28 +1,41 @@
 import type { PurchaseInvoice } from './purchase_invoice';
-import type { PaymentMethod } from './enums';
+import type { Supplier } from './supplier';
+
+export interface PurchasePaymentDetail {
+  id: number;
+  purchasePaymentId: number;
+  totalPrice: number;
+  purchaseInvoiceId: number | null;
+  purchaseInvoiceDetailId: number | null;
+  purchaseInvoice?: PurchaseInvoice;
+}
 
 export interface PurchasePayment {
   id: number;
   code: string;
-  purchaseInvoiceId: number;
+  supplierId: number;
+  totalPrice: number;
+  paidAmount: number;
   paymentDate: string;
-  amount: number;
-  paymentMethod: PaymentMethod;
-  referenceNumber: string | null;
   description: string | null;
+  isCancel: boolean;
   createdAt: string;
   updatedAt: string;
-  purchaseInvoice?: PurchaseInvoice;
+  supplier?: Supplier;
+  details?: PurchasePaymentDetail[];
 }
 
 export interface CreatePurchasePaymentRequest {
   code?: string;
-  purchaseInvoiceId: number;
+  supplierId: number;
   paymentDate: string;
-  amount: number;
-  paymentMethod: PaymentMethod;
-  referenceNumber?: string;
+  paidAmount?: number;
   description?: string;
+  details: {
+    purchaseInvoiceId?: number;
+    totalPrice: number;
+    purchaseInvoiceDetailId?: number;
+  }[];
 }
 
 export interface UpdatePurchasePaymentRequest extends CreatePurchasePaymentRequest {

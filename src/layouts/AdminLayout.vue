@@ -95,11 +95,13 @@ interface NavItem {
   titleKey: string;
   icon: any;
   url?: string;
-  children?: { titleKey: string; url: string; icon: any }[];
+  permission?: string | string[];
+  children?: { titleKey: string; url: string; icon: any; permission?: string | string[] }[];
 }
 
 interface NavDomain {
   domainKey: string;
+  permission?: string | string[];
   items: NavItem[];
 }
 
@@ -108,35 +110,41 @@ const navDomains: NavDomain[] = [
     domainKey: "layout.posDomain",
     items: [
       { titleKey: "menu.dashboard", url: "/dashboard", icon: LayoutDashboard },
-      { titleKey: "menu.customers", url: "/admin/customers", icon: Users },
+      { titleKey: "menu.customers", url: "/admin/customers", icon: Users, permission: "customer:view" },
       {
         titleKey: "menu.sales",
         icon: Coins,
+        permission: ["sale_order:view", "sale_invoice:view", "sale_payment:view", "sale_return:view"],
         children: [
           {
             titleKey: "menu.saleOrders",
             url: "/admin/sale-orders",
             icon: Package,
+            permission: "sale_order:view",
           },
           {
             titleKey: "menu.saleQuotations",
             url: "/admin/sale-quotations",
             icon: FileText,
+            permission: "sale_quotation:view",
           },
           {
             titleKey: "menu.saleInvoices",
             url: "/admin/sale-invoices",
             icon: CreditCard,
+            permission: "sale_invoice:view",
           },
           {
             titleKey: "menu.salePayments",
             url: "/admin/sale-payments",
             icon: Banknote,
+            permission: "sale_payment:view",
           },
           {
             titleKey: "menu.saleReturns",
             url: "/admin/sale-returns",
             icon: RotateCcw,
+            permission: "sale_return:view",
           },
         ],
       },
@@ -148,47 +156,56 @@ const navDomains: NavDomain[] = [
       {
         titleKey: "menu.transactions",
         icon: History,
+        permission: "transaction:view",
         children: [
           {
             titleKey: "menu.allTransactions",
             url: "/admin/transactions",
             icon: ArrowRightLeft,
+            permission: "transaction:view",
           },
           {
             titleKey: "menu.addTransaction",
             url: "/admin/transactions/create",
             icon: Plus,
+            permission: "transaction:create",
           },
         ],
       },
       {
         titleKey: "menu.purchases",
         icon: Truck,
+        permission: ["purchase_order:view", "purchase_invoice:view", "purchase_payment:view", "purchase_return:view"],
         children: [
           {
             titleKey: "menu.purchaseQuotations",
             url: "/admin/purchase-quotations",
             icon: FileText,
+            permission: "purchase_quotation:view",
           },
           {
             titleKey: "menu.purchaseOrders",
             url: "/admin/purchase-orders",
             icon: ShoppingBag,
+            permission: "purchase_order:view",
           },
           {
             titleKey: "menu.purchaseInvoices",
             url: "/admin/purchase-invoices",
             icon: Receipt,
+            permission: "purchase_invoice:view",
           },
           {
             titleKey: "menu.purchasePayments",
             url: "/admin/purchase-payments",
             icon: Banknote,
+            permission: "purchase_payment:view",
           },
           {
             titleKey: "menu.purchaseReturns",
             url: "/admin/purchase-returns",
             icon: RotateCcw,
+            permission: "purchase_return:view",
           },
         ],
       },
@@ -200,53 +217,62 @@ const navDomains: NavDomain[] = [
       {
         titleKey: "menu.products",
         icon: Package,
+        permission: "product:view",
         children: [
           {
             titleKey: "menu.allProducts",
             url: "/admin/products",
             icon: Package,
+            permission: "product:list",
           },
           {
             titleKey: "menu.addProduct",
             url: "/admin/products/create",
             icon: Plus,
+            permission: "product:create",
           },
         ],
       },
       {
         titleKey: "menu.categories",
         icon: Tag,
+        permission: "category:view",
         children: [
           {
             titleKey: "menu.allCategories",
             url: "/admin/categories",
             icon: Layers,
+            permission: "category:view",
           },
           {
             titleKey: "menu.addCategory",
             url: "/admin/categories/create",
             icon: Plus,
+            permission: "category:create",
           },
         ],
       },
       {
         titleKey: "menu.brands",
         icon: Bookmark,
+        permission: "brand:view",
         children: [
-          { titleKey: "menu.allBrands", url: "/admin/brands", icon: Bookmark },
+          { titleKey: "menu.allBrands", url: "/admin/brands", icon: Bookmark, permission: "brand:view" },
           {
             titleKey: "menu.addBrand",
             url: "/admin/brands/create",
             icon: Plus,
+            permission: "brand:create",
           },
         ],
       },
       {
         titleKey: "menu.units",
         icon: Ruler,
+        permission: "unit:view",
         children: [
-          { titleKey: "menu.allUnits", url: "/admin/units", icon: Ruler },
-          { titleKey: "menu.addUnit", url: "/admin/units/create", icon: Plus },
+          { titleKey: "menu.allUnits", url: "/admin/units", icon: Ruler, permission: "unit:view" },
+          { titleKey: "menu.addUnit", url: "/admin/units/create", icon: Plus, permission: "unit:create" },
         ],
       },
     ],
@@ -262,40 +288,47 @@ const navDomains: NavDomain[] = [
       {
         titleKey: "menu.currencies",
         icon: Coins,
+        permission: "currency:view",
         children: [
           {
             titleKey: "menu.allCurrencies",
             url: "/admin/currencies",
             icon: Coins,
+            permission: "currency:view",
           },
           {
             titleKey: "menu.addCurrency",
             url: "/admin/currencies/create",
             icon: Plus,
+            permission: "currency:create",
           },
         ],
       },
       {
         titleKey: "menu.users",
         icon: UserCog,
+        permission: "user:view",
         children: [
-          { titleKey: "menu.allUsers", url: "/admin/users", icon: ShieldCheck },
-          { titleKey: "menu.addUser", url: "/admin/users/create", icon: Plus },
+          { titleKey: "menu.allUsers", url: "/admin/users", icon: ShieldCheck, permission: "user:view" },
+          { titleKey: "menu.addUser", url: "/admin/users/create", icon: Plus, permission: "user:create" },
         ],
       },
       {
         titleKey: "menu.suppliers",
         icon: Truck,
+        permission: "supplier:view",
         children: [
           {
             titleKey: "menu.allSuppliers",
             url: "/admin/suppliers",
             icon: Globe,
+            permission: "supplier:view",
           },
           {
             titleKey: "menu.addSupplier",
             url: "/admin/suppliers/create",
             icon: Plus,
+            permission: "supplier:create",
           },
         ],
       },
@@ -303,6 +336,7 @@ const navDomains: NavDomain[] = [
   },
   {
     domainKey: "layout.reportsDomain",
+    permission: ["report:view_sales", "report:view_purchases", "report:view_inventory", "report:view_profit_loss", "report:view_top_performers"],
     items: [
       {
         titleKey: "layout.reportsDomain",
@@ -312,6 +346,43 @@ const navDomains: NavDomain[] = [
     ],
   },
 ];
+
+const filteredNavDomains = computed(() => {
+  const userPermissions = authStore.user?.permissions || [];
+  const roleName = authStore.user?.role?.name?.toLowerCase() || "";
+  const isSuperAdmin = roleName === "superadmin";
+
+  const checkPerm = (p?: string | string[]) => {
+    if (isSuperAdmin || !p) return true;
+    if (Array.isArray(p)) return p.some((perm) => userPermissions.includes(perm));
+    return userPermissions.includes(p);
+  };
+
+  return navDomains
+    .filter((domain) => checkPerm(domain.permission))
+    .map((domain) => {
+      const filteredItems = domain.items
+        .filter((item) => checkPerm(item.permission))
+        .map((item) => {
+          if (item.children) {
+            const filteredChildren = item.children.filter((child) =>
+              checkPerm(child.permission),
+            );
+            return { ...item, children: filteredChildren.length > 0 ? filteredChildren : undefined };
+          }
+          return item;
+        })
+        .filter((item) => {
+          // If it had children but they are all filtered out, hide the item itself
+          // unless it has a URL (meaning it's clickable on its own)
+          if (item.children === undefined && !item.url) return false;
+          return true;
+        });
+
+      return { ...domain, items: filteredItems };
+    })
+    .filter((domain) => domain.items.length > 0);
+});
 
 const currentLocaleItem = computed(() => {
   return (
@@ -375,7 +446,10 @@ onMounted(() => {
 
       <!-- Navigation -->
       <SidebarContent>
-        <SidebarGroup v-for="domain in navDomains" :key="domain.domainKey">
+        <SidebarGroup 
+          v-for="domain in filteredNavDomains" 
+          :key="domain.domainKey"
+        >
           <SidebarGroupLabel>{{ $t(domain.domainKey) }}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>

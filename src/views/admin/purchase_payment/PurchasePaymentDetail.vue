@@ -11,10 +11,9 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, FileText, Loader2, Calendar, CreditCard, Banknote, History, Receipt } from "lucide-vue-next";
+import { ChevronLeft, FileText, Loader2, Calendar, Banknote, History, Receipt } from "lucide-vue-next";
 import { PurchasePaymentService } from "@/services/purchase_payment/purchase_payment.service";
 import type { PurchasePayment } from "@/types";
-import { PaymentMethod } from "@/types/enums";
 import { toast } from "vue-sonner";
 
 const { t, labels, fields, crud, group } = useAppI18n("purchasePayment");
@@ -45,17 +44,6 @@ async function fetchDetail() {
     loading.value = false;
   }
 }
-
-function getPaymentMethodLabel(pm: PaymentMethod) {
-  switch (Number(pm)) {
-    case PaymentMethod.CASH: return fields.paymentMethodLabels.cash;
-    case PaymentMethod.TRANSFER: return fields.paymentMethodLabels.transfer;
-    case PaymentMethod.OTHER: return fields.paymentMethodLabels.other;
-    default: return 'N/A';
-  }
-}
-
-
 
 onMounted(() => {
   fetchDetail();
@@ -171,7 +159,7 @@ onMounted(() => {
                         {{ d.purchaseInvoice?.code || `ID: ${d.purchaseInvoiceId}` }}
                       </td>
                       <td class="px-4 py-2 text-right">{{ formatCurrency(d.purchaseInvoice?.totalPrice) }}</td>
-                      <td class="px-4 py-2 text-right text-success font-bold">{{ formatCurrency(d.paidAmount) }}</td>
+                      <td class="px-4 py-2 text-right text-success font-bold">{{ formatCurrency(d.totalPrice) }}</td>
                     </tr>
                   </tbody>
                 </table>

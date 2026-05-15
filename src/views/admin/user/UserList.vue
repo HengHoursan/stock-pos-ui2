@@ -321,7 +321,7 @@ onMounted(() => {
         >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button v-permission="'users.create'" @click="router.push('/admin/users/create')">
+        <Button v-permission="'user:create'" @click="router.push('/admin/users/create')">
           <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }}
           {{ labels.name }}</Button
         >
@@ -336,6 +336,7 @@ onMounted(() => {
         t("crud.selectedCount", { count: selectedIds.length })
       }}</span>
       <Button
+        v-permission="'user:update'"
         variant="outline"
         size="sm"
         @click="handleBulkAction('activate')"
@@ -344,6 +345,7 @@ onMounted(() => {
         {{ crud.activate }}
       </Button>
       <Button
+        v-permission="'user:update'"
         variant="outline"
         size="sm"
         @click="handleBulkAction('deactivate')"
@@ -352,6 +354,7 @@ onMounted(() => {
         {{ crud.deactivate }}
       </Button>
       <Button
+        v-permission="'user:delete'"
         variant="destructive"
         size="sm"
         @click="handleBulkAction('delete')"
@@ -471,8 +474,8 @@ onMounted(() => {
                 <Badge
                   :variant="user.status ? 'success' : 'warning'"
                   class="font-bold px-3 transition-all"
-                  :class="{ 'cursor-pointer hover:opacity-80 active:scale-95': hasPermission('users.edit') }"
-                  @click="hasPermission('users.edit') ? toggleStatus(user) : null"
+                  :class="{ 'cursor-pointer hover:opacity-80 active:scale-95': hasPermission('user:update') }"
+                  @click="hasPermission('user:update') ? toggleStatus(user) : null"
                 >
                   {{ user.status ? crud.active : crud.inactive }}
                 </Badge>
@@ -495,7 +498,7 @@ onMounted(() => {
                     >
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      v-permission="'users.edit'"
+                      v-permission="'user:update'"
                       @click="router.push(`/admin/users/${user.id}/edit`)"
                       class="cursor-pointer"
                     >
@@ -504,7 +507,7 @@ onMounted(() => {
                       }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      v-permission="'users.edit'"
+                      v-permission="'user:update'"
                       @click="openResetDialog(user.id)"
                       class="cursor-pointer"
                     >
@@ -514,7 +517,7 @@ onMounted(() => {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      v-permission="'users.delete'"
+                      v-permission="'user:delete'"
                       class="text-destructive focus:text-destructive cursor-pointer font-medium"
                       @click="openDeleteDialog(user.id)"
                     >

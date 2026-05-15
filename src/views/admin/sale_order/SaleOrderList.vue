@@ -2,6 +2,9 @@
 import { useAppI18n } from "@/hooks/useAppI18n";
 const { t, labels, fields, crud, actions } = useAppI18n("saleOrder");
 import { ref, onMounted, reactive, watch, computed } from "vue";
+
+
+
 import { useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
 import SearchableSelect from "@/components/SearchableSelect.vue";
@@ -266,7 +269,7 @@ onMounted(() => {
         >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button @click="router.push('/admin/sale-orders/create')">
+        <Button v-permission="'sale_order:create'" @click="router.push('/admin/sale-orders/create')">
           <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.name }}
         </Button>
       </div>
@@ -450,6 +453,7 @@ onMounted(() => {
                       <Eye class="mr-2 h-4 w-4 opacity-70" />{{ crud.viewBtn }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      v-permission="'sale_invoice:create'"
                       v-if="record.status !== OrderStatus.COMPLETED"
                       @click="
                         router.push(
@@ -462,8 +466,9 @@ onMounted(() => {
                         actions.generateInvoice
                       }}
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
+                    <DropdownMenuSeparator v-permission="'sale_order:delete'" />
                     <DropdownMenuItem
+                      v-permission="'sale_order:delete'"
                       class="text-destructive focus:text-destructive cursor-pointer font-medium"
                       @click="openDeleteDialog(record.id)"
                     >

@@ -2,6 +2,9 @@
 import { useAppI18n } from "@/hooks/useAppI18n";
 const { t, labels, fields, crud } = useAppI18n("product");
 import { ref, onMounted, reactive, watch, computed } from "vue";
+import { usePermissions } from "@/hooks/usePermissions";
+
+const { hasPermission } = usePermissions();
 import { useRouter } from "vue-router";
 import {
   Table,
@@ -362,7 +365,7 @@ onMounted(() => {
         >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button @click="router.push('/admin/products/create')">
+        <Button v-permission="'product:create'" @click="router.push('/admin/products/create')">
           <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }}
           {{ labels.name }}</Button
         >
@@ -575,8 +578,9 @@ onMounted(() => {
               <TableCell class="w-[100px]">
                 <Badge
                   :variant="product.status ? 'success' : 'warning'"
-                  class="cursor-pointer font-bold px-3 transition-all hover:opacity-80 active:scale-95"
-                  @click="toggleStatus(product)"
+                  class="font-bold px-3 transition-all"
+                  :class="hasPermission('product:status-update') ? 'cursor-pointer hover:opacity-80 active:scale-95' : 'cursor-default opacity-70'"
+                  @click="hasPermission('product:status-update') && toggleStatus(product)"
                 >
                   {{ product.status ? crud.active : crud.inactive }}
                 </Badge>
@@ -603,6 +607,7 @@ onMounted(() => {
                       {{ crud.viewBtn }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      v-permission="'product:update'"
                       @click="router.push(`/admin/products/${product.id}/edit`)"
                       class="cursor-pointer"
                     >
@@ -611,6 +616,7 @@ onMounted(() => {
                       }}</DropdownMenuItem
                     >
                     <DropdownMenuItem
+                      v-permission="'product:create'"
                       @click="duplicateProduct(product.id)"
                       class="cursor-pointer"
                     >
@@ -618,8 +624,9 @@ onMounted(() => {
                         crud.duplicate
                       }}</DropdownMenuItem
                     >
-                    <DropdownMenuSeparator />
+                    <DropdownMenuSeparator v-permission="'product:delete'" />
                     <DropdownMenuItem
+                      v-permission="'product:delete'"
                       class="text-destructive focus:text-destructive cursor-pointer font-medium"
                       @click="openDeleteDialog(product.id)"
                     >

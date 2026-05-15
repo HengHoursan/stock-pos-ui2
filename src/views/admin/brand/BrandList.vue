@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
+import { usePermissions } from "@/hooks/usePermissions";
 const { t, labels, fields, crud } = useAppI18n("brand");
+const { hasPermission } = usePermissions();
 import { ref, onMounted, reactive, watch } from "vue";
 import { useRouter } from "vue-router";
 
@@ -277,7 +279,7 @@ onMounted(() => {
         >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button @click="router.push('/admin/brands/create')">
+        <Button v-permission="'brand:create'" @click="router.push('/admin/brands/create')">
           <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.title }}
         </Button>
       </div>
@@ -285,13 +287,13 @@ onMounted(() => {
 
     <div v-if="selectedIds.length > 0" class="flex items-center gap-2 p-3 bg-muted/30 border rounded-lg animate-in fade-in slide-in-from-top-2">
       <span class="text-sm font-medium mr-2">{{ t('crud.selectedCount', { count: selectedIds.length }) }}</span>
-      <Button variant="outline" size="sm" @click="handleBulkAction('activate')" class="h-8">
+      <Button v-permission="'brand:update'" variant="outline" size="sm" @click="handleBulkAction('activate')" class="h-8">
         {{ crud.activate }}
       </Button>
-      <Button variant="outline" size="sm" @click="handleBulkAction('deactivate')" class="h-8">
+      <Button v-permission="'brand:update'" variant="outline" size="sm" @click="handleBulkAction('deactivate')" class="h-8">
         {{ crud.deactivate }}
       </Button>
-      <Button variant="destructive" size="sm" @click="handleBulkAction('delete')" class="h-8">
+      <Button v-permission="'brand:delete'" variant="destructive" size="sm" @click="handleBulkAction('delete')" class="h-8">
         <Trash2 class="mr-2 h-4 w-4" />
         {{ crud.delete }}
       </Button>
@@ -405,8 +407,9 @@ onMounted(() => {
               <TableCell class="w-[100px]">
                 <Badge
                   :variant="brand.status ? 'success' : 'warning'"
-                  class="cursor-pointer font-bold px-3 transition-all hover:opacity-80 active:scale-95"
-                  @click="toggleStatus(brand)"
+                  class="font-bold px-3 transition-all"
+                  :class="{ 'cursor-pointer hover:opacity-80 active:scale-95': hasPermission('brand:update') }"
+                  @click="hasPermission('brand:update') ? toggleStatus(brand) : null"
                 >
                   {{ brand.status ? crud.active : crud.inactive }}
                 </Badge>
@@ -429,6 +432,7 @@ onMounted(() => {
                     >
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
+                      v-permission="'brand:view'"
                       @click="router.push(`/admin/brands/${brand.id}`)"
                       class="cursor-pointer"
                     >
@@ -437,6 +441,7 @@ onMounted(() => {
                       }}
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                      v-permission="'brand:update'"
                       @click="router.push(`/admin/brands/${brand.id}/edit`)"
                       class="cursor-pointer"
                     >
@@ -446,6 +451,7 @@ onMounted(() => {
                     >
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
+                      v-permission="'brand:delete'"
                       class="text-destructive focus:text-destructive cursor-pointer font-medium"
                       @click="openDeleteDialog(brand.id)"
                     >

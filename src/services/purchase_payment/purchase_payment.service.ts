@@ -36,4 +36,9 @@ export class PurchasePaymentService extends BaseService {
   async forceDelete(id: number): Promise<ApiResponse<null>> {
     return this.post<ApiResponse<null>>("/purchase-payments/force-delete", { id });
   }
+
+  async softDelete(id: number): Promise<ApiResponse<null>> {
+    return this.post<ApiResponse<null>>("/purchase-payments/soft-delete", { id });
+  }
+  
 }

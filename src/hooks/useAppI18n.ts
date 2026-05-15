@@ -29,6 +29,7 @@ export function useAppI18n(moduleName?: string) {
     labels: moduleName ? group(moduleName) : ({} as any),
     fields: group("fields"),
     crud: group("crud"),
+    actions: group("actions"),
     auth: group("auth"),
     menu: group("menu"),
     layout: group("layout"),
