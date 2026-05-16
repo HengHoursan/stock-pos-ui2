@@ -74,9 +74,14 @@ export const useAuthStore = defineStore("auth", {
         console.error("Failed to fetch user profile", error);
       }
     },
-    setUser(user: User) {
-      this.user = user;
-      localStorage.setItem("user", JSON.stringify(user));
+    setUser(user: Partial<User>) {
+      if (this.user) {
+        // Merge updated data with existing user data (permissions, role, etc)
+        this.user = { ...this.user, ...user };
+      } else {
+        this.user = user as User;
+      }
+      localStorage.setItem("user", JSON.stringify(this.user));
     },
     initSync() {
       window.addEventListener("storage", (event) => {

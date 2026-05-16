@@ -4,7 +4,6 @@ import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -46,28 +45,34 @@ import { CustomerService } from "@/services/customer/customer.service";
 import { CustomerType } from "@/types";
 import { toast } from "vue-sonner";
 
-const { t, labels, fields, crud, common, auth } = useAppI18n("customer");
+import { useZod } from "@/hooks/useZod";
+import { computed } from "vue";
+
+const { t, labels, crud, common, auth } = useAppI18n("customer");
 const router = useRouter();
 const route = useRoute();
 const customerService = new CustomerService();
+const { z, err } = useZod();
 
 const loading = ref(true);
 const submitting = ref(false);
 const customerId = Number(route.params.id);
 
-const formSchema = toTypedSchema(
+const customerSchema = computed(() => 
   z.object({
-    name: z.string().min(2, t("fields.enterName")).max(100),
-    nameLatin: z.string().max(100).optional().nullable(),
-    code: z.string().max(50).optional().nullable(),
-    email: z.string().email().optional().nullable().or(z.literal("")),
-    phoneNumber: z.string().max(20).optional().nullable(),
+    name: z.string().min(2, err.min("fields.name", 2)).max(100, err.max("fields.name", 100)),
+    nameLatin: z.string().max(100, err.max("fields.nameLatin", 100)).optional().nullable(),
+    code: z.string().max(50, err.max("fields.code", 50)).optional().nullable(),
+    email: z.string().email(err.email()).optional().nullable().or(z.literal("")),
+    phoneNumber: z.string().max(20, err.max("fields.phoneNumber", 20)).optional().nullable(),
     address: z.string().optional().nullable(),
     description: z.string().optional().nullable(),
     type: z.number().default(CustomerType.DINE_IN),
     status: z.boolean().default(true),
-  }),
+  })
 );
+
+const formSchema = computed(() => toTypedSchema(customerSchema.value));
 
 const form = useForm({
   validationSchema: formSchema,

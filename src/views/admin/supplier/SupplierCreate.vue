@@ -1,13 +1,13 @@
-<script setup lang="ts">
-import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("supplier");
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
-import * as z from "zod";
+import { useAppI18n } from "@/hooks/useAppI18n";
+import { useZod } from "@/hooks/useZod";
+import { SupplierService } from "@/services/supplier/supplier.service";
+import { CustomerType } from "@/types";
+import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
-
 import {
   FormControl,
   FormDescription,
@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/Textarea";
-
 import {
   Select,
   SelectContent,
@@ -27,7 +26,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-
 import {
   Card,
   CardContent,
@@ -36,27 +34,29 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { ChevronLeft, Loader2, UserPlus, Phone, MapPin, Settings } from "lucide-vue-next";
-import { SupplierService } from "@/services/supplier/supplier.service";
-import { CustomerType } from "@/types";
-import { toast } from "vue-sonner";
+
+const { t, labels, fields, crud, auth, layout } = useAppI18n("supplier");
 
 const router = useRouter();
 const supplierService = new SupplierService();
+const { z, err } = useZod();
 const submitting = ref(false);
 
-const formSchema = toTypedSchema(
+const supplierSchema = computed(() => 
   z.object({
-    name: z.string().min(2, t('fields.enterName')).max(100),
-    nameLatin: z.string().max(100).optional().nullable(),
-    code: z.string().max(50).optional().nullable(),
-    email: z.string().email().optional().nullable().or(z.literal("")),
-    phoneNumber: z.string().max(20).optional().nullable(),
+    name: z.string().min(2, err.min("fields.name", 2)).max(100, err.max("fields.name", 100)),
+    nameLatin: z.string().max(100, err.max("fields.nameLatin", 100)).optional().nullable(),
+    code: z.string().max(50, err.max("fields.code", 50)).optional().nullable(),
+    email: z.string().email(err.email()).optional().nullable().or(z.literal("")),
+    phoneNumber: z.string().max(20, err.max("fields.phoneNumber", 20)).optional().nullable(),
     address: z.string().optional().nullable(),
     description: z.string().optional().nullable(),
     type: z.number().default(CustomerType.DINE_IN),
     status: z.boolean().default(true),
-  }),
+  })
 );
+
+const formSchema = computed(() => toTypedSchema(supplierSchema.value));
 
 const form = useForm({
   validationSchema: formSchema,
@@ -112,15 +112,15 @@ const onSubmit = form.handleSubmit(async (values) => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2">
               <UserPlus class="h-5 w-5 text-primary" />
-              {{ $t('crud.generalInfo') }}
+              {{ crud.generalInfo }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6 space-y-4">
             <FormField v-slot="{ componentField }" name="name">
               <FormItem>
-                <FormLabel>{{ $t('fields.name') }}</FormLabel>
+                <FormLabel>{{ fields.name }}</FormLabel>
                 <FormControl>
-                  <Input :placeholder="$t('fields.enterName')" v-bind="componentField" />
+                  <Input :placeholder="fields.enterName" v-bind="componentField" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -128,9 +128,9 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="nameLatin">
               <FormItem>
-                <FormLabel>{{ $t('fields.nameLatin') }}</FormLabel>
+                <FormLabel>{{ fields.nameLatin }}</FormLabel>
                 <FormControl>
-                  <Input :placeholder="$t('fields.nameLatin')" v-bind="componentField" />
+                  <Input :placeholder="fields.nameLatin" v-bind="componentField" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -138,9 +138,9 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="code">
               <FormItem>
-                <FormLabel>{{ $t('fields.code') }}</FormLabel>
+                <FormLabel>{{ fields.code }}</FormLabel>
                 <FormControl>
-                  <Input :placeholder="$t('fields.autoGenerate')" v-bind="componentField" />
+                  <Input :placeholder="fields.autoGenerate" v-bind="componentField" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -153,15 +153,15 @@ const onSubmit = form.handleSubmit(async (values) => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2">
               <Phone class="h-5 w-5 text-primary" />
-              {{ $t('fields.phoneNumber') }} & {{ $t('auth.email') }}
+              {{ fields.phoneNumber }} & {{ auth.email }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6 space-y-4">
             <FormField v-slot="{ componentField }" name="email">
               <FormItem>
-                <FormLabel>{{ $t('auth.email') }}</FormLabel>
+                <FormLabel>{{ auth.email }}</FormLabel>
                 <FormControl>
-                  <Input :placeholder="$t('fields.emailPlaceholder')" v-bind="componentField" />
+                  <Input :placeholder="fields.emailPlaceholder" v-bind="componentField" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -169,9 +169,9 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="phoneNumber">
               <FormItem>
-                <FormLabel>{{ $t('fields.phoneNumber') }}</FormLabel>
+                <FormLabel>{{ fields.phoneNumber }}</FormLabel>
                 <FormControl>
-                  <Input :placeholder="$t('fields.phoneNumber')" v-bind="componentField" />
+                  <Input :placeholder="fields.phoneNumber" v-bind="componentField" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -181,10 +181,10 @@ const onSubmit = form.handleSubmit(async (values) => {
               <FormItem>
                 <FormLabel class="flex items-center gap-2">
                   <MapPin class="h-4 w-4 text-muted-foreground" />
-                  {{ $t('fields.address') }}
+                  {{ fields.address }}
                 </FormLabel>
                 <FormControl>
-                  <Textarea :placeholder="$t('fields.address')" v-bind="componentField" />
+                  <Textarea :placeholder="fields.address" v-bind="componentField" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -197,25 +197,25 @@ const onSubmit = form.handleSubmit(async (values) => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2">
               <Settings class="h-5 w-5 text-primary" />
-              {{ $t('layout.adminPanel') }}
+              {{ layout.adminPanel }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6 space-y-6">
             <FormField v-slot="{ field }" name="type">
               <FormItem>
-                <FormLabel>{{ $t('fields.type') }}</FormLabel>
+                <FormLabel>{{ fields.type }}</FormLabel>
                 <Select
                   :model-value="String(field.value)"
                   @update:model-value="(v) => field.onChange(Number(v))"
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue :placeholder="$t('crud.selectType')" />
+                      <SelectValue :placeholder="crud.selectType" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem :value="String(CustomerType.DINE_IN)">{{ $t('fields.dineIn') }}</SelectItem>
-                    <SelectItem :value="String(CustomerType.DINE_OUT)">{{ $t('fields.dineOut') }}</SelectItem>
+                    <SelectItem :value="String(CustomerType.DINE_IN)">{{ fields.dineIn }}</SelectItem>
+                    <SelectItem :value="String(CustomerType.DINE_OUT)">{{ fields.dineOut }}</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -224,9 +224,9 @@ const onSubmit = form.handleSubmit(async (values) => {
 
             <FormField v-slot="{ componentField }" name="description">
               <FormItem>
-                <FormLabel>{{ $t('fields.description') }}</FormLabel>
+                <FormLabel>{{ fields.description }}</FormLabel>
                 <FormControl>
-                  <Textarea :placeholder="$t('fields.enterDescription')" v-bind="componentField" />
+                  <Textarea :placeholder="fields.enterDescription" v-bind="componentField" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -235,7 +235,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             <FormField v-slot="{ value, handleChange }" name="status">
               <FormItem class="flex flex-row items-center justify-between rounded-lg border p-4 bg-muted/5">
                 <div class="space-y-0.5">
-                  <FormLabel class="text-base font-semibold">{{ $t('fields.activeStatus') }}</FormLabel>
+                  <FormLabel class="text-base font-semibold">{{ fields.activeStatus }}</FormLabel>
                   <FormDescription>{{ t('fields.statusDescription', { module: labels.name }) }}</FormDescription>
                 </div>
                 <FormControl>
@@ -245,7 +245,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             </FormField>
           </CardContent>
           <CardFooter class="flex justify-end gap-2 border-t px-6 py-4 bg-muted/5">
-            <Button variant="outline" type="button" @click="router.back()" :disabled="submitting">{{ $t('crud.cancel') }}</Button>
+            <Button variant="outline" type="button" @click="router.back()" :disabled="submitting">{{ crud.cancel }}</Button>
             <Button type="submit" :disabled="submitting">
               <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
               {{ crud.createBtn }} {{ labels.name }}

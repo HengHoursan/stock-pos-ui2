@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud, actions } = useAppI18n("purchaseInvoice");
+const { t, labels, fields, crud, actions, menu, common } = useAppI18n("purchaseInvoice");
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
@@ -216,7 +216,7 @@ onMounted(() => {
             </div>
             <div v-if="record.details?.some(d => d.purchaseOrder)">
               <p class="text-muted-foreground mb-1 flex items-center gap-1.5">
-                <ArrowRightCircle class="h-3.5 w-3.5" />{{ t("modules.purchaseOrder") }}
+                <ArrowRightCircle class="h-3.5 w-3.5" />{{ menu.purchaseOrders }}
               </p>
               <div class="flex flex-wrap gap-1 mt-1">
                 <div
@@ -316,7 +316,7 @@ onMounted(() => {
               <TableHeader class="bg-muted/30">
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>{{ t("modules.product") }}</TableHead>
+                  <TableHead>{{ menu.products }}</TableHead>
                   <TableHead class="text-right">{{
                     fields.unitPrice
                   }}</TableHead>
@@ -372,7 +372,7 @@ onMounted(() => {
                   <TableCell
                     colspan="5"
                     class="py-8 text-center text-muted-foreground italic"
-                    >{{ t("common.noData") }}</TableCell
+                    >{{ common.noData }}</TableCell
                   >
                 </TableRow>
               </TableBody>
@@ -437,7 +437,7 @@ onMounted(() => {
                     colspan="4"
                     class="py-8 text-center text-muted-foreground italic"
                   >
-                    {{ t("common.noData") }}
+                    {{ common.noData }}
                   </TableCell>
                 </TableRow>
               </TableBody>

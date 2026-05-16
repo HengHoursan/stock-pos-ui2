@@ -7,7 +7,7 @@ import SearchableSelect from "@/components/SearchableSelect.vue";
 
 import { useForm, useFieldArray } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
-import * as z from "zod";
+import { useZod } from "@/hooks/useZod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -42,8 +42,8 @@ import { ProductService } from "@/services/product/product.service";
 import type { Product, Customer } from "@/types";
 import { toast } from "vue-sonner";
 
-const { t, labels, fields, crud, common, group } = useAppI18n("saleQuotation");
-const customerLabels = group("customer");
+const { t, labels, fields, crud, common, actions, group } = useAppI18n("saleQuotation");
+const { z, err } = useZod();
 const productLabels = group("product");
 const router = useRouter();
 const sqService = new SaleQuotationService();
@@ -76,18 +76,20 @@ onMounted(async () => {
 
 const formSchema = toTypedSchema(
   z.object({
-    code: z.string().max(50).optional().nullable(),
-    customerId: z.number().min(1, t('validation.required', { field: customerLabels.name })),
-    quotationDate: z.string().min(1, t('validation.required', { field: t('fields.invoiceDate') })),
+    code: z.string().max(50, err.max("fields.code", 50)).optional().nullable(),
+    customerId: z.coerce.number().min(1, err.required("fields.customerId")),
+    quotationDate: z.string().min(1, err.required("fields.date")),
     description: z.string().optional().nullable(),
-    details: z.array(
-      z.object({
-        productId: z.number().min(1, t('validation.required', { field: productLabels.name })),
-        quantity: z.number().min(0.01, t('validation.min', { field: t('fields.quantity'), min: '0.01' })),
-        price: z.number().min(0, t('validation.min', { field: fields.price, min: '0' })),
-      })
-    ).min(1, t('validation.atLeastOneItem')),
-  })
+    details: z
+      .array(
+        z.object({
+          productId: z.coerce.number().min(1, err.required("product.name")),
+          quantity: z.coerce.number().min(0.01, err.min("fields.quantity", 0.01)),
+          price: z.coerce.number().min(0, err.min("fields.price", 0)),
+        }),
+      )
+      .min(1, err.min("fields.details", 1)),
+  }),
 );
 
 const form = useForm({
@@ -246,7 +248,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             </div>
           </CardContent>
           <CardFooter class="flex flex-col gap-2 border-t pt-4">
-            <Button type="submit" class="w-full" :disabled="submitting || fields.length === 0">
+            <Button type="submit" class="w-full" :disabled="submitting || detailsFields.length === 0">
               <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
               {{ crud.save }}
             </Button>
@@ -264,7 +266,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               {{ fields.details }}
             </CardTitle>
             <Button type="button" size="sm" @click="addProduct" variant="default">
-              <Plus class="h-4 w-4 mr-2"/> {{ t('actions.addProduct') }}
+              <Plus class="h-4 w-4 mr-2"/> {{ actions.addProduct }}
             </Button>
           </CardHeader>
           <CardContent class="p-0">

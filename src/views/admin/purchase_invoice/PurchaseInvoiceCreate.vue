@@ -1,20 +1,12 @@
-<script setup lang="ts">
-import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("purchaseInvoice");
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import {
-  toLocalISOString,
-  formatCurrency,
-  formatNumberInput,
-} from "@/utils/format";
-import SearchableSelect from "@/components/SearchableSelect.vue";
-import CurrencyToggle from "@/components/CurrencyToggle.vue";
-
 import { useForm, useFieldArray } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
-import * as z from "zod";
-
+import { useZod } from "@/hooks/useZod";
+import { useCurrencyStore } from "@/stores/currency";
+import { toLocalISOString, formatCurrency, formatNumberInput } from "@/utils/format";
+import SearchableSelect from "@/components/SearchableSelect.vue";
+import CurrencyToggle from "@/components/CurrencyToggle.vue";
 import { Button } from "@/components/ui/button";
 import {
   FormControl,
@@ -56,15 +48,16 @@ import {
   Truck,
   CreditCard,
 } from "lucide-vue-next";
-
 import { PurchaseInvoiceService } from "@/services/purchase_invoice/purchase_invoice.service";
 import { PurchaseOrderService } from "@/services/purchase_order/purchase_order.service";
 import { SupplierService } from "@/services/supplier/supplier.service";
 import { ProductService } from "@/services/product/product.service";
-import { useCurrencyStore } from "@/stores/currency";
 import type { Product, Supplier } from "@/types";
 import { PaymentMethod } from "@/types/enums";
 import { toast } from "vue-sonner";
+import { useAppI18n } from "@/hooks/useAppI18n";
+
+const { t, labels, fields, crud, actions, common, menu } = useAppI18n("purchaseInvoice");
 
 const route = useRoute();
 const router = useRouter();
@@ -73,6 +66,7 @@ const poService = new PurchaseOrderService();
 const supplierService = new SupplierService();
 const productService = new ProductService();
 const currencyStore = useCurrencyStore();
+const { z, err } = useZod();
 
 const submitting = ref(false);
 const products = ref<Product[]>([]);
@@ -86,9 +80,7 @@ const productOptions = computed(() =>
   products.value.map((p) => ({ label: `[${p.code}] ${p.name}`, value: p.id })),
 );
 
-const currencySymbol = computed(
-  () => currencyStore.activeCurrency?.symbol ?? "$",
-);
+const currencySymbol = computed(() => currencyStore.activeCurrency?.symbol ?? "$");
 const localPaidAmount = ref("");
 const localPrices = ref<Record<string, string>>({});
 const localQuantities = ref<Record<string, string>>({});
@@ -117,6 +109,41 @@ watch(
   },
 );
 
+const purchaseInvoiceSchema = computed(() => 
+  z.object({
+    code: z.string().max(50, err.max("fields.code", 50)).optional().nullable(),
+    supplierId: z.coerce.number().min(1, err.required("fields.supplierId")),
+    invoiceDate: z.string().min(1, err.required("fields.invoiceDate")),
+    paidAmount: z.coerce.number().min(0, err.min("fields.paidAmount", 0)).optional(),
+    paymentMethod: z.coerce.number().optional(),
+    description: z.string().optional().nullable(),
+    details: z.array(
+      z.object({
+        productId: z.coerce.number().min(1, err.required("product.name")),
+        quantity: z.coerce.number().min(0.01, err.gte("fields.quantity", 0.01)),
+        price: z.coerce.number().min(0, err.gte("fields.price", 0)),
+        purchaseOrderId: z.coerce.number().optional().nullable(),
+        purchaseOrderDetailId: z.coerce.number().optional().nullable(),
+      })
+    ).min(1, err.min("fields.details", 1)),
+  })
+);
+
+const formSchema = computed(() => toTypedSchema(purchaseInvoiceSchema.value));
+
+const form = useForm({
+  validationSchema: formSchema,
+  initialValues: {
+    code: "",
+    supplierId: 0,
+    invoiceDate: toLocalISOString(new Date()),
+    paidAmount: 0,
+    paymentMethod: PaymentMethod.CASH,
+    description: "",
+    details: [],
+  },
+});
+
 onMounted(async () => {
   try {
     const [prodRes, supRes] = await Promise.all([
@@ -139,14 +166,14 @@ onMounted(async () => {
             productId: d.productId,
             quantity: Number(d.quantity),
             price: Number(d.totalPrice) / Number(d.quantity),
-            purchaseOrderId: oRes.data.id, // Explicitly use parent order ID
+            purchaseOrderId: oRes.data.id, 
             purchaseOrderDetailId: d.id,
           }));
 
         form.setFieldValue("details", mappedDetails as any);
         toast.info(
           t("validation.loadedFromSource", {
-            source: t("modules.purchaseOrder"),
+            source: menu.purchaseOrders,
           }),
         );
       }
@@ -156,61 +183,7 @@ onMounted(async () => {
   }
 });
 
-const formSchema = toTypedSchema(
-  z.object({
-    code: z.string().max(50).optional().nullable(),
-    supplierId: z.coerce
-      .number()
-      .min(1, t("validation.required", { field: fields.supplierId })),
-    invoiceDate: z
-      .string()
-      .min(1, t("validation.required", { field: fields.invoiceDate })),
-    paidAmount: z.coerce
-      .number()
-      .min(0, t("validation.paidAmountNegative"))
-      .optional(),
-    paymentMethod: z.coerce.number().optional(),
-    description: z.string().optional().nullable(),
-    details: z
-      .array(
-        z.object({
-          productId: z.coerce
-            .number()
-            .min(1, t("validation.required", { field: t("modules.product") })),
-          quantity: z.coerce
-            .number()
-            .min(
-              0.01,
-              t("validation.min", { field: fields.quantity, min: "0.01" }),
-            ),
-          price: z.coerce
-            .number()
-            .min(
-              0,
-              t("validation.min", { field: fields.price, min: "0" }),
-            ),
-          purchaseOrderId: z.coerce.number().optional().nullable(),
-          purchaseOrderDetailId: z.coerce.number().optional().nullable(),
-        }),
-      )
-      .min(1, t("validation.atLeastOneItem")),
-  }),
-);
-
-const form = useForm({
-  validationSchema: formSchema,
-  initialValues: {
-    code: "",
-    supplierId: 0,
-    invoiceDate: toLocalISOString(new Date()),
-    paidAmount: 0,
-    paymentMethod: PaymentMethod.CASH,
-    description: "",
-    details: [],
-  },
-});
-
-const { remove, push, fields } = useFieldArray("details");
+const { remove, push, fields: detailsFields } = useFieldArray("details");
 
 function addProduct() {
   push({
@@ -253,7 +226,6 @@ const onSubmit = form.handleSubmit(async (values) => {
       })),
     };
 
-    console.log("payload", payload);
     const response = await piService.create(payload as any);
     if (response.success) {
       toast.success(
@@ -473,7 +445,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               @click="addProduct"
               variant="default"
             >
-              <Plus class="h-4 w-4 mr-2" /> {{ t("actions.addProduct") }}
+              <Plus class="h-4 w-4 mr-2" /> {{ actions.addProduct }}
             </Button>
           </CardHeader>
           <CardContent class="p-0">
@@ -481,7 +453,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               <TableHeader class="bg-muted/30">
                 <TableRow>
                   <TableHead class="w-[40%]">{{
-                    t("modules.product")
+                    menu.products
                   }}</TableHead>
                   <TableHead class="w-[20%] text-right">{{
                     fields.unitPrice
@@ -496,15 +468,15 @@ const onSubmit = form.handleSubmit(async (values) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow v-if="fields.length === 0">
+                <TableRow v-if="detailsFields.length === 0">
                   <TableCell
                     colspan="5"
                     class="text-center py-8 text-muted-foreground italic"
                   >
-                    {{ t("common.noData") }}
+                    {{ common.noData }}
                   </TableCell>
                 </TableRow>
-                <TableRow v-for="(field, index) in fields" :key="field.key">
+                <TableRow v-for="(field, index) in detailsFields" :key="field.key">
                   <TableCell>
                     <FormField
                       v-slot="{ value, handleChange }"
@@ -639,7 +611,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               :disabled="submitting"
               >{{ crud.cancel }}</Button
             >
-            <Button type="submit" :disabled="submitting || fields.length === 0">
+            <Button type="submit" :disabled="submitting || detailsFields.length === 0">
               <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
               {{ crud.save }}
             </Button>

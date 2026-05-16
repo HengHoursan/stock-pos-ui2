@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("product");
+const { t, labels, fields, crud, common } = useAppI18n("product");
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { toLocalISOString, formatNumberInput } from "@/utils/format";
+import { formatNumberInput } from "@/utils/format";
 import { toTypedSchema } from "@vee-validate/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   FormControl,
@@ -35,11 +34,15 @@ import type { Category, Brand, Unit } from "@/types";
 import { toast } from "vue-sonner";
 import { useForm } from "vee-validate";
 
+import { useZod } from "@/hooks/useZod";
+import { computed } from "vue";
+
 const router = useRouter();
 const productService = new ProductService();
 const categoryService = new CategoryService();
 const brandService = new BrandService();
 const unitService = new UnitService();
+const { z, err } = useZod();
 
 const categories = ref<Category[]>([]);
 const brands = ref<Brand[]>([]);
@@ -47,30 +50,44 @@ const units = ref<Unit[]>([]);
 const loading = ref(false);
 const submitting = ref(false);
 
-const formSchema = toTypedSchema(
+const productSchema = computed(() =>
   z.object({
-    name: z.string().min(2, "Name must be at least 2 characters").max(200),
+    name: z
+      .string()
+      .min(2, err.min("fields.name", 2))
+      .max(200, err.max("fields.name", 200)),
     code: z.string().optional(),
     skuCode: z.string().optional(),
-    categoryId: z.string().min(1, "Category is required"),
+    categoryId: z.string().min(1, err.required("fields.category")),
     brandId: z.string().optional(),
-    unitId: z.string().min(1, "Unit is required"),
+    unitId: z.string().min(1, err.required("fields.unit")),
     barcodeType: z.string().default("CODE128"),
-    alertQuantity: z.number().default(0),
+    alertQuantity: z
+      .number()
+      .gte(0, err.gte("fields.alertQuantity", 0))
+      .default(0),
     photoPath: z.string().optional(),
     status: z.boolean().default(true),
     forSelling: z.boolean().default(true),
     isManufacture: z.boolean().default(true),
     manageStock: z.boolean().default(true),
     // Detail fields
-    purchasePrice: z.number().default(0),
-    salePrice: z.number().default(0),
-    currentStock: z.number().default(0),
+    purchasePrice: z
+      .number()
+      .gte(0, err.gte("fields.purchasePrice", 0))
+      .default(0),
+    salePrice: z.number().gte(0, err.gte("fields.salePrice", 0)).default(0),
+    currentStock: z
+      .number()
+      .gte(0, err.gte("fields.currentStock", 0))
+      .default(0),
     stockNumber: z.string().optional(),
     expiryDate: z.string().optional(),
     expiryType: z.string().optional(),
   }),
 );
+
+const formSchema = computed(() => toTypedSchema(productSchema.value));
 
 const form = useForm({
   validationSchema: formSchema,
@@ -132,8 +149,7 @@ const onSubmit = form.handleSubmit(async (values) => {
       router.push("/admin/products");
     } else {
       toast.error(
-        response.message ||
-          t("crud.errorCreate", { module: labels.name }),
+        response.message || t("crud.errorCreate", { module: labels.name }),
       );
     }
   } catch (error) {
@@ -168,16 +184,16 @@ onMounted(() => {
             <CardHeader>
               <CardTitle class="flex items-center gap-2">
                 <Package class="h-5 w-5 text-primary" />
-                {{ $t("crud.generalInfo") }}
+                {{ crud.generalInfo }}
               </CardTitle>
             </CardHeader>
             <CardContent class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField v-slot="{ componentField }" name="name">
                 <FormItem class="md:col-span-2">
-                  <FormLabel>{{ $t("fields.name") }}</FormLabel>
+                  <FormLabel>{{ fields.name }}</FormLabel>
                   <FormControl>
                     <Input
-                      :placeholder="$t('fields.enterProductName')"
+                      :placeholder="fields.enterProductName"
                       v-bind="componentField"
                     />
                   </FormControl>
@@ -187,10 +203,10 @@ onMounted(() => {
 
               <FormField v-slot="{ componentField }" name="skuCode">
                 <FormItem>
-                  <FormLabel>{{ $t("fields.sku") }}</FormLabel>
+                  <FormLabel>{{ fields.sku }}</FormLabel>
                   <FormControl>
                     <Input
-                      :placeholder="$t('fields.autoGenerate')"
+                      :placeholder="fields.autoGenerate"
                       v-bind="componentField"
                     />
                   </FormControl>
@@ -200,10 +216,10 @@ onMounted(() => {
 
               <FormField v-slot="{ componentField }" name="code">
                 <FormItem>
-                  <FormLabel>{{ $t("fields.code") }}</FormLabel>
+                  <FormLabel>{{ fields.code }}</FormLabel>
                   <FormControl>
                     <Input
-                      :placeholder="$t('fields.autoGenerate')"
+                      :placeholder="fields.autoGenerate"
                       v-bind="componentField"
                     />
                   </FormControl>
@@ -213,11 +229,11 @@ onMounted(() => {
 
               <FormField v-slot="{ field }" name="categoryId">
                 <FormItem>
-                  <FormLabel>{{ labels.category }}</FormLabel>
+                  <FormLabel>{{ fields.category }}</FormLabel>
                   <Select v-bind="field">
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue :placeholder="$t('crud.selectType')" />
+                        <SelectValue :placeholder="crud.selectValue" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -236,7 +252,7 @@ onMounted(() => {
                         value="none"
                         class="text-muted-foreground italic text-xs py-3 text-center"
                       >
-                        {{ $t("common.noData") }}
+                        {{ common.noData }}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -246,15 +262,15 @@ onMounted(() => {
 
               <FormField v-slot="{ field }" name="brandId">
                 <FormItem>
-                  <FormLabel>{{ labels.brand }}</FormLabel>
+                  <FormLabel>{{ fields.brand }}</FormLabel>
                   <Select v-bind="field">
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue :placeholder="$t('crud.none')" />
+                        <SelectValue :placeholder="crud.none" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="0">{{ $t("crud.none") }}</SelectItem>
+                      <SelectItem value="0">{{ crud.none }}</SelectItem>
                       <template v-if="brands.length > 0">
                         <SelectItem
                           v-for="brand in brands"
@@ -270,7 +286,7 @@ onMounted(() => {
                         value="none"
                         class="text-muted-foreground italic text-xs py-3 text-center"
                       >
-                        {{ $t("common.noData") }}
+                        {{ common.noData }}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -280,11 +296,11 @@ onMounted(() => {
 
               <FormField v-slot="{ field }" name="unitId">
                 <FormItem>
-                  <FormLabel>{{ labels.unit }}</FormLabel>
+                  <FormLabel>{{ fields.unit }}</FormLabel>
                   <Select v-bind="field">
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue :placeholder="$t('crud.selectType')" />
+                        <SelectValue :placeholder="crud.selectValue" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -303,7 +319,7 @@ onMounted(() => {
                         value="none"
                         class="text-muted-foreground italic text-xs py-3 text-center"
                       >
-                        {{ $t("common.noData") }}
+                        {{ common.noData }}
                       </SelectItem>
                     </SelectContent>
                   </Select>
@@ -313,13 +329,11 @@ onMounted(() => {
 
               <FormField v-slot="{ field }" name="barcodeType">
                 <FormItem>
-                  <FormLabel>{{ $t("fields.barcodeType") }}</FormLabel>
+                  <FormLabel>{{ fields.barcodeType }}</FormLabel>
                   <Select v-bind="field">
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue
-                          :placeholder="$t('fields.selectBarcodeType')"
-                        />
+                        <SelectValue :placeholder="fields.selectBarcodeType" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -340,13 +354,13 @@ onMounted(() => {
             <CardHeader>
               <CardTitle class="flex items-center gap-2">
                 <Tag class="h-5 w-5 text-primary" />
-                {{ $t("fields.salePrice") }} & {{ $t("fields.currentStock") }}
+                {{ fields.salePrice }} & {{ fields.currentStock }}
               </CardTitle>
             </CardHeader>
             <CardContent class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField v-slot="{ componentField }" name="purchasePrice">
                 <FormItem>
-                  <FormLabel>{{ $t("fields.purchasePrice") }}</FormLabel>
+                  <FormLabel>{{ fields.purchasePrice }}</FormLabel>
                   <FormControl>
                     <Input
                       type="text"
@@ -375,7 +389,7 @@ onMounted(() => {
 
               <FormField v-slot="{ componentField }" name="salePrice">
                 <FormItem>
-                  <FormLabel>{{ $t("fields.salePrice") }}</FormLabel>
+                  <FormLabel>{{ fields.salePrice }}</FormLabel>
                   <FormControl>
                     <Input
                       type="text"
@@ -402,7 +416,7 @@ onMounted(() => {
 
               <FormField v-slot="{ componentField }" name="currentStock">
                 <FormItem>
-                  <FormLabel>{{ $t("fields.currentStock") }}</FormLabel>
+                  <FormLabel>{{ fields.currentStock }}</FormLabel>
                   <FormControl>
                     <Input
                       type="text"
@@ -429,7 +443,7 @@ onMounted(() => {
 
               <FormField v-slot="{ componentField }" name="alertQuantity">
                 <FormItem>
-                  <FormLabel>{{ $t("fields.alertQuantity") }}</FormLabel>
+                  <FormLabel>{{ fields.alertQuantity }}</FormLabel>
                   <FormControl>
                     <Input
                       type="text"
@@ -465,7 +479,7 @@ onMounted(() => {
             <CardHeader>
               <CardTitle class="flex items-center gap-2">
                 <Camera class="h-5 w-5 text-primary" />
-                {{ $t("fields.photo") }}
+                {{ fields.photo }}
               </CardTitle>
             </CardHeader>
             <CardContent class="flex justify-center py-4">
@@ -485,10 +499,7 @@ onMounted(() => {
 
           <Card>
             <CardHeader>
-              <CardTitle
-                >{{ $t("fields.status") }} &
-                {{ $t("layout.mainMenu") }}</CardTitle
-              >
+              <CardTitle>{{ fields.status }} & {{ fields.settings }}</CardTitle>
             </CardHeader>
             <CardContent class="space-y-4">
               <FormField v-slot="{ value, handleChange }" name="status">
@@ -496,7 +507,7 @@ onMounted(() => {
                   class="flex flex-row items-center justify-between rounded-lg border p-3"
                 >
                   <FormLabel class="text-sm font-medium">{{
-                    $t("fields.activeStatus")
+                    fields.activeStatus
                   }}</FormLabel>
                   <FormControl>
                     <Switch
@@ -512,7 +523,7 @@ onMounted(() => {
                   class="flex flex-row items-center justify-between rounded-lg border p-3"
                 >
                   <FormLabel class="text-sm font-medium">{{
-                    $t("fields.manageStock")
+                    fields.manageStock
                   }}</FormLabel>
                   <FormControl>
                     <Switch
@@ -528,7 +539,7 @@ onMounted(() => {
                   class="flex flex-row items-center justify-between rounded-lg border p-3"
                 >
                   <FormLabel class="text-sm font-medium">{{
-                    $t("fields.forSelling")
+                    fields.forSelling
                   }}</FormLabel>
                   <FormControl>
                     <Switch
@@ -544,7 +555,7 @@ onMounted(() => {
                   class="flex flex-row items-center justify-between rounded-lg border p-3"
                 >
                   <FormLabel class="text-sm font-medium">{{
-                    $t("fields.isManufacture")
+                    fields.isManufacture
                   }}</FormLabel>
                   <FormControl>
                     <Switch
@@ -559,16 +570,16 @@ onMounted(() => {
 
           <Card>
             <CardHeader>
-              <CardTitle>{{ $t("fields.expiryDate") }}</CardTitle>
+              <CardTitle>{{ fields.expiryDate }}</CardTitle>
             </CardHeader>
             <CardContent class="space-y-4">
               <FormField v-slot="{ field }" name="expiryDate">
                 <FormItem>
-                  <FormLabel>{{ $t("fields.expiryDate") }}</FormLabel>
+                  <FormLabel>{{ fields.expiryDate }}</FormLabel>
                   <FormControl>
                     <DatePicker
                       v-bind="field"
-                      :placeholder="$t('fields.selectDate')"
+                      :placeholder="fields.selectDate"
                     />
                   </FormControl>
                   <FormMessage />
@@ -577,22 +588,22 @@ onMounted(() => {
 
               <FormField v-slot="{ field }" name="expiryType">
                 <FormItem>
-                  <FormLabel>{{ $t("fields.expiryType") }}</FormLabel>
+                  <FormLabel>{{ fields.expiryType }}</FormLabel>
                   <Select v-bind="field">
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue :placeholder="$t('fields.selectOption')" />
+                        <SelectValue :placeholder="fields.selectOption" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="None">{{
-                        $t("fields.expiryTypes.none")
+                        fields.expiryTypes.none
                       }}</SelectItem>
                       <SelectItem value="Best Before">{{
-                        $t("fields.expiryTypes.bestBefore")
+                        fields.expiryTypes.bestBefore
                       }}</SelectItem>
                       <SelectItem value="Expiry">{{
-                        $t("fields.expiryTypes.expiry")
+                        fields.expiryTypes.expiry
                       }}</SelectItem>
                     </SelectContent>
                   </Select>
@@ -613,7 +624,7 @@ onMounted(() => {
         size="lg"
         class="bg-card"
       >
-        {{ $t("crud.cancel") }}
+        {{ crud.cancel }}
       </Button>
       <Button
         type="submit"

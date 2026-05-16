@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
-import * as zod from "zod";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { Button } from "@/components/ui/button";
@@ -25,18 +24,24 @@ import { ref } from "vue";
 import { toast } from "vue-sonner";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
+import { useZod } from "@/hooks/useZod";
+import { computed } from "vue";
+
 const router = useRouter();
 const authStore = useAuthStore();
 const { t, auth, fields } = useAppI18n("auth");
+const { z, err } = useZod();
 const isLoading = ref(false);
 
-const formSchema = toTypedSchema(
-  zod.object({
-    username: zod.string().min(2, "Username must be at least 2 characters"),
-    email: zod.string().email("Invalid email address"),
-    password: zod.string().min(6, "Password must be at least 6 characters"),
-  }),
+const registerSchema = computed(() => 
+  z.object({
+    username: z.string().min(2, err.min("auth.username", 2)),
+    email: z.string().email(err.email()),
+    password: z.string().min(6, err.min("auth.password", 6)),
+  })
 );
+
+const formSchema = computed(() => toTypedSchema(registerSchema.value));
 
 const form = useForm({
   validationSchema: formSchema,

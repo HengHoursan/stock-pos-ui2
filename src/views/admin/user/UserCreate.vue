@@ -1,11 +1,14 @@
-<script setup lang="ts">
-import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, crud } = useAppI18n("user");
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
-import * as z from "zod";
+import { useAppI18n } from "@/hooks/useAppI18n";
+import { useZod } from "@/hooks/useZod";
+import { userService } from "@/services/user/user.service";
+import { roleService } from "@/services/role/role.service";
+import type { Role } from "@/types";
+import { toast } from "vue-sonner";
+import ImageUpload from "@/components/upload/ImageUpload.vue";
 import { Button } from "@/components/ui/button";
 import {
   FormControl,
@@ -32,28 +35,28 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { ArrowLeft, Loader2 } from "lucide-vue-next";
-import { userService } from "@/services/user/user.service";
-import { roleService } from "@/services/role/role.service";
-import type { Role } from "@/types";
-import { toast } from "vue-sonner";
-import ImageUpload from "@/components/upload/ImageUpload.vue";
+
+const { t, labels, fields, crud, auth } = useAppI18n("user");
 
 const router = useRouter();
+const { z, err } = useZod();
 
 const roles = ref<Role[]>([]);
 const fetchingRoles = ref(false);
 const submitting = ref(false);
 
-const formSchema = toTypedSchema(
+const userSchema = computed(() => 
   z.object({
-    username: z.string().min(3, "Username must be at least 3 characters").max(60),
-    email: z.string().email("Invalid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
+    username: z.string().min(3, err.min("auth.username", 3)).max(60, err.max("auth.username", 60)),
+    email: z.string().email(err.email()),
+    password: z.string().min(6, err.min("auth.password", 6)),
     roleId: z.string().nullable().optional(),
     status: z.boolean().default(true),
     photo: z.string().optional(),
   })
 );
+
+const formSchema = computed(() => toTypedSchema(userSchema.value));
 
 const form = useForm({
   validationSchema: formSchema,
@@ -139,7 +142,7 @@ onMounted(() => {
               
               <FormField v-slot="{ componentField }" name="username">
                 <FormItem>
-                  <FormLabel>{{ $t("auth.username") }} <span class="text-destructive">*</span></FormLabel>
+                  <FormLabel>{{ auth.username }} <span class="text-destructive">*</span></FormLabel>
                   <FormControl>
                     <Input placeholder="johndoe123" v-bind="componentField" />
                   </FormControl>
@@ -149,7 +152,7 @@ onMounted(() => {
 
               <FormField v-slot="{ componentField }" name="email">
                 <FormItem>
-                  <FormLabel>{{ $t("auth.email") }} <span class="text-destructive">*</span></FormLabel>
+                  <FormLabel>{{ auth.email }} <span class="text-destructive">*</span></FormLabel>
                   <FormControl>
                     <Input type="email" placeholder="johndoe@example.com" v-bind="componentField" />
                   </FormControl>
@@ -159,7 +162,7 @@ onMounted(() => {
 
               <FormField v-slot="{ componentField }" name="password">
                 <FormItem>
-                  <FormLabel>{{ $t("auth.password") }} <span class="text-destructive">*</span></FormLabel>
+                  <FormLabel>{{ auth.password }} <span class="text-destructive">*</span></FormLabel>
                   <FormControl>
                     <Input type="password" placeholder="••••••••" v-bind="componentField" />
                   </FormControl>
@@ -169,11 +172,11 @@ onMounted(() => {
 
               <FormField v-slot="{ field }" name="roleId">
                 <FormItem>
-                  <FormLabel>{{ $t('auth.role') }}</FormLabel>
+                  <FormLabel>{{ auth.role }}</FormLabel>
                   <Select v-bind="field" :disabled="fetchingRoles">
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue :placeholder="$t('fields.selectRole')">
+                        <SelectValue :placeholder="fields.selectRole">
                           <span v-if="field.value && roles.find((r) => String(r.id) === field.value)">
                             {{ roles.find((r) => String(r.id) === field.value)?.name }}
                           </span>
@@ -181,7 +184,7 @@ onMounted(() => {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="null">{{ $t('crud.none') }}</SelectItem>
+                      <SelectItem value="null">{{ crud.none }}</SelectItem>
                       <SelectItem v-for="ro in roles" :key="ro.id" :value="String(ro.id)">
                         {{ ro.name }}
                       </SelectItem>
@@ -195,7 +198,7 @@ onMounted(() => {
                 <FormField v-slot="{ value, handleChange }" name="status">
                   <FormItem class="flex flex-row items-center justify-between rounded-lg border p-4 bg-background">
                     <div class="space-y-0.5">
-                      <FormLabel class="text-base font-semibold">{{ $t('fields.activeStatus') }}</FormLabel>
+                      <FormLabel class="text-base font-semibold">{{ fields.activeStatus }}</FormLabel>
                       <FormDescription>
                         {{ t('fields.statusDescription', { module: labels.name }) }}
                       </FormDescription>
@@ -213,7 +216,7 @@ onMounted(() => {
               <div class="md:col-span-2 space-y-4">
                 <FormField v-slot="{ value, handleChange }" name="photo">
                   <FormItem class="space-y-4">
-                    <FormLabel>{{ $t("fields.photo") }}</FormLabel>
+                    <FormLabel>{{ fields.photo }}</FormLabel>
                     <div class="flex flex-col items-center justify-center gap-4 p-8 rounded-2xl border border-dashed border-muted-foreground/20 bg-muted/10 hover:bg-muted/30 transition-all">
                       <FormControl>
                         <ImageUpload
@@ -224,10 +227,10 @@ onMounted(() => {
                       </FormControl>
                       <div class="text-center space-y-1 mt-2">
                         <p class="text-sm font-bold tracking-tight">
-                          {{ $t("fields.userAvatar") }}
+                          {{ fields.userAvatar }}
                         </p>
                         <p class="text-[11px] text-muted-foreground leading-relaxed max-w-[250px] mx-auto">
-                          {{ $t("fields.userAvatarHint") }}
+                          {{ fields.userAvatarHint }}
                         </p>
                       </div>
                     </div>
@@ -242,7 +245,7 @@ onMounted(() => {
       </CardContent>
       <CardFooter class="flex justify-end gap-2 border-t px-6 py-4">
         <Button variant="outline" @click="router.back()" :disabled="submitting">
-          {{ $t("crud.cancel") }}
+          {{ crud.cancel }}
         </Button>
         <Button type="submit" form="userForm" :disabled="submitting">
           <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />

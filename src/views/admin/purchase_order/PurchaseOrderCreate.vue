@@ -1,16 +1,10 @@
-<script setup lang="ts">
-import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud, group } = useAppI18n("purchaseOrder");
-const productLabels = group("product");
-const purchaseQuotationLabels = group("purchaseQuotation");
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { toLocalISOString, formatNumberInput, formatCurrency } from "@/utils/format";
-import SearchableSelect from "@/components/SearchableSelect.vue";
 import { useForm, useFieldArray } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
-import * as z from "zod";
-
+import { useZod } from "@/hooks/useZod";
+import { toLocalISOString, formatNumberInput, formatCurrency } from "@/utils/format";
+import SearchableSelect from "@/components/SearchableSelect.vue";
 import { Button } from "@/components/ui/button";
 import {
   FormControl,
@@ -36,7 +30,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 import {
   ChevronLeft,
   Loader2,
@@ -45,13 +38,17 @@ import {
   Trash2,
   Truck,
 } from "lucide-vue-next";
-
 import { PurchaseOrderService } from "@/services/purchase_order/purchase_order.service";
 import { PurchaseQuotationService } from "@/services/purchase_quotation/purchase_quotation.service";
 import { SupplierService } from "@/services/supplier/supplier.service";
 import { ProductService } from "@/services/product/product.service";
 import type { Product, Supplier } from "@/types";
 import { toast } from "vue-sonner";
+import { useAppI18n } from "@/hooks/useAppI18n";
+
+const { t, labels, fields, crud, group, actions, common } = useAppI18n("purchaseOrder");
+const productLabels = group("product");
+const purchaseQuotationLabels = group("purchaseQuotation");
 
 const route = useRoute();
 const router = useRouter();
@@ -59,6 +56,7 @@ const poService = new PurchaseOrderService();
 const pqService = new PurchaseQuotationService();
 const supplierService = new SupplierService();
 const productService = new ProductService();
+const { z, err } = useZod();
 
 const submitting = ref(false);
 const products = ref<Product[]>([]);
@@ -70,6 +68,37 @@ const supplierOptions = computed(() =>
 const productOptions = computed(() =>
   products.value.map((p) => ({ label: `[${p.code}] ${p.name}`, value: p.id })),
 );
+
+const purchaseOrderSchema = computed(() => 
+  z.object({
+    code: z.string().max(50, err.max("fields.code", 50)).optional().nullable(),
+    supplierId: z.number().min(1, err.required("fields.supplierId")),
+    orderDate: z.string().min(1, err.required("fields.orderDate")),
+    description: z.string().optional().nullable(),
+    details: z.array(
+      z.object({
+        productId: z.number().min(1, err.required("product.name")),
+        quantity: z.number().gte(0.01, err.gte("fields.quantity", 0.01)),
+        price: z.number().gte(0, err.gte("fields.price", 0)),
+        purchaseQuotationId: z.number().optional().nullable(),
+        purchaseQuotationDetailId: z.number().optional().nullable(),
+      })
+    ).min(1, err.min("fields.details", 1)),
+  })
+);
+
+const formSchema = computed(() => toTypedSchema(purchaseOrderSchema.value));
+
+const form = useForm({
+  validationSchema: formSchema,
+  initialValues: {
+    code: "",
+    supplierId: 0,
+    orderDate: toLocalISOString(new Date()),
+    description: "",
+    details: [],
+  },
+});
 
 onMounted(async () => {
   try {
@@ -85,8 +114,6 @@ onMounted(async () => {
     if (quotationId) {
       const qRes = await pqService.getDetail(quotationId);
       if (qRes.success && qRes.data) {
-        // Pre-fill fields
-
         const mappedDetails = (qRes.data.details || []).map((d) => ({
           productId: d.productId,
           quantity: d.quantity,
@@ -106,53 +133,6 @@ onMounted(async () => {
   } catch (error) {
     console.error("Failed to fetch dependencies", error);
   }
-});
-
-const formSchema = toTypedSchema(
-  z.object({
-    code: z.string().max(50).optional().nullable(),
-    supplierId: z
-      .number()
-      .min(1, t("validation.required", { field: fields.supplierId })),
-    orderDate: z
-      .string()
-      .min(1, t("validation.required", { field: fields.orderDate })),
-    description: z.string().optional().nullable(),
-    details: z
-      .array(
-        z.object({
-          productId: z
-            .number()
-            .min(1, t("validation.required", { field: productLabels.name })),
-          quantity: z
-            .number()
-            .min(
-              0.01,
-              t("validation.min", { field: fields.quantity, min: "0.01" }),
-            ),
-          price: z
-            .number()
-            .min(
-              0,
-              t("validation.min", { field: fields.price, min: "0" }),
-            ),
-          purchaseQuotationId: z.number().optional().nullable(),
-          purchaseQuotationDetailId: z.number().optional().nullable(),
-        }),
-      )
-      .min(1, t("validation.atLeastOneItem")),
-  }),
-);
-
-const form = useForm({
-  validationSchema: formSchema,
-  initialValues: {
-    code: "",
-    supplierId: 0,
-    orderDate: toLocalISOString(new Date()),
-    description: "",
-    details: [],
-  },
 });
 
 const { remove, push, fields: detailsFields } = useFieldArray("details");
@@ -310,7 +290,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               @click="addProduct"
               variant="default"
             >
-              <Plus class="h-4 w-4 mr-2" /> {{ t("actions.addProduct") }}
+              <Plus class="h-4 w-4 mr-2" /> {{ actions.addProduct }}
             </Button>
           </CardHeader>
           <CardContent class="p-0">
@@ -338,7 +318,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                     colspan="5"
                     class="text-center py-8 text-muted-foreground italic"
                   >
-                    {{ t("common.noData") }}
+                    {{ common.noData }}
                   </TableCell>
                 </TableRow>
                 <TableRow v-for="(field, index) in detailsFields" :key="field.key">

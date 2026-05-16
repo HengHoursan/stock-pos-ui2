@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("unit");
+const { t, labels, crud } = useAppI18n("unit");
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -40,24 +39,30 @@ import type { Unit } from "@/types";
 import { toast } from "vue-sonner";
 
 
+import { useZod } from "@/hooks/useZod";
+import { computed } from "vue";
+
 const router = useRouter();
 const unitService = new UnitService();
+const { z, err } = useZod();
 
 const parentUnits = ref<Unit[]>([]);
 const loading = ref(false);
 const submitting = ref(false);
 
-const formSchema = toTypedSchema(
+const unitSchema = computed(() => 
   z.object({
-    name: z.string().min(2, "Name must be at least 2 characters").max(60),
+    name: z.string().min(2, err.min("fields.name", 2)).max(60, err.max("fields.name", 60)),
     parentId: z.string().optional(),
     symbol: z.string().optional(),
-    conversionFactor: z.number().min(0).optional(),
-    defaultPrice: z.number().min(0).optional(),
+    conversionFactor: z.number().gte(0, err.gte("fields.conversionFactor", 0)).optional(),
+    defaultPrice: z.number().gte(0, err.gte("fields.defaultPrice", 0)).optional(),
     isCalculateDetail: z.boolean().default(false),
     status: z.boolean().default(true),
-  }),
+  })
 );
+
+const formSchema = computed(() => toTypedSchema(unitSchema.value));
 
 const form = useForm({
   validationSchema: formSchema,
@@ -132,10 +137,10 @@ onMounted(() => {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <FormField v-slot="{ componentField }" name="name">
               <FormItem>
-                <FormLabel>{{ $t('fields.name') }}</FormLabel>
+                <FormLabel>{{ fields.name }}</FormLabel>
                 <FormControl>
                   <Input
-                    :placeholder="$t('fields.enterUnitName')"
+                    :placeholder="fields.enterUnitName"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -149,11 +154,11 @@ onMounted(() => {
                 <Select v-bind="field">
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue :placeholder="$t('fields.selectParentUnit')" />
+                      <SelectValue :placeholder="fields.selectParentUnit" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="0">{{ $t('crud.none') }}</SelectItem>
+                    <SelectItem value="0">{{ crud.none }}</SelectItem>
                     <template v-if="parentUnits.length > 0">
                       <SelectItem
                         v-for="u in parentUnits"
@@ -174,10 +179,10 @@ onMounted(() => {
 
             <FormField v-slot="{ componentField }" name="symbol">
               <FormItem>
-                <FormLabel>{{ $t('fields.symbol') }}</FormLabel>
+                <FormLabel>{{ fields.symbol }}</FormLabel>
                 <FormControl>
                   <Input
-                    :placeholder="$t('fields.enterSymbol')"
+                    :placeholder="fields.enterSymbol"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -187,7 +192,7 @@ onMounted(() => {
 
             <FormField v-slot="{ componentField }" name="conversionFactor">
               <FormItem>
-                <FormLabel>{{ $t('fields.conversionFactor') }}</FormLabel>
+                <FormLabel>{{ fields.conversionFactor }}</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -203,7 +208,7 @@ onMounted(() => {
 
             <FormField v-slot="{ componentField }" name="defaultPrice">
               <FormItem>
-                <FormLabel>{{ $t('fields.defaultPrice') }}</FormLabel>
+                <FormLabel>{{ fields.defaultPrice }}</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -222,7 +227,7 @@ onMounted(() => {
               >
                 <div class="space-y-0.5">
                   <FormLabel class="text-base font-semibold"
-                    >{{ $t('fields.isCalculateDetail') }}</FormLabel
+                    >{{ fields.isCalculateDetail }}</FormLabel
                   >
                   <FormDescription>
                     {{ t('fields.calculateDetailInfo', { module: labels.name }) }}
@@ -237,7 +242,7 @@ onMounted(() => {
             <FormField v-slot="{ value, handleChange }" name="status">
               <FormItem class="flex flex-row items-center justify-between rounded-lg border p-4">
                 <div class="space-y-0.5">
-                  <FormLabel class="text-base font-semibold">{{ $t('fields.activeStatus') }}</FormLabel>
+                  <FormLabel class="text-base font-semibold">{{ fields.activeStatus }}</FormLabel>
                   <FormDescription>{{ t('fields.statusDescription', { module: labels.name }) }}</FormDescription>
                 </div>
                 <FormControl>
@@ -249,7 +254,7 @@ onMounted(() => {
         </form>
       </CardContent>
       <CardFooter class="flex justify-end gap-2 border-t px-6 py-4">
-        <Button variant="outline" @click="router.back()" :disabled="submitting">{{ $t('crud.cancel') }}</Button>
+        <Button variant="outline" @click="router.back()" :disabled="submitting">{{ crud.cancel }}</Button>
         <Button type="submit" form="unitForm" :disabled="submitting">
           <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />{{ crud.createBtn }} {{ labels.name }}</Button>
       </CardFooter>

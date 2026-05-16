@@ -1,13 +1,13 @@
-<script setup lang="ts">
-import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("supplier");
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
-import * as z from "zod";
+import { useAppI18n } from "@/hooks/useAppI18n";
+import { useZod } from "@/hooks/useZod";
+import { SupplierService } from "@/services/supplier/supplier.service";
+import { CustomerType } from "@/types";
+import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
-
 import {
   FormControl,
   FormDescription,
@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/Textarea";
-
 import {
   Select,
   SelectContent,
@@ -27,7 +26,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-
 import {
   Card,
   CardContent,
@@ -43,31 +41,33 @@ import {
   MapPin,
   Settings,
 } from "lucide-vue-next";
-import { SupplierService } from "@/services/supplier/supplier.service";
-import { CustomerType } from "@/types";
-import { toast } from "vue-sonner";
+
+const { t, labels, fields, crud, auth, layout } = useAppI18n("supplier");
 
 const router = useRouter();
 const route = useRoute();
 const supplierService = new SupplierService();
+const { z, err } = useZod();
 
 const loading = ref(true);
 const submitting = ref(false);
 const supplierId = Number(route.params.id);
 
-const formSchema = toTypedSchema(
+const supplierSchema = computed(() => 
   z.object({
-    name: z.string().min(2, t("fields.enterName")).max(100),
-    nameLatin: z.string().max(100).optional().nullable(),
-    code: z.string().max(50).optional().nullable(),
-    email: z.string().email().optional().nullable().or(z.literal("")),
-    phoneNumber: z.string().max(20).optional().nullable(),
+    name: z.string().min(2, err.min("fields.name", 2)).max(100, err.max("fields.name", 100)),
+    nameLatin: z.string().max(100, err.max("fields.nameLatin", 100)).optional().nullable(),
+    code: z.string().max(50, err.max("fields.code", 50)).optional().nullable(),
+    email: z.string().email(err.email()).optional().nullable().or(z.literal("")),
+    phoneNumber: z.string().max(20, err.max("fields.phoneNumber", 20)).optional().nullable(),
     address: z.string().optional().nullable(),
     description: z.string().optional().nullable(),
     type: z.number().default(CustomerType.DINE_IN),
     status: z.boolean().default(true),
-  }),
+  })
 );
+
+const formSchema = computed(() => toTypedSchema(supplierSchema.value));
 
 const form = useForm({
   validationSchema: formSchema,
@@ -145,7 +145,7 @@ onMounted(() => {
       class="flex flex-col items-center justify-center h-[400px] border rounded-lg bg-card shadow-sm"
     >
       <Loader2 class="h-8 w-8 animate-spin text-primary mb-4" />
-      <p class="text-muted-foreground">{{ $t("crud.loading") }}</p>
+      <p class="text-muted-foreground">{{ crud.loading }}</p>
     </div>
 
     <form v-else @submit="onSubmit" id="supplierEditForm">
@@ -155,16 +155,16 @@ onMounted(() => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2">
               <UserPlus class="h-5 w-5 text-primary" />
-              {{ $t("crud.generalInfo") }}
+              {{ crud.generalInfo }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6 space-y-4">
             <FormField v-slot="{ componentField }" name="name">
               <FormItem>
-                <FormLabel>{{ $t("fields.name") }}</FormLabel>
+                <FormLabel>{{ fields.name }}</FormLabel>
                 <FormControl>
                   <Input
-                    :placeholder="$t('fields.enterName')"
+                    :placeholder="fields.enterName"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -174,10 +174,10 @@ onMounted(() => {
 
             <FormField v-slot="{ componentField }" name="nameLatin">
               <FormItem>
-                <FormLabel>{{ $t("fields.nameLatin") }}</FormLabel>
+                <FormLabel>{{ fields.nameLatin }}</FormLabel>
                 <FormControl>
                   <Input
-                    :placeholder="$t('fields.nameLatin')"
+                    :placeholder="fields.nameLatin"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -187,10 +187,10 @@ onMounted(() => {
 
             <FormField v-slot="{ componentField }" name="code">
               <FormItem>
-                <FormLabel>{{ $t("fields.code") }}</FormLabel>
+                <FormLabel>{{ fields.code }}</FormLabel>
                 <FormControl>
                   <Input
-                    :placeholder="$t('fields.code')"
+                    :placeholder="fields.code"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -205,16 +205,16 @@ onMounted(() => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2">
               <Phone class="h-5 w-5 text-primary" />
-              {{ $t("fields.phoneNumber") }} & {{ $t("auth.email") }}
+              {{ fields.phoneNumber }} & {{ auth.email }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6 space-y-4">
             <FormField v-slot="{ componentField }" name="email">
               <FormItem>
-                <FormLabel>{{ $t("auth.email") }}</FormLabel>
+                <FormLabel>{{ auth.email }}</FormLabel>
                 <FormControl>
                   <Input
-                    :placeholder="$t('fields.emailPlaceholder')"
+                    :placeholder="fields.emailPlaceholder"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -224,10 +224,10 @@ onMounted(() => {
 
             <FormField v-slot="{ componentField }" name="phoneNumber">
               <FormItem>
-                <FormLabel>{{ $t("fields.phoneNumber") }}</FormLabel>
+                <FormLabel>{{ fields.phoneNumber }}</FormLabel>
                 <FormControl>
                   <Input
-                    :placeholder="$t('fields.phoneNumber')"
+                    :placeholder="fields.phoneNumber"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -239,11 +239,11 @@ onMounted(() => {
               <FormItem>
                 <FormLabel class="flex items-center gap-2">
                   <MapPin class="h-4 w-4 text-muted-foreground" />
-                  {{ $t("fields.address") }}
+                  {{ fields.address }}
                 </FormLabel>
                 <FormControl>
                   <Textarea
-                    :placeholder="$t('fields.address')"
+                    :placeholder="fields.address"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -258,28 +258,28 @@ onMounted(() => {
           <CardHeader class="pb-3 border-b bg-muted/5">
             <CardTitle class="text-lg flex items-center gap-2">
               <Settings class="h-5 w-5 text-primary" />
-              {{ $t("layout.adminPanel") }}
+              {{ layout.adminPanel }}
             </CardTitle>
           </CardHeader>
           <CardContent class="pt-6 space-y-6">
             <FormField v-slot="{ field }" name="type">
               <FormItem>
-                <FormLabel>{{ $t("fields.type") }}</FormLabel>
+                <FormLabel>{{ fields.type }}</FormLabel>
                 <Select
                   :model-value="String(field.value)"
                   @update:model-value="(v) => field.onChange(Number(v))"
                 >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue :placeholder="$t('crud.selectType')" />
+                      <SelectValue :placeholder="crud.selectType" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     <SelectItem :value="String(CustomerType.DINE_IN)">{{
-                      $t("fields.dineIn")
+                      fields.dineIn
                     }}</SelectItem>
                     <SelectItem :value="String(CustomerType.DINE_OUT)">{{
-                      $t("fields.dineOut")
+                      fields.dineOut
                     }}</SelectItem>
                   </SelectContent>
                 </Select>
@@ -289,10 +289,10 @@ onMounted(() => {
 
             <FormField v-slot="{ componentField }" name="description">
               <FormItem>
-                <FormLabel>{{ $t("fields.description") }}</FormLabel>
+                <FormLabel>{{ fields.description }}</FormLabel>
                 <FormControl>
                   <Textarea
-                    :placeholder="$t('fields.enterDescription')"
+                    :placeholder="fields.enterDescription"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -306,7 +306,7 @@ onMounted(() => {
               >
                 <div class="space-y-0.5">
                   <FormLabel class="text-base font-semibold">{{
-                    $t("fields.activeStatus")
+                    fields.activeStatus
                   }}</FormLabel>
                   <FormDescription>{{
                     t("fields.statusDescription", {
@@ -331,7 +331,7 @@ onMounted(() => {
               type="button"
               @click="router.back()"
               :disabled="submitting"
-              >{{ $t("crud.cancel") }}</Button
+              >{{ crud.cancel }}</Button
             >
             <Button
               type="submit"

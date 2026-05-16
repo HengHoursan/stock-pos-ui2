@@ -6,7 +6,7 @@ import { toLocalISOString, formatNumberInput, formatCurrency } from "@/utils/for
 import SearchableSelect from "@/components/SearchableSelect.vue";
 import { useForm, useFieldArray } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
-import * as z from "zod";
+import { useZod } from "@/hooks/useZod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -41,6 +41,7 @@ import type { Product } from "@/types";
 import { toast } from "vue-sonner";
 
 const { t, labels, fields, crud, common, actions, group } = useAppI18n("purchaseQuotation");
+const { z, err } = useZod();
 const productLabels = group("product");
 const router = useRouter();
 const pqService = new PurchaseQuotationService();
@@ -65,32 +66,18 @@ onMounted(async () => {
 
 const formSchema = toTypedSchema(
   z.object({
-    code: z.string().max(50).optional().nullable(),
-    quotationDate: z
-      .string()
-      .min(1, t("validation.required", { field: t("fields.quotationDate") })),
+    code: z.string().max(50, err.max("fields.code", 50)).optional().nullable(),
+    quotationDate: z.string().min(1, err.required("fields.quotationDate")),
     description: z.string().optional().nullable(),
     details: z
       .array(
         z.object({
-          productId: z
-            .number()
-            .min(1, t("validation.required", { field: productLabels.name })),
-          quantity: z
-            .number()
-            .min(
-              0.01,
-              t("validation.min", { field: t("fields.quantity"), min: "0.01" }),
-            ),
-          price: z
-            .number()
-            .min(
-              0,
-              t("validation.min", { field: t("fields.price"), min: "0" }),
-            ),
+          productId: z.coerce.number().min(1, err.required("product.name")),
+          quantity: z.coerce.number().min(0.01, err.min("fields.quantity", 0.01)),
+          price: z.coerce.number().min(0, err.min("fields.price", 0)),
         }),
       )
-      .min(1, t("validation.atLeastOneItem")),
+      .min(1, err.min("fields.details", 1)),
   }),
 );
 
@@ -405,7 +392,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               :disabled="submitting"
               >{{ crud.cancel }}</Button
             >
-            <Button type="submit" :disabled="submitting || fields.length === 0">
+            <Button type="submit" :disabled="submitting || detailsFields.length === 0">
               <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
               {{ crud.save }}
             </Button>

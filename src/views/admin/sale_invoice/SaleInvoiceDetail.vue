@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud, actions, group } = useAppI18n("saleInvoice");
+const { t, labels, fields, crud, actions, group, common } = useAppI18n("saleInvoice");
 const productLabels = group("product");
 const saleOrderLabels = group("saleOrder");
 import { ref, onMounted, computed } from "vue";
@@ -236,14 +236,14 @@ onMounted(() => {
                     new Map(
                       record.details
                         .filter((d) => d.saleOrder)
-                        .map((d) => [d.saleOrder.id, d.saleOrder]),
+                        .map((d) => [d.saleOrder?.id, d.saleOrder]),
                     ).values(),
                   )"
-                  :key="order.id"
+                  :key="order?.id"
                   class="bg-indigo-50 px-2 py-0.5 rounded text-xs font-bold text-indigo-700 border border-indigo-200/50 uppercase cursor-pointer hover:bg-indigo-100 transition-colors shadow-sm"
-                  @click="router.push(`/admin/sale-orders/${order.id}`)"
+                  @click="router.push(`/admin/sale-orders/${order?.id}`)"
                 >
-                  {{ order.code }}
+                  {{ order?.code }}
                 </div>
               </div>
             </div>
@@ -368,7 +368,7 @@ onMounted(() => {
                   <TableCell
                     colspan="5"
                     class="py-8 text-center text-muted-foreground italic"
-                    >{{ t("common.noData") }}</TableCell
+                    >{{ common.noData }}</TableCell
                   >
                 </TableRow>
               </TableBody>
@@ -425,7 +425,7 @@ onMounted(() => {
                         size="sm"
                         @click="router.push(`/admin/sale-payments/${pay.id}`)"
                       >
-                        {{ crud.view }}
+                        {{ crud.viewBtn }}
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -435,7 +435,7 @@ onMounted(() => {
                     colspan="4"
                     class="py-8 text-center text-muted-foreground italic"
                   >
-                    {{ t("common.noData") }}
+                    {{ common.noData }}
                   </TableCell>
                 </TableRow>
               </TableBody>

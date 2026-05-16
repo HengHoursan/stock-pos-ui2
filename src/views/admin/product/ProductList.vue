@@ -149,7 +149,7 @@ async function handleBulkAction(action: "delete" | "activate" | "deactivate") {
   
   try {
     if (action === "delete") {
-      if (!confirm(t("crud.confirmBulkDelete", { count: selectedIds.value.length, module: moduleTitle }))) return;
+      if (!confirm(crud.confirmBulkDelete)) return;
       const res = await productService.bulkSoftDelete(selectedIds.value);
       if (res.success) {
         toast.success(t("crud.successBulkDelete", { module: moduleTitle }));
@@ -373,7 +373,7 @@ onMounted(() => {
     </div>
 
     <div v-if="selectedIds.length > 0" class="flex items-center gap-2 p-3 bg-muted/30 border rounded-lg animate-in fade-in slide-in-from-top-2">
-      <span class="text-sm font-medium mr-2">{{ t('crud.selectedCount', { count: selectedIds.length }) }}</span>
+      <span class="text-sm font-medium mr-2">{{ crud.selectedCount }}</span>
       <Button variant="outline" size="sm" @click="handleBulkAction('activate')" class="h-8">
         {{ crud.activate }}
       </Button>
@@ -396,7 +396,7 @@ onMounted(() => {
         />
         <Input
           type="search"
-          :placeholder="t('crud.search', { module: labels.name })"
+          :placeholder="crud.search"
           class="pl-8"
           v-model="filters.search"
         />
@@ -647,7 +647,7 @@ onMounted(() => {
               <div class="flex flex-col items-center justify-center gap-3">
                 <Package class="h-10 w-10 opacity-10" />
                 <p class="font-medium">
-                  {{ t("crud.noRecords", { module: labels.title }) }}
+                  {{ crud.noRecords }}
                 </p>
                 <Button
                   v-if="
@@ -747,7 +747,7 @@ onMounted(() => {
         <AlertDialogHeader>
           <AlertDialogTitle>{{ crud.confirmDelete }}</AlertDialogTitle>
           <AlertDialogDescription>
-            {{ t("crud.confirmDeleteDesc", { module: labels.name }) }}
+            {{ crud.confirmDeleteDesc }}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

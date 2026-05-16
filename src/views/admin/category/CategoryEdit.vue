@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("category");
+const { t, labels, crud } = useAppI18n("category");
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import {
   FormControl,
@@ -38,26 +37,32 @@ import ImageUpload from "@/components/upload/ImageUpload.vue";
 import type { Category } from "@/types";
 import { toast } from "vue-sonner";
 
+import { useZod } from "@/hooks/useZod";
+import { computed } from "vue";
+
 const router = useRouter();
 const route = useRoute();
 const categoryService = new CategoryService();
+const { z, err } = useZod();
 
 const categoryId = Number(route.params.id);
 const parentCategories = ref<Category[]>([]);
 const loading = ref(true);
 const submitting = ref(false);
 
-const formSchema = toTypedSchema(
+const categorySchema = computed(() => 
   z.object({
-    name: z.string().min(2, "Name must be at least 2 characters").max(6),
+    name: z.string().min(2, err.min("fields.name", 2)).max(60, err.max("fields.name", 60)),
     code: z.string().optional(),
     slug: z.string().optional(),
     parentId: z.string().optional(),
     description: z.string().optional(),
     imageUrl: z.string().optional(),
     status: z.boolean().default(true),
-  }),
+  })
 );
+
+const formSchema = computed(() => toTypedSchema(categorySchema.value));
 
 const form = useForm({
   validationSchema: formSchema,
@@ -170,7 +175,7 @@ onMounted(() => {
                 <CardHeader>
                   <CardTitle class="flex items-center gap-2">
                     <Camera class="h-5 w-5 text-primary" />
-                    {{ $t("fields.photo") }}
+                    {{ fields.photo }}
                   </CardTitle>
                 </CardHeader>
                 <CardContent class="flex justify-center py-4">
@@ -194,10 +199,10 @@ onMounted(() => {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField v-slot="{ componentField }" name="name">
                   <FormItem>
-                    <FormLabel>{{ $t("fields.name") }}</FormLabel>
+                    <FormLabel>{{ fields.name }}</FormLabel>
                     <FormControl>
                       <Input
-                        :placeholder="$t('fields.enterCategoryName')"
+                        :placeholder="fields.enterCategoryName"
                         v-bind="componentField"
                       />
                     </FormControl>
@@ -207,7 +212,7 @@ onMounted(() => {
 
                 <FormField v-slot="{ componentField }" name="code">
                   <FormItem>
-                    <FormLabel>{{ $t("fields.code") }}</FormLabel>
+                    <FormLabel>{{ fields.code }}</FormLabel>
                     <FormControl>
                       <Input
                         v-bind="componentField"
@@ -221,7 +226,7 @@ onMounted(() => {
 
                 <FormField v-slot="{ componentField }" name="slug">
                   <FormItem>
-                    <FormLabel>{{ $t("fields.slug") }}</FormLabel>
+                    <FormLabel>{{ fields.slug }}</FormLabel>
                     <FormControl>
                       <Input
                         v-bind="componentField"
@@ -242,12 +247,12 @@ onMounted(() => {
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue
-                            :placeholder="$t('fields.selectParentCategory')"
+                            :placeholder="fields.selectParentCategory"
                           />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="0">{{ $t("crud.none") }}</SelectItem>
+                        <SelectItem value="0">{{ crud.none }}</SelectItem>
                         <template v-if="parentCategories.length > 0">
                           <SelectItem
                             v-for="cat in parentCategories"
@@ -269,10 +274,10 @@ onMounted(() => {
                 <div class="md:col-span-2">
                   <FormField v-slot="{ componentField }" name="description">
                     <FormItem>
-                      <FormLabel>{{ $t("fields.description") }}</FormLabel>
+                      <FormLabel>{{ fields.description }}</FormLabel>
                       <FormControl>
                         <Textarea
-                          :placeholder="$t('fields.enterDescription')"
+                          :placeholder="fields.enterDescription"
                           v-bind="componentField"
                         />
                       </FormControl>
@@ -288,7 +293,7 @@ onMounted(() => {
                     >
                       <div class="space-y-0.5">
                         <FormLabel class="text-base font-semibold">{{
-                          $t("fields.activeStatus")
+                          fields.activeStatus
                         }}</FormLabel>
                           {{
                             t("fields.statusDescription", {
@@ -315,7 +320,7 @@ onMounted(() => {
           variant="outline"
           @click="router.back()"
           :disabled="submitting"
-          >{{ $t("crud.cancel") }}</Button
+          >{{ crud.cancel }}</Button
         >
         <Button type="submit" form="categoryForm" :disabled="submitting">
           <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />

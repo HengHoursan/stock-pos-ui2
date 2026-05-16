@@ -108,7 +108,7 @@
     "allSaleQuotations": "Sale Quotations",
     "addSaleQuotation": "Add Sale Quotation",
     "allPurchaseQuotations": "All Purchase Quotations",
-    "addPurchaseQuoatation": "Add Purchase Quotation"
+    "addPurchaseQuotation": "Add Purchase Quotation"
   },
   "auth": {
     "welcomeBack": "Welcome back",
@@ -449,12 +449,33 @@
   },
   "validation": {
     "required": "{field} is required",
-    "min": "{field} must be at least {min}",
+    "min": "{field} must be at least {count} characters",
+    "max": "{field} must not exceed {count} characters",
+    "email": "Invalid email address",
+    "url": "Invalid URL format",
+    "phone": "Invalid phone number format (e.g. 012345678)",
+    "number": "{field} must be a number",
+    "positive": "{field} must be a positive number",
+    "gte": "{field} must be at least {count}",
+    "lte": "{field} must not exceed {count}",
+    "match": "{field1} and {field2} must match",
     "paidAmountNegative": "Paid amount cannot be negative",
     "atLeastOneItem": "At least one product is required",
     "loadedFromSource": "Loaded items from {source}",
     "paymentExceedsBalance": "Note: Payment amount exceeds the remaining balance.",
     "onlyDraftEditable": "Only draft records can be edited"
+  },
+  "api": {
+    "errors": {
+      "invalid_credentials": "Invalid email or password",
+      "unauthorized": "Your session has expired. Please login again.",
+      "forbidden": "You do not have permission to perform this action.",
+      "not_found": "The requested resource was not found.",
+      "internal_server_error": "A system error occurred. Please try again later.",
+      "validation_error": "Some fields contain invalid data.",
+      "email_taken": "This email address is already in use.",
+      "phone_taken": "This phone number is already in use."
+    }
   },
   "pagination": {
     "previous": "Previous",

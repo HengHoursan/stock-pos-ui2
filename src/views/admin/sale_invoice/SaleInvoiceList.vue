@@ -241,7 +241,7 @@ onMounted(() => {
         <Button variant="outline" size="icon" @click="fetchData" :disabled="loading">
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button v-permission="'sale_invoice:create'" @click="router.push('/admin/sale_invoices/create')">
+        <Button v-permission="'sale_invoice:create'" @click="router.push('/admin/sale-invoices/create')">
           <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.name }}
         </Button>
       </div>
@@ -252,7 +252,7 @@ onMounted(() => {
         <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
-          :placeholder="t('crud.search', { module: labels.title })"
+          :placeholder="crud.search"
           class="pl-8 bg-background/50 border-border/60 shadow-sm transition-all focus:ring-2 focus:ring-primary/20"
           v-model="filters.search"
         />
@@ -390,7 +390,7 @@ onMounted(() => {
             <TableCell colspan="8" class="h-32 text-center text-muted-foreground">
               <div class="flex flex-col items-center justify-center gap-3">
                 <FileText class="h-10 w-10 opacity-10" />
-                <p class="font-medium">{{ t('crud.noRecords', { module: labels.title }) }}</p>
+                <p class="font-medium">{{ crud.noRecords }}</p>
                 <Button
                   v-if="filters.search || filters.status || filters.customerId || filters.startDate || filters.endDate"
                   variant="outline"
@@ -445,7 +445,7 @@ onMounted(() => {
         <AlertDialogHeader>
           <AlertDialogTitle>{{ crud.confirmDelete }}</AlertDialogTitle>
           <AlertDialogDescription>
-            {{ t('crud.confirmDeleteDesc', { module: labels.name }) }}
+            {{ crud.confirmDeleteDesc }}
             <br/><br/>
             <strong class="text-destructive">{{ fields.saleInvoiceDeleteWarning }}</strong>
           </AlertDialogDescription>

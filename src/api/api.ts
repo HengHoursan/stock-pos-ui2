@@ -2,6 +2,8 @@ import axios, {
   type AxiosInstance,
   type InternalAxiosRequestConfig,
 } from "axios";
+import pinia from "@/stores";
+import { useAuthStore } from "@/stores/auth";
 
 const api: AxiosInstance = axios.create({
   baseURL: (import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api").endsWith('/') 
@@ -58,6 +60,17 @@ api.interceptors.response.use(
         const newToken = res.data.data.accessToken;
 
         localStorage.setItem("accessToken", newToken);
+        if (res.data.data.refreshToken) {
+          localStorage.setItem("refreshToken", res.data.data.refreshToken);
+        }
+
+        // Sync with Pinia store
+        const authStore = useAuthStore(pinia);
+        authStore.setAuth({ 
+          accessToken: newToken, 
+          refreshToken: res.data.data.refreshToken || refreshToken 
+        });
+
         onTokenRefreshed(newToken);
         isRefreshing = false;
 

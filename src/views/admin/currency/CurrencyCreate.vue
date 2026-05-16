@@ -3,11 +3,12 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
-import * as zod from "zod";
-
+import { useAppI18n } from "@/hooks/useAppI18n";
+import { useZod } from "@/hooks/useZod";
+import { CurrencyService } from "@/services/currency/currency.service";
+import { toast } from "vue-sonner";
 import { Button } from "@/components/ui/button";
 import {
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -32,13 +33,10 @@ import {
 import { ChevronLeft, Loader2, Coins, Check, Search } from "lucide-vue-next";
 import { cn } from "@/lib/utils";
 
-import { CurrencyService } from "@/services/currency/currency.service";
-import { toast } from "vue-sonner";
-
-import { useAppI18n } from "@/hooks/useAppI18n";
 const { t, labels, fields, crud } = useAppI18n("currency");
 const router = useRouter();
 const currencyService = new CurrencyService();
+const { z, err } = useZod();
 const isSubmitting = ref(false);
 
 const countries = [
@@ -80,19 +78,21 @@ function selectCountry(country: string) {
   isDropdownOpen.value = false;
 }
 
-const formSchema = toTypedSchema(
-  zod.object({
-    code: zod.string().min(1, t("auth.usernameRequired")).max(10),
-    country: zod.string().min(1, t("auth.usernameRequired")),
-    currency: zod.string().min(1, t("auth.usernameRequired")),
-    symbol: zod.string().max(10).optional().default(""),
-    thousandSeparator: zod.string().max(5).optional().default(","),
-    decimalSeparator: zod.string().max(5).optional().default("."),
-    exchangeRate: zod.coerce.number().min(0).default(1),
-    isDefault: zod.boolean().default(false),
-    status: zod.boolean().default(true),
-  }),
+const currencySchema = computed(() => 
+  z.object({
+    code: z.string().min(1, err.required("fields.code")).max(10, err.max("fields.code", 10)),
+    country: z.string().min(1, err.required("fields.country")),
+    currency: z.string().min(1, err.required("fields.currency")),
+    symbol: z.string().max(10, err.max("fields.symbol", 10)).optional().default(""),
+    thousandSeparator: z.string().max(5, err.max("fields.thousandSeparator", 5)).optional().default(","),
+    decimalSeparator: z.string().max(5, err.max("fields.decimalSeparator", 5)).optional().default("."),
+    exchangeRate: z.coerce.number().gte(0, err.gte("fields.exchangeRate", 0)).default(1),
+    isDefault: z.boolean().default(false),
+    status: z.boolean().default(true),
+  })
 );
+
+const formSchema = computed(() => toTypedSchema(currencySchema.value));
 
 const form = useForm({
   validationSchema: formSchema,
@@ -162,7 +162,7 @@ async function onSubmit(values: any) {
       class="md:hidden flex items-center justify-between px-4 py-2 bg-muted/30 rounded-md border text-sm"
     >
       <span class="text-muted-foreground font-medium"
-        >{{ $t("fields.formatPreview") }}:</span
+        >{{ fields.formatPreview }}:</span
       >
       <span class="text-foreground">{{ formattedPreview }}</span>
     </div>
@@ -180,10 +180,10 @@ async function onSubmit(values: any) {
           >
             <FormField v-slot="{ componentField }" name="code">
               <FormItem>
-                <FormLabel>{{ $t("fields.code") }}</FormLabel>
+                <FormLabel>{{ fields.code }}</FormLabel>
                 <FormControl>
                   <Input
-                    :placeholder="$t('fields.enterCurrencyCode')"
+                    :placeholder="fields.enterCurrencyCode"
                     v-bind="componentField"
                     class="uppercase"
                   />
@@ -195,7 +195,7 @@ async function onSubmit(values: any) {
             <!-- Searchable Country Dropdown -->
             <FormField v-slot="{ value }" name="country">
               <FormItem class="flex flex-col">
-                <FormLabel>{{ $t("fields.country") }}</FormLabel>
+                <FormLabel>{{ fields.country }}</FormLabel>
                 <Popover v-model:open="isDropdownOpen">
                   <PopoverTrigger as-child>
                     <FormControl>
@@ -209,7 +209,7 @@ async function onSubmit(values: any) {
                           )
                         "
                       >
-                        {{ value || $t("crud.selectCountry") }}
+                        {{ value || crud.selectCountry }}
                         <Search class="ml-2 h-4 w-4 shrink-0 opacity-50" />
                       </Button>
                     </FormControl>
@@ -223,7 +223,7 @@ async function onSubmit(values: any) {
                         <input
                           v-model="searchTerm"
                           class="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
-                          :placeholder="$t('crud.typeToSearch')"
+                          :placeholder="crud.typeToSearch"
                         />
                       </div>
                       <div class="max-h-[300px] overflow-y-auto p-1">
@@ -247,7 +247,7 @@ async function onSubmit(values: any) {
                           v-if="filteredCountries.length === 0"
                           class="py-6 text-center text-sm text-muted-foreground"
                         >
-                          {{ $t("crud.noCountryFound") }}
+                          {{ crud.noCountryFound }}
                         </div>
                       </div>
                       <!-- Allow typing custom if not found -->
@@ -259,7 +259,7 @@ async function onSubmit(values: any) {
                           class="w-full justify-start text-xs italic"
                           @click="selectCountry(searchTerm)"
                         >
-                          {{ $t("crud.useCustom") }}: "{{ searchTerm }}"
+                          {{ crud.useCustom }}: "{{ searchTerm }}"
                         </Button>
                       </div>
                     </div>
@@ -271,10 +271,10 @@ async function onSubmit(values: any) {
 
             <FormField v-slot="{ componentField }" name="currency">
               <FormItem>
-                <FormLabel>{{ $t("fields.currency") }}</FormLabel>
+                <FormLabel>{{ fields.currency }}</FormLabel>
                 <FormControl>
                   <Input
-                    :placeholder="$t('fields.enterCurrencyName')"
+                    :placeholder="fields.enterCurrencyName"
                     v-bind="componentField"
                   />
                 </FormControl>
@@ -284,7 +284,7 @@ async function onSubmit(values: any) {
 
             <FormField v-slot="{ componentField }" name="symbol">
               <FormItem>
-                <FormLabel>{{ $t("fields.symbol") }}</FormLabel>
+                <FormLabel>{{ fields.symbol }}</FormLabel>
                 <FormControl>
                   <Input placeholder="$, ៛..." v-bind="componentField" />
                 </FormControl>
@@ -294,7 +294,7 @@ async function onSubmit(values: any) {
 
             <FormField v-slot="{ componentField }" name="thousandSeparator">
               <FormItem>
-                <FormLabel>{{ $t("fields.thousandSeparator") }}</FormLabel>
+                <FormLabel>{{ fields.thousandSeparator }}</FormLabel>
                 <FormControl>
                   <Input v-bind="componentField" maxlength="5" />
                 </FormControl>
@@ -304,7 +304,7 @@ async function onSubmit(values: any) {
 
             <FormField v-slot="{ componentField }" name="decimalSeparator">
               <FormItem>
-                <FormLabel>{{ $t("fields.decimalSeparator") }}</FormLabel>
+                <FormLabel>{{ fields.decimalSeparator }}</FormLabel>
                 <FormControl>
                   <Input v-bind="componentField" maxlength="5" />
                 </FormControl>
@@ -315,7 +315,7 @@ async function onSubmit(values: any) {
             <FormField v-slot="{ componentField }" name="exchangeRate">
               <FormItem>
                 <FormLabel class="text-primary font-bold underline decoration-primary/30">
-                  {{ $t("fields.exchangeRate") }} (Base: USD)
+                  {{ fields.exchangeRate }} (Base: USD)
                 </FormLabel>
                 <FormControl>
                   <div class="relative group">
@@ -345,7 +345,7 @@ async function onSubmit(values: any) {
                 >
                   <div class="space-y-0.5">
                     <FormLabel class="text-base font-semibold text-primary">
-                      {{ $t("fields.defaultCurrency") }}
+                      {{ fields.defaultCurrency }}
                     </FormLabel>
                     <FormDescription class="text-xs">
                       Make this the system's preferred currency.
@@ -363,7 +363,7 @@ async function onSubmit(values: any) {
                 >
                   <div class="space-y-0.5">
                     <FormLabel class="text-base font-semibold">
-                      {{ $t("fields.activeStatus") }}
+                      {{ fields.activeStatus }}
                     </FormLabel>
                     <FormDescription class="text-xs">
                       Enable or disable this currency.
@@ -385,7 +385,7 @@ async function onSubmit(values: any) {
               :disabled="isSubmitting"
               class="px-8"
             >
-              {{ $t("crud.cancel") }}
+              {{ crud.cancel }}
             </Button>
             <Button
               type="submit"

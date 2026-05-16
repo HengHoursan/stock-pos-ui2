@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
-import * as zod from "zod";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { Button } from "@/components/ui/button";
@@ -21,27 +20,29 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { RouterLink } from "vue-router";
-import { ref } from "vue";
+import { ref,computed } from "vue";
 import { Eye, EyeOff } from "lucide-vue-next";
 import { toast } from "vue-sonner";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
-type LoginForm = zod.infer<typeof loginSchema>;
-
+import { useZod } from "@/hooks/useZod";
 const router = useRouter();
 const authStore = useAuthStore();
 const { t, auth, fields } = useAppI18n("auth");
+const { z, err } = useZod();
 const isLoading = ref(false);
 const showPassword = ref(false);
 
-const loginSchema = zod.object({
-  email: zod.string().email("Invalid email address"),
-  password: zod.string().min(6, "Password must be at least 6 characters"),
-});
+const loginSchema = computed(() => 
+  z.object({
+    email: z.string().email(err.email()),
+    password: z.string().min(6, err.min("auth.password", 6)),
+  })
+);
 
-const formSchema = toTypedSchema(loginSchema);
+const formSchema = computed(() => toTypedSchema(loginSchema.value));
 
-const form = useForm<LoginForm>({
+const form = useForm({
   validationSchema: formSchema,
   initialValues: {
     email: "",

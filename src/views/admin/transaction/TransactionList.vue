@@ -2,9 +2,6 @@
 import { useAppI18n } from "@/hooks/useAppI18n";
 const { t, labels, fields, crud } = useAppI18n("transaction");
 import { ref, onMounted, reactive, watch, computed } from "vue";
-import { usePermissions } from "@/hooks/usePermissions";
-
-const { hasPermission } = usePermissions();
 import { useRouter } from "vue-router";
 
 import {
@@ -323,7 +320,10 @@ onMounted(() => {
         >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button v-permission="'transaction:create'" @click="router.push('/admin/transactions/create')">
+        <Button
+          v-permission="'transaction:create'"
+          @click="router.push('/admin/transactions/create')"
+        >
           <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }}
           {{ labels.name }}</Button
         >
@@ -513,7 +513,9 @@ onMounted(() => {
                     >
                       <Eye class="mr-2 h-4 w-4 opacity-70" />{{ crud.viewBtn }}
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator v-permission="'transaction:delete'" />
+                    <DropdownMenuSeparator
+                      v-permission="'transaction:delete'"
+                    />
                     <DropdownMenuItem
                       v-permission="'transaction:delete'"
                       class="text-destructive focus:text-destructive cursor-pointer font-medium"

@@ -6,14 +6,12 @@ const productLabels = group("product");
 const saleQuotationLabels = group("saleQuotation");
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useForm, useFieldArray } from "vee-validate";
+import { toTypedSchema } from "@vee-validate/zod";
+import { useZod } from "@/hooks/useZod";
 import { toLocalISOString, formatCurrency, formatNumberInput } from "@/utils/format";
 import SearchableSelect from "@/components/SearchableSelect.vue";
 import CurrencyToggle from "@/components/CurrencyToggle.vue";
-
-import { useForm, useFieldArray } from "vee-validate";
-import { toTypedSchema } from "@vee-validate/zod";
-import * as z from "zod";
-
 import { Button } from "@/components/ui/button";
 import {
   FormControl,
@@ -40,7 +38,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ChevronLeft, Loader2, FileText, Plus, Trash2} from "lucide-vue-next";
-
 import { SaleOrderService } from "@/services/sale_order/sale_order.service";
 import { SaleQuotationService } from "@/services/sale_quotation/sale_quotation.service";
 import { CustomerService } from "@/services/customer/customer.service";
@@ -48,17 +45,18 @@ import { ProductService } from "@/services/product/product.service";
 import type { Product, Customer } from "@/types";
 import { toast } from "vue-sonner";
 
-
 const route = useRoute();
 const router = useRouter();
 const soService = new SaleOrderService();
 const sqService = new SaleQuotationService();
 const customerService = new CustomerService();
 const productService = new ProductService();
+const { z, err } = useZod();
 
 const submitting = ref(false);
 const products = ref<Product[]>([]);
 const customers = ref<Customer[]>([]);
+
 const customerOptions = computed(() =>
   customers.value.map(c => ({ label: `${c.name} (${c.code})`, value: c.id }))
 );
@@ -67,6 +65,35 @@ const productOptions = computed(() =>
     .filter(p => p.forSelling)
     .map(p => ({ label: `[${p.code}] ${p.name}`, value: p.id }))
 );
+
+const saleOrderSchema = computed(() => 
+  z.object({
+    code: z.string().max(50, err.max("fields.code", 50)).optional().nullable(),
+    customerId: z.number().min(1, err.required("fields.customerId")),
+    orderDate: z.string().min(1, err.required("fields.orderDate")),
+    description: z.string().optional().nullable(),
+    details: z.array(
+      z.object({
+        productId: z.number().min(1, err.required("product.name")),
+        quantity: z.number().gte(0.01, err.gte("fields.quantity", 0.01)),
+        price: z.number().gte(0, err.gte("fields.price", 0)),
+      })
+    ).min(1, err.min("fields.details", 1)),
+  })
+);
+
+const formSchema = computed(() => toTypedSchema(saleOrderSchema.value));
+
+const form = useForm({
+  validationSchema: formSchema,
+  initialValues: {
+    code: "",
+    customerId: undefined,
+    orderDate: toLocalISOString(new Date()),
+    description: "",
+    details: [],
+  },
+});
 
 onMounted(async () => {
   try {
@@ -94,33 +121,6 @@ onMounted(async () => {
   } catch (error) {
     console.error("Failed to fetch dependencies", error);
   }
-});
-
-const formSchema = toTypedSchema(
-  z.object({
-    code: z.string().max(50).optional().nullable(),
-    customerId: z.number().min(1, t('validation.required', { field: fields.customerId })),
-    orderDate: z.string().min(1, t('validation.required', { field: fields.orderDate })),
-    description: z.string().optional().nullable(),
-    details: z.array(
-      z.object({
-        productId: z.number().min(1, t('validation.required', { field: productLabels.name })),
-        quantity: z.number().min(0.01, t('validation.min', { field: fields.quantity, min: '0.01' })),
-        price: z.number().min(0, t('validation.min', { field: fields.price, min: '0' })),
-      })
-    ).min(1, t('validation.atLeastOneItem')),
-  })
-);
-
-const form = useForm({
-  validationSchema: formSchema,
-  initialValues: {
-    code: "",
-    customerId: undefined,
-    orderDate: toLocalISOString(new Date()),
-    description: "",
-    details: [],
-  },
 });
 
 const { remove, push, fields: detailsFields } = useFieldArray("details");

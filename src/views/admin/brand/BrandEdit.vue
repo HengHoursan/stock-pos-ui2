@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("brand");
+const { t, labels, crud } = useAppI18n("brand");
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useForm } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -42,26 +41,32 @@ import type { Brand } from "@/types";
 import { toast } from "vue-sonner";
 
 
+import { useZod } from "@/hooks/useZod";
+import { computed } from "vue";
+
 const router = useRouter();
 const route = useRoute();
 const brandService = new BrandService();
+const { z, err } = useZod();
 
 const brandId = Number(route.params.id);
 const parentBrands = ref<Brand[]>([]);
 const loading = ref(true);
 const submitting = ref(false);
 
-const formSchema = toTypedSchema(
+const brandSchema = computed(() => 
   z.object({
-    name: z.string().min(2, "Name must be at least 2 characters").max(60),
+    name: z.string().min(2, err.min("fields.name", 2)).max(60, err.max("fields.name", 60)),
     code: z.string().optional(),
     slug: z.string().optional(),
     parentId: z.string().optional(),
     description: z.string().optional(),
     imageUrl: z.string().optional(),
     status: z.boolean().default(true),
-  }),
+  })
 );
+
+const formSchema = computed(() => toTypedSchema(brandSchema.value));
 
 const form = useForm({
   validationSchema: formSchema,
@@ -167,7 +172,7 @@ onMounted(() => {
                 <CardHeader>
                   <CardTitle class="flex items-center gap-2">
                     <Camera class="h-5 w-5 text-primary" />
-                    {{ $t('fields.photo') }}
+                    {{ fields.photo }}
                   </CardTitle>
                 </CardHeader>
                 <CardContent class="flex justify-center py-4">
@@ -191,10 +196,10 @@ onMounted(() => {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField v-slot="{ componentField }" name="name">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.name') }}</FormLabel>
+                    <FormLabel>{{ fields.name }}</FormLabel>
                     <FormControl>
                       <Input
-                        :placeholder="$t('fields.enterBrandName')"
+                        :placeholder="fields.enterBrandName"
                         v-bind="componentField"
                       />
                     </FormControl>
@@ -204,7 +209,7 @@ onMounted(() => {
 
                 <FormField v-slot="{ componentField }" name="code">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.code') }}</FormLabel>
+                    <FormLabel>{{ fields.code }}</FormLabel>
                     <FormControl>
                       <Input
                         v-bind="componentField"
@@ -218,7 +223,7 @@ onMounted(() => {
 
                 <FormField v-slot="{ componentField }" name="slug">
                   <FormItem>
-                    <FormLabel>{{ $t('fields.slug') }}</FormLabel>
+                    <FormLabel>{{ fields.slug }}</FormLabel>
                     <FormControl>
                       <Input
                         v-bind="componentField"
@@ -236,11 +241,11 @@ onMounted(() => {
                     <Select v-bind="field">
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue :placeholder="$t('fields.selectParentBrand')" />
+                          <SelectValue :placeholder="fields.selectParentBrand" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="0">{{ $t('crud.none') }}</SelectItem>
+                        <SelectItem value="0">{{ crud.none }}</SelectItem>
                         <template v-if="parentBrands.length > 0">
                           <SelectItem
                             v-for="brand in parentBrands"
@@ -262,13 +267,13 @@ onMounted(() => {
                 <div class="md:col-span-2">
                   <FormField v-slot="{ componentField }" name="description">
                     <FormItem>
-                      <FormLabel>{{ $t('fields.description') }}</FormLabel>
+                      <FormLabel>{{ fields.description }}</FormLabel>
                       <FormControl>
-                      <Textarea
-                        :placeholder="$t('fields.enterDescription')"
-                        v-bind="componentField"
-                      />
-                    </FormControl>
+                        <Textarea
+                          :placeholder="fields.enterDescription"
+                          v-bind="componentField"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   </FormField>
@@ -281,7 +286,7 @@ onMounted(() => {
                     >
                       <div class="space-y-0.5">
                         <FormLabel class="text-base font-semibold"
-                          >{{ $t('fields.activeStatus') }}</FormLabel
+                          >{{ fields.activeStatus }}</FormLabel
                         >
                         <FormDescription>
                           {{ t('fields.statusDescription', { module: labels.name }) }}
@@ -299,7 +304,7 @@ onMounted(() => {
         </form>
       </CardContent>
       <CardFooter class="flex justify-end gap-2 border-t px-6 py-4">
-        <Button variant="outline" @click="router.back()" :disabled="submitting">{{ $t('crud.cancel') }}</Button>
+        <Button variant="outline" @click="router.back()" :disabled="submitting">{{ crud.cancel }}</Button>
         <Button type="submit" form="brandForm" :disabled="submitting">
           <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
           {{ crud.updateBtn }} {{ labels.name }}

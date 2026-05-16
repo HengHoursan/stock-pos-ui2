@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("saleQuotation");
+const { t, labels, fields, crud, actions } = useAppI18n("saleQuotation");
 import { ref, onMounted, reactive, watch, computed } from "vue";
-
-
 
 import { useRouter } from "vue-router";
 import { formatDateTime, formatCurrency } from "@/utils/format";
@@ -271,7 +269,10 @@ onMounted(() => {
         >
           <RefreshCw class="h-4 w-4" :class="{ 'animate-spin': loading }" />
         </Button>
-        <Button v-permission="'sale_quotation:create'" @click="router.push('/admin/sale-quotations/create')">
+        <Button
+          v-permission="'sale_quotation:create'"
+          @click="router.push('/admin/sale-quotations/create')"
+        >
           <Plus class="mr-2 h-4 w-4" />{{ crud.createBtn }} {{ labels.name }}
         </Button>
       </div>
@@ -284,7 +285,7 @@ onMounted(() => {
         />
         <Input
           type="search"
-          :placeholder="t('crud.search', { module: labels.title })"
+          :placeholder="crud.search"
           class="pl-8 bg-background/50 border-border/60 shadow-sm transition-all focus:ring-2 focus:ring-primary/20"
           v-model="filters.search"
         />
@@ -460,7 +461,9 @@ onMounted(() => {
                     >
                       {{ crud.editBtn }}
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator v-permission="'sale_quotation:delete'" />
+                    <DropdownMenuSeparator
+                      v-permission="'sale_quotation:delete'"
+                    />
                     <DropdownMenuItem
                       v-permission="'sale_quotation:delete'"
                       class="text-destructive focus:text-destructive cursor-pointer font-medium"
@@ -481,7 +484,7 @@ onMounted(() => {
               <div class="flex flex-col items-center justify-center gap-3">
                 <FileText class="h-10 w-10 opacity-10" />
                 <p class="font-medium">
-                  {{ t("crud.noRecords", { module: labels.title }) }}
+                  {{ crud.noRecords }}
                 </p>
                 <Button
                   v-if="
@@ -579,7 +582,7 @@ onMounted(() => {
         <AlertDialogHeader>
           <AlertDialogTitle>{{ crud.confirmDelete }}</AlertDialogTitle>
           <AlertDialogDescription>
-            {{ t("crud.confirmDeleteDesc", { module: labels.name }) }}
+            {{ crud.confirmDeleteDesc }}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
