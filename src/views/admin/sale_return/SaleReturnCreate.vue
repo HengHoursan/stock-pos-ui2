@@ -10,7 +10,6 @@ import { toLocalISOString, formatNumberInput, formatCurrency } from "@/utils/for
 import { useForm, useFieldArray } from "vee-validate";
 import { toTypedSchema } from "@vee-validate/zod";
 import * as z from "zod";
-
 import { Button } from "@/components/ui/button";
 import {
   FormControl,
@@ -153,7 +152,8 @@ const form = useForm({
   },
 });
 
-const { remove, push, fields, replace } = useFieldArray("details");
+const { remove, push, fields: detailFields, replace } = useFieldArray("details");
+
 
 async function loadItemsFromInvoice(invoiceId: number) {
   try {
@@ -392,7 +392,7 @@ const onSubmit = form.handleSubmit(async (values) => {
             <Button
               type="submit"
               class="w-full"
-              :disabled="submitting || fields.length === 0"
+              :disabled="submitting || detailFields.length === 0"
             >
               <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
               {{ crud.save }}
@@ -447,7 +447,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow v-if="fields.length === 0">
+                <TableRow v-if="detailFields.length === 0">
                   <TableCell
                     colspan="5"
                     class="text-center py-8 text-muted-foreground italic"
@@ -455,7 +455,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                     {{ t("common.noData") }}
                   </TableCell>
                 </TableRow>
-                <TableRow v-for="(field, index) in fields" :key="field.key">
+                <TableRow v-for="(field, index) in detailFields" :key="field.key">
                   <TableCell>
                     <FormField
                       v-slot="{ value, handleChange }"

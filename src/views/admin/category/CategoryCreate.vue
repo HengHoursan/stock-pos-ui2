@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, crud } = useAppI18n("category");
+const { t, labels, crud,common,fields} = useAppI18n("category");
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useForm } from "vee-validate";
@@ -205,7 +205,7 @@ onMounted(() => {
                           </SelectItem>
                         </template>
                         <SelectItem v-else disabled value="none" class="text-muted-foreground italic text-xs py-3 text-center">
-                          {{ $t('common.noData') }}
+                          {{ common.noData}}
                         </SelectItem>
                       </SelectContent>
                     </Select>
