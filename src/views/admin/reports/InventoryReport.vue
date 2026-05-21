@@ -54,7 +54,7 @@ import {
   type ExportColumn,
 } from "@/utils/export";
 
-const { t, labels, fields, crud, menu } = useAppI18n("reports");
+const { labels, fields, crud, menu } = useAppI18n("reports");
 const reportService = new ReportService();
 
 const loading = ref(true);

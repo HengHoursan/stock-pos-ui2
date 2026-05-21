@@ -48,7 +48,7 @@ import { toast } from "vue-sonner";
 import { useZod } from "@/hooks/useZod";
 import { computed } from "vue";
 
-const { t, labels, crud, common, auth } = useAppI18n("customer");
+const { t, labels, fields, crud, auth } = useAppI18n("customer");
 const router = useRouter();
 const route = useRoute();
 const customerService = new CustomerService();
@@ -122,8 +122,8 @@ const onSubmit = form.handleSubmit(async (values) => {
           t("crud.errorUpdate", { module: labels.name }),
       );
     }
-  } catch (error) {
-    toast.error(t("crud.errorGeneral"));
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || t('crud.errorGeneral'));
   } finally {
     submitting.value = false;
   }

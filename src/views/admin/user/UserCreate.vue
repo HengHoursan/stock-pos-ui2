@@ -1,3 +1,4 @@
+<script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useForm } from "vee-validate";
@@ -107,9 +108,9 @@ const onSubmit = form.handleSubmit(async (values) => {
         response.message || t("crud.errorCreate", { module: labels.name })
       );
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to create user:", error);
-    toast.error(t("crud.errorGeneral"));
+    toast.error(error.response?.data?.message || t("crud.errorGeneral"));
   } finally {
     submitting.value = false;
   }

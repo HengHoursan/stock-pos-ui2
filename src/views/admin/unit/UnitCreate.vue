@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, crud } = useAppI18n("unit");
+const { t, labels, fields, crud } = useAppI18n("unit");
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useForm } from "vee-validate";
@@ -95,6 +95,7 @@ const onSubmit = form.handleSubmit(async (values) => {
   try {
     const payload = {
       ...values,
+      latinName: (values as any).latinName || "",
       parentId:
         values.parentId && values.parentId !== "0"
           ? Number(values.parentId)

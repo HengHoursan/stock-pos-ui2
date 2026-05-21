@@ -1,3 +1,4 @@
+<script setup lang="ts">
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useForm } from "vee-validate";
@@ -88,8 +89,8 @@ const onSubmit = form.handleSubmit(async (values) => {
     } else {
       toast.error(response.message || t('crud.errorCreate', { module: labels.name }));
     }
-  } catch (error) {
-    toast.error(t('crud.errorGeneral'));
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || t('crud.errorGeneral'));
   } finally {
     submitting.value = false;
   }

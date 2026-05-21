@@ -68,7 +68,7 @@ const formSchema = toTypedSchema(
       z.object({
         id: z.number().optional().nullable(),
         productId: z.number().min(1, t('validation.required', { field: productLabels.name })),
-        quantity: z.number().min(0.01, t('validation.min', { field: fields.quantity, min: '0.01' })),
+        quantity: z.number().min(1, t('validation.min', { field: fields.quantity, min: '1' })),
         unitPrice: z.number().min(0, t('validation.min', { field: fields.price, min: '0' })),
         totalPrice: z.number().min(0, t('validation.min', { field: fields.price, min: '0' })),
       })
@@ -173,8 +173,8 @@ const onSubmit = form.handleSubmit(async (values) => {
     } else {
       toast.error(response.message || t('crud.errorUpdate', { module: labels.name }));
     }
-  } catch (error) {
-    toast.error(t('crud.errorGeneral'));
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || t('crud.errorGeneral'));
   } finally {
     submitting.value = false;
   }

@@ -52,7 +52,7 @@ const units = ref<Unit[]>([]);
 const loading = ref(true);
 const submitting = ref(false);
 
-const productSchema = computed(() => 
+const productSchema = computed(() =>
   z.object({
     name: z.string().min(2, err.min("fields.name", 2)).max(200, err.max("fields.name", 200)),
     code: z.string().optional(),
@@ -126,7 +126,7 @@ async function fetchData() {
         code: prod.code,
         skuCode: prod.skuCode,
         categoryId: String(prod.categoryId),
-        brandId: prod.brandId ? String(prod.brandId) : "0",
+        brandId: String(prod.brandId),
         unitId: String(prod.unitId),
         barcodeType: prod.barcodeType,
         alertQuantity: Number(prod.alertQuantity),
@@ -188,8 +188,8 @@ const onSubmit = form.handleSubmit(async (values) => {
         response.message || t("crud.errorUpdate", { module: labels.name }),
       );
     }
-  } catch (error) {
-    toast.error(t("crud.errorGeneral"));
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || t('crud.errorGeneral'));
   } finally {
     submitting.value = false;
   }
@@ -267,10 +267,10 @@ onMounted(() => {
                   </FormItem>
                 </FormField>
 
-                <FormField v-slot="{ field }" name="categoryId">
+                <FormField v-slot="{ componentField }" name="categoryId">
                   <FormItem>
-                    <FormLabel>{{ labels.category }}</FormLabel>
-                    <Select v-bind="field">
+                    <FormLabel>{{ fields.category }}</FormLabel>
+                    <Select v-bind="componentField">
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue :placeholder="crud.selectType" />
@@ -279,18 +279,18 @@ onMounted(() => {
                       <SelectContent>
                         <template v-if="categories.length > 0">
                           <SelectItem
-                            v-for="cat in categories"
-                            :key="cat.id"
-                            :value="String(cat.id)"
+                              v-for="cat in categories"
+                              :key="cat.id"
+                              :value="String(cat.id)"
                           >
                             {{ cat.name }}
                           </SelectItem>
                         </template>
                         <SelectItem
-                          v-else
-                          disabled
-                          value="none"
-                          class="text-muted-foreground italic text-xs py-3 text-center"
+                            v-else
+                            disabled
+                            value="none"
+                            class="text-muted-foreground italic text-xs py-3 text-center"
                         >
                           {{ common.noData }}
                         </SelectItem>
@@ -299,11 +299,10 @@ onMounted(() => {
                     <FormMessage />
                   </FormItem>
                 </FormField>
-
-                <FormField v-slot="{ field }" name="brandId">
+                <FormField v-slot="{ componentField }" name="brandId">
                   <FormItem>
-                    <FormLabel>{{ labels.brand }}</FormLabel>
-                    <Select v-bind="field">
+                    <FormLabel>{{ fields.brand }}</FormLabel>
+                    <Select v-bind="componentField">
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue :placeholder="crud.none" />
@@ -313,18 +312,18 @@ onMounted(() => {
                         <SelectItem value="0">{{ crud.none }}</SelectItem>
                         <template v-if="brands.length > 0">
                           <SelectItem
-                            v-for="brand in brands"
-                            :key="brand.id"
-                            :value="String(brand.id)"
+                              v-for="brand in brands"
+                              :key="brand.id"
+                              :value="String(brand.id)"
                           >
                             {{ brand.name }}
                           </SelectItem>
                         </template>
                         <SelectItem
-                          v-else
-                          disabled
-                          value="none"
-                          class="text-muted-foreground italic text-xs py-3 text-center"
+                            v-else
+                            disabled
+                            value="none"
+                            class="text-muted-foreground italic text-xs py-3 text-center"
                         >
                           {{ common.noData }}
                         </SelectItem>
@@ -334,10 +333,10 @@ onMounted(() => {
                   </FormItem>
                 </FormField>
 
-                <FormField v-slot="{ field }" name="unitId">
+                <FormField v-slot="{ componentField }" name="unitId">
                   <FormItem>
-                    <FormLabel>{{ labels.unit }}</FormLabel>
-                    <Select v-bind="field">
+                    <FormLabel>{{ fields.unit }}</FormLabel>
+                    <Select v-bind="componentField">
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue :placeholder="crud.selectType" />
@@ -346,18 +345,18 @@ onMounted(() => {
                       <SelectContent>
                         <template v-if="units.length > 0">
                           <SelectItem
-                            v-for="u in units"
-                            :key="u.id"
-                            :value="String(u.id)"
+                              v-for="u in units"
+                              :key="u.id"
+                              :value="String(u.id)"
                           >
                             {{ u.name }}
                           </SelectItem>
                         </template>
                         <SelectItem
-                          v-else
-                          disabled
-                          value="none"
-                          class="text-muted-foreground italic text-xs py-3 text-center"
+                            v-else
+                            disabled
+                            value="none"
+                            class="text-muted-foreground italic text-xs py-3 text-center"
                         >
                           {{ common.noData }}
                         </SelectItem>

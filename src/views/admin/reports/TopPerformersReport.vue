@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, reactive, watch } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { ReportService } from "@/services/report/report.service";
 import DateRangePicker from "@/components/DateRangePicker.vue";
 import type { TopPerformersReport, PaginationRequest } from "@/types";
 import {
-  Trophy,
   Users,
   Package,
   Star,
@@ -41,7 +40,7 @@ import {
   type ExportColumn,
 } from "@/utils/export";
 
-const { t, labels, fields, crud, menu, common } = useAppI18n("reports");
+const { labels, fields, crud, menu, common } = useAppI18n("reports");
 const reportService = new ReportService();
 
 const loading = ref(true);

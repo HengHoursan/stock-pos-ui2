@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { usePermissions } from "@/hooks/usePermissions";
-const { t, labels, fields, crud } = useAppI18n("brand");
+const { t, labels, crud } = useAppI18n("brand");
 const { hasPermission } = usePermissions();
 import { ref, onMounted, reactive, watch } from "vue";
 import { useRouter } from "vue-router";
@@ -364,7 +364,7 @@ onMounted(() => {
             </TableCell>
           </TableRow>
           <template v-else-if="brands.length > 0">
-            <TableRow v-for="(brand, index) in brands" :key="brand.id" :class="{ 'bg-muted/30': selectedIds.includes(brand.id) }">
+            <TableRow v-for="brand in brands" :key="brand.id" :class="{ 'bg-muted/30': selectedIds.includes(brand.id) }">
               <TableCell>
                 <input 
                   type="checkbox" 

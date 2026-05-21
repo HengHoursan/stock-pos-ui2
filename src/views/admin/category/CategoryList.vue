@@ -362,7 +362,7 @@ onMounted(() => {
           </TableRow>
           <template v-else-if="categories.length > 0">
             <TableRow
-              v-for="(category, index) in categories"
+              v-for="category in categories"
               :key="category.id"
               :class="{ 'bg-muted/30': selectedIds.includes(category.id) }"
             >

@@ -45,7 +45,7 @@ const payments = ref<SalePayment[]>([]);
 const loading = ref(true);
 
 function getStatusBadge(rec: SaleInvoice) {
-  if (rec.isCancel)
+  if (rec.isCancel || Number(rec.status) === InvoiceStatus.CANCELLED)
     return {
       variant: "destructive",
       label: fields.statusLabels.cancelled,
@@ -53,6 +53,8 @@ function getStatusBadge(rec: SaleInvoice) {
   switch (Number(rec.status)) {
     case InvoiceStatus.DRAFT:
       return { variant: "secondary", label: fields.statusLabels.draft };
+    case InvoiceStatus.CONFIRMED:
+      return { variant: "warning", label: fields.statusLabels.confirmed };
     case InvoiceStatus.COMPLETED:
       return { variant: "success", label: fields.statusLabels.completed };
     default:
@@ -78,8 +80,8 @@ async function fetchDetail() {
       toast.error(t("crud.notFound", { module: labels.name }));
       router.back();
     }
-  } catch (error) {
-    toast.error(t("crud.errorGeneral"));
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || t('crud.errorGeneral'));
   } finally {
     loading.value = false;
   }

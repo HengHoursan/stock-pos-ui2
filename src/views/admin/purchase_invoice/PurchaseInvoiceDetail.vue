@@ -13,7 +13,6 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  TableFooter,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -61,7 +60,7 @@ function getStatusBadge(rec: PurchaseInvoice) {
 
 function getPaymentAmountForInvoice(pay: PurchasePayment) {
   const detail = pay.details?.find(d => d.purchaseInvoiceId === record.value?.id);
-  return detail ? detail.paidAmount : 0;
+  return detail ? (detail as any).paidAmount : 0;
 }
 
 function getPaymentMethod(pm: PaymentMethod) {
@@ -224,14 +223,14 @@ onMounted(() => {
                     new Map(
                       record.details
                         .filter((d) => d.purchaseOrder)
-                        .map((d) => [d.purchaseOrder.id, d.purchaseOrder]),
+                        .map((d) => [d.purchaseOrder?.id, d.purchaseOrder]),
                     ).values(),
                   )"
-                  :key="order.id"
+                  :key="order?.id"
                   class="bg-indigo-50 px-2 py-0.5 rounded text-xs font-bold text-indigo-700 border border-indigo-200/50 uppercase cursor-pointer hover:bg-indigo-100 transition-colors shadow-sm"
-                  @click="router.push(`/admin/purchase-orders/${order.id}`)"
+                  @click="router.push(`/admin/purchase-orders/${order?.id}`)"
                 >
-                  {{ order.code }}
+                  {{ order?.code }}
                 </div>
               </div>
             </div>

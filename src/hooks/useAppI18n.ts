@@ -8,19 +8,35 @@ export function useAppI18n(moduleName?: string) {
 
   // Reactive proxy for any namespace (fields, crud, or modules like product)
   const group = (ns: string): any => {
-    const labels = {} as any;
     const isModule = (en as any).modules?.[ns];
     const prefix = isModule ? `modules.${ns}` : ns;
     const base = (en as any)[ns] || isModule || {};
 
-    Object.keys(base).forEach((key) => {
-      Object.defineProperty(labels, key, {
-        get: () => t(`${prefix}.${key}`),
-        enumerable: true,
+    const buildProxy = (path: string, obj: any): any => {
+      if (typeof obj !== "object" || obj === null) {
+        return obj;
+      }
+      const proxyObj = {} as any;
+      Object.keys(obj).forEach((key) => {
+        const value = obj[key];
+        if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+          Object.defineProperty(proxyObj, key, {
+            get: () => buildProxy(`${path}.${key}`, value),
+            enumerable: true,
+            configurable: true,
+          });
+        } else {
+          Object.defineProperty(proxyObj, key, {
+            get: () => t(`${path}.${key}`),
+            enumerable: true,
+            configurable: true,
+          });
+        }
       });
-    });
+      return proxyObj;
+    };
 
-    return labels;
+    return buildProxy(prefix, base);
   };
 
   return {

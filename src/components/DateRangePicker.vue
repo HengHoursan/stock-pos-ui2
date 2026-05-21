@@ -118,7 +118,7 @@ watch(() => props.modelValue, (newVal) => {
     </PopoverTrigger>
     <PopoverContent class="w-auto p-0 border shadow-xl shadow-primary/5" align="start">
       <RangeCalendarRoot
-        v-model="value"
+        v-model="value as any"
         v-slot="{ grid, weekDays }"
         class="p-3"
         :number-of-months="2"

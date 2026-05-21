@@ -38,8 +38,8 @@ async function fetchDetail() {
       toast.error(t('crud.notFound', { module: labels.name }));
       router.back();
     }
-  } catch (error) {
-    toast.error(t('crud.errorGeneral'));
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || t('crud.errorGeneral'));
   } finally {
     loading.value = false;
   }

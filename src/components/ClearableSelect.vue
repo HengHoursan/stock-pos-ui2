@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { X, ChevronDown } from 'lucide-vue-next'
+import { X } from 'lucide-vue-next'
 import { cn } from '@/lib/utils'
 import {
   Select,
@@ -23,7 +23,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:modelValue', 'change'])
 
-function handleUpdate(val: string) {
+function handleUpdate(val: any) {
   emit('update:modelValue', val)
   emit('change', val)
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, crud } = useAppI18n("category");
+const { t, labels, fields, crud } = useAppI18n("category");
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useForm } from "vee-validate";
@@ -8,7 +8,6 @@ import { toTypedSchema } from "@vee-validate/zod";
 import { Button } from "@/components/ui/button";
 import {
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,

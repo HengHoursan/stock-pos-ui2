@@ -42,7 +42,6 @@ import {
   FileText,
   CreditCard,
   Banknote,
-  History,
   Trash2,
 } from "lucide-vue-next";
 
@@ -116,7 +115,7 @@ const formSchema = toTypedSchema(
       .array(
         z.object({
           saleInvoiceId: z.number().min(1),
-          paidAmount: z.number().min(0.01),
+          paidAmount: z.number().min(1),
           balance: z.number(), // UI only helper
           invoiceCode: z.string(), // UI only helper
         }),
@@ -264,8 +263,8 @@ const onSubmit = form.handleSubmit(async (values) => {
         response.message || t("crud.errorCreate", { module: labels.name }),
       );
     }
-  } catch (error) {
-    toast.error(t("crud.errorGeneral"));
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || t('crud.errorGeneral'));
   } finally {
     submitting.value = false;
   }
@@ -396,8 +395,8 @@ const onSubmit = form.handleSubmit(async (values) => {
                                 (val) =>
                                   handleLocalInput(
                                     index,
-                                    (form.values.details || [])[index]
-                                      ?.saleInvoiceId,
+                                    String((form.values.details || [])[index]
+                                      ?.saleInvoiceId),
                                     String(val),
                                   )
                               "

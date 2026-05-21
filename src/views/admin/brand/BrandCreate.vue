@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, crud } = useAppI18n("brand");
+const { t, labels, fields, crud } = useAppI18n("brand");
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useForm } from "vee-validate";
@@ -107,8 +107,8 @@ const onSubmit = form.handleSubmit(async (values) => {
           t("crud.errorCreate", { module: labels.name }),
       );
     }
-  } catch (error) {
-    toast.error(t("crud.errorGeneral"));
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || t('crud.errorGeneral'));
   } finally {
     submitting.value = false;
   }

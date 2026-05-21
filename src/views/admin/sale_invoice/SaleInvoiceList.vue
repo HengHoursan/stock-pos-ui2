@@ -216,12 +216,13 @@ function handleSort(column: string) {
 }
 
 function getStatusBadge(record: SaleInvoice) {
-  if (record.isCancel) return { variant: 'destructive', label: fields.statusLabels.cancelled };
+  if (record.isCancel || Number(record.status) === InvoiceStatus.CANCELLED) 
+    return { variant: 'destructive', label: fields.statusLabels.cancelled };
+    
   switch(Number(record.status)) {
     case InvoiceStatus.DRAFT: return { variant: 'secondary', label: fields.statusLabels.draft };
-    case 2: return { variant: 'warning', label: fields.statusLabels.confirmed };
+    case InvoiceStatus.CONFIRMED: return { variant: 'warning', label: fields.statusLabels.confirmed };
     case InvoiceStatus.COMPLETED: return { variant: 'success', label: fields.statusLabels.completed };
-    case InvoiceStatus.CANCELLED: return { variant: 'destructive', label: fields.statusLabels.cancelled };
     default: return { variant: 'outline', label: crud.all };
   }
 }

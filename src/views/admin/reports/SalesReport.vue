@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, reactive, watch } from "vue";
+import { ref, onMounted, reactive, watch } from "vue";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { ReportService } from "@/services/report/report.service";
 import type { SalesReport, PaginationRequest } from "@/types";
@@ -12,12 +12,9 @@ import {
 } from "@/utils/export";
 import {
   LineChart,
-  BarChart3,
   TrendingUp,
   PieChart,
-  ShoppingBag,
   FileText,
-  Download,
   Search,
   Loader2,
   FileSpreadsheet,
@@ -57,7 +54,7 @@ import {
 import { formatCurrency, formatDateForFilename } from "@/utils/format";
 import { toast } from "vue-sonner";
 
-const { t, labels, fields, crud, menu, common } = useAppI18n("reports");
+const { labels, fields, crud, menu, common } = useAppI18n("reports");
 const reportService = new ReportService();
 
 const loading = ref(true);
@@ -149,27 +146,7 @@ function handlePageChange(newPage: number) {
   pagination.page = newPage;
 }
 
-function getPageArray(): (number | string)[] {
-  const totalPages = Math.ceil(pagination.totalItems / pagination.limit);
-  const current = pagination.page;
-  const delta = 2;
-  const range: (number | string)[] = [];
 
-  if (totalPages <= 1) return [1];
-
-  for (let i = 1; i <= totalPages; i++) {
-    if (
-      i === 1 ||
-      i === totalPages ||
-      (i >= current - delta && i <= current + delta)
-    ) {
-      range.push(i);
-    } else if (range[range.length - 1] !== "...") {
-      range.push("...");
-    }
-  }
-  return range;
-}
 
 /* EXPORT LOGIC */
 const customExportCols: ExportColumn[] = [

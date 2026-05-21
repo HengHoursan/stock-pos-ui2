@@ -1,3 +1,4 @@
+<script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useForm } from "vee-validate";

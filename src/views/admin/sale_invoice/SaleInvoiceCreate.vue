@@ -76,7 +76,7 @@ const saleInvoiceSchema = computed(() =>
     details: z.array(
       z.object({
         productId: z.number().min(1, err.required("product.name")),
-        quantity: z.coerce.number().min(0.01, err.gte("fields.quantity", 0.01)),
+        quantity: z.coerce.number().min(1, err.gte("fields.quantity", 1)),
         price: z.coerce.number().min(0, err.gte("fields.price", 0)),
         isSelected: z.boolean().default(true),
         saleOrderId: z.number().optional().nullable(),
@@ -117,10 +117,10 @@ onMounted(async () => {
         form.setFieldValue("customerId", oRes.data.customerId);
         
         const mappedDetails = (oRes.data.details || [])
-          .filter((d: any) => !d.isInvoiced)
+          .filter((d: any) => (Number(d.quantity) - Number(d.invoicedQuantity || 0)) > 0)
           .map((d: any) => ({
             productId: d.productId,
-            quantity: Number(d.quantity),
+            quantity: Number(d.quantity) - Number(d.invoicedQuantity || 0),
             price: Number(d.totalPrice) / Number(d.quantity),
             isSelected: true,
             saleOrderId: oRes?.data?.id, 
@@ -232,8 +232,8 @@ const onSubmit = form.handleSubmit(async (values) => {
     } else {
       toast.error(response.message || t('crud.errorCreate', { module: labels.name }));
     }
-  } catch (error) {
-    toast.error(t('crud.errorGeneral'));
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || t('crud.errorGeneral'));
   } finally {
     submitting.value = false;
   }

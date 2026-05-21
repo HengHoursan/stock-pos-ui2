@@ -1,25 +1,21 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { ReportService } from "@/services/report/report.service";
 import DateRangePicker from "@/components/DateRangePicker.vue";
-import type { ProfitLossReport, PaginationRequest } from "@/types";
+import type { ProfitAndLossReport, PaginationRequest } from "@/types";
 import {
   TrendingUp,
   TrendingDown,
   DollarSign,
   PieChart,
-  Target,
-  Download,
   FileSpreadsheet,
   FileText,
   Loader2,
-  Search,
 } from "lucide-vue-next";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -41,7 +37,7 @@ const dateRange = ref<{ start: string | null; end: string | null } | null>(
   null,
 );
 
-const reportData = ref<ProfitLossReport>({
+const reportData = ref<ProfitAndLossReport>({
   netSales: 0,
   costOfGoodsSold: 0,
   grossProfit: 0,

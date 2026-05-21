@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, FileText, Loader2, Package, Calendar, Users, ArrowRightCircle } from "lucide-vue-next";
+import { ChevronLeft, FileText, Loader2, Package, Calendar, Users, ArrowRightCircle, CheckCircle2, Clock } from "lucide-vue-next";
 import { SaleOrderService } from "@/services/sale_order/sale_order.service";
 import type { SaleOrder } from "@/types";
 import { OrderStatus } from "@/types/enums";
@@ -40,6 +40,7 @@ function getStatusBadge(status: OrderStatus) {
     case OrderStatus.PENDING: return { variant: 'warning', label: fields.statusLabels.pending };
     case OrderStatus.PARTIAL: return { variant: 'default', label: fields.statusLabels.partial };
     case OrderStatus.COMPLETED: return { variant: 'success', label: fields.statusLabels.completed };
+    case OrderStatus.CANCELLED: return { variant: 'destructive', label: fields.statusLabels.cancelled };
     default: return { variant: 'outline', label: crud.all };
   }
 }
@@ -90,7 +91,7 @@ onMounted(() => {
       </div>
       <div class="flex items-center gap-2">
         <CurrencyToggle />
-        <Button v-if="record && record.status !== OrderStatus.COMPLETED" @click="router.push(`/admin/sale-invoices/create?orderId=${record.id}`)" class="text-primary-foreground">
+        <Button v-if="record && record.status !== OrderStatus.COMPLETED && (record.totalLine - record.totalCloseLine > 0)" @click="router.push(`/admin/sale-invoices/create?orderId=${record.id}`)" class="text-primary-foreground">
           {{ actions.generateInvoice }} <ArrowRightCircle class="ml-2 h-4 w-4" />
         </Button>
       </div>
@@ -100,7 +101,9 @@ onMounted(() => {
       <Loader2 class="h-8 w-8 animate-spin text-primary opacity-50" />
     </div>
 
-    <div v-else-if="record" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <template v-else-if="record">
+      <!-- Main Grid Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       
       <!-- Side panel for attributes -->
       <div class="lg:col-span-1 space-y-6">
@@ -136,6 +139,7 @@ onMounted(() => {
             </div>
           </CardContent>
         </Card>
+
       </div>
 
       <!-- Main panel for details -->
@@ -151,10 +155,11 @@ onMounted(() => {
             <Table>
               <TableHeader class="bg-muted/30">
                 <TableRow>
-                  <TableHead>#</TableHead>
+                  <TableHead class="w-8">#</TableHead>
                   <TableHead>{{ productLabels.name }}</TableHead>
                   <TableHead class="text-right">{{ fields.sellingPrice }}</TableHead>
-                  <TableHead class="text-center">{{ fields.quantity }}</TableHead>
+                  <TableHead class="text-center w-20">{{ fields.quantity }}</TableHead>
+                  <TableHead class="w-52">{{ fields.fulfillment }}</TableHead>
                   <TableHead class="text-right">{{ fields.rowTotal }}</TableHead>
                 </TableRow>
               </TableHeader>
@@ -167,7 +172,33 @@ onMounted(() => {
                       <div v-if="item.product?.code" class="text-xs text-muted-foreground mt-0.5">{{ item.product.code }}</div>
                     </TableCell>
                     <TableCell class="text-right">{{ formatCurrency(item.totalPrice / item.quantity) }}</TableCell>
-                    <TableCell class="text-center font-medium">{{ Math.trunc(item.quantity || 0) }}</TableCell>
+                    <TableCell class="text-center font-medium text-foreground">{{ Math.trunc(item.quantity || 0) }}</TableCell>
+                    <TableCell class="py-3 pr-4">
+                      <div class="flex flex-col gap-1.5">
+                        <div class="flex items-center justify-between">
+                          <span
+                            v-if="Number(item.invoicedQuantity || 0) >= Number(item.quantity)"
+                            class="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800"
+                          >
+                            <CheckCircle2 class="h-3 w-3" /> {{ fields.fullyFulfilled }}
+                          </span>
+                          <span
+                            v-else
+                            class="inline-flex items-center gap-1 text-xs font-medium text-amber-600 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-800"
+                          >
+                            <Clock class="h-3 w-3" /> {{ Math.trunc(item.quantity - (item.invoicedQuantity || 0)) }} {{ fields.remaining }}
+                          </span>
+                          <span class="text-xs text-muted-foreground">{{ Math.trunc(item.invoicedQuantity || 0) }}/{{ Math.trunc(item.quantity || 0) }}</span>
+                        </div>
+                        <div class="h-2 rounded-full bg-muted overflow-hidden">
+                          <div
+                            class="h-full rounded-full transition-all duration-500"
+                            :class="Number(item.invoicedQuantity || 0) >= Number(item.quantity) ? 'bg-emerald-500' : 'bg-primary'"
+                            :style="{ width: Math.min(100, (Number(item.invoicedQuantity || 0) / Number(item.quantity || 1)) * 100) + '%' }"
+                          />
+                        </div>
+                      </div>
+                    </TableCell>
                     <TableCell class="text-right font-semibold">{{ formatCurrency(item.totalPrice) }}</TableCell>
                   </TableRow>
                 </template>
@@ -177,18 +208,17 @@ onMounted(() => {
               </TableBody>
             </Table>
             
-            <div class="flex justify-end p-6 border-t bg-muted/10">
-              <div class="w-full max-w-sm space-y-3">
-                <div class="flex justify-between items-center text-lg font-bold">
-                  <span>{{ fields.grandTotal }}:</span>
-                  <span class="text-primary">{{ formatCurrency(record.totalPrice) }}</span>
-                </div>
-              </div>
+            <div class="flex justify-between items-center px-5 py-4 border-t text-sm bg-muted/10">
+              <span class="font-medium text-muted-foreground">{{ fields.grandTotal }}</span>
+              <span class="text-lg font-bold text-primary">{{ formatCurrency(record.totalPrice) }}</span>
             </div>
           </CardContent>
         </Card>
+
+
       </div>
 
     </div>
-  </div>
+  </template>
+</div>
 </template>

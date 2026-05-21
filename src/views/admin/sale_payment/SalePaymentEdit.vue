@@ -59,7 +59,7 @@ const formSchema = toTypedSchema(
     id: z.number(),
     saleInvoiceId: z.number().min(1, t('validation.required', { field: saleInvoiceLabels.name })),
     paymentDate: z.string().min(1, t('validation.required', { field: fields.date })),
-    amount: z.number().min(0.01, t('validation.min', { field: fields.paidAmount, min: '0.01' })),
+    amount: z.number().min(1, t('validation.min', { field: fields.paidAmount, min: '1' })),
     description: z.string().optional().nullable(),
   })
 );
@@ -163,8 +163,8 @@ const onSubmit = form.handleSubmit(async (values) => {
     } else {
       toast.error(response.message || t('crud.errorUpdate', { module: labels.name }));
     }
-  } catch (error) {
-    toast.error(t('crud.errorGeneral'));
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || t('crud.errorGeneral'));
   } finally {
     submitting.value = false;
   }

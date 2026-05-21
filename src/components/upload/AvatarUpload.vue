@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
-import { Button } from "@/components/ui/button";
-import { Loader2, Camera, User, X } from "lucide-vue-next";
+import { ref } from "vue";
+import { Loader2, Camera } from "lucide-vue-next";
 import { uploadService } from "@/services/upload/upload.service.ts";
 import { toast } from "vue-sonner";
 import { cn } from "@/lib/utils.ts";
@@ -65,7 +64,7 @@ const userInitials = props.name
 <template>
   <div :class="cn('relative group w-32 h-32 mx-auto', props.class)">
     <Avatar class="w-full h-full border-4 border-background shadow-xl">
-      <AvatarImage :src="imageUrl" class="object-cover" />
+      <AvatarImage :src="imageUrl || ''" class="object-cover" />
       <AvatarFallback class="bg-primary/5 text-primary text-2xl font-bold">
         {{ userInitials }}
       </AvatarFallback>

@@ -23,7 +23,7 @@ import type { Customer } from "@/types";
 import { CustomerType } from "@/types";
 import { toast } from "vue-sonner";
 
-const { t, labels, fields, crud, common, auth } = useAppI18n("customer");
+const { t, labels, fields, crud, auth } = useAppI18n("customer");
 const router = useRouter();
 const route = useRoute();
 const customerService = new CustomerService();

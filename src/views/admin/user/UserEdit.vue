@@ -1,3 +1,4 @@
+<script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useForm } from "vee-validate";
@@ -135,9 +136,9 @@ const onSubmit = form.handleSubmit(async (values) => {
         response.message || t("crud.errorUpdate", { module: labels.name }),
       );
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to update user:", error);
-    toast.error(t("crud.errorGeneral"));
+    toast.error(error.response?.data?.message || t("crud.errorGeneral"));
   } finally {
     submitting.value = false;
   }

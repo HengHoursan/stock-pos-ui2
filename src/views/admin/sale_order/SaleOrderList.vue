@@ -109,6 +109,10 @@ const statusOptions = computed(() => [
     label: fields.statusLabels.completed,
     value: String(OrderStatus.COMPLETED),
   },
+  {
+    label: fields.statusLabels.cancelled,
+    value: String(OrderStatus.CANCELLED),
+  },
 ]);
 
 const isDeleteDialogOpen = ref(false);
@@ -237,11 +241,13 @@ function handleSort(column: string) {
 function getStatusBadge(status: OrderStatus) {
   switch (Number(status)) {
     case OrderStatus.PENDING:
-      return { variant: "secondary", label: fields.statusLabels.pending };
+      return { variant: "warning", label: fields.statusLabels.pending };
     case OrderStatus.PARTIAL:
-      return { variant: "warning", label: fields.statusLabels.partial };
+      return { variant: "default", label: fields.statusLabels.partial };
     case OrderStatus.COMPLETED:
       return { variant: "success", label: fields.statusLabels.completed };
+    case OrderStatus.CANCELLED:
+      return { variant: "destructive", label: fields.statusLabels.cancelled };
     default:
       return { variant: "outline", label: crud.all };
   }
@@ -417,8 +423,8 @@ onMounted(() => {
                   </span>
                 </div>
               </TableCell>
-              <TableCell class="text-right text-primary font-semibold">
-                {{ formatCurrency(record.totalPrice) }}
+              <TableCell class="text-right">
+                <p class="font-semibold text-foreground">{{ formatCurrency(record.totalPrice) }}</p>
               </TableCell>
               <TableCell class="text-center">
                 <Badge
@@ -454,7 +460,7 @@ onMounted(() => {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       v-permission="'sale_invoice:create'"
-                      v-if="record.status !== OrderStatus.COMPLETED"
+                      v-if="record.status !== OrderStatus.COMPLETED && (record.totalLine - record.totalCloseLine > 0)"
                       @click="
                         router.push(
                           `/admin/sale-invoices/create?orderId=${record.id}`,

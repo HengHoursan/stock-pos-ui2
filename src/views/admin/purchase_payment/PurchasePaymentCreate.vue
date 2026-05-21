@@ -123,7 +123,7 @@ const formSchema = toTypedSchema(
       .min(1, t("validation.required", { field: fields.date })),
     amount: z
       .number()
-      .min(0.01, t("validation.min", { field: fields.paidAmount, min: "0.01" })),
+      .min(1, t("validation.min", { field: fields.paidAmount, min: "1" })),
     description: z.string().optional().nullable(),
   }),
 );
@@ -200,8 +200,8 @@ const onSubmit = form.handleSubmit(async (values) => {
         response.message || t("crud.errorCreate", { module: labels.name }),
       );
     }
-  } catch (error) {
-    toast.error(t("crud.errorGeneral"));
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || t('crud.errorGeneral'));
   } finally {
     submitting.value = false;
   }

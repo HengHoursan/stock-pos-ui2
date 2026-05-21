@@ -1,3 +1,4 @@
+<script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useForm, useFieldArray } from "vee-validate";
@@ -120,7 +121,7 @@ const purchaseInvoiceSchema = computed(() =>
     details: z.array(
       z.object({
         productId: z.coerce.number().min(1, err.required("product.name")),
-        quantity: z.coerce.number().min(0.01, err.gte("fields.quantity", 0.01)),
+        quantity: z.coerce.number().min(1, err.gte("fields.quantity", 1)),
         price: z.coerce.number().min(0, err.gte("fields.price", 0)),
         purchaseOrderId: z.coerce.number().optional().nullable(),
         purchaseOrderDetailId: z.coerce.number().optional().nullable(),
@@ -161,14 +162,20 @@ onMounted(async () => {
         form.setFieldValue("supplierId", oRes.data.supplierId);
 
         const mappedDetails = (oRes.data.details || [])
-          .filter((d: any) => !d.isInvoiced)
-          .map((d: any) => ({
-            productId: d.productId,
-            quantity: Number(d.quantity),
-            price: Number(d.totalPrice) / Number(d.quantity),
-            purchaseOrderId: oRes.data.id, 
-            purchaseOrderDetailId: d.id,
-          }));
+          .filter((d: any) => {
+            const invoicedQty = (d.purchaseInvoiceDetails || []).reduce((acc: number, curr: any) => acc + Number(curr.quantity), 0);
+            return (Number(d.quantity) - invoicedQty) > 0;
+          })
+          .map((d: any) => {
+            const invoicedQty = (d.purchaseInvoiceDetails || []).reduce((acc: number, curr: any) => acc + Number(curr.quantity), 0);
+            return {
+              productId: d.productId,
+              quantity: Number(d.quantity) - invoicedQty,
+              price: Number(d.totalPrice) / Number(d.quantity),
+              purchaseOrderId: oRes.data!.id, 
+              purchaseOrderDetailId: d.id,
+            };
+          });
 
         form.setFieldValue("details", mappedDetails as any);
         toast.info(
@@ -354,7 +361,7 @@ const onSubmit = form.handleSubmit(async (values) => {
               </div>
             </div>
 
-            <FormField name="paidAmount">
+            <FormField v-slot="{ componentField }" name="paidAmount">
               <FormItem>
                 <FormLabel>{{ fields.paidAmount }}</FormLabel>
                 <FormControl>

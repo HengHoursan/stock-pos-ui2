@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, FileText, Loader2, Calendar, CreditCard, Banknote, History, Receipt } from "lucide-vue-next";
+import { ChevronLeft, FileText, Loader2, Calendar, Banknote, History, Receipt } from "lucide-vue-next";
 import { SalePaymentService } from "@/services/sale_payment/sale_payment.service";
 import type { SalePayment } from "@/types";
 import { toast } from "vue-sonner";
@@ -40,8 +40,8 @@ async function fetchDetail() {
       toast.error(t('crud.notFound', { module: labels.name }));
       router.back();
     }
-  } catch (error) {
-    toast.error(t('crud.errorGeneral'));
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || t('crud.errorGeneral'));
   } finally {
     loading.value = false;
   }

@@ -21,7 +21,6 @@ import {
   DollarSign, 
   Box, 
   AlertTriangle, 
-  ShieldCheck, 
   Clock 
 } from "lucide-vue-next";
 import { ProductService } from "@/services/product/product.service";

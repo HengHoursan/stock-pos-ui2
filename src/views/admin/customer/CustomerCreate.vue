@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { ChevronLeft, Lock } from "lucide-vue-next";
 
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud, common } = useAppI18n("customer");
+const { labels, common } = useAppI18n("customer");
 const router = useRouter();
 </script>
 

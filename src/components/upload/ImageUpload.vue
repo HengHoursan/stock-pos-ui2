@@ -88,7 +88,7 @@ function triggerUpload() {
     <template v-if="shape === 'circle'">
       <div class="relative group w-44 h-44 mx-auto">
         <Avatar class="w-full h-full border-4 border-background shadow-xl">
-          <AvatarImage :src="imageUrl" class="object-cover" />
+          <AvatarImage :src="imageUrl || ''" class="object-cover" />
           <AvatarFallback class="bg-primary/5 text-primary">
             <User class="w-1/3 h-1/3 opacity-50" />
           </AvatarFallback>

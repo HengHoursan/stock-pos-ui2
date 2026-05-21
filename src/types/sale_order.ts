@@ -8,6 +8,7 @@ export interface SaleOrderDetail {
   saleOrderId: number;
   productId: number;
   quantity: number;
+  invoicedQuantity: number;
   totalPrice: number;
   purchaseQuotationId: number | null;
   purchaseQuotationDetailId: number | null;
@@ -24,6 +25,8 @@ export interface SaleOrder {
   totalLine: number;
   totalCloseLine: number;
   totalPrice: number;
+  invoicedAmount: number;
+  paidAmount: number;
   status: OrderStatus;
   orderDate: string;
   description: string | null;
@@ -32,6 +35,8 @@ export interface SaleOrder {
   updatedAt: string;
   customer?: Customer;
   details?: SaleOrderDetail[];
+  invoices?: any[];
+  payments?: any[];
 }
 
 export interface SaleOrderDetailPayload {

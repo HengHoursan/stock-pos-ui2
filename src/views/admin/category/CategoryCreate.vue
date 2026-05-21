@@ -105,8 +105,8 @@ const onSubmit = form.handleSubmit(async (values) => {
           t("crud.errorCreate", { module: labels.name }),
       );
     }
-  } catch (error) {
-    toast.error(t("crud.errorGeneral"));
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || t('crud.errorGeneral'));
   } finally {
     submitting.value = false;
   }

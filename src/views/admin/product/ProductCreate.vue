@@ -126,9 +126,9 @@ async function fetchData() {
     if (catRes.success) categories.value = catRes.data || [];
     if (brandRes.success) brands.value = brandRes.data || [];
     if (unitRes.success) units.value = unitRes.data || [];
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to fetch dependencies", error);
-    toast.error(t("crud.errorGeneral"));
+    toast.error(error.response?.data?.message || t("crud.errorGeneral"));
   } finally {
     loading.value = false;
   }
@@ -152,8 +152,8 @@ const onSubmit = form.handleSubmit(async (values) => {
         response.message || t("crud.errorCreate", { module: labels.name }),
       );
     }
-  } catch (error) {
-    toast.error(t("crud.errorGeneral"));
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || t("crud.errorGeneral"));
   } finally {
     submitting.value = false;
   }

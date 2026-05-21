@@ -75,7 +75,7 @@ const saleOrderSchema = computed(() =>
     details: z.array(
       z.object({
         productId: z.number().min(1, err.required("product.name")),
-        quantity: z.number().gte(0.01, err.gte("fields.quantity", 0.01)),
+        quantity: z.number().gte(1, err.gte("fields.quantity", 1)),
         price: z.number().gte(0, err.gte("fields.price", 0)),
       })
     ).min(1, err.min("fields.details", 1)),
@@ -169,8 +169,8 @@ const onSubmit = form.handleSubmit(async (values) => {
     } else {
       toast.error(response.message || t('crud.errorCreate', { module: labels.name }));
     }
-  } catch (error) {
-    toast.error(t('crud.errorGeneral'));
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || t('crud.errorGeneral'));
   } finally {
     submitting.value = false;
   }

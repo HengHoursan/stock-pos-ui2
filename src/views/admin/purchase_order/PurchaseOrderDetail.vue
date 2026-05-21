@@ -56,8 +56,8 @@ async function fetchDetail() {
       toast.error(t('crud.notFound', { module: labels.name }));
       router.back();
     }
-  } catch (error) {
-    toast.error(t('crud.errorGeneral'));
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || t('crud.errorGeneral'));
   } finally {
     loading.value = false;
   }
@@ -88,7 +88,7 @@ onMounted(() => {
         </div>
       </div>
       <div>
-        <Button v-if="record && record.status !== OrderStatus.COMPLETED && !record.isCancel" @click="router.push(`/admin/purchase-invoices/create?orderId=${record.id}`)" class="text-primary-foreground">
+        <Button v-if="record && record.status !== OrderStatus.COMPLETED && !record.isCancel && (record.totalLine - record.totalCloseLine > 0)" @click="router.push(`/admin/purchase-invoices/create?orderId=${record.id}`)" class="text-primary-foreground">
           {{ t('actions.generateInvoice') }} <ArrowRightCircle class="ml-2 h-4 w-4" />
         </Button>
       </div>

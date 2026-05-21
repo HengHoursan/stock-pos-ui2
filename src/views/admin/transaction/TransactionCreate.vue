@@ -67,7 +67,7 @@ const formSchema = toTypedSchema(
     transactionType: z.number().default(TransactionType.IN),
     transactionDate: z.string().default(new Date().toISOString()),
     transactionCode: z.string().optional().nullable(),
-    quantity: z.number().min(0.01, t("crud.errorGeneral")),
+    quantity: z.number().min(1, t("crud.errorGeneral")),
     remarks: z.string().optional().nullable(),
   }),
 );
@@ -77,7 +77,7 @@ const form = useForm({
   initialValues: {
     transactionType: TransactionType.IN,
     transactionDate: toLocalISOString(new Date()),
-    quantity: 0,
+    quantity: 1,
     remarks: "",
   },
 });
@@ -108,8 +108,8 @@ const onSubmit = form.handleSubmit(async (values) => {
         response.message || t("crud.errorCreate", { module: labels.name }),
       );
     }
-  } catch (error) {
-    toast.error(t("crud.errorGeneral"));
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || t('crud.errorGeneral'));
   } finally {
     submitting.value = false;
   }
@@ -210,7 +210,7 @@ onMounted(() => {
                   <FormControl>
                     <Input
                       type="number"
-                      step="0.01"
+                      step="1"
                       :placeholder="fields.quantity"
                       v-bind="componentField"
                       @update:model-value="

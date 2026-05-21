@@ -133,10 +133,9 @@ const formSchema = toTypedSchema(
           quantity: z
             .number()
             .min(
-              0.01,
-              t("validation.min", { field: fields.quantity, min: "0.01" }),
-            ),
-          unitPrice: z
+              1,
+              t("validation.min", { field: fields.quantity, min: "1" }),
+            ),          unitPrice: z
             .number()
             .min(
               0,
@@ -249,8 +248,8 @@ const onSubmit = form.handleSubmit(async (values) => {
           t("crud.errorCreate", { module: labels.name }),
       );
     }
-  } catch (error) {
-    toast.error(t("crud.errorGeneral"));
+  } catch (error: any) {
+    toast.error(error.response?.data?.message || t('crud.errorGeneral'));
   } finally {
     submitting.value = false;
   }

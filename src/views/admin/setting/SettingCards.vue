@@ -29,7 +29,7 @@ const settingCards = computed(() => {
       title: layout.profile,
       description: layout.profileDesc,
       icon: User,
-      permission: null, // Public for all logged in users
+      permission: null as string | null, // Public for all logged in users
     },
   ];
   if (isSuperAdmin.value) {

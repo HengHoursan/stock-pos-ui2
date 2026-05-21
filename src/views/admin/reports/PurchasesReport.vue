@@ -11,11 +11,7 @@ import {
   type ExportColumn,
 } from "@/utils/export";
 import {
-  BarChart3,
   TrendingDown,
-  ShoppingBag,
-  History,
-  Download,
   FileText,
   Loader2,
   Search,
@@ -56,7 +52,7 @@ import {
 import { formatCurrency, formatDateForFilename } from "@/utils/format";
 import { toast } from "vue-sonner";
 
-const { t, labels, menu, crud, common } = useAppI18n("reports");
+const { labels, menu, crud, common } = useAppI18n("reports");
 const reportService = new ReportService();
 
 const loading = ref(true);
@@ -144,27 +140,7 @@ function handlePageChange(newPage: number) {
   pagination.page = newPage;
 }
 
-function getPageArray(): (number | string)[] {
-  const totalPages = Math.ceil(pagination.totalItems / pagination.limit);
-  const current = pagination.page;
-  const delta = 2;
-  const range: (number | string)[] = [];
 
-  if (totalPages <= 1) return [1];
-
-  for (let i = 1; i <= totalPages; i++) {
-    if (
-      i === 1 ||
-      i === totalPages ||
-      (i >= current - delta && i <= current + delta)
-    ) {
-      range.push(i);
-    } else if (range[range.length - 1] !== "...") {
-      range.push("...");
-    }
-  }
-  return range;
-}
 
 /* EXPORT LOGIC */
 const customExportCols: ExportColumn[] = [
