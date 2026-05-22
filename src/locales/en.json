@@ -331,6 +331,7 @@
     "namePlaceholder": "John Doe",
     "filterByStatus": "Status",
     "selectBarcodeType": "Select barcode type",
+    "selectExpiryType": "Select expiry type",
     "nameLatin": "Latin Name",
     "phoneNumber": "Phone Number",
     "address": "Address",

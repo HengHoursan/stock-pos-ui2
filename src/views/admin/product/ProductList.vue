@@ -462,7 +462,7 @@ onMounted(() => {
     <div
       class="rounded-md border bg-card overflow-auto shadow-sm max-h-[700px] scrollbar-thin scrollbar-thumb-muted-foreground/20"
     >
-      <Table class="min-w-[1200px]">
+      <Table class="min-w-[1300px]">
         <TableHeader>
           <TableRow>
             <TableHead class="w-[40px]">
@@ -473,6 +473,7 @@ onMounted(() => {
               />
             </TableHead>
             <TableHead class="w-[120px]">{{ fields.code }}</TableHead>
+            <TableHead>{{ fields.barcodeType }}</TableHead>
             <TableHead class="w-[80px]">{{ fields.photo }}</TableHead>
             <TableHead>
               <Button
@@ -493,7 +494,7 @@ onMounted(() => {
         </TableHeader>
         <TableBody>
           <TableRow v-if="loading && products.length === 0">
-            <TableCell colspan="11" class="h-24 text-center">
+            <TableCell colspan="12" class="h-24 text-center">
               <div
                 class="flex items-center justify-center text-muted-foreground italic text-sm"
               >
@@ -517,6 +518,11 @@ onMounted(() => {
                   class="bg-muted px-2 py-0.5 rounded text-xs font-bold text-foreground/70 border border-muted-foreground/10 uppercase"
                   >{{ product.code }}</code
                 >
+              </TableCell>
+              <TableCell>
+                <Badge variant="outline" class="font-mono text-xs">
+                  {{ product.barcodeType || "-" }}
+                </Badge>
               </TableCell>
               <TableCell>
                 <Avatar
@@ -641,7 +647,7 @@ onMounted(() => {
           </template>
           <TableRow v-else>
             <TableCell
-              colspan="11"
+              colspan="12"
               class="h-32 text-center text-muted-foreground"
             >
               <div class="flex flex-col items-center justify-center gap-3">

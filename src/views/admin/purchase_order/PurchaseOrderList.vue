@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud } = useAppI18n("purchaseOrder");
+const { t, labels, fields, crud, actions } = useAppI18n("purchaseOrder");
 import { ref, onMounted, reactive, watch, computed } from "vue";
 
 
@@ -62,7 +62,8 @@ import {
   ArrowUpDown,
   RefreshCw,
   Loader2,
-  FileText
+  FileText,
+  ArrowRightCircle,
 } from "lucide-vue-next";
 import DateRangePicker from "@/components/DateRangePicker.vue";
 import CurrencyToggle from "@/components/CurrencyToggle.vue";
@@ -364,6 +365,16 @@ onMounted(() => {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem @click="router.push(`/admin/purchase-orders/${record.id}`)" class="cursor-pointer">
                       <Eye class="mr-2 h-4 w-4 opacity-70" />{{ crud.viewBtn }}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      v-permission="'purchase_invoice:create'"
+                      v-if="record.status !== OrderStatus.COMPLETED && (record.totalLine - record.totalCloseLine > 0)"
+                      @click="router.push(`/admin/purchase-invoices/create?orderId=${record.id}`)"
+                      class="cursor-pointer text-primary"
+                    >
+                      <ArrowRightCircle class="mr-2 h-4 w-4" />{{
+                        actions.generateInvoice
+                      }}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator v-permission="'purchase_order:delete'" />
                     <DropdownMenuItem

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud, group } = useAppI18n("purchaseOrder");
+const { t, labels, fields, crud, actions, group } = useAppI18n("purchaseOrder");
 const productLabels = group("product");
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -88,8 +88,13 @@ onMounted(() => {
         </div>
       </div>
       <div>
-        <Button v-if="record && record.status !== OrderStatus.COMPLETED && !record.isCancel && (record.totalLine - record.totalCloseLine > 0)" @click="router.push(`/admin/purchase-invoices/create?orderId=${record.id}`)" class="text-primary-foreground">
-          {{ t('actions.generateInvoice') }} <ArrowRightCircle class="ml-2 h-4 w-4" />
+        <Button
+          v-if="record && record.status !== OrderStatus.COMPLETED && !record.isCancel && (record.totalLine - record.totalCloseLine > 0)"
+          v-permission="'purchase_invoice:create'"
+          @click="router.push(`/admin/purchase-invoices/create?orderId=${record.id}`)"
+          class="text-primary-foreground"
+        >
+          {{ actions.generateInvoice }} <ArrowRightCircle class="ml-2 h-4 w-4" />
         </Button>
       </div>
     </div>

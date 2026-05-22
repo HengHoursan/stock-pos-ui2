@@ -3,7 +3,7 @@ import { useAppI18n } from "@/hooks/useAppI18n";
 const { t, labels, fields, crud, layout, common } = useAppI18n("product");
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { formatNumberInput } from "@/utils/format";
+import { formatNumberInput, formatQuantityInput } from "@/utils/format";
 import { toTypedSchema } from "@vee-validate/zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -128,7 +128,7 @@ async function fetchData() {
         categoryId: String(prod.categoryId),
         brandId: String(prod.brandId),
         unitId: String(prod.unitId),
-        barcodeType: prod.barcodeType,
+        barcodeType: prod.barcodeType || "CODE128",
         alertQuantity: Number(prod.alertQuantity),
         photoPath: prod.photoPath,
         status: prod.status,
@@ -150,10 +150,10 @@ async function fetchData() {
         prod.detail?.purchasePrice || 0,
       );
       localSalePrice.value = formatNumberInput(prod.detail?.salePrice || 0);
-      localCurrentStock.value = formatNumberInput(
+      localCurrentStock.value = formatQuantityInput(
         prod.detail?.currentStock || 0,
       );
-      localAlertQuantity.value = formatNumberInput(prod.alertQuantity || 0);
+      localAlertQuantity.value = formatQuantityInput(prod.alertQuantity || 0);
     } else {
       toast.error(t("crud.notFound", { module: labels.name }));
       router.push("/admin/products");
@@ -366,10 +366,10 @@ onMounted(() => {
                   </FormItem>
                 </FormField>
 
-                <FormField v-slot="{ field }" name="barcodeType">
+                <FormField v-slot="{ componentField }" name="barcodeType">
                   <FormItem>
                   <FormLabel>{{ fields.barcodeType }}</FormLabel>
-                  <Select v-bind="field">
+                  <Select v-bind="componentField">
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue
@@ -465,11 +465,11 @@ onMounted(() => {
                         @blur="componentField.onBlur"
                         :model-value="
                           localCurrentStock ||
-                          formatNumberInput(componentField.modelValue)
+                          formatQuantityInput(componentField.modelValue)
                         "
                         @input="
                           (e: any) => {
-                            localCurrentStock = formatNumberInput(
+                            localCurrentStock = formatQuantityInput(
                               e.target.value,
                             );
                             form.setFieldValue(
@@ -494,11 +494,11 @@ onMounted(() => {
                         @blur="componentField.onBlur"
                         :model-value="
                           localAlertQuantity ||
-                          formatNumberInput(componentField.modelValue)
+                          formatQuantityInput(componentField.modelValue)
                         "
                         @input="
                           (e: any) => {
-                            localAlertQuantity = formatNumberInput(
+                            localAlertQuantity = formatQuantityInput(
                               e.target.value,
                             );
                             form.setFieldValue(
@@ -635,13 +635,13 @@ onMounted(() => {
                   </FormItem>
                 </FormField>
 
-                <FormField v-slot="{ field }" name="expiryType">
+                <FormField v-slot="{ componentField }" name="expiryType">
                   <FormItem>
                     <FormLabel>{{ fields.expiryType }}</FormLabel>
-                    <Select v-bind="field">
+                    <Select v-bind="componentField">
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue :placeholder="fields.selectType" />
+                          <SelectValue :placeholder="fields.selectExpiryType" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>

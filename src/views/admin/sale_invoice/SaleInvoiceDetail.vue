@@ -143,7 +143,8 @@ onMounted(() => {
       <div class="flex items-center gap-2">
         <CurrencyToggle />
         <Button
-          v-if="record && record.status !== InvoiceStatus.COMPLETED"
+          v-permission="'sale_payment:create'"
+          v-if="record && !record.isCancel && record.totalPrice - record.paidAmount > 0"
           @click="
             router.push(`/admin/sale-payments/create?invoiceId=${record.id}`)
           "

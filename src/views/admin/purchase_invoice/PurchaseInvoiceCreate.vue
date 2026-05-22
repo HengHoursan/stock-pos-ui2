@@ -34,13 +34,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   ChevronLeft,
   Loader2,
   FileText,
@@ -54,7 +47,6 @@ import { PurchaseOrderService } from "@/services/purchase_order/purchase_order.s
 import { SupplierService } from "@/services/supplier/supplier.service";
 import { ProductService } from "@/services/product/product.service";
 import type { Product, Supplier } from "@/types";
-import { PaymentMethod } from "@/types/enums";
 import { toast } from "vue-sonner";
 import { useAppI18n } from "@/hooks/useAppI18n";
 
@@ -85,44 +77,19 @@ const currencySymbol = computed(() => currencyStore.activeCurrency?.symbol ?? "$
 const localPaidAmount = ref("");
 const localPrices = ref<Record<string, string>>({});
 const localQuantities = ref<Record<string, string>>({});
-
-// Watch for manual local amount changes
-watch(localPaidAmount, (val) => {
-  const cleanVal = Number(String(val).replace(/,/g, ""));
-  const rate = currencyStore.activeCurrency?.exchangeRate || 1;
-  const inUsd = cleanVal === 0 ? 0 : cleanVal / rate;
-
-  if (Math.abs((form.values.paidAmount || 0) - inUsd) > 0.001) {
-    form.setFieldValue("paidAmount", inUsd);
-  }
-});
-
-// Watch for base currency changes (e.g. from loading from source)
-watch(
-  () => form.values.paidAmount,
-  (newVal) => {
-    const rate = currencyStore.activeCurrency?.exchangeRate || 1;
-    const expectedLocal = Number(((newVal || 0) * rate).toFixed(2));
-    const currentClean = Number(localPaidAmount.value.replace(/,/g, ""));
-    if (Math.abs(currentClean - expectedLocal) > 0.01) {
-      localPaidAmount.value = formatNumberInput(String(expectedLocal));
-    }
-  },
-);
-
 const purchaseInvoiceSchema = computed(() => 
   z.object({
     code: z.string().max(50, err.max("fields.code", 50)).optional().nullable(),
     supplierId: z.coerce.number().min(1, err.required("fields.supplierId")),
     invoiceDate: z.string().min(1, err.required("fields.invoiceDate")),
     paidAmount: z.coerce.number().min(0, err.min("fields.paidAmount", 0)).optional(),
-    paymentMethod: z.coerce.number().optional(),
     description: z.string().optional().nullable(),
     details: z.array(
       z.object({
         productId: z.coerce.number().min(1, err.required("product.name")),
         quantity: z.coerce.number().min(1, err.gte("fields.quantity", 1)),
         price: z.coerce.number().min(0, err.gte("fields.price", 0)),
+        isSelected: z.boolean().default(true),
         purchaseOrderId: z.coerce.number().optional().nullable(),
         purchaseOrderDetailId: z.coerce.number().optional().nullable(),
       })
@@ -139,7 +106,6 @@ const form = useForm({
     supplierId: 0,
     invoiceDate: toLocalISOString(new Date()),
     paidAmount: 0,
-    paymentMethod: PaymentMethod.CASH,
     description: "",
     details: [],
   },
@@ -172,6 +138,7 @@ onMounted(async () => {
               productId: d.productId,
               quantity: Number(d.quantity) - invoicedQty,
               price: Number(d.totalPrice) / Number(d.quantity),
+              isSelected: true,
               purchaseOrderId: oRes.data!.id, 
               purchaseOrderDetailId: d.id,
             };
@@ -197,6 +164,7 @@ function addProduct() {
     productId: 0,
     quantity: 1,
     price: 0,
+    isSelected: true,
   });
 }
 
@@ -208,6 +176,7 @@ function getProductPrice(productId: number): number {
 const grandTotal = computed(() => {
   return (
     form.values.details?.reduce((acc, curr) => {
+      if (!(curr as any).isSelected) return acc;
       return acc + curr.quantity * curr.price;
     }, 0) || 0
   );
@@ -221,9 +190,8 @@ const onSubmit = form.handleSubmit(async (values) => {
       supplierId: values.supplierId,
       invoiceDate: new Date(values.invoiceDate).toISOString(),
       paidAmount: values.paidAmount,
-      paymentMethod: values.paymentMethod,
       description: values.description,
-      details: values.details.map((d: any) => ({
+      details: (values.details as any[]).filter((d) => d.isSelected).map((d: any) => ({
         productId: d.productId,
         quantity: Number(d.quantity),
         totalPrice:
@@ -251,6 +219,29 @@ const onSubmit = form.handleSubmit(async (values) => {
     submitting.value = false;
   }
 });
+// Watch for manual local amount changes
+watch(localPaidAmount, (val) => {
+  const cleanVal = Number(String(val).replace(/,/g, ""));
+  const rate = currencyStore.activeCurrency?.exchangeRate || 1;
+  const inUsd = cleanVal === 0 ? 0 : cleanVal / rate;
+
+  if (Math.abs((form.values.paidAmount || 0) - inUsd) > 0.001) {
+    form.setFieldValue("paidAmount", inUsd);
+  }
+});
+
+// Watch for base currency changes (e.g. from loading from source)
+watch(
+    () => form.values.paidAmount,
+    (newVal) => {
+      const rate = currencyStore.activeCurrency?.exchangeRate || 1;
+      const expectedLocal = Number(((newVal || 0) * rate).toFixed(2));
+      const currentClean = Number(localPaidAmount.value.replace(/,/g, ""));
+      if (Math.abs(currentClean - expectedLocal) > 0.01) {
+        localPaidAmount.value = formatNumberInput(String(expectedLocal));
+      }
+    },
+);
 </script>
 
 <template>
@@ -387,34 +378,6 @@ const onSubmit = form.handleSubmit(async (values) => {
               </FormItem>
             </FormField>
 
-            <FormField v-slot="{ value, handleChange }" name="paymentMethod">
-              <FormItem>
-                <FormLabel>{{ fields.paymentMethod }}</FormLabel>
-                <Select
-                  :model-value="value ? String(value) : undefined"
-                  @update:model-value="(v) => handleChange(Number(v))"
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue :placeholder="fields.selectOption" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem :value="String(PaymentMethod.CASH)">{{
-                      fields.paymentMethodLabels.cash
-                    }}</SelectItem>
-                    <SelectItem :value="String(PaymentMethod.TRANSFER)">{{
-                      fields.paymentMethodLabels.transfer
-                    }}</SelectItem>
-                    <SelectItem :value="String(PaymentMethod.OTHER)">{{
-                      fields.paymentMethodLabels.other
-                    }}</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            </FormField>
-
             <div
               class="flex justify-between items-center pt-2 text-sm text-muted-foreground border-t mt-4"
             >
@@ -459,7 +422,8 @@ const onSubmit = form.handleSubmit(async (values) => {
             <Table>
               <TableHeader class="bg-muted/30">
                 <TableRow>
-                  <TableHead class="w-[40%]">{{
+                  <TableHead class="w-[5%]"></TableHead>
+                  <TableHead class="w-[35%]">{{
                     menu.products
                   }}</TableHead>
                   <TableHead class="w-[20%] text-right">{{
@@ -477,13 +441,34 @@ const onSubmit = form.handleSubmit(async (values) => {
               <TableBody>
                 <TableRow v-if="detailsFields.length === 0">
                   <TableCell
-                    colspan="5"
+                    colspan="6"
                     class="text-center py-8 text-muted-foreground italic"
                   >
                     {{ common.noData }}
                   </TableCell>
                 </TableRow>
-                <TableRow v-for="(field, index) in detailsFields" :key="field.key">
+                <TableRow
+                  v-for="(field, index) in detailsFields"
+                  :key="field.key"
+                  :class="!((form.values.details || [])[index] as any).isSelected ? 'opacity-50 grayscale' : ''"
+                >
+                  <TableCell>
+                    <FormField
+                      v-slot="{ value, handleChange }"
+                      :name="`details[${index}].isSelected`"
+                    >
+                      <FormItem class="mb-0">
+                        <FormControl>
+                          <input
+                            type="checkbox"
+                            :checked="value"
+                            @change="handleChange(!value)"
+                            class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    </FormField>
+                  </TableCell>
                   <TableCell>
                     <FormField
                       v-slot="{ value, handleChange }"
@@ -507,6 +492,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                             :options="productOptions"
                             :placeholder="fields.selectOption"
                             :empty-message="crud.noResults"
+                            :disabled="!((form.values.details || [])[index] as any).isSelected"
                           />
                         </FormControl>
                         <FormMessage />
@@ -525,6 +511,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                             class="text-right"
                             :name="componentField.name"
                             @blur="componentField.onBlur"
+                            :disabled="!((form.values.details || [])[index] as any).isSelected"
                             :model-value="
                               localPrices[field.key] ??
                               formatNumberInput(componentField.modelValue)
@@ -561,6 +548,7 @@ const onSubmit = form.handleSubmit(async (values) => {
                             class="text-right"
                             :name="componentField.name"
                             @blur="componentField.onBlur"
+                            :disabled="!((form.values.details || [])[index] as any).isSelected"
                             :model-value="
                               localQuantities[field.key] ??
                               formatNumberInput(componentField.modelValue)
@@ -618,7 +606,10 @@ const onSubmit = form.handleSubmit(async (values) => {
               :disabled="submitting"
               >{{ crud.cancel }}</Button
             >
-            <Button type="submit" :disabled="submitting || detailsFields.length === 0">
+            <Button
+              type="submit"
+              :disabled="submitting || detailsFields.length === 0 || !form.values.details?.some((d: any) => d.isSelected)"
+            >
               <Loader2 v-if="submitting" class="mr-2 h-4 w-4 animate-spin" />
               {{ crud.save }}
             </Button>

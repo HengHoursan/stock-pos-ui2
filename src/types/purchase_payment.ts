@@ -4,7 +4,7 @@ import type { Supplier } from './supplier';
 export interface PurchasePaymentDetail {
   id: number;
   purchasePaymentId: number;
-  totalPrice: number;
+  paidAmount: number;
   purchaseInvoiceId: number | null;
   purchaseInvoiceDetailId: number | null;
   purchaseInvoice?: PurchaseInvoice;
@@ -33,7 +33,7 @@ export interface CreatePurchasePaymentRequest {
   description?: string;
   details: {
     purchaseInvoiceId?: number;
-    totalPrice: number;
+    paidAmount: number;
     purchaseInvoiceDetailId?: number;
   }[];
 }

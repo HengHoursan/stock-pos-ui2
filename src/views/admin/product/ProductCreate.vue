@@ -3,7 +3,7 @@ import { useAppI18n } from "@/hooks/useAppI18n";
 const { t, labels, fields, crud, common } = useAppI18n("product");
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import { formatNumberInput } from "@/utils/format";
+import { formatNumberInput, formatQuantityInput } from "@/utils/format";
 import { toTypedSchema } from "@vee-validate/zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -83,7 +83,7 @@ const productSchema = computed(() =>
       .default(0),
     stockNumber: z.string().optional(),
     expiryDate: z.string().optional(),
-    expiryType: z.string().optional(),
+    expiryType: z.string().default("None"),
   }),
 );
 
@@ -327,10 +327,10 @@ onMounted(() => {
                 </FormItem>
               </FormField>
 
-              <FormField v-slot="{ field }" name="barcodeType">
+              <FormField v-slot="{ componentField }" name="barcodeType">
                 <FormItem>
                   <FormLabel>{{ fields.barcodeType }}</FormLabel>
-                  <Select v-bind="field">
+                  <Select v-bind="componentField">
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue :placeholder="fields.selectBarcodeType" />
@@ -424,11 +424,11 @@ onMounted(() => {
                       @blur="componentField.onBlur"
                       :model-value="
                         localCurrentStock ||
-                        formatNumberInput(componentField.modelValue)
+                        formatQuantityInput(componentField.modelValue)
                       "
                       @input="
                         (e: any) => {
-                          localCurrentStock = formatNumberInput(e.target.value);
+                          localCurrentStock = formatQuantityInput(e.target.value);
                           form.setFieldValue(
                             'currentStock',
                             Number(localCurrentStock.replace(/,/g, '')),
@@ -451,11 +451,11 @@ onMounted(() => {
                       @blur="componentField.onBlur"
                       :model-value="
                         localAlertQuantity ||
-                        formatNumberInput(componentField.modelValue)
+                        formatQuantityInput(componentField.modelValue)
                       "
                       @input="
                         (e: any) => {
-                          localAlertQuantity = formatNumberInput(
+                          localAlertQuantity = formatQuantityInput(
                             e.target.value,
                           );
                           form.setFieldValue(
@@ -586,13 +586,13 @@ onMounted(() => {
                 </FormItem>
               </FormField>
 
-              <FormField v-slot="{ field }" name="expiryType">
+              <FormField v-slot="{ componentField }" name="expiryType">
                 <FormItem>
                   <FormLabel>{{ fields.expiryType }}</FormLabel>
-                  <Select v-bind="field">
+                  <Select v-bind="componentField">
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue :placeholder="fields.selectOption" />
+                        <SelectValue :placeholder="fields.selectExpiryType" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>

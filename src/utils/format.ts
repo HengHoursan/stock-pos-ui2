@@ -138,3 +138,16 @@ export function formatNumberInput(
   if (parts.length > 2) parts.length = 2; // Keep max 1 decimal point
   return parts.join(".");
 }
+
+/**
+ * Formats quantity inputs without fixed trailing decimals.
+ * Examples: "10.00" -> "10", "10.50" -> "10.5", "1,000.00" -> "1,000"
+ */
+export function formatQuantityInput(
+  value: string | number | null | undefined,
+): string {
+  const formatted = formatNumberInput(value);
+  if (!formatted.includes(".")) return formatted;
+
+  return formatted.replace(/(\.\d*?[1-9])0+$/, "$1").replace(/\.0+$/, "");
+}

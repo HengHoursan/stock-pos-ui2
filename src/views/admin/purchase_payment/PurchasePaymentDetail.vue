@@ -159,7 +159,7 @@ onMounted(() => {
                         {{ d.purchaseInvoice?.code || `ID: ${d.purchaseInvoiceId}` }}
                       </td>
                       <td class="px-4 py-2 text-right">{{ formatCurrency(d.purchaseInvoice?.totalPrice) }}</td>
-                      <td class="px-4 py-2 text-right text-success font-bold">{{ formatCurrency(d.totalPrice) }}</td>
+                      <td class="px-4 py-2 text-right text-success font-bold">{{ formatCurrency(d.paidAmount) }}</td>
                     </tr>
                   </tbody>
                 </table>

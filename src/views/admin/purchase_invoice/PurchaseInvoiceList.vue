@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAppI18n } from "@/hooks/useAppI18n";
-const { t, labels, fields, crud, actions } = useAppI18n("purchaseInvoice");
+const { t, labels, fields, crud, actions, group } = useAppI18n("purchaseInvoice");
+const purchaseOrderLabels = group("purchaseOrder");
 import { ref, onMounted, reactive, watch, computed } from "vue";
 
 
@@ -297,6 +298,7 @@ onMounted(() => {
           <TableRow>
             <TableHead class="w-[50px]">#</TableHead>
             <TableHead class="w-[150px]">{{ fields.code }}</TableHead>
+            <TableHead class="w-[170px]">{{ purchaseOrderLabels.name }}</TableHead>
             <TableHead>{{ fields.supplierId }}</TableHead>
             <TableHead>
               <Button variant="ghost" @click="handleSort('invoiceDate')" class="-ml-4 h-8 font-medium">
@@ -311,7 +313,7 @@ onMounted(() => {
         </TableHeader>
         <TableBody>
           <TableRow v-if="loading && records.length === 0">
-            <TableCell colspan="11" class="h-24 text-center">
+            <TableCell colspan="9" class="h-24 text-center">
               <div class="flex items-center justify-center text-muted-foreground italic text-sm">
                 <Loader2 class="h-4 w-4 animate-spin mr-2" />
                 <span>{{ crud.fetchingData }}</span>
@@ -398,7 +400,7 @@ onMounted(() => {
             </TableRow>
           </template>
           <TableRow v-else>
-            <TableCell colspan="11" class="h-32 text-center text-muted-foreground">
+            <TableCell colspan="9" class="h-32 text-center text-muted-foreground">
               <div class="flex flex-col items-center justify-center gap-3">
                 <FileText class="h-10 w-10 opacity-10" />
                 <p class="font-medium">{{ crud.noRecords }}</p>
