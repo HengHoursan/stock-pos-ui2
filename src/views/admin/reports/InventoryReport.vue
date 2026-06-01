@@ -163,7 +163,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
   const timestamp = formatDateForFilename(new Date());
   const filename = `${menu.inventoryReport}_${timestamp}`;
 
-  if (formatType === "excel") exportToExcel(filename, customExportCols, ds);
+  if (formatType === "excel") exportToExcel(filename, customExportCols, ds, menu.inventoryReport);
   if (formatType === "csv") exportToCSV(filename, customExportCols, ds);
     exportToPDF(filename, customExportCols, ds, menu.inventoryReport);
 }

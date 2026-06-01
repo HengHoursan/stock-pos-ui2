@@ -159,7 +159,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
   const timestamp = formatDateForFilename(new Date());
   const filename = `${menu.purchasesReport}_${timestamp}`;
 
-  if (formatType === "excel") exportToExcel(filename, customExportCols, ds);
+  if (formatType === "excel") exportToExcel(filename, customExportCols, ds, menu.purchasesReport);
   if (formatType === "csv") exportToCSV(filename, customExportCols, ds);
     exportToPDF(filename, customExportCols, ds, menu.purchasesReport);
 }

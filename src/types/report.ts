@@ -35,12 +35,19 @@ export interface CustomerSalesData {
   totalInvoices: number;
 }
 
+export interface CashierSalesData {
+  cashierName: string;
+  totalRevenue: number;
+  totalInvoices: number;
+}
+
 export interface SalesReport {
   totalRevenue: number;
   totalReturns: number;
   netSales: number;
   salesByPaymentMethod: Array<{ paymentMethod: string; total: number }>;
   salesByCustomer: PaginationResponse<CustomerSalesData>;
+  salesByCashier: CashierSalesData[];
 }
 
 /**

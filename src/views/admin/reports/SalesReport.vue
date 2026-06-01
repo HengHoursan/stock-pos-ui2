@@ -2,7 +2,8 @@
 import { ref, onMounted, reactive, watch } from "vue";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { ReportService } from "@/services/report/report.service";
-import type { SalesReport, PaginationRequest } from "@/types";
+import { userService } from "@/services/user/user.service";
+import type { SalesReport, PaginationRequest, User } from "@/types";
 import DateRangePicker from "@/components/DateRangePicker.vue";
 import {
   exportToExcel,
@@ -62,6 +63,8 @@ const search = ref("");
 const dateRange = ref<{ start: string | null; end: string | null } | null>(
   null,
 );
+const cashiers = ref<User[]>([]);
+const selectedCashier = ref<string>("all");
 
 const pagination = reactive({
   page: 1,
@@ -74,6 +77,7 @@ const reportData = ref<SalesReport>({
   netSales: 0,
   totalReturns: 0,
   salesByPaymentMethod: [],
+  salesByCashier: [],
   salesByCustomer: {
     data: [],
     meta: {
@@ -103,6 +107,8 @@ async function fetchData() {
       query.filter.startDate = dateRange.value.start;
     if (dateRange.value?.end && query.filter)
       query.filter.endDate = dateRange.value.end;
+    if (selectedCashier.value && selectedCashier.value !== "all" && query.filter)
+      query.filter.createdBy = selectedCashier.value;
 
     const res = await reportService.getSalesReport(query);
     if (res.data) {
@@ -116,7 +122,19 @@ async function fetchData() {
   }
 }
 
+async function fetchCashiers() {
+  try {
+    const res = await userService.getAll();
+    if (res.data) {
+      cashiers.value = res.data;
+    }
+  } catch (error) {
+    console.error("Failed to fetch cashiers");
+  }
+}
+
 onMounted(() => {
+  fetchCashiers();
   fetchData();
 });
 
@@ -166,7 +184,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
   const timestamp = formatDateForFilename(new Date());
   const filename = `${menu.salesReport}_${timestamp}`;
 
-  if (formatType === "excel") exportToExcel(filename, customExportCols, ds);
+  if (formatType === "excel") exportToExcel(filename, customExportCols, ds, menu.salesReport);
   if (formatType === "csv") exportToCSV(filename, customExportCols, ds);
     exportToPDF(filename, customExportCols, ds, menu.salesReport);
 }
@@ -206,6 +224,17 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
             @update:modelValue="handleDateRangeFilter"
             class="w-full md:w-[320px] bg-background"
           />
+          <Select v-model="selectedCashier" @update:model-value="() => { pagination.page = 1; fetchData(); }">
+            <SelectTrigger class="w-full md:w-[200px] bg-background">
+              <SelectValue placeholder="All Cashiers" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Cashiers</SelectItem>
+              <SelectItem v-for="cashier in cashiers" :key="cashier.id" :value="cashier.id.toString()">
+                {{ cashier.username }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <Button
@@ -290,6 +319,37 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
         </CardContent>
       </Card>
     </div>
+
+    <!-- Sales By Cashier Data Table -->
+    <Card v-if="reportData.salesByCashier && reportData.salesByCashier.length > 0">
+      <CardHeader>
+        <CardTitle>Sales By Cashier</CardTitle>
+        <CardDescription>Breakdown of sales and revenue per cashier.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div class="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Cashier Name</TableHead>
+                <TableHead>Invoices Count</TableHead>
+                <TableHead class="text-right">Total Revenue</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow
+                v-for="(item, index) in reportData.salesByCashier"
+                :key="index"
+              >
+                <TableCell class="font-medium">{{ item.cashierName }}</TableCell>
+                <TableCell>{{ item.totalInvoices }}</TableCell>
+                <TableCell class="text-right font-medium text-green-600">{{ formatCurrency(item.totalRevenue) }}</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
 
     <!-- Sales By Customer Data Table -->
     <Card>

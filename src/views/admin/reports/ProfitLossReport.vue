@@ -2,8 +2,9 @@
 import { ref, onMounted } from "vue";
 import { useAppI18n } from "@/hooks/useAppI18n";
 import { ReportService } from "@/services/report/report.service";
+import { userService } from "@/services/user/user.service";
 import DateRangePicker from "@/components/DateRangePicker.vue";
-import type { ProfitAndLossReport, PaginationRequest } from "@/types";
+import type { ProfitAndLossReport, PaginationRequest, User } from "@/types";
 import {
   TrendingUp,
   TrendingDown,
@@ -20,6 +21,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatCurrency, formatDateForFilename } from "@/utils/format";
 import { toast } from "vue-sonner";
 import {
@@ -36,6 +44,8 @@ const loading = ref(true);
 const dateRange = ref<{ start: string | null; end: string | null } | null>(
   null,
 );
+const cashiers = ref<User[]>([]);
+const selectedCashier = ref<string>("all");
 
 const reportData = ref<ProfitAndLossReport>({
   netSales: 0,
@@ -59,6 +69,8 @@ async function fetchData() {
       query.filter.startDate = dateRange.value.start;
     if (dateRange.value?.end && query.filter)
       query.filter.endDate = dateRange.value.end;
+    if (selectedCashier.value && selectedCashier.value !== "all" && query.filter)
+      query.filter.createdBy = selectedCashier.value;
 
     const res = await reportService.getProfitAndLossReport(query);
     if (res.data) {
@@ -71,7 +83,19 @@ async function fetchData() {
   }
 }
 
+async function fetchCashiers() {
+  try {
+    const res = await userService.getAll();
+    if (res.data) {
+      cashiers.value = res.data;
+    }
+  } catch (error) {
+    console.error("Failed to fetch cashiers");
+  }
+}
+
 onMounted(() => {
+  fetchCashiers();
   fetchData();
 });
 
@@ -96,7 +120,7 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
   const timestamp = formatDateForFilename(new Date());
   const filename = `${menu.plReport}_${timestamp}`;
 
-  if (formatType === "excel") exportToExcel(filename, customExportCols, ds);
+  if (formatType === "excel") exportToExcel(filename, customExportCols, ds, menu.plReport);
   if (formatType === "csv") exportToCSV(filename, customExportCols, ds);
     exportToPDF(filename, customExportCols, ds, menu.plReport);
 }
@@ -124,6 +148,17 @@ function handleExport(formatType: "excel" | "csv" | "pdf") {
             @update:modelValue="handleDateRangeFilter"
             class="w-full md:w-[320px] bg-background"
           />
+          <Select v-model="selectedCashier" @update:model-value="fetchData">
+            <SelectTrigger class="w-full md:w-[200px] bg-background">
+              <SelectValue placeholder="All Cashiers" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Cashiers</SelectItem>
+              <SelectItem v-for="cashier in cashiers" :key="cashier.id" :value="cashier.id.toString()">
+                {{ cashier.username }}
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div class="flex flex-wrap items-center gap-2">
             <Button
